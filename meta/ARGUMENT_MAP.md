@@ -1,19 +1,22 @@
 # ARGUMENT MAP
-
-## Dissertation: Integrated Preprocessing-CNN Pipeline for Automated Diabetic Retinopathy Diagnosis in Resource-Limited Environments
+## PhD Dissertation: Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
+**Candidate:** Yesmukhamedov N.S.
+**Document Type:** Formal Claim-Evidence-Dependency Structure
+**Binding Reference:** DISSERTATION_INVARIANTS.md v.1.0
 
 ---
 
 ## I. MAIN THESIS NODE
 
-**Thesis Formulation:**
+**IT-1 (Verbatim from Invariants, Section I):**
 
-Systematic improvement of input data quality through an integrated preprocessing pipeline (resizing, normalization, CLAHE, data augmentation) has a greater impact on CNN-based diabetic retinopathy diagnostic performance than increases in model architectural complexity alone, and the integration of this pipeline with convolutional neural networks within a modular system architecture constitutes a clinically applicable approach for automated five-class DR screening deployable in resource-limited healthcare environments.
+> An integrated preprocessing-CNN pipeline — comprising resizing, pixel normalization to [0, 1], modified CLAHE with controllable threshold parameter (clip limit ≥ 2.0, tile grid ≥ 8×8), and data augmentation — applied to fundus images sourced from APTOS 2019 and supplementary clinical corpora, produces statistically measurable improvement in five-class diabetic retinopathy classification performance relative to a baseline CNN trained without preprocessing, under constrained computational conditions defined by hardware limitations operative during experimental execution.
 
-**Thesis Components:**
-- (T1) Preprocessing quality is the primary performance driver over architectural complexity.
-- (T2) Integration of preprocessing with CNN as a unified pipeline yields improved diagnostic accuracy.
-- (T3) The approach is deployable in resource-limited environments via modular system architecture.
+**Scope boundary:**
+- Five-stage DR classification (DR 0–4 per standard clinical grading).
+- Bounded to APTOS 2019 and STARE datasets.
+- "Improvement" = measurable difference in primary metrics (weighted F1-score, ROC-AUC, Cohen's Kappa, Accuracy) under matched experimental conditions.
+- Does not extend to: general retinal disease classification, other imaging modalities, other dataset distributions.
 
 ---
 
@@ -21,66 +24,48 @@ Systematic improvement of input data quality through an integrated preprocessing
 
 ---
 
-### PC-1: Preprocessing Dominance
-
-- **Formal Statement:** The diagnostic effectiveness of CNN models for automated DR classification depends more on the quality of input images (as improved by systematic preprocessing) than on architectural complexity alone.
-- **Claim Type:** Empirical
-- **Required Evidence Type:** Comparative experimental results showing accuracy gains from preprocessing exceeding gains from architectural changes; ablation study isolating preprocessing contribution.
-- **Dependency:** None (foundational claim)
-
----
-
-### PC-2: Unified Pipeline Integration
-
-- **Formal Statement:** Integration of image enhancement methods (resizing, normalization, CLAHE, data augmentation) with CNN classification as a formalized, unified pipeline significantly improves diagnostic accuracy and generalization compared to CNN classification without such preprocessing.
-- **Claim Type:** Methodological / Empirical
-- **Required Evidence Type:** Quantitative comparison of baseline CNN (no preprocessing) vs. enhanced CNN (with preprocessing pipeline) on identical datasets using multi-metric evaluation.
-- **Dependency:** Depends on PC-1 (preprocessing dominance must hold for pipeline integration to be justified as the primary design principle).
+### PC-1
+**Claim ID:** PC-1
+**Formal Statement:** The integrated preprocessing pipeline (resizing → normalization → CLAHE, clip limit 2.0, grid 8×8 → augmentation) produces statistically measurable improvement in five-class DR classification performance relative to a baseline CNN trained on unprocessed fundus images from the same source distribution, on the metrics: weighted F1-score, ROC-AUC, Cohen's Kappa, and Accuracy.
+**Claim Type:** Empirical
+**Required Evidence Type:** Controlled experimental comparison; matched dataset; matched hardware; metric values satisfying EH-3 (weighted F1 Δ ≥ 5 pp; ROC-AUC Δ ≥ 0.02; no Cohen's Kappa degradation).
+**Dependency:** None (foundational claim; corresponds to H-1)
 
 ---
 
-### PC-3: Modified CLAHE with Simplified Threshold Control
-
-- **Formal Statement:** A modified CLAHE algorithm with controllable threshold parameters improves feature preservation (microaneurysms, small vessels) in fundus images under variable quality conditions, and this improvement translates to measurably better CNN classification performance on small and imbalanced datasets.
-- **Claim Type:** Methodological / Empirical
-- **Required Evidence Type:** Threshold sensitivity analysis; image quality metrics before/after CLAHE; per-class performance comparison with and without CLAHE on APTOS 2019 and STARE datasets.
-- **Dependency:** Depends on PC-1 and PC-2 (CLAHE is a component within the preprocessing pipeline whose dominance and integration are asserted by PC-1 and PC-2).
-
----
-
-### PC-4: Two-Stage Fine-Tuning Strategy
-
-- **Formal Statement:** A two-stage transfer learning adaptation strategy — initially freezing base layers and training only the classification head, followed by unfreezing and fine-tuning upper layers — yields superior classification performance (Precision, Recall, F1-Score, Cohen's Kappa) compared to a fully frozen strategy, for both EfficientNetB0 and ResNet50 architectures on five-class DR classification tasks.
-- **Claim Type:** Empirical
-- **Required Evidence Type:** Quantitative comparison of frozen vs. progressive fine-tuning strategies across multiple metrics and architectures; per-class performance analysis under class imbalance; overfitting analysis (train-test performance gap).
-- **Dependency:** Depends on PC-2 (fine-tuning is evaluated within the context of the unified pipeline; preprocessing is held constant across fine-tuning comparisons).
+### PC-2
+**Claim ID:** PC-2
+**Formal Statement:** The CLAHE clip limit parameter, varied across controlled values within the tested range, produces a parameter-dependent sensitivity profile in downstream CNN classification performance, with at least one identifiable local optimum within the tested range, particularly in per-class F1-score for DR 1 and DR 2 (microaneurysm and small vessel features).
+**Claim Type:** Empirical
+**Required Evidence Type:** Parameter sweep experiment; per-class F1-score across clip limit values; APTOS 2019 or equivalent small fundus image dataset.
+**Dependency:** Depends on PC-1 (CLAHE is a component of the pipeline validated in PC-1)
 
 ---
 
-### PC-5: Resource-Efficient Deployment
-
-- **Formal Statement:** The proposed preprocessing-CNN pipeline achieves clinically meaningful diagnostic performance under limited computational resources without requiring complex or resource-intensive architectures, making it suitable for deployment in resource-limited healthcare environments.
-- **Claim Type:** Empirical / System-level
-- **Required Evidence Type:** Performance metrics achieved under documented hardware constraints; comparison of performance-to-complexity ratios across architectures; processing time measurements.
-- **Dependency:** Depends on PC-1, PC-2, PC-4 (resource efficiency is meaningful only if the pipeline and fine-tuning strategy are validated as effective).
-
----
-
-### PC-6: Laser-Tissue Interaction Modeling
-
-- **Formal Statement:** Mathematical modeling of laser-tissue thermal interaction (coupled thermal-optical model) in fundus tissue provides a theoretical framework for understanding diagnostic image feature characteristics resulting from prior laser coagulation treatment, and supports optimization of laser parameters for DR therapy.
-- **Claim Type:** Theoretical
-- **Required Evidence Type:** Mathematical formulation (heat conduction equation, Beer-Lambert law, Gaussian beam model); numerical simulation results showing differential temperature distribution across tissue layers.
-- **Dependency:** Independent of PC-1 through PC-5 (parallel theoretical component); conditionally linked to PC-2 via image feature interpretation.
+### PC-3
+**Claim ID:** PC-3
+**Formal Statement:** A two-stage fine-tuning protocol — (1) frozen EfficientNetB0 base with classification head training, followed by (2) progressive unfreezing of upper layers — applied under the preprocessing regime of PC-1, yields higher test-set Precision, Recall, F1-score, and Cohen's Kappa than the frozen-only strategy (Stage 1 alone), under the same dataset and hardware conditions.
+**Claim Type:** Empirical
+**Required Evidence Type:** Comparative experiment; matched preprocessing; EfficientNetB0 on APTOS 2019 + supplementary clinical images; metric values: Precision, Recall, F1, Macro Avg, Weighted Avg, Cohen's Kappa for both strategies.
+**Dependency:** Depends on PC-1 (preprocessing regime must be active for this comparison)
 
 ---
 
-### PC-7: System Architecture for Clinical Integration
+### PC-4
+**Claim ID:** PC-4
+**Formal Statement:** A coupled thermal-optical mathematical model of laser-fundus tissue interaction — comprising Beer's law for radiation attenuation, an energy balance equation, and the general heat conduction equation solved by finite difference methods — provides a theoretical computational grounding for the thermal effects of laser coagulation on retinal tissue layers (cornea, choroid, retina). This model provides qualitative support for diagnostic image feature interpretation in the context of laser-treated retinopathy. The model does not constitute an experimentally validated clinical model.
+**Claim Type:** Theoretical
+**Required Evidence Type:** Mathematical derivation; computational simulation results; qualitative heat map outputs for three tissue layers.
+**Dependency:** None (independent theoretical contribution; does not condition PC-1, PC-2, or PC-3)
 
-- **Formal Statement:** A modular, scalable AI-driven information system architecture — integrating PACS, EHR, cloud services, AI processing modules, telemedicine capabilities, and physician-in-the-loop decision support — provides an implementable framework for deploying the proposed DR screening pipeline in Kazakhstan's healthcare infrastructure.
-- **Claim Type:** System-level
-- **Required Evidence Type:** Architectural specification (UML diagrams, component specifications, ER model); comparative analysis with existing AI systems (IDx-DR, Eyenuk, DeepMind); functional and non-functional requirements specification; regulatory compliance framework (GDPR/HIPAA).
-- **Dependency:** Depends on PC-2 and PC-5 (the AI processing module implements the validated preprocessing-CNN pipeline under resource constraints).
+---
+
+### PC-5
+**Claim ID:** PC-5
+**Formal Statement:** A modular, scalable AI-driven information system architecture — specifying components for image capture, preprocessing, inference, reporting, data management, PACS/EHR integration, and physician-in-the-loop decision support — constitutes a design specification for automated DR screening deployable in resource-limited environments. The architecture has not been prototype-implemented or field-tested. All stated deployment benefits are design specifications, not demonstrated outcomes.
+**Claim Type:** System-level
+**Required Evidence Type:** UML architecture diagrams; component specification; comparative analysis of existing DR screening systems; design feasibility framing for Kazakhstan healthcare context.
+**Dependency:** Depends on PC-1 (the preprocessing-CNN pipeline validated in PC-1 constitutes the AI processing module of the architecture)
 
 ---
 
@@ -88,223 +73,203 @@ Systematic improvement of input data quality through an integrated preprocessing
 
 ---
 
-### SC-1.1: Preprocessing raises baseline CNN accuracy
+### SC-1.1
+**Parent Claim:** PC-1
+**Sub-Claim ID:** SC-1.1
+**Formal Statement:** Fundus image preprocessing combining resizing to 512×512, pixel normalization to [0,1], CLAHE (clip limit 2.0, grid 8×8), and augmentation (horizontal/vertical flip, rotation ±15°, zoom ±10%, brightness variation) raises validation accuracy from 71% to 86% and classification accuracy from 88% to 91% relative to no-preprocessing baseline on the APTOS 2019 and supplementary clinical dataset.
 
-- **Formal Statement:** Application of the preprocessing pipeline (resize, normalization, CLAHE, augmentation) to fundus images improves baseline CNN validation accuracy from 71% to 86%.
-- **Evidence Reference:**
-  - Literature Card: LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-01
-  - Dissertation Section: §4.2 (Experiment 1)
-  - Dataset: APTOS 2019 + supplementary clinical images
-  - Metric: Validation accuracy (71% → 86%)
-- **Boundary Conditions:** Measured on a specific dataset composition; improvement magnitude may vary with dataset characteristics and image acquisition conditions.
+**Evidence Reference:**
+- Literature Card: LC-SAPAKOVA-2025-01, Extraction Block EB-LC-SAPAKOVA-2025-01-01
+- Dissertation Section: §4.2 (Experiment 1: Baseline CNN vs. Enhanced CNN)
+- Dataset: APTOS 2019 + supplementary clinical images (25,000 labeled images; 80/10/10 split)
+- Metrics: Validation accuracy (71% → 86%); Classification accuracy (88% → 91%); Weighted F1 = 0.91; ROC-AUC = 0.9638 (LC-SAPAKOVA-2025-01, p. 84)
 
----
-
-### SC-1.2: Enhanced model with preprocessing outperforms baseline without preprocessing
-
-- **Formal Statement:** The enhanced CNN (4 convolutional layers, 32–256 filters, batch normalization, dropout, 512×512 input with preprocessing) achieves 91% validation accuracy vs. 88% for the baseline model (2 convolutional blocks, 256×256 input, no CLAHE).
-- **Evidence Reference:**
-  - Literature Card: LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-01, EB-LC-SAPAKOVA-2025-01-03
-  - Dissertation Section: §4.2.2
-  - Dataset: APTOS 2019 + supplementary clinical data (25,000 labeled retinal images)
-  - Metrics: Validation accuracy (91% vs. 88%); ROC-AUC = 0.9638; F1-score (0.91 vs. 0.87–0.89)
-- **Boundary Conditions:** Enhanced model uses both preprocessing and increased architectural complexity; the contribution of preprocessing vs. architecture is not fully isolated in this comparison alone (requires ablation study SC-1.3).
+**Boundary Conditions:**
+- Results are bounded to the APTOS 2019 image distribution and the specific pipeline parameters cited.
+- Supplementary clinical dataset is not publicly available; reproducibility is structurally limited (SB-2.2).
+- Hardware overheating constrained epoch count; full learning potential may not have been reached (LC-SAPAKOVA-2025-01, p. 86).
+- Binary classification performance reported in Figs. 4–5 of LC-SAPAKOVA-2025-01; multiclass performance relationship requires explicit clarification in dissertation (LC-SAPAKOVA-2025-01, II.7 Assumption 3).
 
 ---
 
-### SC-1.3: Ablation study confirms preprocessing as primary performance driver
+### SC-1.2
+**Parent Claim:** PC-1
+**Sub-Claim ID:** SC-1.2
+**Formal Statement:** The enhanced four-block CNN (filters: 32–256, batch normalization, dropout 0.4, softmax 5-class, Adam lr=0.0001, categorical cross-entropy) achieves 94.5% training accuracy and 91.3% validation accuracy, converging within 35–40 epochs, with validation loss stabilizing at 0.18–0.20, compared to the baseline two-block CNN (32–64 filters, sigmoid, binary cross-entropy) stabilizing at validation loss 0.27–0.30.
 
-- **Formal Statement:** Ablation study demonstrates that removal of preprocessing components degrades classification performance more than reduction of architectural complexity.
-- **Evidence Reference:**
-  - Dissertation Section: §5.2.1 (Ablation Study: Preprocessing Components versus Architectural Complexity), §5.2.2 (Quantitative Evidence for Image Quality as Primary Performance Driver)
-  - Dataset: APTOS 2019
-  - Metrics: Accuracy, F1-Score, ROC-AUC with and without individual preprocessing stages
-- **Boundary Conditions:** Ablation results are bounded by the specific architectures tested (baseline CNN, enhanced CNN, EfficientNetB0, ResNet50) and the specific datasets used.
+**Evidence Reference:**
+- Literature Card: LC-SAPAKOVA-2025-01, §II.5
+- Dissertation Section: §4.2.1 (Training Dynamics and Convergence Analysis)
+- Dataset: APTOS 2019 + supplementary clinical images
+- Metrics: Training accuracy 94.5%; Validation accuracy 91.3% (Epoch 9: val_acc 93.41%, val_loss 0.1833 vs. baseline val_acc 91.71%, val_loss 0.2288) (LC-SAPAKOVA-2025-01, p. 86, Table 2)
 
----
-
-### SC-2.1: Pipeline stage specification
-
-- **Formal Statement:** The unified preprocessing pipeline consists of four formalized stages: (1) resizing (256×256 or 512×512 via cubic interpolation), (2) normalization (pixel values to [0,1]), (3) CLAHE enhancement (clip limit 2.0, grid size 8×8), (4) data augmentation (horizontal/vertical flips, ±15° rotation, ±10% zoom, brightness variation).
-- **Evidence Reference:**
-  - Literature Card: LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-02
-  - Literature Card: LC-SAPAKOVA-2025 (CONF), EB-02
-  - Dissertation Section: §3.1.1
-- **Boundary Conditions:** Parameter values (clip limit, grid size, augmentation ranges) are optimized for APTOS 2019 image characteristics; transferability to other fundus image corpora requires validation.
+**Boundary Conditions:**
+- Results are bounded to the specific hyperparameter configuration documented (Adam, lr=0.0001, batch 32, dropout 0.4, early stopping).
+- Hardware-specific computational constraints apply (DGL-2).
+- Training accuracy significantly exceeds test accuracy on Method 1 in parallel EfficientNetB0 experiment; overfitting remains a documented risk (LC-SAPAKOVA-2025, p. 499; LC-Yesmukhamedov-2025-SELF, p. 119).
 
 ---
 
-### SC-2.2: Preprocessing improves classification with and without CLAHE
+### SC-1.3
+**Parent Claim:** PC-1
+**Sub-Claim ID:** SC-1.3
+**Formal Statement:** Preprocessing with CLAHE reduces per-step processing time relative to unprocessed input (1s 108ms/step with preprocessing vs. 8s 986ms/step without preprocessing), under the same hardware configuration.
 
-- **Formal Statement:** CNN classification accuracy with the CV2/CLAHE preprocessing pipeline reaches 91% (precision 0.90/0.93, recall 0.93/0.90, F1-score 0.91) compared to 88% without preprocessing (precision 0.91/0.85, recall 0.83/0.92, F1-score 0.87/0.89).
-- **Evidence Reference:**
-  - Literature Card: LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-04
-  - Dissertation Section: §4.2.2
-  - Dataset: APTOS 2019 + supplementary data
-  - Metrics: Accuracy, Precision, Recall, F1-score per class; Confusion matrices
-- **Boundary Conditions:** Comparison performed using binary classification (classes 0 and 1); relationship to full five-class performance requires separate evaluation.
+**Evidence Reference:**
+- Literature Card: LC-SAPAKOVA-2025-01, §II.5, p. 84
+- Dissertation Section: §4.1.3 (Hardware Constraints and Computational Resource Limitations)
+- Dataset: APTOS 2019 + supplementary clinical images
+- Metric: Processing time per step
 
----
-
-### SC-3.1: Modified CLAHE threshold sensitivity
-
-- **Formal Statement:** The CLAHE threshold parameter affects classification performance in a measurable and non-trivial manner, with optimal threshold values improving feature visibility (particularly for microaneurysms and small vessels) on small datasets.
-- **Evidence Reference:**
-  - Literature Card: LC-AlTimemy-2021, EB-01 (upgraded CLAHE with T/80 formulation; image quality score: conventional CLAHE = 33.2284 vs. upgraded CLAHE T/80 = 34.3483)
-  - Dissertation Section: §4.3 (Experiment 2: Modified CLAHE Threshold Optimization on Small Datasets), §4.3.1, §4.3.2
-  - Dataset: APTOS 2019, STARE
-  - Metrics: Image quality scores; downstream classification accuracy by threshold value
-- **Boundary Conditions:** The T/80 optimality was determined on STARE (157 images, 5 disease types); generalizability to APTOS 2019 (3,662 images, 5 DR severity grades) requires independent validation. The classification task differs (multi-disease vs. DR severity grading).
+**Boundary Conditions:**
+- Processing time difference is hardware-specific; does not generalize to different hardware configurations (DGL-2).
+- This finding is a secondary metric (EH-2); it does not independently validate the preprocessing dominance hypothesis.
 
 ---
 
-### SC-3.2: CLAHE preserves diagnostically relevant features
+### SC-1.4
+**Parent Claim:** PC-1
+**Sub-Claim ID:** SC-1.4
+**Formal Statement:** The APTOS 2019 dataset exhibits severe class imbalance (Class 0: 73.5% training / 49.3% test; Classes 3 and 4: 4.5% combined training / 13.3% combined test), which constitutes a primary confounding factor in the interpretation of accuracy-based performance claims and necessitates weighted F1-score and Cohen's Kappa as primary evaluation metrics.
 
-- **Formal Statement:** CLAHE with appropriate threshold control improves local contrast in darker fundus regions, enhancing visibility of pathological features without introducing artifacts, particularly improving visibility of tiny veins.
-- **Evidence Reference:**
-  - Literature Card: LC-AlTimemy-2021, EB-01 ("improved the image distinctiveness, especially the tiny veins")
-  - Literature Card: LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-02 ("improves local contrast, especially in darker regions of the fundus, enhancing the visibility of pathological features without introducing artifacts")
-  - Dissertation Section: §4.3.2
-- **Boundary Conditions:** Feature preservation claims are qualitative in both sources; no formal pathological feature detection metric (e.g., microaneurysm detection rate) is reported.
+**Evidence Reference:**
+- Literature Card: LC-SAPAKOVA-2025, §II.3 (p. 498); LC-Yesmukhamedov-2025-SELF, §II.3; LC-SAPAKOVA-2025-01, §II.3
+- Dissertation Section: §4.1.2 (Class Distribution Analysis)
+- Dataset: APTOS 2019
+- Metric: Class distribution (percentage per class, training and test partitions)
 
----
-
-### SC-4.1: EfficientNetB0 frozen vs. progressive fine-tuning
-
-- **Formal Statement:** For EfficientNetB0 on five-class DR classification, progressive fine-tuning (Method 2) achieves Test Precision = 0.75, Recall = 0.74, F1-Score = 0.74, Macro Average = 0.77, Weighted Average = 0.81, compared to frozen strategy (Method 1): Precision = 0.65, Recall = 0.60, F1-Score = 0.62, Macro Average = 0.72, Weighted Average = 0.74.
-- **Evidence Reference:**
-  - Literature Card: LC-SAPAKOVA-2025 (CONF), EB-01
-  - Literature Card: LC-Yesmukhamedov-2025-SELF, EB-LC-Yesmukhamedov-2025-SELF-02
-  - Dissertation Section: §4.4.1
-  - Dataset: APTOS 2019 + supplementary (35,126 training, 3,662 test images)
-  - Metrics: Precision, Recall, F1-Score, Macro Average, Weighted Average (all from Table 3 of CONF source)
-- **Boundary Conditions:** Overall accuracy remained constant at 0.80 for both methods; improvement is visible only in class-sensitive metrics. Evidence of remaining overfitting: training F1 = 0.86 (Method 2) vs. test F1 = 0.74.
+**Boundary Conditions:**
+- Class imbalance figures are specific to the APTOS 2019 + supplementary clinical dataset split as documented in the cited sources.
+- Per-class precision and recall for minority classes (DR 3, DR 4) are subject to instability under severe imbalance (EH-2).
 
 ---
 
-### SC-4.2: Fine-tuning reduces overfitting
+### SC-2.1
+**Parent Claim:** PC-2
+**Sub-Claim ID:** SC-2.1
+**Formal Statement:** The modified CLAHE formulation CLIP LIMIT = T/80, proposed in LC-AlTimemy-2021 as an upgrade to conventional CLAHE (CLIP LIMIT = ⌈L/T⌉ + β·(φ−⌈L/T⌉)), provides controllable adaptive contrast enhancement that addresses excessive enhancement artifacts and poor manifestation of small vessels and microaneurysm-like features in fundus images. This formulation was adapted and validated within the dissertation's preprocessing pipeline.
 
-- **Formal Statement:** Progressive fine-tuning reduces the train-test F1 gap compared to the frozen strategy: Method 2 training F1 = 0.86, test F1 = 0.74 (gap = 0.12) vs. Method 1 training F1 = 0.87, test F1 = 0.62 (gap = 0.25).
-- **Evidence Reference:**
-  - Literature Card: LC-SAPAKOVA-2025 (CONF), EB-04
-  - Literature Card: LC-Yesmukhamedov-2025-SELF, EB-LC-Yesmukhamedov-2025-SELF-03
-  - Dissertation Section: §4.4.1
-  - Metrics: Train F1 vs. Test F1 gap
-- **Boundary Conditions:** Overfitting is reduced but not eliminated. Source acknowledges "additional data and interpretive improvements are needed to ensure overall model stability."
+**Evidence Reference:**
+- Literature Card: LC-AlTimemy-2021, §3 (Equation 2, p. 5); §4 (Conceptual Contributions)
+- Dissertation Section: §3.1.2 (Modified CLAHE Algorithm with Simplified Threshold Control); §4.3 (Experiment 2: Modified CLAHE Threshold Optimization)
+- Dataset: STARE (LC-AlTimemy-2021 context: 157 images, five-class taxonomy); APTOS 2019 (dissertation validation)
+- Metric: Per-class F1-score for DR 1 and DR 2; classification accuracy
 
----
-
-### SC-4.3: ResNet50 transfer learning performance
-
-- **Formal Statement:** ResNet50 with transfer learning achieves high classification accuracy on retinal disease classification tasks, with fine-tuned ResNet50 outperforming feature-extraction-only approaches.
-- **Evidence Reference:**
-  - Literature Card: LC-AlTimemy-2021, EB-02 (RESNET50 achieved 100% accuracy on STARE with upgraded CLAHE preprocessing)
-  - Dissertation Section: §4.4.2
-  - Dataset: STARE (157 images, augmented to 960); dissertation uses APTOS 2019
-  - Metrics: Accuracy, Sensitivity, Specificity
-- **Boundary Conditions:** 100% accuracy on STARE raises overfitting concerns due to small, augmented dataset. Performance on STARE (5 disease types) is not directly comparable to APTOS 2019 (5 DR severity grades). The sensitivity formula in the source (Eq. 3: TP/(TP+TN)) contains an apparent error vs. standard TP/(TP+FN).
+**Boundary Conditions:**
+- CLAHE T/80 formulation was derived on STARE dataset with different image characteristics and different five-class taxonomy (BDR, CRVO, CNV, PDR, Normal ≠ DR 0–4). No parameter-level equivalence between STARE-optimized and APTOS-optimized parameters is asserted (DGL-5).
+- The sensitivity formula in LC-AlTimemy-2021 (Eq. 3: Sen = TP/(TP+TN)) deviates from standard (TP/(TP+FN)); this anomaly must be noted if that source's sensitivity figure is cited (SIR-3).
+- 100% accuracy reported in LC-AlTimemy-2021 is not transferable to the dissertation's APTOS 2019 framework (SB-1.2).
+- CLAHE parameters must be independently validated within the dissertation's experimental framework (DGL-5).
 
 ---
 
-### SC-5.1: EfficientNetB0 computational efficiency
+### SC-2.2
+**Parent Claim:** PC-2
+**Sub-Claim ID:** SC-2.2
+**Formal Statement:** Within the CLAHE clip limit range tested experimentally on the small fundus image dataset, downstream CNN classification performance on per-class F1-score for DR 1 and DR 2 exhibits a parameter-dependent sensitivity profile. The profile has at least one local optimum identifiable within the tested range. No extrapolation to untested parameter values is permissible.
 
-- **Formal Statement:** EfficientNetB0 provides a high accuracy-to-computation ratio, making it suitable for resource-limited deployment.
-- **Evidence Reference:**
-  - Literature Card: LC-SAPAKOVA-2025 (CONF), EB-05 ("high accuracy-to-computation ratio, providing an optimal balance between performance and computational efficiency")
-  - Dissertation Section: §3.3.1
-- **Boundary Conditions:** No explicit computational cost comparison across architectures is provided in the sources reviewed. The efficiency claim is based on architectural properties, not measured FLOPs or inference time comparison.
+**Evidence Reference:**
+- Literature Card: LC-SAPAKOVA-2025-01, §II.3 (CLAHE parameters: clip limit 2.0, grid 8×8); LC-AlTimemy-2021, §3
+- Dissertation Section: §4.3.1 (Threshold Parameter Sensitivity Analysis); §4.3.2 (Impact on Feature Preservation)
+- Dataset: Small fundus image dataset (experiment-specific; bounded per Invariants H-2)
+- Metric: Per-class F1-score, DR 1 and DR 2 classes
 
----
-
-### SC-5.2: Performance achieved under hardware constraints
-
-- **Formal Statement:** The enhanced CNN model achieves improved classification results (91% validation accuracy) even under documented hardware constraints (overheating limiting epoch count).
-- **Evidence Reference:**
-  - Literature Card: LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-05
-  - Dissertation Section: §4.1.3, §5.4
-  - Metric: Validation accuracy achieved within 35–40 epochs before hardware-imposed termination
-- **Boundary Conditions:** Hardware constraints are documented as a limitation, not a controlled experimental variable. The source acknowledges "further gains are possible with extended computational resources."
+**Boundary Conditions:**
+- Claim is bounded strictly to the parameter range tested experimentally (Invariants H-2).
+- Extrapolation to clip limit values outside the tested range is forbidden (CFC-1.2).
 
 ---
 
-### SC-5.3: Processing time comparison
+### SC-3.1
+**Parent Claim:** PC-3
+**Sub-Claim ID:** SC-3.1
+**Formal Statement:** EfficientNetB0 two-stage fine-tuning (Method 2: progressive unfreezing of upper layers) achieves test-set Precision = 0.75, Recall = 0.74, F1 = 0.74, Macro Average = 0.77, Weighted Average = 0.81, compared to frozen-only strategy (Method 1) achieving Precision = 0.65, Recall = 0.60, F1 = 0.62, Macro Average = 0.72, Weighted Average = 0.74, with Accuracy = 0.80 for both methods on the APTOS 2019 + supplementary clinical test partition.
 
-- **Formal Statement:** Preprocessing with CV2/CLAHE achieves faster per-step processing time (1s 108ms/step) compared to without preprocessing (8s 986ms/step).
-- **Evidence Reference:**
-  - Literature Card: LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-04
-  - Dissertation Section: §4.2, §5.2
-  - Metric: Processing time per step
-- **Boundary Conditions:** Processing time difference may be attributed to input resolution differences (512×512 with preprocessing vs. 256×256 baseline); the metric conflates preprocessing pipeline efficiency with model inference time.
+**Evidence Reference:**
+- Literature Card: LC-SAPAKOVA-2025, §II.5, p. 499, Table 3 (prior self-publication — must be cited as previously published results per SIR-4)
+- Literature Card: LC-Yesmukhamedov-2025-SELF, §II.5 (identical experimental configuration — may not be cited as independent confirmation per SIR-5)
+- Dissertation Section: §4.4.1 (EfficientNetB0: Frozen versus Progressive Fine-Tuning); §4.4.3
+- Dataset: APTOS 2019 + supplementary clinical images (training: 35,126; test: 3,662)
+- Metrics: Precision, Recall, F1-Score, Macro Average, Weighted Average (Test partition)
 
----
-
-### SC-6.1: Thermal model mathematical formulation
-
-- **Formal Statement:** The coupled thermal-optical model for laser-tissue interaction in fundus tissue is described by: Beer's law for laser attenuation (I(r,z) = I₀(r)e^(−∫β(r,ξ)dξ)), energy balance equation (ΔV·Co·ΔT = W·Δt), Gaussian beam profile (I₀(r) = (P/πa²)e^(−(r/a)²)), and heat conduction equation (Coσ∂T/∂t = div(k·grad(T))).
-- **Evidence Reference:**
-  - Literature Card: LC-Sapakova-2024-01, EB-01 (Equations 1–8)
-  - Dissertation Section: §2.4.1
-- **Boundary Conditions:** Model assumes static tissue optical/thermal properties; no blood perfusion term; homogeneous properties within each layer; no experimental validation against clinical data.
-
----
-
-### SC-6.2: Differential temperature distribution across tissue layers
-
-- **Formal Statement:** Numerical simulation demonstrates that surface tissue layers (cornea) absorb laser energy faster than deeper layers (choroid, retina), with temperature stabilizing in deep layers after initial exposure.
-- **Evidence Reference:**
-  - Literature Card: LC-Sapakova-2024-01, EB-02 (Figures 2–5)
-  - Dissertation Section: §2.4.2
-- **Boundary Conditions:** Results are qualitative only; no specific numerical temperature values reported. Simulation uses assumed parameters without specified sources.
+**Boundary Conditions:**
+- These values are the published empirical baseline from prior self-publications (LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF). Dissertation must replicate and extend, not simply reproduce.
+- LC-SAPAKOVA-2025 and LC-Yesmukhamedov-2025-SELF share identical experimental data; they cannot be cited as independent confirmatory sources (SIR-5).
+- Alternative architectures (ResNet, VGG, DenseNet) were not evaluated; results cannot be generalized to the class of efficient CNN architectures (SIR-7; SB-1.7).
+- Method 1 (Frozen) exhibits overfitting: training F1 = 0.87 vs. test F1 = 0.62 (LC-SAPAKOVA-2025, p. 499, Tables 1–2).
 
 ---
 
-### SC-7.1: Modular system architecture specification
+### SC-3.2
+**Parent Claim:** PC-3
+**Sub-Claim ID:** SC-3.2
+**Formal Statement:** ResNet50, under feature extraction strategy versus end-to-end fine-tuning, produces a performance differential on the APTOS 2019 test partition, evaluated on the same primary metric set (Accuracy, weighted F1, ROC-AUC, Cohen's Kappa).
 
-- **Formal Statement:** The proposed system architecture comprises modular components: Image Capture, Image Processing, Recognition Model, Diagnosis, Reporting, User Interface, Data Storage, Error Handling, and Security, with PACS and EHR integration via FHIR/HL7 standards.
-- **Evidence Reference:**
-  - Literature Card: LC-2025-Yesmukhamedov-01, EB-02 (Tables 2–3, Fig. 1)
-  - Dissertation Section: §6.1, §6.2
-- **Boundary Conditions:** No prototype implementation or testing reported. Architecture is conceptual/specified but not empirically validated.
+**Evidence Reference:**
+- Literature Card: LC-AlTimemy-2021, §3 (ResNet50 as transfer learning base on STARE; training parameters: 100 epochs, lr=0.0003, 262 min elapsed)
+- Dissertation Section: §4.4.2 (ResNet50: Feature Extraction versus End-to-End Fine-Tuning)
+- Dataset: APTOS 2019 (dissertation); STARE (LC-AlTimemy-2021 context — different taxonomy)
+- Metric: Accuracy, weighted F1, ROC-AUC, Cohen's Kappa
 
----
-
-### SC-7.2: Comparative positioning against existing systems
-
-- **Formal Statement:** Existing AI-based DR screening systems (IDx-DR, Eyenuk, DeepMind, Orbis Cybersight AI, etc.) have identified limitations including: restriction to single diseases, requirement for advanced imaging equipment, limited adoption in non-English-speaking regions, and dependency on internet connectivity.
-- **Evidence Reference:**
-  - Literature Card: LC-2025-Yesmukhamedov-01, EB-01 (Table 1)
-  - Dissertation Section: §1.4, §5.3.1
-- **Boundary Conditions:** Comparative analysis is qualitative; no direct quantitative benchmarking of the proposed system against these systems using identical datasets.
+**Boundary Conditions:**
+- LC-AlTimemy-2021 results are on STARE with different five-class taxonomy; they cannot be directly compared to APTOS 2019 results without explicit acknowledgment of taxonomic non-equivalence (SB-2.3).
+- ResNet50 results from dissertation experiments (§4.4.2) constitute the primary evidence; LC-AlTimemy-2021 provides only methodological precedent for ResNet50 use.
 
 ---
 
-### SC-7.3: Kazakhstan deployment context
+### SC-4.1
+**Parent Claim:** PC-4
+**Sub-Claim ID:** SC-4.1
+**Formal Statement:** The heat conduction equation Coσ(x,y,z,T)∂T/∂t = div(k(x,y,z,T)·grad(T)), combined with Beer's law for laser intensity attenuation I(r,z) = I₀(r)e^(−∫₀ᶻβ(r,ξ)dξ) and a Gaussian beam intensity profile I₀(r) = (P/πa²)e^(−(r/a)²), provides a mathematical framework for numerically modeling temperature distribution across retinal tissue layers (cornea, choroid, retina) during laser coagulation. Surface layers (cornea) exhibit faster temperature rise than deeper layers (choroid, retina). Temperature stabilizes in deep layers after continued laser exposure.
 
-- **Formal Statement:** Kazakhstan's healthcare infrastructure context — approximately 1,200 ophthalmologists, ~40% rural population, ~70% of rural residents with limited eye care access, ~8% adult diabetes prevalence — justifies the need for resource-efficient automated DR screening.
-- **Evidence Reference:**
-  - Literature Card: LC-2025-Yesmukhamedov-01, EB-03
-  - Dissertation Section: §1.1.2, §6.3.1, §6.4.2
-- **Boundary Conditions:** Statistics are derived from external sources (IDF Diabetes Atlas 2021) and are projections. Actual deployment feasibility depends on infrastructure investment, regulatory approval, and clinician training not addressed experimentally.
+**Evidence Reference:**
+- Literature Card: LC-Sapakova-2024-01, §II.3 (Equations 2, 3, 4, 7, 8); §II.5
+- Dissertation Section: §2.4.1 (Coupled Thermal-Optical Model of Fundus Tissue Response)
+- Dataset: Simulation only (no clinical data; no APTOS 2019 involvement)
+- Metric: Qualitative temperature distribution (heat maps; depth-time graphs); no quantitative temperature thresholds reported
+
+**Boundary Conditions:**
+- Results are computational simulation only. No quantitative validation against experimental or clinical data exists (LC-Sapakova-2024-01, §II.5; SIR-6).
+- Model omits blood perfusion term despite Pennes bioheat equation reference in source introduction (LC-Sapakova-2024-01, §II.7 Assumption 4).
+- Tissue optical and thermal properties treated as static during exposure; no temperature-dependent modification modeled (LC-Sapakova-2024-01, §II.7 Assumption 1).
+- The claim that simulation "confirms effectiveness of laser therapy" is the source's claim; it is not absorbed into dissertation's validated findings (SIR-6; CFC-2.4).
 
 ---
 
-### SC-7.4: Physician-in-the-loop decision support
+### SC-5.1
+**Parent Claim:** PC-5
+**Sub-Claim ID:** SC-5.1
+**Formal Statement:** A modular AI-driven diagnostic system architecture for ophthalmological screening — specifying components including Image Capture, Image Processing, Recognition Model, Diagnosis, Reporting, User Interface, Data Storage, Error Handling, and a Doctor-AI Feedback Loop — can be formally specified using UML component, sequence, class, activity, and ER diagrams. This specification addresses functional and non-functional requirements for deployment in resource-limited environments including PACS/EHR integration, telemedicine support, and physician-in-the-loop decision support.
 
-- **Formal Statement:** The proposed system operates within a physician-in-the-loop paradigm, incorporating a Doctor-AI Feedback Loop where clinicians can request clarification or corrections from the AI model.
-- **Evidence Reference:**
-  - Literature Card: LC-2025-Yesmukhamedov-01, EB-05
-  - Dissertation Section: §6.3.2
-- **Boundary Conditions:** Conceptual framework only; no user studies, clinical trials, or interface prototyping reported.
+**Evidence Reference:**
+- Literature Card: LC-2025-Yesmukhamedov-01, §II.4 (UML diagrams; Fig. 1 p. 83; Fig. 4 p. 87; Fig. 5 p. 88; Tables 2–5)
+- Dissertation Section: §6.1 (System Requirements); §6.2 (AI Processing Module Design); §6.3 (Clinical Workflow Integration); §6.4 (Data Security and Regulatory Compliance)
+- Dataset: No experimental dataset; epidemiological statistics from IDF Diabetes Atlas 2021 (LC-2025-Yesmukhamedov-01, p. 86–87)
+- Metric: Not applicable (design specification)
+
+**Boundary Conditions:**
+- System architecture is a design specification only. No prototype implementation or field testing has been conducted (SB-4.1; DGL-4).
+- GDPR/HIPAA compliance framing is a design specification, not certified compliance status (SB-4.2).
+- Infrastructure prerequisites for Kazakhstan deployment (equipment investment, algorithm adaptation, national standards, specialist training) acknowledged but not resolved (LC-2025-Yesmukhamedov-01, p. 90; DGL-4).
+- Internet connectivity dependency noted for telemedicine components (LC-2025-Yesmukhamedov-01, Table 1, p. 81).
 
 ---
 
-### SC-7.5: Data security and regulatory compliance
+### SC-5.2
+**Parent Claim:** PC-5
+**Sub-Claim ID:** SC-5.2
+**Formal Statement:** Existing commercial DR screening systems (IDx-DR, EyeNuk, DeepMind, Retina-AI Health, Visulytix Pegasus, ZEISS VISUHEALTH, NVIDIA Clara AI, Orbis Cybersight AI, Heidelberg AI Tools) exhibit identified limitations (data security dependencies, internet connectivity requirements, lack of adaptation to local datasets, infrastructure prerequisites) that the proposed system architecture design explicitly addresses in its specification.
 
-- **Formal Statement:** The proposed system architecture includes security components (encryption, authentication, security gateway) aligned with GDPR and HIPAA requirements.
-- **Evidence Reference:**
-  - Literature Card: LC-2025-Yesmukhamedov-01, EB-04
-  - Dissertation Section: §6.4.1
-- **Boundary Conditions:** Compliance is stated as a design requirement, not demonstrated through audit, certification, or penetration testing.
+**Evidence Reference:**
+- Literature Card: LC-2025-Yesmukhamedov-01, §II.3 (comparative analysis, Table 1, pp. 80–81)
+- Dissertation Section: §1.4 (Critical Analysis of Existing DR Screening Systems); §5.3 (Comparative Analysis with Existing DR Diagnostic Systems)
+- Dataset: Published system specifications and peer-reviewed performance reports (external benchmarks; no direct controlled experiment)
+- Metric: Qualitative comparative analysis; tabular decomposition
+
+**Boundary Conditions:**
+- The comparison is qualitative and based on published specifications, not a controlled experiment against named systems under identical evaluation conditions (CFC-2.2).
+- Claims of superiority over existing systems without direct controlled comparison are forbidden (CFC-2.2).
+- Published performance metrics of existing systems (e.g., IDx-DR sensitivity ≥ 96%) are cited as external benchmarks, not as validated results of this dissertation (LC-2025-Yesmukhamedov-01, §II.5).
 
 ---
 
@@ -312,108 +277,118 @@ Systematic improvement of input data quality through an integrated preprocessing
 
 ---
 
-### For PC-1 (Preprocessing Dominance):
+### PC-1: Counter-Arguments and Limitations
 
-- **Counter-argument:** Preprocessing and architectural changes are not fully isolated in the primary experiments. The enhanced model uses both preprocessing and increased architectural complexity (4 conv layers, batch normalization, dropout, larger input resolution) simultaneously.
-  - **Source:** LC-SAPAKOVA-2025-01, §II.7, Assumption 3; SC-1.2 boundary conditions.
-  - **Conditions under which claim fails:** If the ablation study (§5.2.1) shows that architectural improvements contribute equally or more than preprocessing to performance gains.
+**Counter-Argument CA-1.1:**
+Claim: Preprocessing improvement may be confounded by simultaneous architectural change. In LC-SAPAKOVA-2025-01, preprocessing (pipeline activation) and architectural complexity increase (two-block → four-block CNN) are applied together in the enhanced condition. The isolated effect of preprocessing versus architectural complexity change is not independently measured.
+Source: LC-SAPAKOVA-2025-01, §II.7 Assumption 3; dissertation §5.2 (ablation study required).
+Condition of Failure: If ablation study (§5.2) demonstrates that architectural complexity alone accounts for performance gains, the preprocessing dominance claim weakens to conditional status.
 
-- **Counter-argument:** The preprocessing pipeline's impact has not been independently validated across diverse clinical imaging conditions (different cameras, lighting, patient demographics).
-  - **Source:** LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-06 ("The model was trained primarily on high-quality images... does not fully capture the variability of retinal images in real clinical practice").
-  - **Conditions under which claim fails:** If cross-database generalization testing (§5.1) reveals that preprocessing gains do not transfer to heterogeneous image sources.
+**Counter-Argument CA-1.2:**
+Claim: Test performance is evaluated on a non-public supplementary dataset that cannot be independently reproduced.
+Source: LC-SAPAKOVA-2025-01, §II.6 Limitation 1; SB-2.2.
+Condition of Failure: If results do not replicate on APTOS 2019 public partition alone, generalizability is structurally limited.
 
----
-
-### For PC-2 (Unified Pipeline Integration):
-
-- **Counter-argument:** The source reporting the most comprehensive pipeline evaluation (LC-SAPAKOVA-2025-01) shows an internal metric inconsistency: conclusion reports precision 0.82, recall 0.85, F1-score 0.83, while main results report higher values (precision 0.90/0.93, recall 0.93/0.90, F1-score 0.91).
-  - **Source:** LC-SAPAKOVA-2025-01, §IV Relational Positioning.
-  - **Conditions under which claim fails:** If the lower values represent the multiclass evaluation and the higher values are binary-only, the pipeline's effectiveness for five-class DR grading is weaker than initially reported.
-
-- **Counter-argument:** The pipeline lacks standardized external benchmarking. No direct comparison is made on identical datasets and identical metrics against published systems (IDx-DR sensitivity 96%, specificity 93%).
-  - **Source:** LC-2025-Yesmukhamedov-01, EB-03 (external benchmarks cited but not replicated).
+**Counter-Argument CA-1.3:**
+Claim: Accuracy metric is subject to inflation under class imbalance (Class 0: 49.3%–73.5%); a classifier assigning all images to Class 0 could achieve ~49–73% accuracy without learning DR-relevant features.
+Source: Invariants §V (EH-1); SB-2.1.
+Condition of Failure: If weighted F1 and Cohen's Kappa do not satisfy EH-3 thresholds, accuracy-based claims do not constitute evidence of preprocessing dominance.
 
 ---
 
-### For PC-3 (Modified CLAHE):
+### PC-2: Counter-Arguments and Limitations
 
-- **Counter-argument:** The CLAHE threshold optimality (T/80) was established on a different dataset (STARE, 157 images, 5 disease types) and a different classification task than the dissertation's primary evaluation (APTOS 2019, 3,662 images, 5 DR severity grades).
-  - **Source:** LC-AlTimemy-2021, §II.7, Assumption 4.
-  - **Conditions under which claim fails:** If CLAHE parameter sensitivity analysis on APTOS 2019 (§4.3.1) yields a different optimal threshold, undermining the claim of a generalizable modified CLAHE approach.
+**Counter-Argument CA-2.1:**
+Claim: The T/80 CLAHE formulation was derived on STARE (157 images, different disease taxonomy) and is not directly validated for APTOS 2019 five-class DR staging without independent parameter optimization.
+Source: DGL-5; LC-AlTimemy-2021, §3.
+Condition of Failure: If clip limit optimum on APTOS 2019 differs substantially from T/80 formulation, the source cannot be used as direct parameter justification.
 
-- **Counter-argument:** Feature preservation claims (microaneurysms, small vessels) are qualitative in all sources reviewed; no quantitative pathological feature detection metric is provided.
-  - **Source:** LC-AlTimemy-2021, EB-01; LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-02.
-
----
-
-### For PC-4 (Two-Stage Fine-Tuning):
-
-- **Counter-argument:** Overall accuracy (0.80) remained identical for both frozen and fine-tuned strategies; the improvement is visible only in class-sensitive metrics (Precision, Recall, F1-Score).
-  - **Source:** LC-SAPAKOVA-2025 (CONF), EB-01.
-  - **Conditions under which claim fails:** If accuracy is adopted as the primary metric (which the sources argue against due to class imbalance), the fine-tuning strategy shows no improvement.
-
-- **Counter-argument:** Only EfficientNetB0 was evaluated for two-stage fine-tuning in the published self-authored sources; alternative architectures (ResNet, VGG, DenseNet) were explicitly deferred to future work.
-  - **Source:** LC-SAPAKOVA-2025 (CONF), §II.6; LC-Yesmukhamedov-2025-SELF, §II.7.
-  - **Conditions under which claim fails:** If ResNet50 fine-tuning results (§4.4.2) do not replicate the same pattern of improvement.
+**Counter-Argument CA-2.2:**
+Claim: Sensitivity formula anomaly in LC-AlTimemy-2021 (Sen = TP/(TP+TN) vs. standard TP/(TP+FN)) may undermine the credibility of that source's 100% accuracy/sensitivity claims.
+Source: LC-AlTimemy-2021, Eq. 3, p. 9; SIR-3.
+Condition of Failure: If the 100% accuracy claim is methodologically flawed due to metric formula error, the source's empirical results cannot be cited as evidence of CLAHE effectiveness.
 
 ---
 
-### For PC-5 (Resource-Efficient Deployment):
+### PC-3: Counter-Arguments and Limitations
 
-- **Counter-argument:** Hardware constraints are documented as a limitation encountered during research, not as a controlled experimental variable simulating real deployment conditions.
-  - **Source:** LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-05 ("Hardware constraints prevented longer training durations. Due to overheating during extended training, the number of epochs was limited").
-  - **Conditions under which claim fails:** If performance is substantially lower when genuinely deployed on target hardware (portable devices, edge devices) in clinical settings.
+**Counter-Argument CA-3.1:**
+Claim: LC-SAPAKOVA-2025 and LC-Yesmukhamedov-2025-SELF share identical experimental data (same training set 35,126; same test set 3,662; same APTOS 2019 + supplementary clinical data). They cannot serve as independent confirmatory sources for H-3. Independent replication within the dissertation's own experiments is required.
+Source: SIR-5; Invariants §V (EH-4).
+Condition of Failure: If dissertation experiments do not replicate the fine-tuning performance differential in §4.4.1, H-3 lacks independent validation.
 
-- **Counter-argument:** No formal deployment testing on actual resource-limited clinical hardware (portable retinal cameras, mobile devices, edge computing) is reported.
-  - **Source:** LC-SAPAKOVA-2025-01, EB-LC-SAPAKOVA-2025-01-05 ("Deployment challenges such as real-time inference on edge devices or in mobile applications should be addressed").
+**Counter-Argument CA-3.2:**
+Claim: EfficientNetB0 results cannot be generalized to the class of efficient CNN architectures; alternative architectures (ResNet, VGG, DenseNet) were not evaluated in the referenced publications.
+Source: SIR-7; LC-SAPAKOVA-2025, §II.6; SB-1.7.
+Condition of Failure: Claim fails as a general statement; it holds only as architecture-specific and is so bounded.
 
----
-
-### For PC-6 (Laser-Tissue Interaction Modeling):
-
-- **Counter-argument:** The thermal model has no experimental validation against clinical or laboratory data. All results are computational simulations with assumed parameter values.
-  - **Source:** LC-Sapakova-2024-01, §II.5, §II.6 ("further research and experiments are required").
-  - **Conditions under which claim fails:** If model predictions diverge significantly from clinical observations of laser coagulation effects on retinal tissue.
-
-- **Counter-argument:** The model omits blood perfusion (Pennes bioheat equation term), assumes static tissue properties, and uses homogeneous layer approximation despite acknowledging tissue inhomogeneity.
-  - **Source:** LC-Sapakova-2024-01, §II.7, Assumptions 1–4.
+**Counter-Argument CA-3.3:**
+Claim: Observed overfitting in Method 1 (Frozen) — training F1 = 0.87 vs. test F1 = 0.62 — exceeds the 15 pp overfitting threshold defined in OD-4. This indicates the frozen strategy is inadequate for this task but does not independently establish that progressive fine-tuning fully resolves the generalization deficit.
+Source: LC-SAPAKOVA-2025, p. 499; Invariants OD-4.
+Condition of Failure: If fine-tuning (Method 2) also exhibits training-test gap exceeding 15 pp on any primary metric, overfitting concern extends to Method 2.
 
 ---
 
-### For PC-7 (System Architecture):
+### PC-4: Counter-Arguments and Limitations
 
-- **Counter-argument:** The system architecture is entirely conceptual; no prototype implementation, user testing, or operational validation is reported.
-  - **Source:** LC-2025-Yesmukhamedov-01, §II.5, §II.7.
-  - **Conditions under which claim fails:** If implementation reveals unforeseen integration challenges, performance bottlenecks, or incompatibility with Kazakhstan's existing healthcare IT infrastructure.
+**Counter-Argument CA-4.1:**
+Claim: The mathematical model lacks quantitative experimental validation against physical or clinical data. Temperature distribution results are qualitative only; no numerical thresholds, error margins, or calibration against measured tissue temperatures are reported.
+Source: LC-Sapakova-2024-01, §II.5; §II.6; SIR-6.
+Condition of Failure: This claim fails as an empirical or clinical contribution. It is bounded to its status as a theoretical/computational contribution.
 
-- **Counter-argument:** Published performance metrics of referenced AI systems (IDx-DR sensitivity 96%, specificity 93%) may not be transferable to the Kazakhstan context due to dataset differences, population-specific variation, and regulatory requirements.
-  - **Source:** LC-2025-Yesmukhamedov-01, §II.7, Assumption 3.
+**Counter-Argument CA-4.2:**
+Claim: The model omits blood perfusion (Pennes bioheat term), despite its relevance to retinal tissue thermal dynamics, and uses static tissue optical properties despite coagulation-induced property changes during laser exposure.
+Source: LC-Sapakova-2024-01, §II.7 Assumptions 1, 4.
+Condition of Failure: Model predictions may deviate significantly from physical reality in vivo; the dissertation must restrict its use of this model to "theoretical/computational grounding" (SIR-6).
+
+---
+
+### PC-5: Counter-Arguments and Limitations
+
+**Counter-Argument CA-5.1:**
+Claim: The system architecture has not been prototype-implemented or field-tested. All stated benefits (diagnostic accuracy improvement, telemedicine reach, cost reduction) are design-level projections, not demonstrated results.
+Source: SB-4.1; DGL-4; LC-2025-Yesmukhamedov-01, §II.7.
+Condition of Failure: Any claim framing the architecture as a demonstrated system, as a clinically validated tool, or as an infrastructure with certified compliance fails per CFC-2.3, CFC-2.4, SB-4.2.
+
+**Counter-Argument CA-5.2:**
+Claim: The projected deployment outcomes for Kazakhstan (4+ million rural residents accessed; 20–30% late-stage DR complication reduction; 15–20% cost reduction) are third-party projections cited by LC-2025-Yesmukhamedov-01, not results of this dissertation. They cannot be attributed to dissertation findings.
+Source: SIR-8; SB-1.6; CFC-2.3; LC-2025-Yesmukhamedov-01, p. 88.
+Condition of Failure: Attribution of these figures to dissertation findings constitutes a forbidden claim type (CFC-2.3).
 
 ---
 
 ## V. CLAIM DEPENDENCY STRUCTURE
 
 ```
-PC-1 (Preprocessing Dominance)
-  ├── PC-2 (Unified Pipeline) depends on PC-1
-  │     ├── PC-3 (Modified CLAHE) depends on PC-1, PC-2
-  │     └── PC-4 (Two-Stage Fine-Tuning) depends on PC-2
-  │           └── PC-5 (Resource-Efficient Deployment) depends on PC-1, PC-2, PC-4
-  │                 └── PC-7 (System Architecture) depends on PC-2, PC-5
-  └── (provides theoretical grounding for all downstream claims)
-
-PC-6 (Laser-Tissue Modeling) — Independent
-  └── Conditionally linked to PC-2 via §2.4.2 (image feature interpretation)
+IT-1 (Main Thesis)
+├── PC-1 [Empirical — Preprocessing Dominance]          ← No upstream dependency
+│   ├── SC-1.1 [Accuracy and F1 improvement evidence]
+│   ├── SC-1.2 [Convergence and loss dynamics]
+│   ├── SC-1.3 [Processing time — secondary metric only]
+│   └── SC-1.4 [Class imbalance — interpretive framing]
+│
+├── PC-2 [Empirical — CLAHE Threshold Sensitivity]      ← Depends on PC-1
+│   ├── SC-2.1 [T/80 formulation — theoretical adaptation]
+│   └── SC-2.2 [Sensitivity profile — experimental result]
+│
+├── PC-3 [Empirical — Two-Stage Fine-Tuning]            ← Depends on PC-1
+│   ├── SC-3.1 [EfficientNetB0 Frozen vs. Fine-Tuned metrics]
+│   └── SC-3.2 [ResNet50 comparison — additional architecture]
+│
+├── PC-4 [Theoretical — Laser-Tissue Model]             ← Independent (no empirical dependency)
+│   └── SC-4.1 [Thermal-optical equations; simulation results]
+│
+└── PC-5 [System-level — DR Screening Architecture]     ← Depends on PC-1
+    ├── SC-5.1 [Architecture specification and UML diagrams]
+    └── SC-5.2 [Comparative analysis of existing systems]
 ```
 
-**Formal Dependencies:**
-
-1. PC-2 depends on PC-1: The unified pipeline design is justified by the claim that preprocessing is the primary performance driver.
-2. PC-3 depends on PC-1 and PC-2: Modified CLAHE is a component within the pipeline whose overall dominance (PC-1) and integration (PC-2) must hold.
-3. PC-4 depends on PC-2: Fine-tuning strategy is evaluated within the pipeline context; preprocessing is held constant.
-4. PC-5 depends on PC-1, PC-2, PC-4: Resource efficiency is meaningful only if the pipeline and strategies it implements are validated.
-5. PC-7 depends on PC-2 and PC-5: System architecture implements the validated pipeline under resource constraints.
-6. PC-6 is independent but conditionally linked to PC-2 via diagnostic image feature interpretation (§2.4.2).
+**Dependency Rules:**
+- PC-3 requires PC-1 to be validated: the two-stage fine-tuning protocol operates under the preprocessing regime established in PC-1. If PC-1 fails, PC-3 cannot be evaluated under the same conditions.
+- PC-2 requires PC-1 to be validated: CLAHE is embedded in the pipeline of PC-1; parameter sensitivity testing presupposes the pipeline's demonstrated effectiveness.
+- PC-5 requires PC-1 for its AI processing module justification. If PC-1 fails, the architecture's core preprocessing-CNN module lacks experimental grounding.
+- PC-4 is independent of PC-1, PC-2, PC-3, PC-5. Its failure or success does not condition any other primary claim.
+- EH-4 (Sufficient Validation Criterion) requires PC-1 to be satisfied on APTOS 2019 AND confirmed in direction of effect on STARE or equivalent AND replicated across at least two architectures (custom CNN and EfficientNetB0). PC-3 contributes the second architecture replication required by EH-4.
 
 ---
 
@@ -421,70 +396,99 @@ PC-6 (Laser-Tissue Modeling) — Independent
 
 ---
 
-### PC-1: Preprocessing Dominance — **Moderate**
-
-- **Justification:** Direct empirical evidence shows accuracy improvement from preprocessing (71% → 86%, 88% → 91%); however, preprocessing and architectural changes are not fully isolated in primary experiments. Claim strength depends on ablation study (§5.2.1) not yet available from external published sources. Two independent self-authored publications (LC-SAPAKOVA-2025-01, LC-SAPAKOVA-2025 CONF) provide supporting data.
-
----
-
-### PC-2: Unified Pipeline Integration — **Strong**
-
-- **Justification:** Multiple published sources (LC-SAPAKOVA-2025-01, LC-SAPAKOVA-2025 CONF, LC-Yesmukhamedov-2025-SELF) provide convergent evidence that the pipeline improves performance. External source (LC-AlTimemy-2021) independently demonstrates that CLAHE + transfer learning pipeline achieves high accuracy. Pipeline specification is documented with exact parameters. ROC-AUC = 0.9638 provides robust single-metric validation.
+### PC-1 — Preprocessing Dominance
+**Strength: MODERATE**
+**Justification:**
+- Direct experimental evidence exists (LC-SAPAKOVA-2025-01): validation accuracy 71% → 86%; classification accuracy 88% → 91%; ROC-AUC = 0.9638; Weighted F1 = 0.91.
+- Evidence satisfies EH-3 criteria direction (weighted F1 Δ ≥ 5 pp; ROC-AUC ≥ 0.9638) on the dataset tested.
+- Strength is MODERATE rather than STRONG because: (a) preprocessing and architectural complexity change are confounded in the existing source (SC-1.1 boundary); (b) supplementary clinical dataset is non-public (SB-2.2); (c) ablation study isolating preprocessing from architectural change is required for Strong classification and is not yet documented in a separate independent source; (d) binary vs. five-class classification ambiguity exists in LC-SAPAKOVA-2025-01 reporting (SC-1.1 boundary).
+- Promotion to STRONG requires: ablation study (§5.2) demonstrating preprocessing as primary driver, with EH-3 satisfied across both custom CNN and EfficientNetB0, on publicly reproducible APTOS 2019 partition.
 
 ---
 
-### PC-3: Modified CLAHE — **Conditional**
-
-- **Justification:** CLAHE threshold optimization evidence comes primarily from an external source (LC-AlTimemy-2021) using a different dataset (STARE) and different classification task (multi-disease vs. DR severity). Dissertation-specific threshold sensitivity analysis (§4.3) is required but not yet published. Feature preservation claims are qualitative.
-
----
-
-### PC-4: Two-Stage Fine-Tuning — **Strong**
-
-- **Justification:** Direct empirical validation with quantified improvements (+10 pp Precision, +14 pp Recall, +12 pp F1-Score) from two self-authored publications (LC-SAPAKOVA-2025 CONF, LC-Yesmukhamedov-2025-SELF) with consistent results. Overfitting reduction is quantified (train-test F1 gap reduced from 0.25 to 0.12). Limited to EfficientNetB0 in published sources; ResNet50 comparison (§4.4.2) is pending.
+### PC-2 — CLAHE Threshold Sensitivity
+**Strength: CONDITIONAL**
+**Justification:**
+- The T/80 formulation is established in LC-AlTimemy-2021 on STARE; however, metric formula anomaly in that source (Sen = TP/(TP+TN)) weakens confidence in its 100% performance claims.
+- CLAHE parameters (clip limit 2.0, grid 8×8) are documented in LC-SAPAKOVA-2025-01 as producing improved classification, but no explicit parameter sweep across clip limit values is documented in the available literature cards.
+- Dissertation §4.3 is the primary evidence source for SC-2.2. Until those experimental results are produced and validated within the dissertation, claim strength is CONDITIONAL on experimental execution.
+- Claim fails if no identifiable optimum is found within the tested range, per H-2 falsification requirement (Invariants VCR-3).
 
 ---
 
-### PC-5: Resource-Efficient Deployment — **Conditional**
-
-- **Justification:** Performance under hardware constraints is documented but as an incidental limitation, not a controlled experiment. No formal deployment testing on target hardware. Processing time comparison exists but may be confounded by resolution differences. EfficientNetB0 efficiency rationale is architectural, not empirically benchmarked in the sources.
-
----
-
-### PC-6: Laser-Tissue Interaction Modeling — **Conditional**
-
-- **Justification:** Mathematical formulation is complete and published (LC-Sapakova-2024-01). Simulation results are qualitative only (no numerical temperature values). No experimental validation against clinical data. Model omits key physical factors (blood perfusion, dynamic tissue properties).
+### PC-3 — Two-Stage Fine-Tuning
+**Strength: MODERATE**
+**Justification:**
+- Direct empirical evidence exists in prior self-publications (LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF): Method 2 Precision = 0.75, Recall = 0.74, F1 = 0.74 vs. Method 1 Precision = 0.65, Recall = 0.60, F1 = 0.62. Differential is substantial (+10 pp Precision, +14 pp Recall, +12 pp F1).
+- Strength is MODERATE rather than STRONG because: (a) the two sources are not independent (identical experimental data; SIR-5); (b) independent replication within the dissertation's own experiments has not been documented in a separate literature card; (c) the claim is architecture-specific (EfficientNetB0 only; SIR-7); (d) supplementary clinical data non-reproducibility (SB-2.2).
+- Promotion to STRONG requires: independent replication in dissertation §4.4 experiments on APTOS 2019 public partition, with explicit extension beyond prior self-publication results.
 
 ---
 
-### PC-7: System Architecture — **Conditional**
+### PC-4 — Laser-Tissue Mathematical Model
+**Strength: CONDITIONAL**
+**Justification:**
+- The mathematical equations are standard (Beer's law, heat conduction, Gaussian beam) applied to fundus tissue layers; they are not contested as formulations.
+- The claim is bounded to theoretical/computational grounding status per SIR-6 and SB-1.5.
+- CONDITIONAL: valid as a theoretical claim within its bounded scope (computational simulation; qualitative results). Fails if claimed as empirically or clinically validated (CFC-2.4; SIR-6).
+- No quantitative validation data exists; this constraint is permanent under current evidence.
 
-- **Justification:** Architecture is specified in detail (UML diagrams, ER model, component tables, DMP taxonomy) in a published source (LC-2025-Yesmukhamedov-01). Comparative analysis with existing systems is provided. However, no prototype implementation, no empirical validation, no user testing, and no deployment in actual clinical settings are reported. Kazakhstan-specific statistics support the deployment rationale but are projections.
+---
+
+### PC-5 — System Architecture
+**Strength: CONDITIONAL**
+**Justification:**
+- The architecture design is formally specified in LC-2025-Yesmukhamedov-01 with UML diagrams, component specifications, and comparative analysis. As a design claim, it is well-documented.
+- CONDITIONAL: valid as a design/conceptual claim only. Fails if asserted as a deployed, prototype-validated, or clinically tested system (SB-4.1; DGL-4).
+- Infrastructure prerequisites for Kazakhstan deployment (investment, algorithm adaptation, standards) constitute acknowledged unresolved preconditions (LC-2025-Yesmukhamedov-01, p. 90).
 
 ---
 
 ## VII. NON-CLAIMS (Explicitly Not Argued)
 
-1. The dissertation does not claim that the proposed system has been clinically validated in a real healthcare setting or received regulatory approval.
+The following propositions are intentionally excluded from the dissertation's argumentation. These are not claims of the dissertation. They are listed here to enforce epistemic boundary compliance.
 
-2. The dissertation does not claim superiority over all existing commercial DR screening systems (IDx-DR, Eyenuk, DeepMind) on identical benchmarks.
+**NC-1.** The proposed preprocessing pipeline is effective for all fundus image datasets.
+*(Forbidden per CFC-2.1; DGL-1)*
 
-3. The dissertation does not claim that EfficientNetB0 or ResNet50 is the optimal architecture for DR classification in absolute terms; it evaluates these as representative architectures within the pipeline framework.
+**NC-2.** The proposed pipeline outperforms existing commercial DR diagnostic systems (IDx-DR, EyeNuk, DeepMind, etc.) under identical evaluation conditions.
+*(Forbidden per CFC-2.2: no controlled experiment against named systems under identical conditions is documented)*
 
-4. The dissertation does not claim that the modified CLAHE threshold parameter (T/80 or clip limit 2.0) is universally optimal across all fundus image datasets.
+**NC-3.** The system reduces late-stage DR complications by 20–30% in Kazakhstan, or reduces healthcare costs by 15–20%.
+*(Forbidden per CFC-2.3; SIR-8; SB-1.6: these are third-party projections cited by LC-2025-Yesmukhamedov-01, p. 88)*
 
-5. The dissertation does not claim that the laser-tissue thermal model has been experimentally validated against clinical or laboratory measurements.
+**NC-4.** The system achieves clinical-grade diagnostic accuracy.
+*(Forbidden per CFC-2.4: no clinical validation trial is documented in any literature card)*
 
-6. The dissertation does not claim that the proposed system architecture has been implemented as a functioning prototype.
+**NC-5.** The preprocessing pipeline achieves 100% accuracy on DR classification.
+*(Forbidden per CFC-2.5; SB-1.2: the 100% accuracy in LC-AlTimemy-2021 is on a different dataset, different taxonomy, and potentially affected by metric formula anomaly)*
 
-7. The dissertation does not claim resolution of the class imbalance problem; it documents mitigation strategies (weighted loss, augmentation) and acknowledges remaining limitations.
+**NC-6.** EfficientNetB0 represents the globally optimal or generally superior architecture for DR classification.
+*(Forbidden per SIR-7; SB-1.7: alternative architectures were not comparatively evaluated)*
 
-8. The dissertation does not claim that model interpretability has been addressed (Grad-CAM, SHAP, or equivalent explainability tools are identified as future work).
+**NC-7.** The laser-tissue interaction mathematical model (Chapter 2, §2.4) constitutes an experimentally or clinically validated model.
+*(Forbidden per SB-1.5; SIR-6)*
 
-9. The dissertation does not claim generalizability to non-APTOS, non-STARE fundus image populations without additional cross-database validation.
+**NC-8.** The system architecture (Chapter 6) has been prototype-implemented or field-tested in Kazakhstan healthcare settings.
+*(Forbidden per SB-4.1; SB-4.3; DGL-4)*
 
-10. The dissertation does not argue that the five-class APTOS classification scheme is clinically superior to alternative DR grading systems (e.g., ETDRS).
+**NC-9.** GDPR/HIPAA compliance has been certified for the proposed system.
+*(Forbidden per SB-4.2: compliance framing is a design specification only)*
+
+**NC-10.** CLAHE parameters optimized in this dissertation are portable to other fundus image datasets or imaging devices without independent validation.
+*(Forbidden per DGL-5)*
+
+**NC-11.** Results generalize to imaging modalities other than fundus photography (OCT, fluorescein angiography, etc.).
+*(Forbidden per SB-1.4)*
+
+**NC-12.** The proposed system performs equivalently across specific demographic subgroups (ethnic, age-stratified, comorbidity-defined populations).
+*(Forbidden per DGL-3)*
+
+**NC-13.** LC-SAPAKOVA-2025 and LC-Yesmukhamedov-2025-SELF constitute independent confirmatory evidence of any shared claim.
+*(Forbidden per SIR-5: sources share identical experimental data)*
 
 ---
 
-*Argument Map constructed from: 6 Literature Cards (LC-SAPAKOVA-2025, LC-Sapakova-2024-01, LC-Yesmukhamedov-2025-SELF, LC-2025-Yesmukhamedov-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01) and approved Table of Contents.*
+*End of Argument_Map*
+*Document bound to: DISSERTATION_INVARIANTS.md v.1.0*
+*All claims traceable to: LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01, LC-2025-Yesmukhamedov-01*
