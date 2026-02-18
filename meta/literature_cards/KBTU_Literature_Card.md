@@ -6,7 +6,7 @@
 
 | Field | Value |
 |---|---|
-| **Unique ID** | `LC-Yesmukhamedov-2025-SELF` |
+| **Unique ID** | `KBTU` |
 | **Full Bibliographic Citation** | Yesmukhamedov N.S., Sapakova S.Z., Kozhamkulova Zh.Zh., Daniyarova D.R., Armankyzy R. Methods for Preprocessing and Analysis of Fundus Images for Diabetic Retinopathy Detection. Herald of the Kazakh-British Technical University, No. 4(75), 2025. https://doi.org/10.55452/1998-6688-2025-22-4-119-130 |
 | **Type of Publication** | Empirical study (primary); methodological paper (secondary) |
 | **Year** | 2025 |

@@ -4,7 +4,7 @@
 
 ## I. SOURCE IDENTIFICATION
 
-- **Unique ID:** `LC-AlTimemy-2021`
+- **Unique ID:** `SQOPUS_Q2`
 - **Full Bibliographic Citation:** Al-Timemy, A. H., Ghaeb, N. H., Mosa, Z. M., & Escudero, J. (Year: [verify from DOI/metadata]). Retinal disease identification using upgraded CLAHE filter and transfer convolution neural network. *[Journal name: verify from DOI/metadata]*. Keywords listed: Retinal disease; Retinal fundus images; Convolution neural network (CNN); (CLAHE) filter.
 - **Type of Publication:** Empirical study
 - **Year:** [Verify from DOI/metadata — not explicitly stated in provided text; references extend to 2020, suggesting 2021 or later]

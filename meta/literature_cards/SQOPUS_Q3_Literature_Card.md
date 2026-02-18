@@ -4,7 +4,7 @@
 
 ## I. SOURCE IDENTIFICATION
 
-- **Unique ID:** `LC-SAPAKOVA-2025-01`
+- **Unique ID:** `SQOPUS_Q3`
 - **Full Bibliographic Citation:** Sapakova, S., Yesmukhamedov, N., & Sapakov, A. (2025). Development of an image quality enhancement approach for diabetic retinopathy diagnosis. *Eastern-European Journal of Enterprise Technologies*, 4(9(136)), 79–88. https://doi.org/10.15587/1729-4061.2025.335570
 - **Type of Publication:** Journal article / Empirical study (primary: journal article, published in a Scopus Q3-indexed journal; the work is empirical in nature, involving experimental model training and evaluation).
 - **Year:** 2025

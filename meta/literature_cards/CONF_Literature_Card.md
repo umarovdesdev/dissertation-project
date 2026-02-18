@@ -6,7 +6,7 @@
 
 | Field | Content |
 |-------|---------|
-| **Unique ID** | LC-SAPAKOVA-2025 |
+| **Unique ID** | `CONF` |
 | **Full Bibliographic Citation** | S. Sapakova, N. Yesmukhamedov, A. Sapakov, A. Yemberdiyeva, and Z. Kozhamkulova, "Methods for pre-processing and analysis of fund images for detection of diabetic retinopathy," *Procedia Computer Science*, vol. 272, pp. 496–501, 2025. doi: 10.1016/j.procs.2025.10.237 |
 | **Type of Publication** | Conference paper (The 3rd International Workshop on Digital Society: in the Eve of the 6th Information Revolution — DS 2025, October 28–30, 2025, Istanbul, Türkiye) |
 | **Year** | 2025 |
