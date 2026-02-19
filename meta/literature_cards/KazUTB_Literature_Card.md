@@ -6,7 +6,7 @@
 
 | Field | Content |
 |-------|---------|
-| **Unique ID** | `KazUTB` |
+| **Unique ID** | `LC-Sapakova-2024-01` |
 | **Full Bibliographic Citation** | **GOST R 7.0.5-2008:** Сапакова С.З., Данияррова Д.Р., Есмухамедов Н.С., Арманкызы Р., Ембердиева А.Б., Калдыбаева А.С. Mathematical Modeling of Laser Exposure on Fundus Tissues in the Treatment of Diabetic Retinopathy // Вестник КазУТБ. — 2024. — Т. 2, № 27-740. DOI: 10.58805/kazutb.v.2.27-740. **APA 7th (secondary):** Sapakova, S. Z., Daniyarova, D., Yesmukhamedov, N., Armankyzy, R., Emberdieva, A. B., & Kaldybaeva, A. (2024). Mathematical modeling of laser exposure on fundus tissues in the treatment of diabetic retinopathy. *Herald of KazUTB — Vestnik KazUTB*, *2*(27-740). https://doi.org/10.58805/kazutb.v.2.27-740 |
 | **Publication Type** | Methodological paper. Justification: The source develops and presents mathematical models and numerical methods for simulating laser-tissue thermal interaction; it does not collect clinical data or test hypotheses on patient cohorts, nor does it review the literature systematically. |
 | **Year** | 2024 |

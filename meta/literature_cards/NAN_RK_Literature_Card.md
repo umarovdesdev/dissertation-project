@@ -6,7 +6,7 @@
 
 | Field | Value |
 |---|---|
-| **Unique ID** | `NAN_RK` |
+| **Unique ID** | `LC-2025-Yesmukhamedov-01` |
 | **Full Bibliographic Citation** | Yesmukhamedov, N. S., Sapakova, S., Al-Haddad, S. A. R., & Daniyarova, D. (2025). Development of an information system architecture for healthcare institutions using artificial intelligence. *News of the National Academy of Sciences of the Republic of Kazakhstan, Physico-Mathematical Series, 2*(354), 74–91. https://doi.org/10.32014/2025.2518-1726.345 |
 | **Type of Publication** | Empirical study (with system architecture design and review components) |
 | **Year** | 2025 |

@@ -4,10 +4,10 @@
 
 ## I. SOURCE IDENTIFICATION
 
-- **Unique ID:** `SQOPUS_Q2`
-- **Full Bibliographic Citation:** Al-Timemy, A. H., Ghaeb, N. H., Mosa, Z. M., & Escudero, J. (Year: [verify from DOI/metadata]). Retinal disease identification using upgraded CLAHE filter and transfer convolution neural network. *[Journal name: verify from DOI/metadata]*. Keywords listed: Retinal disease; Retinal fundus images; Convolution neural network (CNN); (CLAHE) filter.
-- **Type of Publication:** Empirical study
-- **Year:** [Verify from DOI/metadata — not explicitly stated in provided text; references extend to 2020, suggesting 2021 or later]
+- **Unique ID:** `LC-AlTimemy-2021`
+- **Full Bibliographic Citation:** Sapakova, S., Yesmukhamedov, N., & Sapakov, A. (2025). Development of an image quality enhancement approach for diabetic retinopathy diagnosis. *Eastern-European Journal of Enterprise Technologies*, 4(9(136)), 79–88. https://doi.org/10.15587/1729-4061.2025.335570
+- **Type of Publication:** Journal article / Empirical study (primary: journal article, published in a Scopus Q3-indexed journal; the work is empirical in nature, involving experimental model training and evaluation).
+- **Year:** 2025
 - **Research Domain Classification:** Medical Image Processing > Retinal Disease Detection > CNN-based Automated Multi-class Classification with Image Preprocessing Enhancement
 
 ---
