@@ -12,6 +12,14 @@
 
 ---
 
+## I-A. SOURCE STATUS CLASSIFICATION
+
+- **Source Ownership:** Co-authored Publication (Dissertation Candidate as Co-author)
+- **SELF_PUBLICATION_FLAG:** YES
+- **Corpus Coverage Tags:** [OWN_STUDY] [PREPROCESS_DOMINANT]
+
+---
+
 ## II. GLOBAL SOURCE ANALYSIS
 
 ### II.1. Central Thesis
