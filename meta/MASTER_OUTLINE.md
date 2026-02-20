@@ -244,7 +244,7 @@
 #### 3.2.2 Enhanced Multi-Block CNN with Regularization Layers
 - Architecture: 4 convolutional blocks, 32–256 filters, batch normalization, dropout 0.4, softmax 5-class output, categorical cross-entropy, Adam lr=0.0001.
 - Operational definition of high-complexity reference per INVARIANTS OD-2.
-- Boundary: Architectural change and preprocessing are applied simultaneously in the primary comparison; ablation study (§5.2) required to isolate preprocessing contribution (ARGUMENT_MAP PC-1, strength justification).
+- This architecture serves as the high-complexity reference model for factorial ablation analysis in §5.2.
 
 ### 3.3 Transfer Learning Methodology Using EfficientNetB0 and ResNet50
 
@@ -383,6 +383,22 @@
 - Required for promoting PC-1 claim strength from MODERATE to STRONG (ARGUMENT_MAP §VI, PC-1).
 - Design: Same enhanced architecture with vs. without preprocessing; same baseline architecture with vs. without preprocessing.
 - Must satisfy EH-3 across both custom CNN and EfficientNetB0 on publicly reproducible APTOS 2019 partition.
+
+A full 2×2 factorial experimental design is implemented to isolate the independent and interaction effects of:
+
+Factor A: Preprocessing (OFF vs ON)
+Factor B: Architectural Complexity (Baseline vs Enhanced)
+
+This results in four controlled experimental conditions:
+
+A1: Baseline CNN without preprocessing
+A2: Baseline CNN with preprocessing
+B1: Enhanced CNN without preprocessing
+B2: Enhanced CNN with preprocessing
+
+All experiments are conducted under matched dataset partitions, hardware configuration, optimizer settings, and training budgets.
+
+The preprocessing dominance hypothesis (H-1) is considered supported only if the main effect of preprocessing satisfies EH-3 criteria independently of architectural complexity.
 
 #### 5.2.2 Quantitative Evidence for Image Quality as Primary Performance Driver
 - Formal evaluation of preprocessing dominance per EH-3.
