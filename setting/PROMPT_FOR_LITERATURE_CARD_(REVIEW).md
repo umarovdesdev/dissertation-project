@@ -256,11 +256,3 @@ Strictly analytical. No filler language.
 End of Literature Card.
 
 ---
-
-Это именно тот формат, который вы можете использовать для:
-
-* External validation papers
-* EyePACS benchmarking
-* Vision Transformer studies
-* Systematic reviews
-* IDRiD lesion-level papers
