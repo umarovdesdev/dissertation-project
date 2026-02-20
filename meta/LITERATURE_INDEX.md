@@ -4,7 +4,7 @@
 **Dissertation:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 **Candidate:** Yesmukhamedov N.S.
 **Generated from:** Literature Cards in /LITERATURE/
-**Total sources indexed:** 18
+**Total sources indexed:** 32
 
 ---
 
@@ -41,6 +41,7 @@
 | §5.2   | Statistical Validation of Preprocessing Dominance |
 | §5.3   | Comparative Analysis with Existing DR Systems |
 | §6.1   | System Requirements and Design Principles |
+| §6.2   | Modular Architecture with PACS and EHR Integration |
 | §6.3   | Clinical Workflow Integration |
 | INTRO  | Introduction (contextual framing) |
 
@@ -68,6 +69,20 @@
 | 16 | Goh et al. (2024) | CNN classification | SWIN AUC 95.7% Kaggle, 97.3% SEED, 96.3% Messidor-1, ViT > CNN | EyePACS/Kaggle, SEED, Messidor-1 | §1.3.1, §5.1, §5.2, §5.3 |
 | 17 | Voets et al. (2019) | Cross-dataset validation | AUC 0.951 EyePACS, 0.853 Messidor-2 (reproduction of Gulshan 2016) | EyePACS/Kaggle, Messidor-2 | §1.2.2, §1.5, §5.1, §5.2 |
 | 18 | González-Díaz et al. (2024) | ViT comparison | ViT acc 83.69%, BEiT F1 86.36%, 4-class AMD, 305 images | Private (curated AMD) | §1.3.1 |
+| **19** | **Sapakova et al. (2025)** 🔹SELF | **Transfer learning** | **F1 0.74 fine-tuned vs 0.62 frozen, EfficientNetB0, 5-class DR** | **APTOS 2019, Private clinical** | **§2.3.2, §3.3, §4.4, §4.1, §2.2.2, §2.2.3, §3.1** |
+| **20** | **Sapakova et al. (2024)** 🔹SELF | **Mathematical modeling** | **Thermal model of laser-fundus interaction, FDM simulation, qualitative** | **None (simulation)** | **§2.4.1** |
+| **21** | **Yesmukhamedov et al. (2025a)** 🔹SELF | **Transfer learning** | **Precision 75% fine-tuned vs 65% frozen, EfficientNetB0, 5-class DR** | **APTOS 2019, Private clinical** | **§2.3.2, §3.3, §4.4, §3.1, §3.4, §2.2.2, §2.2.3** |
+| **22** | **Yesmukhamedov et al. (2025b)** 🔹SELF | **System architecture** | **Modular AI diagnostic architecture for Kazakhstan, physician-in-the-loop** | **None (design study)** | **§6.1, §6.2, §6.3, §1.4, §1.1.2** |
+| **23** | **Sapakova, Yesmukhamedov & Sapakov (2025a)** 🔹SELF | **CLAHE / Enhancement** | **100% acc/sens/spec, upgraded CLAHE T/80 + ResNet50, 5-class retinal** | **STARE** | **§2.1.2, §3.1, §3.3, §4.3, §5.3, §2.1.1** |
+| **24** | **Sapakova, Yesmukhamedov & Sapakov (2025b)** 🔹SELF | **Preprocessing study** | **Val acc 71%→86% with preprocessing, ROC-AUC 0.9638, 4-layer CNN** | **APTOS 2019, Private clinical** | **§3.1, §3.2, §4.2, §4.1, §2.1.2, §5.2, §1.2.2** |
+| 25 | Wikipedia — Adaptive Histogram Equalization | Background reference | Algorithmic description of AHE/CLAHE; clip limit 3–4, 8×8 tile grid | None | §2.1.1, §2.1.2 |
+| 26 | Shaout & Han (2025) | Preprocessing study | FCE+CLAHE 59% preference, 88% combined; fuzzy logic + CLAHE blending | DRIVE | §2.1.1, §3.1 |
+| 27 | Hayati et al. (2023) | CLAHE / Enhancement | CLAHE improved 3/4 CNNs; EfficientNetB4 97.83% acc; ResNet34 −12.02% | APTOS 2019 | §2.1.1, §2.1.2, §3.1, §4.3, §5.2 |
+| 28 | Brancati et al. (2025) | Peripheral (FHIR / breast ML) | MLP 97.67% acc breast lesion, 3 hand-crafted features, BUSI | BUSI | Peripheral |
+| 29 | Tabari et al. (2024) | Review / Survey (FHIR) | 27 studies reviewed; FHIR pipeline-based (21) vs non-linear (6) models | None (scoping review) | Peripheral |
+| 30 | Chakka (2023) | Preprocessing study | Rescaling best of 4 techniques for OCT; ResNet-50; no numerical metrics | Kaggle OCT (4,480 images) | §2.1.1 |
+| 31 | Kesharwani et al. (2021) | Review / Survey (clinical) | Narrative DR review; 95% vision loss preventable if treated early | None (narrative review) | §1.1.1 |
+| 32 | Kusuhara et al. (2018) | Review / Survey (clinical) | DR prevalence 34.6%; pericyte dropout → BRB breakdown; VEGF/Ang2 pathways | None (narrative review) | §1.1.1 |
 
 ---
 
@@ -75,36 +90,37 @@
 
 | Dissertation Section | Sources Covering It |
 |---------------------|---------------------|
-| §1.1.1 | ⚠️ GAP |
-| §1.1.2 | #06, #10 |
+| §1.1.1 | #31, #32 |
+| §1.1.2 | #06, #10, **#22** |
 | §1.2.1 | ⚠️ GAP |
-| §1.2.2 | #05, #15, #17 |
+| §1.2.2 | #05, #15, #17, **#24** |
 | §1.3.1 | #01, #04, #05, #08, #09, #12, #15, #16, #18 |
 | §1.3.2 | #02, #09, #12 |
-| §1.4 | #02, #03, #07, #11, #12, #13, #14 |
+| §1.4 | #02, #03, #07, #11, #12, #13, #14, **#22** |
 | §1.5 | #17 ⚡ THIN |
-| §2.1.1 | ⚠️ GAP |
-| §2.1.2 | ⚠️ GAP |
+| §2.1.1 | #25, #26, #27, #30, **#23** |
+| §2.1.2 | #25, #27, **#23, #24** |
 | §2.1.3 | ⚠️ GAP |
 | §2.2.1 | #08 ⚡ THIN |
-| §2.2.2 | #01 ⚡ THIN |
-| §2.2.3 | #01 ⚡ THIN |
+| §2.2.2 | #01, **#19, #21** |
+| §2.2.3 | #01, **#19, #21** |
 | §2.3.1 | #04 ⚡ THIN |
-| §2.3.2 | ⚠️ GAP |
-| §2.4.1 | ⚠️ GAP |
-| §3.1 | #02, #15 |
-| §3.2 | #09 ⚡ THIN |
-| §3.3 | ⚠️ GAP |
-| §3.4 | ⚠️ GAP |
-| §4.1 | #06, #10, #15 |
-| §4.2 | ⚠️ GAP |
-| §4.3 | ⚠️ GAP |
-| §4.4 | ⚠️ GAP |
+| §2.3.2 | **#19, #21** |
+| §2.4.1 | **#20** ⚡ THIN |
+| §3.1 | #02, #15, #26, #27, **#19, #21, #23, #24** |
+| §3.2 | #09, **#24** |
+| §3.3 | **#19, #21, #23** |
+| §3.4 | **#21** ⚡ THIN |
+| §4.1 | #06, #10, #15, **#19, #21, #24** |
+| §4.2 | **#24** ⚡ THIN |
+| §4.3 | #27, **#23** |
+| §4.4 | **#19, #21** |
 | §5.1 | #02, #04, #05, #07, #11, #12, #13, #16, #17 |
-| §5.2 | #16, #17 |
-| §5.3 | #02, #05, #07, #11, #12, #13, #14, #16 |
-| §6.1 | ⚠️ GAP |
-| §6.3 | #03, #11, #13, #14 |
+| §5.2 | #16, #17, #27, **#24** |
+| §5.3 | #02, #05, #07, #11, #12, #13, #14, #16, **#23** |
+| §6.1 | **#22** ⚡ THIN |
+| §6.2 | **#22** ⚡ THIN |
+| §6.3 | #03, #11, #13, #14, **#22** |
 | INTRO | #01, #06, #10, #12, #14 |
 
 ---
@@ -112,34 +128,74 @@
 ### Gaps Identified
 
 **⚠️ GAP (0 sources):**
-- §1.1.1 — Pathophysiology and Clinical Grading Systems
 - §1.2.1 — Sources of Image Degradation in Clinical Practice
-- §2.1.1 — Histogram Equalization and Adaptive Contrast Enhancement
-- §2.1.2 — Formalization of CLAHE with Controllable Threshold Parameters
 - §2.1.3 — Spatial Filtering and Noise Reduction Methods
-- §2.3.2 — Frozen-Layer versus Progressive Fine-Tuning Strategies
-- §2.4.1 — Coupled Thermal-Optical Model of Fundus Tissue Response
-- §3.3 — Transfer Learning Methodology Using EfficientNetB0 and ResNet50
-- §3.4 — Evaluation Framework and Performance Metrics
-- §4.2 — Experiment 1: Baseline vs Enhanced CNN
-- §4.3 — Experiment 2: CLAHE Threshold Optimization
-- §4.4 — Experiment 3: Transfer Learning Strategy Comparison
-- §6.1 — System Requirements and Design Principles
 
 **⚡ THIN (1 source):**
 - §1.5 — Formulation of Research Problem (#17)
 - §2.2.1 — Convolution, Pooling, and Feature Extraction Operations (#08)
-- §2.2.2 — Loss Functions and Optimization for Imbalanced Medical Datasets (#01)
-- §2.2.3 — Regularization Techniques: Dropout, Batch Normalization, Data Augmentation (#01)
 - §2.3.1 — Feature Transferability Across Visual Domains (#04)
-- §3.2 — Design of Baseline and Enhanced CNN Architectures (#09)
+- §2.4.1 — Coupled Thermal-Optical Model of Fundus Tissue Response (#20 🔹SELF only)
+- §3.4 — Evaluation Framework and Performance Metrics (#21 🔹SELF only)
+- §4.2 — Experiment 1: Baseline vs Enhanced CNN (#24 🔹SELF only)
+- §6.1 — System Requirements and Design Principles (#22 🔹SELF only)
+- §6.2 — Modular Architecture with PACS and EHR Integration (#22 🔹SELF only)
 
 ---
 
 ### Notes
 
-1. Sources #06 and #10 are **duplicate entries** for the same article (Porwal et al., 2018 — IDRiD dataset descriptor). Both literature cards contain identical content. Consider consolidating to a single entry.
-2. Sources #11 and #13 are **duplicate entries** for the same article (Ting et al., 2017 — JAMA multiethnic DLS validation). Both literature cards contain the same study with minor formatting differences. Consider consolidating to a single entry.
-3. Source #18 (González-Díaz et al., 2024) addresses **AMD, not diabetic retinopathy**. Its relevance to the dissertation is peripheral (ViT architecture comparison only).
-4. Sections §2.x (mathematical foundations), §3.x (methodology), and §4.x (experiments) have the most severe coverage gaps, which is expected since these sections describe the candidate's own contributions rather than prior literature. However, §2.1.1–§2.1.3 (preprocessing theory) and §2.3.2 (fine-tuning strategies) would benefit from additional literature support.
-5. Section §5.1 (Cross-Database Generalization Testing) has the strongest coverage with 9 sources.
+**Existing notes (retained):**
+
+1. Sources #06 and #10 are **duplicate entries** for the same article (Porwal et al., 2018 — IDRiD dataset descriptor). Consider consolidating to a single entry.
+2. Sources #11 and #13 are **duplicate entries** for the same article (Ting et al., 2017 — JAMA multiethnic DLS validation). Consider consolidating to a single entry.
+3. Source #18 (González-Díaz et al., 2024) addresses **AMD, not diabetic retinopathy**. Its relevance is peripheral (ViT architecture comparison only).
+
+**Self-publication notes (retained):**
+
+4. Sources #19–#24 are all **co-authored by the dissertation candidate** (🔹SELF flag). All carry **high self-plagiarism risk** — content must be explicitly self-cited and substantially reformulated in the dissertation.
+5. Sources #23 and #24 are **duplicate entries for the same article** (Sapakova, Yesmukhamedov & Sapakov, 2025 — *Eastern-European Journal of Enterprise Technologies*, DOI: 10.15587/1729-4061.2025.335570). Two literature cards were prepared from different analytical perspectives. Consider consolidating to a single entry.
+6. Sources #19 (CONF, Procedia CS 2025) and #21 (KBTU, Herald KBTU 2025) report **overlapping experiments** — both evaluate EfficientNetB0 frozen vs. fine-tuned on APTOS 2019 with nearly identical metrics. The dissertation should treat these as a single experimental thread with unified citation.
+7. §6.2 (Modular Architecture with PACS and EHR Integration) was **added to the Section Map Key** to accommodate the system architecture content from #22.
+
+**New sources notes (#25–#32):**
+
+8. Source #25 (Wikipedia — AHE/CLAHE) is **NOT citable** in a doctoral dissertation. It serves only as a conceptual primer. Original sources (Pizer et al., 1987; Zuiderveld, 1994) should be cited instead. Classified as **Background reference**.
+9. Source #26 (Shaout & Han, 2025) is an **arXiv preprint** evaluated by 10-person subjective survey only. Low epistemic weight. Provides reproducible fuzzy+CLAHE pipeline with explicit CLAHE parameters (clipLimit=2.0, tileGridSize=8×8).
+10. Source #27 (Hayati et al., 2023) is the **most directly relevant new external source** — it empirically evaluates CLAHE's impact on 4 CNN architectures for binary DR classification on APTOS 2019. Key nuance: CLAHE degraded ResNet34 by −12.02%, complicating universal preprocessing-dominance claims. Published in Procedia Computer Science (conference proceedings); limited-scope study with accuracy-only metrics.
+11. Sources #28 (Brancati et al., 2025) and #29 (Tabari et al., 2024) are **domain mismatches** — FHIR/health informatics papers with no relevance to DR deep learning. Classified as **Peripheral**. Should not be included in the dissertation literature review unless clinical deployment infrastructure is discussed.
+12. Source #30 (Chakka, 2023) is published in a **high school journal** with minimal peer review. No numerical metrics reported. Extremely low epistemic weight. Classified as **Limited-scope**.
+13. Sources #31 (Kesharwani et al., 2021) and #32 (Kusuhara et al., 2018) **resolve the §1.1.1 GAP** (Pathophysiology and Clinical Grading Systems). However, #31 has significant citation errors and was published in a journal flagged for questionable editorial practices — cite with caution. #32 (Kusuhara et al., 2018, *Diabetes & Metabolism Journal*) is the **higher-quality source** for DR pathophysiology.
+
+**Impact of new sources on coverage gaps:**
+
+14. The 8 new sources **resolved 1 previously critical gap**: §1.1.1 (Pathophysiology) now covered by #31 and #32.
+15. §2.1.1 (Histogram Equalization) upgraded from ⚠️ GAP to **well-covered** (5 sources: #25, #26, #27, #30, #23).
+16. §4.3 (CLAHE Threshold Optimization) upgraded from ⚡ THIN to **2 sources** (#27, #23).
+17. **Remaining true gaps** reduced to 2: §1.2.1, §2.1.3. These require **additional literature acquisition**.
+18. **⚠️ Self-only coverage warning:** Sections §2.4.1, §3.4, §4.2, §6.1, §6.2 are covered **only by self-publications**. External supporting literature is strongly recommended for examiner robustness.
+
+---
+
+### Self-Publication Registry
+
+| # | Short Label | Venue | Year | DOI | Overlap with Other Self-Pubs |
+|---|-------------|-------|------|-----|------------------------------|
+| 19 | CONF | Procedia Computer Science (DS 2025) | 2025 | 10.1016/j.procs.2025.10.237 | Overlaps #21 (same experiment) |
+| 20 | KazUTB | Vestnik KazUTB | 2024 | 10.58805/kazutb.v.2.27-740 | Unique (laser-tissue modeling) |
+| 21 | KBTU | Herald of KBTU | 2025 | 10.55452/1998-6688-2025-22-4-119-130 | Overlaps #19 (same experiment) |
+| 22 | NAN_RK | News of NAS RK, Phys.-Math. Series | 2025 | 10.32014/2025.2518-1726.345 | Unique (system architecture) |
+| 23 | SQOPUS_Q2 | Eastern-European J. Enterprise Tech. | 2025 | 10.15587/1729-4061.2025.335570 | **Duplicate of #24** (same article) |
+| 24 | SQOPUS_Q3 | Eastern-European J. Enterprise Tech. | 2025 | 10.15587/1729-4061.2025.335570 | **Duplicate of #23** (same article) |
+
+---
+
+### Peripheral Sources Registry
+
+| # | Source | Domain | Reason for Peripheral Classification |
+|---|--------|--------|--------------------------------------|
+| 25 | Wikipedia — AHE | Image processing (encyclopedic) | Not peer-reviewed; not citable in dissertation |
+| 28 | Brancati et al. (2025) | FHIR / breast cancer ML | Domain mismatch; no DR or retinal imaging content |
+| 29 | Tabari et al. (2024) | FHIR scoping review | Domain mismatch; no imaging or AI classification content |
+| 30 | Chakka (2023) | OCT preprocessing | High school journal; no numerical metrics; low rigor |
+| 31 | Kesharwani et al. (2021) | DR pathophysiology | Multiple citation errors; questionable journal; use #32 instead |
