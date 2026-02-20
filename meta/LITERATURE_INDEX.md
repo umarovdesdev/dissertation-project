@@ -4,7 +4,7 @@
 **Dissertation:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 **Candidate:** Yesmukhamedov N.S.
 **Generated from:** Literature Cards in /LITERATURE/
-**Total sources indexed:** 32
+**Total sources indexed:** 45
 
 ---
 
@@ -83,6 +83,19 @@
 | 30 | Chakka (2023) | Preprocessing study | Rescaling best of 4 techniques for OCT; ResNet-50; no numerical metrics | Kaggle OCT (4,480 images) | §2.1.1 |
 | 31 | Kesharwani et al. (2021) | Review / Survey (clinical) | Narrative DR review; 95% vision loss preventable if treated early | None (narrative review) | §1.1.1 |
 | 32 | Kusuhara et al. (2018) | Review / Survey (clinical) | DR prevalence 34.6%; pericyte dropout → BRB breakdown; VEGF/Ang2 pathways | None (narrative review) | §1.1.1 |
+| 33 | Gettinger et al. (2025) | Review (pathophysiology / experimental models) | No single model reproduces full human DR phenotype; STZ limited to early-stage | None (narrative review) | §1.1.1, INTRO |
+| 34 | Morya et al. (2024) | Review (pathophysiology / treatment) | DR present in 1/3 of diabetic patients; 35–55% screening compliance; Remidio 98% sens | None (narrative review) | §1.1.1, §1.1.2, §6.3 |
+| 35 | Wang & Lo (2018) | Review (pathophysiology / treatment) | Neurodegeneration may precede microvasculopathy; anti-VEGF first-line for DME/PDR | None (narrative review) | §1.1.1, INTRO |
+| 36 | Nandal (2024) | Empirical (AI-driven HL7/FHIR interoperability) | 93% semantic mapping precision; F1=0.89 NLP extraction; 97% interoperability | MIMIC-III, Synthetic HL7 | §6.2 |
+| 37 | Geetha & Hema (2026) | ViT hybrid (DR + glaucoma) | 98.4% acc; ViT + BFF + HGS optimizer; no external validation | Open-source (unnamed) | §1.3.1 |
+| 38 | Khosravi et al. (2025) | External validation (retinal hemorrhage) | FastViT AUC 0.9811, ResNet18 AUC 0.9626; 2661-image external dataset | RFMiD, DeepEyeNet, BRSET, Private (multi-country) | §1.3.1, §5.1 |
+| 39 | Senapati et al. (2024) | Systematic review (DR AI) | PRISMA-based; 2016–2023; EyePACS 75,523 images; identifies overfitting + class imbalance gaps | Multiple (surveyed) | §1.4, §1.5, §2.2.2 |
+| 40 | Araf et al. (2024) | Systematic review (cost-sensitive learning) | 173 papers reviewed; CSL preserves distribution; only 2 validation studies identified | Multiple (surveyed) | §2.2.2, §3.4 |
+| 41 | Sharma et al. (2025) | ViT-CapsNet hybrid (DR) | 94% acc on EyePACS (30,262 images); AUC 0.44–0.56 per class; no external validation | EyePACS/Kaggle | §1.3.1, §4.1 |
+| 42 | Arora et al. (2024) | CNN classification (DR) | EfficientNetB0 avg acc 0.8653; max training acc 97.11%; undersampled to 3,704 images | Kaggle DR Resized (35,108 images) | §1.3.1, §2.2.2 |
+| 43 | Ryu et al. (2021) | CNN classification + external validation (OCTA) | AUC 0.960–0.976 internal; AUC 0.938–0.962 external; ResNet101 on OCTA | Private (single-center) | §1.3.1, §1.4 |
+| 44 | Zhang et al. (2022) | Multicentre external validation (DR screening) | AUROC 0.9931 referable DR (image); 0.9848 (patient); Cohen's κ 0.86–0.93 vs experts | Private (83,465 images, 4 centres) | §1.4, §5.1, §5.3, §6.3 |
+| 45 | Ruamviboonsuk et al. (2022) | Prospective clinical validation (DR screening) | Acc 94.7%, sens 91.4% VTDR; outperformed specialists (p=0.024); 9 Thai sites | Private (7,651 patients, prospective) | §1.4, §5.3, §6.3 |
 
 ---
 
@@ -90,19 +103,19 @@
 
 | Dissertation Section | Sources Covering It |
 |---------------------|---------------------|
-| §1.1.1 | #31, #32 |
-| §1.1.2 | #06, #10, **#22** |
+| §1.1.1 | #31, #32, **#33, #34, #35** |
+| §1.1.2 | #06, #10, **#22**, #34 |
 | §1.2.1 | ⚠️ GAP |
 | §1.2.2 | #05, #15, #17, **#24** |
-| §1.3.1 | #01, #04, #05, #08, #09, #12, #15, #16, #18 |
+| §1.3.1 | #01, #04, #05, #08, #09, #12, #15, #16, #18, #37, #38, #41, #42, #43 |
 | §1.3.2 | #02, #09, #12 |
-| §1.4 | #02, #03, #07, #11, #12, #13, #14, **#22** |
-| §1.5 | #17 ⚡ THIN |
+| §1.4 | #02, #03, #07, #11, #12, #13, #14, **#22**, #39, #43, #44, #45 |
+| §1.5 | #17, #39 |
 | §2.1.1 | #25, #26, #27, #30, **#23** |
 | §2.1.2 | #25, #27, **#23, #24** |
 | §2.1.3 | ⚠️ GAP |
 | §2.2.1 | #08 ⚡ THIN |
-| §2.2.2 | #01, **#19, #21** |
+| §2.2.2 | #01, **#19, #21**, #39, #40, #42 |
 | §2.2.3 | #01, **#19, #21** |
 | §2.3.1 | #04 ⚡ THIN |
 | §2.3.2 | **#19, #21** |
@@ -110,18 +123,18 @@
 | §3.1 | #02, #15, #26, #27, **#19, #21, #23, #24** |
 | §3.2 | #09, **#24** |
 | §3.3 | **#19, #21, #23** |
-| §3.4 | **#21** ⚡ THIN |
-| §4.1 | #06, #10, #15, **#19, #21, #24** |
+| §3.4 | **#21**, #40 |
+| §4.1 | #06, #10, #15, **#19, #21, #24**, #41 |
 | §4.2 | **#24** ⚡ THIN |
 | §4.3 | #27, **#23** |
 | §4.4 | **#19, #21** |
-| §5.1 | #02, #04, #05, #07, #11, #12, #13, #16, #17 |
+| §5.1 | #02, #04, #05, #07, #11, #12, #13, #16, #17, #38, #44 |
 | §5.2 | #16, #17, #27, **#24** |
-| §5.3 | #02, #05, #07, #11, #12, #13, #14, #16, **#23** |
+| §5.3 | #02, #05, #07, #11, #12, #13, #14, #16, **#23**, #44, #45 |
 | §6.1 | **#22** ⚡ THIN |
-| §6.2 | **#22** ⚡ THIN |
-| §6.3 | #03, #11, #13, #14, **#22** |
-| INTRO | #01, #06, #10, #12, #14 |
+| §6.2 | **#22**, #36 |
+| §6.3 | #03, #11, #13, #14, **#22**, #34, #44, #45 |
+| INTRO | #01, #06, #10, #12, #14, #33, #35 |
 
 ---
 
@@ -132,14 +145,11 @@
 - §2.1.3 — Spatial Filtering and Noise Reduction Methods
 
 **⚡ THIN (1 source):**
-- §1.5 — Formulation of Research Problem (#17)
 - §2.2.1 — Convolution, Pooling, and Feature Extraction Operations (#08)
 - §2.3.1 — Feature Transferability Across Visual Domains (#04)
 - §2.4.1 — Coupled Thermal-Optical Model of Fundus Tissue Response (#20 🔹SELF only)
-- §3.4 — Evaluation Framework and Performance Metrics (#21 🔹SELF only)
 - §4.2 — Experiment 1: Baseline vs Enhanced CNN (#24 🔹SELF only)
 - §6.1 — System Requirements and Design Principles (#22 🔹SELF only)
-- §6.2 — Modular Architecture with PACS and EHR Integration (#22 🔹SELF only)
 
 ---
 
@@ -158,7 +168,7 @@
 6. Sources #19 (CONF, Procedia CS 2025) and #21 (KBTU, Herald KBTU 2025) report **overlapping experiments** — both evaluate EfficientNetB0 frozen vs. fine-tuned on APTOS 2019 with nearly identical metrics. The dissertation should treat these as a single experimental thread with unified citation.
 7. §6.2 (Modular Architecture with PACS and EHR Integration) was **added to the Section Map Key** to accommodate the system architecture content from #22.
 
-**New sources notes (#25–#32):**
+**Previous sources notes (#25–#32, retained):**
 
 8. Source #25 (Wikipedia — AHE/CLAHE) is **NOT citable** in a doctoral dissertation. It serves only as a conceptual primer. Original sources (Pizer et al., 1987; Zuiderveld, 1994) should be cited instead. Classified as **Background reference**.
 9. Source #26 (Shaout & Han, 2025) is an **arXiv preprint** evaluated by 10-person subjective survey only. Low epistemic weight. Provides reproducible fuzzy+CLAHE pipeline with explicit CLAHE parameters (clipLimit=2.0, tileGridSize=8×8).
@@ -167,13 +177,36 @@
 12. Source #30 (Chakka, 2023) is published in a **high school journal** with minimal peer review. No numerical metrics reported. Extremely low epistemic weight. Classified as **Limited-scope**.
 13. Sources #31 (Kesharwani et al., 2021) and #32 (Kusuhara et al., 2018) **resolve the §1.1.1 GAP** (Pathophysiology and Clinical Grading Systems). However, #31 has significant citation errors and was published in a journal flagged for questionable editorial practices — cite with caution. #32 (Kusuhara et al., 2018, *Diabetes & Metabolism Journal*) is the **higher-quality source** for DR pathophysiology.
 
+**New sources notes (#33–#45):**
+
+14. Sources #33 (Gettinger et al., 2025), #34 (Morya et al., 2024), and #35 (Wang & Lo, 2018) are **pathophysiology/treatment narrative reviews** that collectively **strengthen §1.1.1 coverage** from 2 to 5 sources. All three reinforce neurodegeneration-preceding-microvasculopathy claims. None carry AI benchmarking value. #35 (Wang & Lo) provides the strongest clinical trial linkage (DRCR.net Protocol I).
+15. Source #34 (Morya et al., 2024) additionally provides **screening compliance data** (35–55%) and **AI screening mentions** (IDxDR, Remidio Medios) — useful for §1.1.2 and §6.3 framing, though AI discussion is high-level and non-architectural.
+16. Source #36 (Nandal, 2024) is an **HL7/FHIR interoperability prototype** study. **Peripheral to core DR imaging research**, but directly relevant to §6.2 (PACS/EHR integration). Resolves previous ⚡ THIN status of §6.2 (was covered only by #22 🔹SELF). However: no DOI reported, published in a non-core journal, moderate epistemic weight.
+17. Source #37 (Geetha & Hema, 2026) presents a ViT-BFF-HGS hybrid for joint DR/glaucoma detection. **Architecturally novel** but critically flawed: no dataset names disclosed, no external validation, no AUC/CI/statistical testing. High internal accuracy claim (98.4%) unsupported by standard validation. **Use only as transformer-era architectural reference**, not as evidence of generalization.
+18. Source #38 (Khosravi et al., 2025) is the **strongest new external validation study** — multi-country (USA, South Korea, Brazil), multi-source (public + private), 2661 external images, FastViT vs ResNet18. **Not DR-focused** (retinal hemorrhage classification) but demonstrates cross-dataset ViT > CNN advantage. Directly supports §5.1 arguments. Caution: severe class imbalance (2346 medical vs 315 trauma) and no CI/statistical tests.
+19. Source #39 (Senapati et al., 2024) is a **PRISMA-based systematic review** of DR AI (2016–2023). Provides bibliometric landscape and identifies overfitting, class imbalance, and early-stage detection as key gaps. **Resolves ⚡ THIN status of §1.5** (was covered only by #17). No empirical benchmarking or ViT coverage. Moderate epistemic weight as field-mapping survey.
+20. Source #40 (Araf et al., 2024) is the **first systematic review dedicated to cost-sensitive learning in medical data** (173 papers, 2010–2022). Reveals that only 2 of 173 studies were validation research. Strengthens §2.2.2 (loss functions for imbalanced data) and partially addresses §3.4 (evaluation frameworks). No architecture-level or DR-specific benchmarking.
+21. Source #41 (Sharma et al., 2025) proposes ViT-CapsNet on EyePACS (30,262 images). **Critical inconsistency**: reported AUC values per class (0.44–0.56) are fundamentally incompatible with claimed 94% accuracy. No external validation, no hyperparameter transparency, no statistical testing. **Cite with extreme caution** — epistemic weight is low due to internal metric inconsistency.
+22. Source #42 (Arora et al., 2024) applies EfficientNetB0 to Kaggle DR with undersampling (35,108 → 3,704 images). Internal accuracy 0.8653; max training accuracy 97.11% suggests **significant overfitting** (11-point gap). No AUC, no class-wise metrics, no external validation. CI bounds reported as identical values (likely artifact). Limited epistemic weight.
+23. Source #43 (Ryu et al., 2021) is an **OCTA-based DR classification study** with external validation — ResNet101 on OCTA scans, AUC 0.960–0.976 internal, 0.938–0.962 external. **Not fundus-based**, but demonstrates temporal external validation methodology and CNN > handcrafted feature advantage. Useful as modality-shift reference for §1.3.1 and §1.4.
+24. Source #44 (Zhang et al., 2022) is a **high-quality multicentre external validation study** published in BMJ Open. Ensemble CNN (Inception-V3/Xception/Inception-ResNet-V2) on 83,465 images from 4 centres. AUROC 0.9931 referable DR, Cohen's κ 0.86–0.93 vs experts. **Strongest new evidence for §5.1 and §5.3**. Limitation: China-only, no public dataset benchmarking, preprocessing not reported.
+25. Source #45 (Ruamviboonsuk et al., 2022) is the **highest-impact new source** — prospective clinical validation of DL screening in Thailand's national programme, published in *The Lancet Digital Health*. Sens 91.4% VTDR, outperformed specialists (p=0.024), 9 sites, 7,651 patients. **Gold standard for §6.3 clinical deployment evidence**. Limitation: no architecture transparency, no preprocessing details, single-country.
+
 **Impact of new sources on coverage gaps:**
 
-14. The 8 new sources **resolved 1 previously critical gap**: §1.1.1 (Pathophysiology) now covered by #31 and #32.
-15. §2.1.1 (Histogram Equalization) upgraded from ⚠️ GAP to **well-covered** (5 sources: #25, #26, #27, #30, #23).
-16. §4.3 (CLAHE Threshold Optimization) upgraded from ⚡ THIN to **2 sources** (#27, #23).
-17. **Remaining true gaps** reduced to 2: §1.2.1, §2.1.3. These require **additional literature acquisition**.
-18. **⚠️ Self-only coverage warning:** Sections §2.4.1, §3.4, §4.2, §6.1, §6.2 are covered **only by self-publications**. External supporting literature is strongly recommended for examiner robustness.
+26. §1.1.1 (Pathophysiology) upgraded from **2 sources to 5 sources** (#31, #32, #33, #34, #35). **Well-covered**.
+27. §1.1.2 (Screening Requirements) upgraded from **3 to 4 sources** (added #34 via screening compliance data).
+28. §1.4 (Critical Analysis of DR Systems) upgraded from **8 to 12 sources** (added #39, #43, #44, #45). **Very well-covered**.
+29. §1.5 (Formulation of Research Problem) upgraded from **⚡ THIN (1 source) to 2 sources** (#17, #39). No longer critically thin.
+30. §2.2.2 (Loss Functions / Imbalanced Data) upgraded from **3 to 6 sources** (added #39, #40, #42).
+31. §3.4 (Evaluation Framework) upgraded from **⚡ THIN (1 🔹SELF) to 2 sources** (added #40). Now has external support.
+32. §5.1 (Cross-Database Generalization) upgraded from **9 to 11 sources** (added #38, #44).
+33. §5.3 (Comparative Analysis) upgraded from **9 to 11 sources** (added #44, #45).
+34. §6.2 (PACS/EHR Integration) upgraded from **⚡ THIN (1 🔹SELF) to 2 sources** (added #36). Now has external support.
+35. §6.3 (Clinical Workflow) upgraded from **5 to 7 sources** (added #34, #44, #45). **Very well-covered**.
+36. **Remaining true gaps reduced to 2**: §1.2.1, §2.1.3. These still require **additional literature acquisition**.
+37. **⚠️ Self-only coverage warning (reduced):** Sections §2.4.1, §4.2, §6.1 remain covered **only by self-publications**. External supporting literature is strongly recommended for examiner robustness.
+38. **⚠️ Metric inconsistency flag**: Source #41 (Sharma et al., 2025) reports class-level AUC values (0.44–0.56) incompatible with 94% accuracy. Do NOT cite AUC values without explicit disclaimers.
 
 ---
 
@@ -199,3 +232,24 @@
 | 29 | Tabari et al. (2024) | FHIR scoping review | Domain mismatch; no imaging or AI classification content |
 | 30 | Chakka (2023) | OCT preprocessing | High school journal; no numerical metrics; low rigor |
 | 31 | Kesharwani et al. (2021) | DR pathophysiology | Multiple citation errors; questionable journal; use #32 instead |
+| 36 | Nandal (2024) | HL7/FHIR interoperability | Peripheral to DR imaging; relevant only to §6.2 infrastructure |
+
+---
+
+### Epistemic Tier Summary (New Sources #33–#45)
+
+| # | Source | Epistemic Tier | Dissertation Role |
+|---|--------|----------------|-------------------|
+| 33 | Gettinger et al. (2025) | Methodological precedent | Background: DR pathophysiology + experimental models |
+| 34 | Morya et al. (2024) | Peripheral / Background | Background: clinical context + screening compliance |
+| 35 | Wang & Lo (2018) | Foundational (clinical) | Background: pathophysiology + treatment paradigm |
+| 36 | Nandal (2024) | Limited-scope prototype | Infrastructure: FHIR/EHR integration reference |
+| 37 | Geetha & Hema (2026) | Transformer-era (limited) | Comparator: ViT architectural reference only |
+| 38 | Khosravi et al. (2025) | Clinical validation precedent | Evidence: cross-dataset external validation + ViT > CNN |
+| 39 | Senapati et al. (2024) | Methodological precedent / Survey | Framing: field landscape + gap identification |
+| 40 | Araf et al. (2024) | Foundational review | Methodology: CSL taxonomy + validation gap evidence |
+| 41 | Sharma et al. (2025) | Limited-scope (⚠️ metric issues) | Comparator: ViT-CapsNet baseline with caveats |
+| 42 | Arora et al. (2024) | Limited-scope | Comparator: EfficientNetB0 baseline |
+| 43 | Ryu et al. (2021) | Clinical validation precedent | Evidence: OCTA-based CNN + external validation methodology |
+| 44 | Zhang et al. (2022) | High-impact empirical evidence | Core evidence: multicentre CNN validation + expert comparison |
+| 45 | Ruamviboonsuk et al. (2022) | High-impact clinical validation | Core evidence: prospective LMIC deployment gold standard |
