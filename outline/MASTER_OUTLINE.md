@@ -3,7 +3,7 @@
 
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Master Structural Outline — Chapter-by-Chapter Content Specification
-**Binding References:** DISSERTATION_INVARIANTS.md v.1.0 | ARGUMENT_MAP.md | GLOSSARY_v1_0.md | TABLE_OF_CONTENT.pdf
+**Binding References:** DISSERTATION_INVARIANTS.md v2.1 | ARGUMENT_MAP.md v2.1 | GLOSSARY_v2_1.md | TABLE_OF_CONTENT.pdf
 **Source Corpus:** LC-CONF | LC-KBTU | LC-KazUTB | LC-NAN_RK | LC-SQOPUS_Q2 | LC-SQOPUS_Q3
 **Governing Documents:** CENTRAL_THESIS.md | CORE_OBJECTIVE.md | HYPOTHESIS.md
 
@@ -15,13 +15,13 @@
 - List of standards governing dissertation format, terminology, and citation practice.
 
 ### Definitions
-- Source: GLOSSARY_v1_0.md, Part A (Structured Glossary Table).
+- Source: GLOSSARY_v2_1.md, Part A (Structured Glossary Table).
 - All operationally defined terms (OD-1 through OD-6 per INVARIANTS §III) must appear here with verbatim definitions.
 - Terminological stabilization recommendations (GLOSSARY §6) must be applied: canonical fine-tuning terminology, disambiguation of "feature extraction," "generalization," and "preprocessing" per Priority 1 items.
 
 ### Designations and Abbreviations
-- CNN, CLAHE, DR, ROC-AUC, APTOS, STARE, EHR, PACS, HIPAA, GDPR, UML.
-- Standardize: "EHR" (not "EMR"); "ResNet50" (not "RESNET50"); "EfficientNetB0" consistently (GLOSSARY §6, items 5, 7).
+- CNN, CLAHE, DR, ROC-AUC, APTOS, EyePACS, IDRiD, Messidor, Messidor-2, RFMiD, DDR, ODIR-5K, EHR, PACS, HIPAA, GDPR, UML, Grad-CAM, IoU, ECE, SSIM, CNR, VVI, FOV, HSV, LAB.
+- Standardize: "EHR" (not "EMR"); "ResNet-50" (not "RESNET50"); "EfficientNet-B3" consistently (GLOSSARY §6, items 5, 7).
 
 ---
 
@@ -34,44 +34,62 @@
 - **Boundary:** Projected deployment benefits (20–30% late-stage DR reduction; 15–20% cost reduction) are third-party projections, not dissertation findings (INVARIANTS SB-1.6; ARGUMENT_MAP NC-3; SIR-8).
 
 ### Scientific Novelty
-1. Integration of contrast-adaptive preprocessing (upgraded CLAHE with threshold control) into a CNN-based DR classification pipeline — as a unified framework, not isolated techniques (LC-SQOPUS_Q3, p. 81; LC-SQOPUS_Q2, §1).
+1. Integration of contrast-adaptive preprocessing (upgraded CLAHE with threshold control in LAB color space) into a CNN-based DR classification pipeline — as a unified framework, not isolated techniques (LC-SQOPUS_Q3, p. 81; LC-SQOPUS_Q2, §1).
 2. Two-stage fine-tuning protocol for EfficientNetB0 tailored to fundus image variability (LC-CONF, p. 497; LC-KBTU, §II.1).
 3. Mathematical modeling of laser-tissue interaction for retinal therapy with qualitative simulation (LC-KazUTB, §II.1) — bounded as theoretical contribution only (INVARIANTS SB-1.5; ARGUMENT_MAP PC-4).
 4. Modular AI-driven system architecture for DR screening in resource-limited environments (LC-NAN_RK, §II.1) — bounded as design specification only (INVARIANTS SB-4.1; ARGUMENT_MAP PC-5).
+5. Cross-database transferability validation across 3+ independent datasets (Messidor, Messidor-2, IDRiD) with generalization ratio metric (G = F1_external / F1_EyePACS) — demonstrating pipeline robustness beyond the training domain (ARGUMENT_MAP PC-6).
+6. Grad-CAM explainability analysis with quantitative IoU against IDRiD pixel-level lesion masks (microaneurysms, hemorrhages, hard exudates, soft exudates) — providing causal evidence that preprocessing redirects CNN attention to clinically relevant structures (ARGUMENT_MAP PC-7).
+7. 5-component preprocessing pipeline (FOV standardization, green channel imaging, normalization, CLAHE enhancement, HSV contrast enhancement) with component-level ablation identifying ranked contribution hierarchy (ARGUMENT_MAP PC-8).
+8. Device domain shift evaluation across 4 camera manufacturers (Canon, Topcon, Kowa, Zeiss) on RFMiD, DDR, ODIR-5K — quantifying cross-device performance variability for deployment readiness assessment (ARGUMENT_MAP PC-9).
 
 ### Research Goal
-- Verbatim from CORE_OBJECTIVE.md: "To develop and experimentally validate an integrated fundus image enhancement and CNN-based classification framework for automated multi-stage diabetic retinopathy diagnosis, with specific emphasis on contrast-adaptive preprocessing (including upgraded CLAHE with threshold control) to improve microvascular feature visibility and classification robustness under variable image quality and constrained computational conditions."
+- To develop and experimentally validate an integrated fundus image enhancement and CNN-based classification framework for automated multi-stage diabetic retinopathy diagnosis, with specific emphasis on contrast-adaptive preprocessing (including upgraded CLAHE with threshold control) to improve microvascular feature visibility and classification robustness under variable image quality and constrained computational conditions. The framework is further validated for generalization across multiple independent datasets (Messidor, Messidor-2, IDRiD), explainability via Grad-CAM attention analysis, and robustness under device domain shift across camera hardware (RFMiD, DDR, ODIR-5K).
 
 ### Research Objectives
-1. Analyze the current state of automated DR diagnosis, fundus image quality variability, and deep learning approaches to retinal image classification (→ Chapter 1).
-2. Formalize the mathematical foundations of image enhancement techniques and CNN-based classification, including CLAHE with controllable threshold parameters and transfer learning theory (→ Chapter 2).
-3. Design a unified preprocessing pipeline (resizing → normalization → CLAHE → augmentation) and integrate it with baseline, enhanced, and transfer learning CNN architectures (→ Chapter 3).
-4. Experimentally validate the preprocessing dominance hypothesis (H-1), CLAHE threshold sensitivity (H-2), and two-stage fine-tuning protocol (H-3) (→ Chapter 4).
-5. Conduct reliability validation through cross-database generalization, ablation study, and comparative analysis with existing DR systems (→ Chapter 5).
-6. Design a modular system architecture for automated DR screening deployable in resource-limited environments (→ Chapter 6).
+1. Analyze the current state of automated DR diagnosis, fundus image quality variability, device-specific acquisition challenges, and deep learning approaches to retinal image classification (→ Chapter 1).
+2. Formalize the mathematical foundations of image enhancement techniques, CNN-based classification, transfer learning theory, explainability methods (CAM, Grad-CAM), and image quality metrics (CNR, VVI, SSIM, Entropy) (→ Chapter 2).
+3. Design the 5-component preprocessing pipeline (FOV standardization → green channel imaging → normalization → CLAHE enhancement (LAB, dynamic clip limit) → HSV contrast enhancement) and integrate it with ResNet-50, EfficientNet-B3, and EfficientNet-B4 architectures (→ Chapter 3).
+4. Experimentally validate the preprocessing dominance hypothesis (H-1) via 2×2 factorial ablation on EyePACS with ResNet-50 and EfficientNet-B3 (→ Chapter 4, Experiment 1).
+5. Validate the preprocessing component contribution hierarchy via component-level ablation on EyePACS (→ Chapter 4, Experiment 2) and CLAHE threshold sensitivity (H-2) as a sub-analysis.
+6. Validate robustness under synthetic image degradation (Gaussian noise, blur, low illumination) on APTOS 2019 (→ Chapter 4, Experiment 3) and explainability via Grad-CAM on EfficientNet-B4 with IoU against IDRiD lesion masks (→ Chapter 4, Experiment 4).
+7. Validate cross-database generalization on Messidor/Messidor-2/IDRiD (→ Chapter 5, Experiment 5) and device domain shift on RFMiD/DDR/ODIR-5K across camera hardware (→ Chapter 5, Experiment 6).
+8. Design a modular system architecture for automated DR screening deployable in resource-limited environments, informed by multi-dataset and multi-device experimental evidence (→ Chapter 6).
 
 ### Object and Subject of Research
-- **Object:** Fundus images of patients with diabetic retinopathy, sourced from APTOS 2019 and supplementary clinical corpora.
+- **Object:** Fundus images of patients with diabetic retinopathy, sourced from EyePACS (primary training), APTOS 2019 (robustness), IDRiD (clinical validation and lesion localization), Messidor/Messidor-2 (external generalization), and RFMiD/DDR/ODIR-5K (device domain shift evaluation).
 - **Subject:** The process of automated multi-stage DR classification through integrated preprocessing and CNN-based analysis.
 
 ### Research Hypothesis
 - Verbatim from HYPOTHESIS.md, mapped to INVARIANTS §II:
-  - **H-1 (Primary — Preprocessing Dominance):** See INVARIANTS §II, H-1. Independent variable: presence vs. absence of preprocessing pipeline. Dependent variables: Accuracy, F1-score, ROC-AUC, Cohen's Kappa. Empirical dominance criterion: EH-3 (weighted F1 Δ ≥ 5 pp; ROC-AUC Δ ≥ 0.02; no Cohen's Kappa degradation).
-  - **H-2 (Secondary — CLAHE Threshold Sensitivity):** See INVARIANTS §II, H-2. Bounded to tested parameter range; no extrapolation permissible.
+  - **H-1 (Primary — Preprocessing Dominance):** See INVARIANTS §II, H-1. Independent variable: presence vs. absence of 5-component preprocessing pipeline. Dependent variables: Accuracy, F1-score, ROC-AUC, Cohen's Kappa. Tested on ResNet-50 and EfficientNet-B3 on EyePACS. Empirical dominance criterion: EH-3 (weighted F1 Δ ≥ 5 pp; ROC-AUC Δ ≥ 0.02; no Cohen's Kappa degradation).
+  - **H-2 (Secondary — CLAHE Threshold Sensitivity):** See INVARIANTS §II, H-2. Bounded to tested parameter range on IDRiD; no extrapolation permissible.
   - **H-3 (Secondary — Two-Stage Fine-Tuning):** See INVARIANTS §II, H-3. Empirical reference values from LC-CONF (Table 3) / LC-KBTU as prior self-publications (SIR-4).
+  - **H-4 (Cross-Database Transferability):** Models trained on EyePACS with the 5-component preprocessing pipeline generalize to Messidor, Messidor-2, and IDRiD without retraining, achieving generalization ratio G ≥ 0.85 per OD-4 (G = F1_external / F1_EyePACS).
+  - **H-5 (Explainability):** Preprocessing shifts CNN attention toward clinically relevant lesion regions: IoU between Grad-CAM activation maps and IDRiD lesion masks is higher for preprocessed models than baseline (IoU_preproc > IoU_baseline).
+  - **H-6 (Device Robustness):** Preprocessed models maintain classification performance across images from different fundus camera domains (Canon, Topcon, Kowa, Zeiss), as evaluated on RFMiD, DDR, ODIR-5K.
 
 ### Methodological Basis
 - Experimental comparison with controlled conditions (matched dataset, hardware, training budget).
 - Multi-metric evaluation framework: weighted F1-score, ROC-AUC, Cohen's Kappa, Accuracy (INVARIANTS EH-1).
 - Transfer learning theory; CNN feature extraction and classification; adaptive histogram equalization theory.
+- 5-fold cross-validation with patient-level split (replacing 80/10/10); mixed-effects model for cross-fold analysis.
+- Bonferroni/Holm correction for multiple comparisons.
+- Grad-CAM explainability analysis with quantitative IoU against lesion masks.
+- Calibration metrics: Expected Calibration Error (ECE), Brier Score.
+- Image quality metrics: Contrast-to-Noise Ratio (CNR), Vessel Visibility Index (VVI), Structural Similarity Index (SSIM), Image Entropy.
 - Cross-validation and statistical reliability protocols (INVARIANTS EH-4).
 
 ### Provisions Submitted for Defense
-1. The integrated preprocessing pipeline (resizing, normalization, modified CLAHE, augmentation) produces statistically measurable improvement in five-class DR classification (ARGUMENT_MAP PC-1).
-2. CLAHE clip limit parameter exhibits a parameter-dependent sensitivity profile with identifiable local optimum (ARGUMENT_MAP PC-2).
+1. The integrated 5-component preprocessing pipeline (FOV standardization, green channel imaging, normalization, CLAHE enhancement, HSV contrast enhancement) produces statistically measurable improvement in five-class DR classification independently for both ResNet-50 and EfficientNet-B3 on EyePACS (ARGUMENT_MAP PC-1).
+2. CLAHE clip limit parameter exhibits a parameter-dependent sensitivity profile with identifiable local optimum on IDRiD (ARGUMENT_MAP PC-2).
 3. Two-stage fine-tuning of EfficientNetB0 outperforms frozen-only strategy (ARGUMENT_MAP PC-3).
 4. Coupled thermal-optical mathematical model provides theoretical grounding for laser-tissue interaction (ARGUMENT_MAP PC-4; theoretical claim only).
 5. Modular system architecture specification for DR screening in resource-limited environments (ARGUMENT_MAP PC-5; design specification only).
+6. Models trained on EyePACS with the 5-component preprocessing pipeline generalize to Messidor, Messidor-2, and IDRiD without retraining, achieving generalization ratio G ≥ 0.85 (ARGUMENT_MAP PC-6).
+7. Grad-CAM analysis demonstrates that preprocessing redirects CNN attention toward clinically relevant lesion regions, with IoU_preproc > IoU_baseline on IDRiD lesion masks (ARGUMENT_MAP PC-7).
+8. Component-level ablation identifies a ranked contribution hierarchy among the 5 preprocessing components, measured by incremental weighted F1 improvement on EyePACS (ARGUMENT_MAP PC-8).
+9. Preprocessed models maintain classification performance across images from different fundus camera manufacturers (Canon, Topcon, Kowa, Zeiss), as evaluated on RFMiD, DDR, ODIR-5K (ARGUMENT_MAP PC-9).
 
 ### Theoretical Significance
 - Mathematical formalization of modified CLAHE with simplified threshold control (T/80 formulation adapted from LC-SQOPUS_Q2).
@@ -79,7 +97,7 @@
 - Coupled thermal-optical model of fundus tissue response (LC-KazUTB; theoretical/computational only).
 
 ### Practical Significance
-- Validated preprocessing-CNN pipeline applicable to APTOS 2019 and supplementary clinical datasets.
+- Multi-dataset validated preprocessing-CNN pipeline applicable to EyePACS (primary), Messidor/Messidor-2 (generalization), and IDRiD (clinical validation), with device domain shift evidence from RFMiD/DDR/ODIR-5K supporting real-world deployment variability assessment.
 - System architecture design for integration with PACS, EHR, and telemedicine platforms in Kazakhstan (LC-NAN_RK; design specification, not deployed).
 - Boundary: No clinical-grade accuracy claim; no prototype implementation (INVARIANTS SB-1.3, SB-4.1).
 
@@ -122,25 +140,39 @@
 - Baseline CNN performance degradation on unprocessed images as evidence of quality impact.
 - Link to preprocessing motivation: "the limited generalization ability of neural networks under variable image quality" (LC-SQOPUS_Q3, p. 81).
 
+#### 1.2.3 Device-Specific Variability in Fundus Imaging
+- Camera-dependent image characteristics across major manufacturers: Canon, Topcon, Kowa, Zeiss.
+- Variations in field of view, illumination profile, color rendering, resolution, and compression artifacts across camera models.
+- Device-specific variability as a clinical deployment challenge: models trained on one camera type may not generalize to images from other devices.
+- Motivation for device domain shift evaluation (Experiment 6) and preprocessing pipeline normalization across camera domains.
+
 ### 1.3 Deep Learning Approaches to Retinal Image Classification
 
 #### 1.3.1 Convolutional Neural Network Architectures for Medical Imaging
 - General CNN architecture: input, convolutional/pooling layers, fully connected layers (GLOSSARY §1, CNN definition).
 - Architectures relevant to DR: EfficientNet family, ResNet, VGG, DenseNet.
-- Boundary: Dissertation evaluates EfficientNetB0 and ResNet50 only; no claim of architectural optimality (INVARIANTS SB-3.1; ARGUMENT_MAP NC-6).
+- Boundary: Dissertation evaluates ResNet-50, EfficientNet-B3, and EfficientNet-B4; no claim of architectural optimality (INVARIANTS SB-3.1; ARGUMENT_MAP NC-6).
 
 #### 1.3.2 Transfer Learning Strategies in Ophthalmic Diagnostics
 - ImageNet pre-training and domain transfer to medical imaging.
 - Domain gap acknowledgment per INVARIANTS DGL-6.
 - Frozen-layer vs. progressive fine-tuning as competing strategies.
 
+#### 1.3.3 Explainability Methods in Medical Image Classification
+- Grad-CAM (Gradient-weighted Class Activation Mapping) as an emerging requirement for clinical trust and regulatory acceptance.
+- Attention visualization techniques: CAM, Grad-CAM, and their application to ophthalmic imaging.
+- Explainability as a prerequisite for deploying AI-based diagnostic tools in clinical settings — understanding what the model "sees" in fundus images.
+- Boundary: Explainability methods provide interpretability, not clinical localization (ARGUMENT_MAP NC-14).
+
 ### 1.4 Critical Analysis of Existing Automated DR Screening Systems
 - Review of IDx-DR, EyeNuk, DeepMind retinal systems.
 - Boundary: No superiority claim against named commercial systems (INVARIANTS CFC-2.2; ARGUMENT_MAP NC-2). Comparison is contextual benchmarking, not controlled evaluation.
+- Coverage of multi-device benchmark datasets: RFMiD (Topcon, Kowa cameras; multi-disease including DR subset), DDR (Canon, Topcon; 5-class DR grading), ODIR-5K (Canon, Zeiss; multi-disease including DR subset) — as resources for evaluating device domain shift in DR classification systems.
 
 ### 1.5 Formulation of the Research Problem and Justification of Research Direction
 - Synthesis of gaps identified in §1.1–1.4.
 - Central gap: absence of a unified framework integrating image enhancement and CNN classification optimized for resource-limited conditions (LC-SQOPUS_Q3, p. 81).
+- Additional gaps: lack of cross-database transferability evidence, absence of explainability validation, and untested device domain shift robustness.
 - Justification for the specific research direction aligned with CORE_OBJECTIVE.md.
 
 ### Conclusions to Chapter 1
@@ -161,7 +193,8 @@
 #### 2.1.2 Formalization of CLAHE with Controllable Threshold Parameters
 - Conventional CLAHE: CLIP LIMIT = ⌈L/T⌉ + β·(φ − ⌈L/T⌉) (Eq. 1, per LC-SQOPUS_Q2, §2.2.1).
 - Upgraded CLAHE (T/80 formulation): CLIP LIMIT = T/80 (Eq. 2, per LC-SQOPUS_Q2, §2.2.1, p. 5).
-- Boundary: T/80 formulation derived on STARE dataset; not directly transferable to APTOS 2019 without independent validation (INVARIANTS DGL-5; GLOSSARY §2, Upgraded CLAHE entry).
+- v2.1 update: CLAHE now applied in LAB color space (L-channel) with dynamic clip limit, replacing fixed clip limit 2.0 from v1.0.
+- Boundary: T/80 formulation derived on STARE dataset; not directly transferable to EyePACS or APTOS 2019 without independent validation (INVARIANTS DGL-5; GLOSSARY §2, Upgraded CLAHE entry).
 - Sensitivity formula anomaly in LC-SQOPUS_Q2: Sen = TP/(TP+TN) deviates from standard Sen = TP/(TP+FN) — must be noted per SIR-3.
 
 #### 2.1.3 Spatial Filtering and Noise Reduction Methods
@@ -209,8 +242,36 @@
 - Qualitative support for understanding thermal effects on retinal features visible in fundus images.
 - **Critical boundary:** No quantitative clinical validation; computational simulation only (INVARIANTS SB-1.5; SIR-6). Model omits blood perfusion term; tissue properties treated as static (LC-KazUTB, §II.7). The claim that simulation "confirms effectiveness of laser therapy" is the source's claim, not the dissertation's validated finding (SIR-6; CFC-2.4).
 
+### 2.5 Explainability in Deep Learning for Medical Imaging
+
+#### 2.5.1 Class Activation Mapping (CAM) and Grad-CAM Mathematical Formulation
+- CAM: weighted sum of feature maps from final convolutional layer using global average pooling weights.
+- Grad-CAM: generalization of CAM using gradient information — gradient of target class score with respect to feature maps, followed by global average pooling and ReLU activation.
+- Mathematical formulation: L^c_Grad-CAM = ReLU(Σ_k α^c_k · A^k), where α^c_k = (1/Z) Σ_i Σ_j (∂y^c / ∂A^k_ij).
+- Advantages of Grad-CAM: architecture-agnostic (no modification to network required), applicable to any convolutional layer.
+
+#### 2.5.2 Interpretation of Attention Maps in Ophthalmic Context
+- Grad-CAM activation regions in fundus images: correspondence to microaneurysms, hemorrhages, exudates, and neovascularization.
+- Clinical relevance: whether model attention aligns with ophthalmologist-identified lesion regions.
+- Distinction between interpretability and diagnostic localization — Grad-CAM provides attention visualization, not pixel-level segmentation (ARGUMENT_MAP NC-14).
+
+#### 2.5.3 IoU as a Quantitative Explainability Metric
+- Intersection-over-Union (IoU) between thresholded Grad-CAM activation maps and ground-truth lesion masks.
+- IoU formulation: IoU = |A ∩ B| / |A ∪ B|, where A = binarized Grad-CAM activation region, B = lesion mask.
+- Application to IDRiD pixel-level annotations: microaneurysms, hemorrhages, hard exudates, soft exudates.
+- IoU as a bridge between explainability and clinical relevance — quantifying the degree to which preprocessing redirects model attention toward pathologically significant structures.
+
+### 2.6 Image Quality Metrics for Preprocessing Evaluation
+
+- Theoretical basis for quantifying preprocessing effectiveness independently of downstream classification.
+- **Contrast-to-Noise Ratio (CNR):** Signal quality of vessel structures versus background — measures ability to distinguish retinal vasculature from surrounding tissue.
+- **Vessel Visibility Index (VVI):** Detectability of retinal vasculature — quantifies enhancement of vessel structures after preprocessing.
+- **Image Entropy:** Information content of the image — measures the increase in informational richness after contrast enhancement.
+- **Structural Similarity Index (SSIM):** Preservation of structural information relative to original image — confirms that preprocessing does not introduce destructive artifacts.
+- These metrics provide the theoretical grounding for the image quality analysis in Experiment 2 (§4.3) pipeline evaluation.
+
 ### Conclusions to Chapter 2
-- Summarize theoretical apparatus; distinguish between experimentally grounded components (§2.1–2.3) and theoretical/computational components (§2.4).
+- Summarize theoretical apparatus; distinguish between experimentally grounded components (§2.1–2.3, §2.5–2.6) and theoretical/computational components (§2.4).
 
 ---
 
@@ -220,12 +281,18 @@
 
 ### 3.1 Formalization of the Unified Preprocessing Pipeline
 
-#### 3.1.1 Pipeline Stage Specification: Resizing, Normalization, Enhancement, Augmentation
-- Formal pipeline definition per INVARIANTS OD-3: (1) Resizing to 512×512 (or 256×256 for baseline), (2) Pixel normalization x/255.0 → [0, 1], (3) CLAHE (clip limit 2.0, grid 8×8), (4) Augmentation.
-- "Active" vs. "absent" pipeline definitions (OD-3): active = all four stages in order; absent = no transformations beyond dimensional resizing.
+#### 3.1.1 Pipeline Component Specification: 5-Component System
+- v2.1 pipeline definition (replaces v1.0 4-stage pipeline per updated INVARIANTS OD-3):
+  - **(1) FOV Standardization:** Fundus circle detection (Hough transform), black border removal, image centering, resize to 512×512.
+  - **(2) Green Channel Imaging:** Extract green channel from RGB (highest vessel-to-background contrast in retinal images).
+  - **(3) Normalization:** Pixel intensity normalization to [0, 1] range.
+  - **(4) CLAHE Enhancement:** Applied in LAB color space (L-channel); dynamic clip limit (replaces fixed 2.0 from v1.0).
+  - **(5) HSV Contrast Enhancement:** Additional contrast adjustment in HSV color space.
+- "Active" pipeline definition: all 5 components applied in order. "Absent" (baseline): resize only (FOV standardization without subsequent components).
+- Augmentation (horizontal/vertical flips, rotation ±15°, zoom ±10%, brightness variation) is applied during training as a separate data augmentation layer, not as a preprocessing component — this separation enables clean ablation in Experiment 2.
 
 #### 3.1.2 Modified CLAHE Algorithm with Simplified Threshold Control
-- Adaptation of T/80 formulation (LC-SQOPUS_Q2) to APTOS 2019 image distribution.
+- Adaptation of T/80 formulation (LC-SQOPUS_Q2) — now applied in LAB color space with dynamic clip limit.
 - Independent validation within dissertation's framework required per DGL-5.
 - Implementation via OpenCV (LC-SQOPUS_Q3, p. 82–83).
 
@@ -234,24 +301,32 @@
 - Dual function: regularization (§2.2.3) and class imbalance mitigation.
 - Class distribution documented: Class 0 = 73.5% training / 49.3% test; Classes 3+4 = 4.5% training / 13.3% test (LC-CONF, p. 498; ARGUMENT_MAP SC-1.4).
 
-### 3.2 Design of Baseline and Enhanced CNN Architectures
+#### 3.1.4 External Image Ingestion Protocol
+- Methodological contribution for integrating clinical data from Kazakh medical centers.
+- Five-stage protocol: (1) Quality Gate — automated quality assessment and rejection of unusable images, (2) Geometric Standardization — alignment to standard FOV and resolution, (3) Preprocessing Pipeline — application of the 5-component system, (4) Label Harmonization — mapping institutional labels to standard 5-class DR taxonomy, (5) Distribution Analysis — statistical comparison of ingested data with training distribution.
+- Boundary: The ingestion protocol is validated only for specific Kazakh medical center data; generalization to other clinical data sources requires independent validation (ARGUMENT_MAP NC-15).
 
-#### 3.2.1 Shallow Baseline CNN for Preprocessing Quality Validation
-- Architecture: 2 convolutional blocks, 32–64 filters, sigmoid output, binary cross-entropy, input 256×256.
-- No batch normalization, no dropout.
-- Operational definition of low-complexity reference per INVARIANTS OD-2.
+### 3.2 Design of CNN Architectures for DR Classification
 
-#### 3.2.2 Enhanced Multi-Block CNN with Regularization Layers
-- Architecture: 4 convolutional blocks, 32–256 filters, batch normalization, dropout 0.4, softmax 5-class output, categorical cross-entropy, Adam lr=0.0001.
-- Operational definition of high-complexity reference per INVARIANTS OD-2.
-- This architecture serves as the high-complexity reference model for factorial ablation analysis in §5.2.
+#### 3.2.1 ResNet-50 and EfficientNet-B3 as Primary Experimental Architectures
+- **ResNet-50:** 50-layer residual network pre-trained on ImageNet; classification head replaced with 5-class softmax. Serves as one factor in the 2×2 factorial ablation (Experiment 1).
+- **EfficientNet-B3:** Compound-scaled architecture pre-trained on ImageNet; classification head replaced with 5-class softmax. Serves as the second factor in the 2×2 factorial ablation (Experiment 1).
+- Rationale for selection: two established pretrained backbone families (ResNet, EfficientNet) provide stronger replication test across architecture families than custom shallow CNNs.
+- Domain gap acknowledgment (DGL-6).
 
-### 3.3 Transfer Learning Methodology Using EfficientNetB0 and ResNet50
+#### 3.2.2 Historical v1.0 Architectures (Reference Only)
+- **Shallow Baseline CNN (v1.0):** 2 convolutional blocks, 32–64 filters, sigmoid output, binary cross-entropy, input 256×256. No batch normalization, no dropout. Operational definition of low-complexity reference per INVARIANTS OD-2.
+- **Enhanced Multi-Block CNN (v1.0):** 4 convolutional blocks, 32–256 filters, batch normalization, dropout 0.4, softmax 5-class output, categorical cross-entropy, Adam lr=0.0001. Operational definition of high-complexity reference per INVARIANTS OD-2.
+- These architectures are retained as historical v1.0 references and are not used in v2.1 experiments. They document the prior experimental context from self-publications (LC-SQOPUS_Q3, LC-CONF).
+
+### 3.3 Transfer Learning Methodology
 
 #### 3.3.1 Architecture Adaptation for Five-Class DR Classification
-- EfficientNetB0 pre-trained on ImageNet; classification head replaced with 5-class softmax.
-- ResNet50 as secondary architecture for replication requirement (INVARIANTS EH-4).
+- EfficientNetB0 pre-trained on ImageNet; classification head replaced with 5-class softmax — used for two-stage fine-tuning comparison (H-3).
+- EfficientNet-B4 for explainability analysis (Experiment 4) — selected for higher-resolution feature maps suitable for Grad-CAM visualization.
+- ResNet-50 as primary architecture for replication requirement (INVARIANTS EH-4).
 - Domain gap acknowledgment (DGL-6).
+- Note: Replication is now conducted on EyePACS (primary dataset), in addition to prior APTOS 2019 self-publication results.
 
 #### 3.3.2 Two-Stage Fine-Tuning Protocol Design
 - Stage 1 (Frozen-layer strategy): Freeze all base layers; train classification head only.
@@ -264,15 +339,25 @@
 
 ### 3.4 Evaluation Framework and Performance Metrics
 
-#### 3.4.1 Multi-Metric Assessment: Accuracy, F1-Score, ROC-AUC, Cohen's Kappa
-- Primary metrics (EH-1): weighted F1-score > ROC-AUC > Cohen's Kappa (quadratic weights) > Accuracy.
-- Secondary metrics (EH-2): per-class precision/recall, macro averages, training-set metrics (overfitting diagnosis only).
+#### 3.4.1 Multi-Metric Assessment Framework
+- **Primary metrics (EH-1):** weighted F1-score > ROC-AUC > Cohen's Kappa (quadratic weights) > Accuracy.
+- **Secondary metrics (EH-2):** per-class precision/recall, macro averages, training-set metrics (overfitting diagnosis only).
+- **Clinical screening metrics:** Sensitivity, Specificity, PPV, NPV for referable DR (grade ≥ 2) — applied in Experiments 3 and 5.
+- **Calibration metrics:** Expected Calibration Error (ECE), Brier Score — applied in Experiments 1 and 5.
+- **Image quality metrics:** Contrast-to-Noise Ratio (CNR), Vessel Visibility Index (VVI), Image Entropy, Structural Similarity Index (SSIM) — applied in Experiment 2 pipeline analysis.
+- **Explainability metrics:** Grad-CAM IoU with IDRiD lesion masks (per lesion type), attention consistency score across datasets — applied in Experiment 4.
+- **Generalization metric:** G = F1_external / F1_EyePACS per OD-4 — applied in Experiments 5 and 6.
 - Diagnostic effectiveness thresholds per INVARIANTS OD-5: Accuracy ≥ 0.80, weighted F1 ≥ 0.80, ROC-AUC ≥ 0.90, Cohen's Kappa ≥ 0.70.
 
 #### 3.4.2 Cross-Validation and Statistical Reliability Protocols
+- **5-fold cross-validation with patient-level split:** All experiments use 5-fold CV with patient-level split to prevent data leakage. For each fold, 4 folds serve as training and 1 fold as test. All metrics reported as mean ± standard deviation across folds.
+- **Mixed-effects model:** Cross-fold analysis accounting for fold as random effect (Experiment 1).
+- **Bonferroni/Holm correction:** Multiple comparison correction across configurations (Experiments 1, 2).
+- **McNemar test:** Paired classification comparison (Experiment 1).
+- **DeLong test:** ROC-AUC comparison (Experiments 1, 5).
+- **Bootstrap 95% CI:** ≥ 1000 iterations on all primary metrics (all experiments).
 - Empirical dominance criterion (EH-3): weighted F1 Δ ≥ 5 pp AND ROC-AUC Δ ≥ 0.02 AND no Cohen's Kappa degradation.
-- Sufficient validation criterion (EH-4): EH-3 on APTOS 2019 + direction confirmed on secondary dataset + replication across ≥ 2 architectures.
-- Data partition: 80/10/10 split (training/validation/test).
+- Sufficient validation criterion (EH-4): EH-3 on EyePACS + direction confirmed on secondary datasets + replication across ≥ 2 architectures.
 
 ### Conclusions to Chapter 3
 - Summarize the complete methodological specification; confirm reproducibility conditions.
@@ -281,148 +366,208 @@
 
 ## CHAPTER 4: EXPERIMENTAL RESEARCH — PREPROCESSING IMPACT ON CNN DIAGNOSTIC PERFORMANCE
 
-**Chapter Function:** Execute experiments H-1, H-2, H-3; report results with full boundary conditions.
+**Chapter Function:** Execute Experiments 1–4; report results for H-1, H-2, H-5 with full boundary conditions.
 
 ### 4.1 Datasets and Experimental Configuration
 
-#### 4.1.1 APTOS 2019, STARE, and Supplementary Clinical Image Corpora
-- APTOS 2019: 3,662 labeled samples, five-class DR staging (public dataset).
-- APTOS 2019 + supplementary clinical data: training 35,126; test 3,662 (LC-CONF, p. 498).
-- STARE: 157 images, five-class taxonomy (BDR, CRVO, CNV, PDR, Normal) — taxonomically non-equivalent to DR 0–4 (INVARIANTS SB-2.3; DGL-1).
-- Supplementary clinical images: not publicly available; reproducibility structurally limited (SB-2.2).
+#### 4.1.1 Dataset Architecture v2.1
+- **EyePACS (Primary Training):** ~88,000 labeled images, five-class DR staging (DR 0–4), Canon CR-1 camera. Primary dataset for Experiments 1 and 2. Public dataset.
+- **APTOS 2019 (Robustness):** 3,662 labeled samples, five-class DR staging. Dataset for Experiment 3 (robustness under image degradation). Public dataset.
+- **IDRiD (Clinical Validation):** Five-class DR staging with pixel-level lesion annotations (microaneurysms, hemorrhages, hard exudates, soft exudates). Kowa camera. Dataset for Experiments 4 and 5. Public dataset.
+- **Messidor / Messidor-2 (External Generalization):** Topcon camera. Datasets for Experiment 5 (cross-database generalization). Public datasets.
+- **RFMiD (Device Domain Shift):** Topcon, Kowa cameras. Multi-disease including DR subset. Dataset for Experiment 6.
+- **DDR (Device Domain Shift):** Canon, Topcon cameras. Five-class DR grading. Dataset for Experiment 6.
+- **ODIR-5K (Device Domain Shift):** Canon, Zeiss cameras. Multi-disease including DR subset. Dataset for Experiment 6.
+- Supplementary clinical images from Kazakh medical centers: not publicly available; reproducibility structurally limited (SB-2.2).
 
 #### 4.1.2 Class Distribution Analysis and Data Partitioning Strategy
-- Training distribution: Class 0 = 25,810 (73.5%), Class 1 = 2,443 (7.0%), Class 2 = 5,292 (15.1%), Class 3 = 873 (2.5%), Class 4 = 708 (2.0%) (LC-CONF, p. 498).
-- Test distribution: Class 0 = 1,805 (49.3%), Class 1 = 370 (10.1%), Class 2 = 999 (27.3%), Class 3 = 193 (5.3%), Class 4 = 295 (8.0%) (LC-CONF, p. 498).
+- EyePACS class distribution and 5-fold cross-validation with patient-level split.
 - Class imbalance as primary confounding factor necessitating weighted F1 and Cohen's Kappa (ARGUMENT_MAP SC-1.4).
+- Label harmonization methodology for datasets with non-standard taxonomies (Messidor, RFMiD, ODIR-5K).
 
-#### 4.1.3 Hardware Constraints and Computational Resource Limitations
+#### 4.1.3 Hardware Specification and Reproducibility Protocol
 - Document specific hardware configuration (DGL-2).
-- Hardware overheating constraints on epoch count noted (LC-SQOPUS_Q3, p. 86).
-- Processing time differential: 1s 108ms/step with preprocessing vs. 8s 986ms/step without (ARGUMENT_MAP SC-1.3).
+- Fixed random seeds, versioned code repository, and environment specification for full reproducibility.
+- Processing time differential documented (ARGUMENT_MAP SC-1.3).
 
-### 4.2 Experiment 1: Baseline CNN without Preprocessing versus Enhanced CNN
+### 4.2 Experiment 1: Causal Improvement — Preprocessing vs. Architecture on EyePACS
 - **Tests:** H-1 (Preprocessing Dominance)
-- **Evidence target:** ARGUMENT_MAP PC-1, SC-1.1, SC-1.2
+- **Evidence target:** ARGUMENT_MAP PC-1
 
-#### 4.2.1 Training Dynamics and Convergence Analysis
-- Enhanced CNN: 94.5% training accuracy, 91.3% validation accuracy, convergence within 35–40 epochs, validation loss stabilizing at 0.18–0.20 (LC-SQOPUS_Q3, p. 86).
-- Baseline CNN: validation loss stabilizing at 0.27–0.30 (ARGUMENT_MAP SC-1.2).
-- Epoch-level analysis: Epoch 9 val_acc 93.41%, val_loss 0.1833 vs. baseline val_acc 91.71%, val_loss 0.2288 (LC-SQOPUS_Q3, p. 86, Table 2).
+#### 4.2.1 2×2 Factorial Design
+- A full 2×2 factorial experimental design is implemented to isolate the independent and interaction effects of:
+  - Factor A: Preprocessing (resize only vs. full 5-component pipeline)
+  - Factor B: Architecture (ResNet-50 vs. EfficientNet-B3)
+- This results in four controlled experimental configurations:
+  - **Config A:** resize only + ResNet-50
+  - **Config B:** resize + proposed preprocessing + ResNet-50
+  - **Config C:** resize only + EfficientNet-B3
+  - **Config D:** resize + proposed preprocessing + EfficientNet-B3
+- All experiments conducted under matched dataset partitions (5-fold CV with patient-level split), hardware configuration, optimizer settings, and training budgets.
+- Statistical analysis: Mixed-effects model across folds; McNemar test for paired comparison; DeLong test for ROC-AUC comparison; Bootstrap 95% CI.
+- The preprocessing dominance hypothesis (H-1) is considered supported only if the main effect of preprocessing satisfies EH-3 criteria independently for both ResNet-50 (B > A) and EfficientNet-B3 (D > C).
 
-#### 4.2.2 Quantitative Comparison of Diagnostic Metrics
-- Validation accuracy: 71% (no preprocessing) → 86% (with preprocessing) (ARGUMENT_MAP SC-1.1).
-- Classification accuracy: 88% → 91% (ARGUMENT_MAP SC-1.1).
-- Weighted F1 = 0.91; ROC-AUC = 0.9638 (LC-SQOPUS_Q3, p. 84).
-- Evaluate against EH-3 criteria: weighted F1 Δ ≥ 5 pp ✓; ROC-AUC ≥ 0.9638 ✓; Cohen's Kappa — report.
-- **Boundary:** Preprocessing and architectural complexity change are confounded; ablation study required (§5.2) for isolation. Binary vs. five-class classification reporting ambiguity must be resolved (LC-SQOPUS_Q3, §II.7 Assumption 3).
+#### 4.2.2 Training Dynamics and Convergence Analysis
+- Training/validation loss and accuracy curves for all four configurations (A–D).
+- Convergence analysis across architectures with and without preprocessing.
+- Calibration analysis: ECE and Brier Score for each configuration.
 
-### 4.3 Experiment 2: Modified CLAHE Threshold Optimization on Small Datasets
-- **Tests:** H-2 (CLAHE Threshold Sensitivity)
-- **Evidence target:** ARGUMENT_MAP PC-2, SC-2.1, SC-2.2
+#### 4.2.3 Quantitative Comparison of Diagnostic Metrics
+- Primary metrics: weighted F1-score, ROC-AUC, Cohen's Kappa, Accuracy across all four configurations.
+- Evaluate against EH-3 criteria independently for both architectures.
+- Per-class performance analysis under severe class imbalance.
+- **Boundary:** This replaces the v1.0 confounded comparison (2-block CNN without preprocessing vs. 4-block CNN with preprocessing) with a proper factorial design on established architectures.
 
-#### 4.3.1 Threshold Parameter Sensitivity Analysis
-- Clip limit parameter sweep across controlled values.
+### 4.3 Experiment 2: Preprocessing Component Ablation on EyePACS
+- **Tests:** Preprocessing component contribution hierarchy; H-2 (CLAHE Threshold Sensitivity) as sub-analysis
+- **Evidence target:** ARGUMENT_MAP PC-8 (component hierarchy); ARGUMENT_MAP PC-2 (CLAHE sensitivity)
+
+#### 4.3.1 5-Level Component Ablation Design
+- Sequential addition of pipeline components to isolate individual contributions:
+  - Level 1: resize only (FOV standardization)
+  - Level 2: resize + normalize (Stages 1 + 3)
+  - Level 3: resize + CLAHE (Stages 1 + 4)
+  - Level 4: resize + normalize + CLAHE (Stages 1 + 3 + 4)
+  - Level 5: full preprocessing pipeline (all 5 stages)
+- Weighted F1 measured at each ablation level on EyePACS.
+- Image quality metrics (CNR, VVI, Entropy, SSIM) calculated before and after each pipeline stage to quantify preprocessing effect independently of downstream classification.
+
+#### 4.3.2 CLAHE Threshold Sensitivity Analysis (H-2 Sub-Analysis)
+- Clip limit parameter sweep across controlled values on IDRiD.
 - Document sensitivity curve; identify local optimum within tested range.
 - No extrapolation to untested values (INVARIANTS H-2; CFC-1.2).
 - If no identifiable optimum found → H-2 falsification per VCR-3.
 
-#### 4.3.2 Impact on Feature Preservation in Microaneurysms and Small Vessels
+#### 4.3.3 Impact on Feature Preservation in Microaneurysms and Small Vessels
 - Per-class F1-score analysis for DR 1 and DR 2 (microaneurysm and small vessel features).
 - Independent validation of CLAHE parameters within dissertation framework (DGL-5).
 - Sensitivity formula anomaly note if citing LC-SQOPUS_Q2 figures (SIR-3).
 
-### 4.4 Experiment 3: Transfer Learning Strategy Comparison
-- **Tests:** H-3 (Two-Stage Fine-Tuning)
-- **Evidence target:** ARGUMENT_MAP PC-3, SC-3.1, SC-3.2
+### 4.4 Experiment 3: Robustness to Image Degradation on APTOS 2019
+- **Tests:** Preprocessing robustness under degraded imaging conditions
+- **Evidence target:** Robustness evidence supporting PC-1 practical relevance
 
-#### 4.4.1 EfficientNetB0: Frozen versus Progressive Fine-Tuning
-- Published baseline (prior self-publications, cited per SIR-4):
-  - Method 1 (Frozen): Precision = 0.65, Recall = 0.60, F1 = 0.62, Accuracy = 0.80, Macro Avg = 0.72, Weighted Avg = 0.74.
-  - Method 2 (Progressive fine-tuning): Precision = 0.75, Recall = 0.74, F1 = 0.74, Accuracy = 0.80, Macro Avg = 0.77, Weighted Avg = 0.81.
-- Differential: +10 pp Precision, +14 pp Recall, +12 pp F1 (LC-CONF, p. 499, Table 3).
-- Dissertation must replicate and extend these results, not simply reproduce (ARGUMENT_MAP SC-3.1 boundary).
-- LC-CONF and LC-KBTU share identical experimental data → cannot be cited as independent confirmation (SIR-5).
-- Method 1 overfitting documented: training F1 = 0.87 vs. test F1 = 0.62.
+#### 4.4.1 Synthetic Image Degradation Protocol
+- Three distortion types applied at three severity levels (low, medium, high):
+  - Gaussian noise (σ parameter) — simulates sensor noise, low-light acquisition.
+  - Gaussian blur (kernel size) — simulates focus errors, motion blur.
+  - Low illumination (brightness reduction factor) — simulates poor lighting in clinical settings.
+- Performance drop measured relative to clean (undistorted) images.
 
-#### 4.4.2 ResNet50: Feature Extraction versus End-to-End Fine-Tuning
-- ResNet50 as secondary architecture for EH-4 replication requirement.
-- Methodological precedent from LC-SQOPUS_Q2 (ResNet50 on STARE; 100 epochs, lr=0.0003).
-- Boundary: LC-SQOPUS_Q2 results on STARE with different taxonomy; not directly comparable (SB-2.3; ARGUMENT_MAP SC-3.2 boundary).
+#### 4.4.2 Binary Clinical Threshold Evaluation
+- Binary classification: non-referable DR (grades 0–1) vs. referable DR (grades ≥ 2).
+- Clinical screening metrics: sensitivity, specificity, ROC-AUC under degraded conditions.
+- Assessment of preprocessing pipeline's contribution to maintaining clinical screening thresholds under degradation.
 
-#### 4.4.3 Per-Class Performance Analysis under Severe Class Imbalance
-- Per-class precision, recall, F1 for all five DR stages.
-- Focus on minority classes (DR 3, DR 4): instability under severe imbalance (EH-2).
-- Cohen's Kappa (quadratic weights) for ordinal misclassification assessment.
+### 4.5 Experiment 4: Explainability Analysis via Grad-CAM
+- **Tests:** H-5 (Explainability — preprocessing shifts CNN attention toward lesion regions)
+- **Evidence target:** ARGUMENT_MAP PC-7
+
+#### 4.5.1 Grad-CAM Generation Protocol
+- Model: EfficientNet-B4 pre-trained on ImageNet, fine-tuned on EyePACS.
+- Sampling: 10 randomly selected images per DR class (50 total), plus additional degraded images from Experiment 3.
+- Two pipelines compared: (1) Baseline — resize only; (2) Proposed — resize + full 5-component preprocessing.
+- Grad-CAM activation maps generated from the final convolutional layer for the predicted class.
+
+#### 4.5.2 Quantitative IoU with IDRiD Lesion Masks
+- IoU computed between thresholded Grad-CAM activation regions and IDRiD pixel-level lesion masks per lesion type: microaneurysms, hemorrhages, hard exudates, soft exudates.
+- Hypothesis test: IoU(preprocessing) > IoU(baseline) with statistical significance (paired test across IDRiD images) for at least 3 of 4 lesion types.
+- Boundary: Grad-CAM activation does not constitute clinical localization of pathology — it is an interpretability tool, not a diagnostic output (ARGUMENT_MAP NC-14).
+
+#### 4.5.3 Attention Consistency Across Datasets
+- Whether the model attends to similar features on EyePACS, Messidor, and IDRiD images.
+- Attention consistency score as a measure of model stability across data distributions.
 
 ### Conclusions to Chapter 4
-- State H-1, H-2, H-3 outcomes explicitly.
+- State H-1, H-2, H-5 outcomes explicitly.
 - Report falsifying observations if any hypothesis direction not confirmed (VCR-3).
+- Summarize Experiments 1–4 outcomes: preprocessing dominance (H-1), component hierarchy (PC-8), CLAHE sensitivity (H-2), robustness under degradation, and explainability (H-5).
 - Acknowledge confounds and boundary conditions.
 
 ---
 
 ## CHAPTER 5: RELIABILITY VALIDATION AND COMPARATIVE ANALYSIS
 
-**Chapter Function:** Strengthen claim robustness through generalization testing, ablation, and benchmarking.
+**Chapter Function:** Strengthen claim robustness through cross-database generalization, device domain shift evaluation, and benchmarking.
 
-### 5.1 Cross-Database Generalization Testing
+### 5.1 Experiment 5: Clinical Generalization — EyePACS to External Datasets
 
-#### 5.1.1 Model Transferability Across Heterogeneous Image Sources
-- Cross-database generalization metric: ratio of test-set F1-score on STARE to F1-score on APTOS 2019 under same trained model, without retraining (INVARIANTS OD-4).
-- Taxonomic non-equivalence between STARE and APTOS 2019 must be explicitly acknowledged (SB-2.3).
+#### 5.1.1 Cross-Database Transferability Without Retraining
+- Models trained on EyePACS (ResNet-50, EfficientNet-B3) with 5-component preprocessing applied directly to Messidor, Messidor-2, and IDRiD without retraining.
+- Generalization ratio G = F1_external / F1_EyePACS per OD-4. Target: G ≥ 0.85 on at least 2 of 3 external datasets.
+- Label harmonization methodology for Messidor (referable/non-referable mapping to 5-class taxonomy).
+- **Tests:** H-4 (Cross-Database Transferability)
+- **Evidence target:** ARGUMENT_MAP PC-6
 
-#### 5.1.2 Stability Assessment under Varying Image Quality Conditions
-- Test preprocessing pipeline effectiveness under different image quality profiles.
+#### 5.1.2 Benchmarking Against Published Generalization Results
+- Results compared with published benchmarks: Gulshan 2016 (AUC 0.990 Messidor-2), Rakhlin 2017 (AUC 0.967 Messidor-2), Saxena 2020 (AUC 0.92 Messidor-2), Ting 2017 (AUC 0.936 referable DR across 10 datasets).
+- Boundary: No controlled experiment against named systems under identical conditions; contextual benchmarking only (CFC-2.2; ARGUMENT_MAP NC-2).
+
+#### 5.1.3 Stability Assessment under Varying Image Quality Conditions
+- Test preprocessing pipeline effectiveness under different image quality profiles across datasets.
 - Link to OD-1 (operational definition of image quality).
 
-### 5.2 Statistical Validation of Preprocessing Dominance Hypothesis
+### 5.2 Explainability Results
+- Presentation of Grad-CAM comparison results from Experiment 4 (§4.5).
+- Grad-CAM overlays for representative images from each DR class (0–4) — with vs. without preprocessing.
+- IoU scores between Grad-CAM activations and IDRiD pixel-level lesion masks per lesion type.
+- Attention consistency maps across datasets — whether the model attends to similar features on EyePACS, Messidor, and IDRiD images.
 
-#### 5.2.1 Ablation Study: Preprocessing Components versus Architectural Complexity
-- **Critical experiment:** Isolate preprocessing contribution from architectural complexity change.
-- Required for promoting PC-1 claim strength from MODERATE to STRONG (ARGUMENT_MAP §VI, PC-1).
-- Design: Same enhanced architecture with vs. without preprocessing; same baseline architecture with vs. without preprocessing.
-- Must satisfy EH-3 across both custom CNN and EfficientNetB0 on publicly reproducible APTOS 2019 partition.
+### 5.3 Experiment 6: Device Domain Shift — Cross-Camera Evaluation
 
-A full 2×2 factorial experimental design is implemented to isolate the independent and interaction effects of:
+#### 5.3.1 Cross-Device Performance Evaluation
+- Dataset subsets grouped by camera model:
+  - Canon (EyePACS, DDR subset, ODIR-5K subset)
+  - Topcon (Messidor, RFMiD subset, DDR subset)
+  - Kowa (IDRiD, RFMiD subset)
+  - Zeiss (ODIR-5K subset)
+- Performance comparison across camera domains: Accuracy, F1-score, ROC-AUC per camera group.
+- **Tests:** H-6 (Device Robustness across camera domains)
+- **Evidence target:** ARGUMENT_MAP PC-9
 
-Factor A: Preprocessing (OFF vs ON)
-Factor B: Architectural Complexity (Baseline vs Enhanced)
+#### 5.3.2 Device-Induced Distribution Shift Analysis
+- Quantification of performance variance across camera groups.
+- Assessment of whether the preprocessing pipeline normalizes device-specific image characteristics.
+- Boundary: Device domain shift results do not constitute device certification or regulatory compliance (ARGUMENT_MAP NC-16).
 
-This results in four controlled experimental conditions:
+### 5.4 Statistical Validation
 
-A1: Baseline CNN without preprocessing
-A2: Baseline CNN with preprocessing
-B1: Enhanced CNN without preprocessing
-B2: Enhanced CNN with preprocessing
+#### 5.4.1 Bootstrap Confidence Intervals and Mixed-Effects Model
+- Bootstrap 95% CI (≥ 1000 iterations) on all primary metrics across all experiments.
+- Mixed-effects model for cross-fold analysis in Experiment 1 (fold as random effect).
+- McNemar test for paired classification comparison (Experiment 1: B vs A, D vs C).
+- DeLong test for ROC-AUC comparison (Experiments 1, 5).
+- Bonferroni/Holm correction for multiple comparisons (Experiments 1, 2).
 
-All experiments are conducted under matched dataset partitions, hardware configuration, optimizer settings, and training budgets.
+#### 5.4.2 Final Claim Strength Classifications
+- Final claim strength classifications for PC-1 through PC-9 based on accumulated experimental evidence.
+- Classification levels: STRONG, MODERATE, CONDITIONAL, per ARGUMENT_MAP §VI methodology.
+- Conditions for strength promotion documented for each claim.
 
-The preprocessing dominance hypothesis (H-1) is considered supported only if the main effect of preprocessing satisfies EH-3 criteria independently of architectural complexity.
+### 5.5 Comparative Analysis with Published Systems
 
-#### 5.2.2 Quantitative Evidence for Image Quality as Primary Performance Driver
-- Formal evaluation of preprocessing dominance per EH-3.
-- Direction of effect confirmation on secondary dataset per EH-4.
-
-### 5.3 Comparative Analysis with Existing DR Diagnostic Systems
-
-#### 5.3.1 Benchmarking Against Published Results: IDx-DR, EyeNuk, DeepMind
+#### 5.5.1 Benchmarking Against Published Results: IDx-DR, EyeNuk, DeepMind
 - Literature-based comparison using published metrics.
 - **Critical boundary:** No controlled experiment against named systems under identical conditions. This is contextual benchmarking, not a superiority claim (CFC-2.2; ARGUMENT_MAP NC-2).
 
-#### 5.3.2 Performance-Complexity Trade-Off Analysis
+#### 5.5.2 Performance-Complexity Trade-Off Analysis
 - Resource efficiency: EfficientNetB0 "high accuracy-to-computation ratio" (LC-CONF, p. 498).
 - Computational cost comparison between architectures tested.
 - Boundary: Claims about computational efficiency are hardware-specific (DGL-2).
 
-### 5.4 Limitations and Boundary Conditions of the Proposed Approach
+### 5.6 Limitations and Boundary Conditions of the Proposed Approach
 - Comprehensive enumeration of all INVARIANTS scope boundaries (SB-1 through SB-4).
 - Dataset-bound generalization (DGL-1); hardware-specific reproducibility (DGL-2); clinical population non-extrapolation (DGL-3).
 - CLAHE parameter portability limitation (DGL-5); transfer learning domain gap (DGL-6).
-- Non-claims enumeration (ARGUMENT_MAP §VII, NC-1 through NC-13).
+- Non-claims enumeration (ARGUMENT_MAP §VII, NC-1 through NC-17):
+  - NC-14: Grad-CAM activation does not constitute clinical localization — interpretability tool only.
+  - NC-15: External Image Ingestion Protocol validated only for specific Kazakh medical center data.
+  - NC-16: Device domain shift results do not constitute device certification or regulatory compliance.
+  - NC-17: Preprocessing component hierarchy bounded to tested architectures and datasets.
 
 ### Conclusions to Chapter 5
-- State final claim strength classifications for PC-1 through PC-5.
+- State final claim strength classifications for PC-1 through PC-9.
+- Summarize hypothesis outcomes for H-1 through H-6: confirmed, partially confirmed, or falsified (per VCR-3).
 - Identify remaining open questions.
 
 ---
@@ -446,11 +591,12 @@ The preprocessing dominance hypothesis (H-1) is considered supported only if the
 ### 6.2 AI Processing Module Design
 
 #### 6.2.1 Preprocessing Engine with Configurable Pipeline Parameters
-- Configurable pipeline parameters based on validated preprocessing pipeline (§3.1).
+- Configurable pipeline parameters based on the validated 5-component preprocessing pipeline (§3.1): FOV standardization, green channel imaging, normalization, CLAHE enhancement (LAB color space, dynamic clip limit), HSV contrast enhancement.
 - Link to PC-1: the preprocessing-CNN pipeline validated experimentally constitutes the AI processing module core.
 
 #### 6.2.2 Inference Module with Model Selection Logic
-- Model selection between baseline CNN, enhanced CNN, EfficientNetB0, ResNet50 based on computational resource availability.
+- Model selection between ResNet-50, EfficientNet-B3, and EfficientNet-B4 based on computational resource availability and deployment context.
+- Note: Device domain shift results from Experiment 6 (§5.3) inform deployment variability considerations — performance variance across camera groups should be factored into model selection and deployment strategy for environments with heterogeneous camera hardware.
 
 ### 6.3 Clinical Workflow Integration
 
@@ -487,10 +633,10 @@ The preprocessing dominance hypothesis (H-1) is considered supported only if the
 ## CONCLUSION
 
 - Restate Central Thesis (INVARIANTS IT-1) and evaluate against experimental evidence.
-- Summarize hypothesis outcomes: H-1, H-2, H-3 — confirmed, partially confirmed, or falsified (per VCR-3).
-- Enumerate primary contributions (provisions submitted for defense) with final claim strength classifications.
-- Restate scope boundaries and non-claims.
-- Identify directions for future work: prototype implementation, clinical validation trial, architecture comparison, demographic subgroup evaluation, CLAHE parameter portability testing.
+- Summarize hypothesis outcomes: H-1, H-2, H-3, H-4, H-5, H-6 — confirmed, partially confirmed, or falsified (per VCR-3).
+- Enumerate primary contributions (provisions submitted for defense) with final claim strength classifications for PC-1 through PC-9.
+- Restate scope boundaries and non-claims (NC-1 through NC-17).
+- Identify directions for future work: prototype implementation, clinical validation trial, architecture comparison, demographic subgroup evaluation, CLAHE parameter portability testing, extended device domain shift evaluation, prospective explainability validation.
 
 ---
 
@@ -505,7 +651,7 @@ The preprocessing dominance hypothesis (H-1) is considered supported only if the
 ## APPENDICES
 
 ### Appendix A — Source Code of the Preprocessing Pipeline
-- Complete implementation code for the four-stage preprocessing pipeline.
+- Complete implementation code for the five-component preprocessing pipeline.
 
 ### Appendix B — Supplementary Experimental Results and Confusion Matrices
 - Per-class confusion matrices for all experiments (Chapters 4–5).
@@ -517,21 +663,34 @@ The preprocessing dominance hypothesis (H-1) is considered supported only if the
 ### Appendix D — Certificates of Implementation and Approbation Acts
 - Conference participation certificates; publication confirmations.
 
+### Appendix E — Grad-CAM Visualization Gallery
+- Representative Grad-CAM overlay images per DR class (0–4), with and without preprocessing.
+- Visual comparison of attention maps between baseline (resize only) and full 5-component preprocessing pipeline.
+- Selected examples from EyePACS, Messidor, and IDRiD to demonstrate attention consistency across datasets.
+
+### Appendix F — Device Domain Shift Supplementary Tables
+- Per-camera performance matrices: Accuracy, F1-score, ROC-AUC for each camera group (Canon, Topcon, Kowa, Zeiss).
+- Cross-dataset × cross-camera performance heatmaps.
+- Supplementary statistical tables for Experiment 6.
+
 ---
 
 ## TRACEABILITY MATRIX
 
-| Outline Section | Hypothesis Tested | Primary Claim | Sub-Claims | Literature Cards | Invariant Constraints |
-|---|---|---|---|---|---|
-| §4.2 | H-1 | PC-1 | SC-1.1, SC-1.2, SC-1.3, SC-1.4 | LC-SQOPUS_Q3, LC-CONF | EH-3, EH-4, OD-1, OD-3 |
-| §4.3 | H-2 | PC-2 | SC-2.1, SC-2.2 | LC-SQOPUS_Q2, LC-SQOPUS_Q3 | DGL-5, CFC-1.2, SIR-3 |
-| §4.4 | H-3 | PC-3 | SC-3.1, SC-3.2 | LC-CONF, LC-KBTU, LC-SQOPUS_Q2 | SIR-4, SIR-5, SIR-7 |
-| §2.4 | — | PC-4 | SC-4.1 | LC-KazUTB | SB-1.5, SIR-6, CFC-2.4 |
-| §6.1–6.4 | — | PC-5 | SC-5.1 | LC-NAN_RK | SB-4.1, SB-4.2, SB-4.3, DGL-4 |
-| §5.2 | H-1 (ablation) | PC-1 (strength promotion) | — | LC-SQOPUS_Q3 | EH-3, EH-4 |
+| Outline Section | Experiment | Hypothesis Tested | Primary Claim | Sub-Claims | Literature Cards | Invariant Constraints |
+|---|---|---|---|---|---|---|
+| §4.2 | Exp 1 | H-1 | PC-1 | SC-1.1, SC-1.2, SC-1.3, SC-1.4 | LC-SQOPUS_Q3, LC-CONF | EH-3, EH-4, OD-1, OD-3 |
+| §4.3 | Exp 2 | H-2 (sub-analysis) | PC-8 / PC-2 | SC-2.1, SC-2.2 | LC-SQOPUS_Q2, LC-SQOPUS_Q3 | DGL-5, CFC-1.2, SIR-3 |
+| §4.4 | Exp 3 | — (robustness) | PC-1 (robustness evidence) | — | — | OD-1 |
+| §4.5 | Exp 4 | H-5 | PC-7 | — | — | NC-14 |
+| §5.1 | Exp 5 | H-4 | PC-6 | — | — | OD-4, DGL-1 |
+| §5.3 | Exp 6 | H-6 | PC-9 | — | — | NC-16 |
+| §4.4 (v1.0 ref) | — | H-3 | PC-3 | SC-3.1, SC-3.2 | LC-CONF, LC-KBTU, LC-SQOPUS_Q2 | SIR-4, SIR-5, SIR-7 |
+| §2.4 | — | — | PC-4 | SC-4.1 | LC-KazUTB | SB-1.5, SIR-6, CFC-2.4 |
+| §6.1–6.4 | — | — | PC-5 | SC-5.1 | LC-NAN_RK | SB-4.1, SB-4.2, SB-4.3, DGL-4 |
 
 ---
 
 *End of MASTER_OUTLINE.md*
-*Binding references: DISSERTATION_INVARIANTS.md v.1.0 | ARGUMENT_MAP.md | GLOSSARY_v1_0.md*
+*Binding references: DISSERTATION_INVARIANTS.md v2.1 | ARGUMENT_MAP.md v2.1 | GLOSSARY_v2_1.md*
 *All structural decisions traceable to the governing source corpus.*
