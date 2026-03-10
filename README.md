@@ -9,8 +9,9 @@ Candidate: Yesmukhamedov N.S. | IITU Doctoral Programme
 ## Directory Map
 
 | Directory | Purpose |
-|-----------|---------|
-| `governance/` | Epistemic constraint system — thesis, hypothesis, invariants, argument map |
+|-----------|---------| 
+| `governance/` | Epistemic constraint system — thesis, hypothesis, invariants, argument map, contributions |
+| `methods/` | Methodology specifications — preprocessing pipeline, implementation details |
 | `outline/` | Table of contents (EN + KZ) and master structural outline |
 | `glossary/` | Terminological resources — English glossary and EN→KZ translation control |
 | `literature/` | Source corpus — external cards, self-citation cards, and the master index |
@@ -20,6 +21,25 @@ Candidate: Yesmukhamedov N.S. | IITU Doctoral Programme
 | `experiments/` | Experimental protocol and design documents |
 | `prompts/` | LLM meta-prompts for chapter writing, card generation, review, etc. |
 | `assets/` | Figures, diagrams, exported images |
+
+## Governance Files
+
+| File | Purpose |
+|------|---------|
+| `governance/INVARIANTS.md` | Master constraint document (v2.2) — immutable thesis, hypotheses, operational definitions |
+| `governance/CENTRAL_THESIS.md` | Single-paragraph thesis formulation with model=preprocessing+CNN framing |
+| `governance/HYPOTHESIS.md` | Central hypothesis + H-1 through H-6 decomposition + argument structure |
+| `governance/ARGUMENT_MAP.md` | Formal claim-evidence-dependency structure (PC-1 through PC-9) |
+| `governance/RESEARCH_ARCHITECTURE.md` | Methodological blueprint (v2.2) |
+| `governance/CORE_OBJECTIVE.md` | Research objective formulation |
+| `governance/CONTRIBUTIONS.md` | Scientific contributions register (3 primary + 3 supporting) |
+
+## Methods Files
+
+| File | Purpose |
+|------|---------|
+| `methods/preprocessing-pipeline.md` | 6-stage pipeline specification with design principle and pipeline-as-model assertion |
+| `methods/implementation.md` | Software stack, hardware config, training config, model definition, Grad-CAM with ALO |
 
 ## Naming Conventions
 

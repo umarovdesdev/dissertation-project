@@ -31,6 +31,7 @@
 **Claim Type:** Empirical
 **Required Evidence Type:** 2×2 factorial ablation on EyePACS (Experiment 1); four configurations — (A) resize only + ResNet-50, (B) preprocessing + ResNet-50, (C) resize only + EfficientNet-B3, (D) preprocessing + EfficientNet-B3; 5-fold cross-validation with patient-level split; mixed-effects model. Preprocessing dominance validated if Performance(B) > Performance(A) AND Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures.
 **Dependency:** None (foundational claim; corresponds to H-1)
+**Tests whether:** Preprocessing improves CNN performance independently of architecture.
 
 ---
 
@@ -40,6 +41,7 @@
 **Claim Type:** Empirical
 **Required Evidence Type:** Parameter sweep experiment; per-class F1-score across clip limit values; IDRiD as the CLAHE threshold sensitivity test dataset.
 **Dependency:** Depends on PC-1 (CLAHE is a component of the pipeline validated in PC-1)
+**Tests whether:** CLAHE clip limit exhibits a parameter-dependent sensitivity profile with an identifiable optimum.
 
 ---
 
@@ -49,6 +51,7 @@
 **Claim Type:** Empirical
 **Required Evidence Type:** Comparative experiment; matched preprocessing; EfficientNetB0 on APTOS 2019 + supplementary clinical images; metric values: Precision, Recall, F1, Macro Avg, Weighted Avg, Cohen's Kappa for both strategies.
 **Dependency:** Depends on PC-1 (preprocessing regime must be active for this comparison)
+**Tests whether:** Progressive fine-tuning outperforms frozen-only transfer learning under the preprocessing regime.
 **Note:** This claim is now replicated on EyePACS (in addition to prior APTOS 2019 self-publication results from LC-SAPAKOVA-2025 / LC-Yesmukhamedov-2025-SELF).
 
 ---
@@ -77,33 +80,35 @@
 **Claim Type:** Empirical
 **Required Evidence Type:** Experiment 5 — cross-database transferability evaluation. Trained models (ResNet-50, EfficientNet-B3) applied to Messidor, Messidor-2, and IDRiD without retraining; generalization ratio G computed per external dataset.
 **Dependency:** Depends on PC-1 (pipeline must be validated before transferability is tested)
+**Tests whether:** The preprocessing pipeline enables cross-database generalization without retraining.
 
 ---
 
 ### PC-7
 **Claim ID:** PC-7
-**Formal Statement:** Grad-CAM analysis on EfficientNet-B4 demonstrates that models trained with the 5-component preprocessing pipeline exhibit higher IoU between activation regions and IDRiD pixel-level lesion masks (microaneurysms, hemorrhages, hard exudates, soft exudates) than models trained with resize-only baseline.
+**Formal Statement:** Grad-CAM analysis on EfficientNet-B4 demonstrates that models trained with the 5-component preprocessing pipeline exhibit higher Attention–Lesion Overlap (ALO) and higher IoU between activation regions and IDRiD pixel-level lesion masks (microaneurysms, hemorrhages, hard exudates, soft exudates) than models trained with resize-only baseline. ALO = area(GradCAM ∩ lesion_mask) / area(lesion_mask) is the **primary** explainability metric (measures lesion coverage by attention); IoU = area(GradCAM ∩ lesion_mask) / area(GradCAM ∪ lesion_mask) is the **secondary** metric (measures symmetric spatial precision). Hypothesis: ALO_preprocessing > ALO_baseline (primary), IoU_preprocessing > IoU_baseline (secondary).
 **Claim Type:** Empirical
-**Required Evidence Type:** Experiment 4 — Grad-CAM explainability analysis. IoU between Grad-CAM activation maps and IDRiD lesion masks computed per lesion type for preprocessing vs. baseline conditions on EfficientNet-B4.
+**Required Evidence Type:** Experiment 4 — Grad-CAM explainability analysis. ALO (primary) and IoU (secondary) between Grad-CAM activation maps and IDRiD lesion masks computed per lesion type for preprocessing vs. baseline conditions on EfficientNet-B4.
 **Dependency:** Depends on PC-1 (preprocessing pipeline validity) and PC-6 (cross-database generalization to IDRiD)
+**Tests whether:** Preprocessing directs CNN attention toward clinically relevant lesion regions.
 
 ---
-
-### PC-8
 **Claim ID:** PC-8
 **Formal Statement:** Component-level ablation of the 5-component pipeline identifies a ranked contribution hierarchy among FOV standardization, green channel imaging, normalization, CLAHE enhancement, and HSV contrast enhancement, measured by incremental weighted F1 improvement on EyePACS.
 **Claim Type:** Empirical
 **Required Evidence Type:** Experiment 2 — component-level ablation. Sequential addition/removal of individual pipeline components; weighted F1 measured at each ablation level (resize only → full pipeline) on EyePACS.
 **Dependency:** Depends on PC-1 (full pipeline must be established before component-level ablation is meaningful)
+**Tests whether:** Individual preprocessing components contribute differentially to classification performance.
 
 ---
 
 ### PC-9
 **Claim ID:** PC-9
-**Formal Statement:** Models trained on EyePACS with the 5-component preprocessing pipeline maintain classification performance across images from different fundus camera manufacturers (Canon, Topcon, Kowa, Zeiss), as evaluated on RFMiD, DDR, ODIR-5K, IDRiD, and Messidor subsets grouped by camera model.
+**Formal Statement:** Models trained on EyePACS with the 5-component preprocessing pipeline maintain classification performance across images from different fundus camera manufacturers (Canon, Topcon, Kowa, Zeiss), as evaluated on RFMiD, DDR, ODIR-5K, IDRiD, and Messidor subsets grouped by camera model. Preprocessing standardizes retinal image appearance and reduces inter-device distribution shift, thereby improving cross-device generalization.
 **Claim Type:** Empirical
 **Required Evidence Type:** Experiment 6 — device domain shift evaluation. F1-score and ROC-AUC computed per camera group across RFMiD, DDR, ODIR-5K, IDRiD, and Messidor subsets.
 **Dependency:** Depends on PC-1 (pipeline validity) and PC-6 (cross-database generalization established)
+**Tests whether:** Preprocessing standardizes retinal image appearance and reduces device-induced distribution shift across camera manufacturers.
 
 ---
 
@@ -332,12 +337,12 @@
 ### SC-7.1
 **Parent Claim:** PC-7
 **Sub-Claim ID:** SC-7.1
-**Formal Statement:** IoU between Grad-CAM activation regions and IDRiD pixel-level lesion masks is computed per lesion type (microaneurysms, hemorrhages, hard exudates, soft exudates) for EfficientNet-B4 models trained with preprocessing vs. resize-only baseline. IoU(preprocessing) > IoU(baseline) constitutes the quantitative evidence for PC-7.
+**Formal Statement:** ALO (primary) and IoU (secondary) between Grad-CAM activation regions and IDRiD pixel-level lesion masks are computed per lesion type (microaneurysms, hemorrhages, hard exudates, soft exudates) for EfficientNet-B4 models trained with preprocessing vs. resize-only baseline. ALO(preprocessing) > ALO(baseline) constitutes the primary quantitative evidence for PC-7; IoU(preprocessing) > IoU(baseline) constitutes secondary evidence.
 
 **Evidence Reference:**
 - Dissertation Section: Experiment 4 (Grad-CAM Explainability Analysis)
 - Dataset: IDRiD (pixel-level lesion annotations)
-- Metrics: IoU per lesion type (microaneurysms, hemorrhages, hard exudates, soft exudates); attention consistency score
+- Metrics: ALO per lesion type (primary — measures lesion coverage by attention); IoU per lesion type (secondary — measures symmetric spatial precision); attention consistency score
 
 **Boundary Conditions:**
 - IoU is an interpretability metric, not clinical localization — Grad-CAM activation does not constitute diagnostic delineation of lesion boundaries (NC-14).
@@ -704,7 +709,18 @@ The following propositions are intentionally excluded from the dissertation's ar
 
 ---
 
+## VIII. EXPERIMENT 7 REFERENCE — CLINICAL VALIDATION (DIRTY DATA PIPELINE)
+
+**Context:** Experiment 7 tests the preprocessing pipeline on clinical fundus images from Kazakh medical centers (dirty data — variable quality, non-standardized acquisition). This experiment provides clinical validation evidence that supplements PC-1 (preprocessing dominance under real-world conditions).
+
+**Linkage:** Experiment 7 results, if positive, strengthen PC-1 by demonstrating that preprocessing dominance holds not only on curated benchmark datasets but also under real-world clinical imaging conditions. Results are bounded per NC-15 (dirty data pipeline validation is specific to the tested clinical data source and does not generalize to arbitrary clinical data without independent validation).
+
+**Formal Claim Scope:** Experiment 7 does not introduce a new primary claim. Its results are reported under PC-1 as supplementary clinical evidence, with explicit acknowledgment of the limitations in NC-15.
+
+---
+
 *End of Argument_Map*
-*Document version: 2.1. Supersedes v1.0.*
-*Document bound to: DISSERTATION_INVARIANTS.md v2.1*
-*All claims traceable to: LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01, LC-2025-Yesmukhamedov-01, and Experiments 1–6 as specified in the v2.1 Dissertation Project.*
+*Document version: 2.2. Supersedes v2.1.*
+*Document bound to: DISSERTATION_INVARIANTS.md v2.2*
+*Changes from v2.1: ALO promoted to primary explainability metric (PC-7, SC-7.1); cross-device mechanism added to PC-9; "Tests whether" linkages added to all PCs; Experiment 7 reference added; central hypothesis and argument structure referenced from HYPOTHESIS.md.*
+*All claims traceable to: LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01, LC-2025-Yesmukhamedov-01, and Experiments 1–7 as specified in the v2.2 Dissertation Project.*

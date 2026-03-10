@@ -2,6 +2,20 @@
 
 Automated Diabetic Retinopathy Detection via Preprocessing and CNN Classification
 
+---
+
+## Research Objective
+
+To evaluate whether preprocessing-based normalization of fundus images improves robustness of CNN-based diabetic retinopathy detection across imaging devices, illumination conditions, and noise levels, while preserving clinically relevant retinal features.
+
+---
+
+## Central Hypothesis
+
+The proposed preprocessing pipeline reduces domain variability across fundus imaging devices and acquisition conditions while preserving diagnostically relevant retinal features, leading to improved CNN-based diabetic retinopathy detection. See `governance/HYPOTHESIS.md` for the full central hypothesis formulation and decomposition into H-1 through H-6.
+
+---
+
 ## 1. Datasets
 
 The study uses multiple publicly available retinal image datasets.
@@ -30,9 +44,9 @@ Procedure:
 3. Process repeated **5 times**.
 4. Final metrics reported as:
 
-[
+\[
 mean \pm std
-]
+\]
 
 This reduces variance due to random data splits.
 
@@ -44,7 +58,7 @@ This reduces variance due to random data splits.
 
 * ROC-AUC
 * Weighted F1-score
-* Quadratic Cohen’s Kappa
+* Quadratic Cohen's Kappa
 * Accuracy
 
 These are standard metrics for DR severity grading.
@@ -75,7 +89,15 @@ Calibration curves are also generated.
 
 ---
 
-## 3.4 Computational metrics
+## 3.4 Explainability metrics
+
+* **ALO (Attention–Lesion Overlap)** — Primary explainability metric: `ALO = area(GradCAM ∩ lesion_mask) / area(lesion_mask)`. Measures what fraction of the lesion is covered by model attention. Clinically relevant — directly answers "Does the model attend to the lesion?"
+* **IoU (Intersection-over-Union)** — Secondary explainability metric: `IoU = area(GradCAM ∩ lesion_mask) / area(GradCAM ∪ lesion_mask)`. Measures symmetric spatial precision of attention overlap.
+* Attention consistency score
+
+---
+
+## 3.5 Computational metrics
 
 To evaluate computational efficiency:
 
@@ -86,7 +108,7 @@ To evaluate computational efficiency:
 
 ---
 
-## 3.5 Statistical validation
+## 3.6 Statistical validation
 
 Statistical significance is evaluated using:
 
@@ -98,10 +120,12 @@ Statistical significance is evaluated using:
 
 # 4. Experiment 1 — Causal Improvement (Preprocessing vs Architecture)
 
-Purpose:
+**Purpose:**
 Determine whether preprocessing improves classification independently of CNN architecture.
 
-Dataset: **EyePACS**
+**Tests whether:** Preprocessing improves CNN performance independently of architecture (H-1).
+
+**Dataset:** EyePACS
 
 Two architectures are evaluated:
 
@@ -123,16 +147,18 @@ Statistical analysis:
 
 Hypothesis:
 
-[
+\[
 Performance_{preprocessing} > Performance_{baseline}
-]
+\]
 
 ---
 
 # 5. Experiment 2 — Preprocessing Component Ablation
 
-Purpose:
+**Purpose:**
 Quantify the contribution of each preprocessing component.
+
+**Tests whether:** Individual preprocessing components contribute differentially to classification performance (H-1 decomposition).
 
 Preprocessing pipeline consists of:
 
@@ -170,10 +196,12 @@ Purpose: determine which components contribute most to performance.
 
 # 6. Experiment 3 — Robustness to Image Degradation
 
-Purpose:
+**Purpose:**
 Evaluate model robustness under degraded imaging conditions.
 
-Dataset: **APTOS 2019**
+**Tests whether:** The preprocessing pipeline provides robustness to noise and illumination variation (H-1 extension).
+
+**Dataset:** APTOS 2019
 
 Image perturbations:
 
@@ -210,10 +238,12 @@ Metrics:
 
 # 7. Experiment 4 — Explainability Analysis
 
-Purpose:
+**Purpose:**
 Determine whether preprocessing shifts CNN attention toward clinically relevant lesion regions.
 
-Model: **EfficientNet-B4**
+**Tests whether:** Preprocessing directs CNN attention toward clinically relevant lesion regions, quantified by ALO and IoU (H-5).
+
+**Model:** EfficientNet-B4
 
 Images:
 
@@ -233,24 +263,50 @@ Explainability method:
 
 Quantitative evaluation:
 
-[
-IoU = GradCAM \cap lesion\ mask
-]
+**Primary metric — Attention–Lesion Overlap (ALO):**
+
+\[
+ALO = \frac{area(GradCAM \cap lesion\_mask)}{area(lesion\_mask)}
+\]
+
+**Secondary metric — Intersection-over-Union (IoU):**
+
+\[
+IoU = \frac{area(GradCAM \cap lesion\_mask)}{area(GradCAM \cup lesion\_mask)}
+\]
 
 Hypothesis:
 
-[
-IoU_{preprocessing} > IoU_{baseline}
-]
+\[
+ALO_{preprocessing} > ALO_{baseline} \quad \text{(primary)}
+\]
+\[
+IoU_{preprocessing} > IoU_{baseline} \quad \text{(secondary)}
+\]
 
 Lesion masks obtained from **IDRiD dataset**.
 
 ---
 
+## 7.1 Lesion Alignment Analysis
+
+To verify that preprocessing improves clinically relevant feature extraction, Grad-CAM attention maps are compared with lesion segmentation masks from IDRiD. This analysis is performed per lesion type (microaneurysms, hemorrhages, hard exudates, soft exudates) and produces:
+
+* Per-lesion-type ALO scores for baseline vs. proposed preprocessing
+* Per-lesion-type IoU scores for baseline vs. proposed preprocessing
+* Visual overlays showing Grad-CAM activation relative to annotated lesion regions
+* Statistical comparison (paired test across IDRiD images) for at least 3 of 4 lesion types
+
+This subsection provides the quantitative bridge between "preprocessing improves classification" (PC-1) and "preprocessing improves attention to clinically relevant structures" (PC-7).
+
+---
+
 # 8. Experiment 5 — Clinical Generalization
 
-Purpose:
+**Purpose:**
 Evaluate generalization to independent clinical datasets.
+
+**Tests whether:** The preprocessing pipeline enables cross-database generalization without retraining (H-4).
 
 Training dataset:
 
@@ -274,8 +330,12 @@ Metrics:
 
 # 9. Experiment 6 — Device Domain Shift
 
-Purpose:
+**Purpose:**
 Evaluate robustness to images captured by different fundus cameras.
+
+**Tests whether:** Preprocessing standardizes retinal image appearance and reduces distribution differences between camera devices, leading to improved cross-device generalization (H-6).
+
+**Hypothesis:** Preprocessing standardizes retinal image appearance and reduces distribution differences between camera devices, leading to improved cross-device generalization. Models with preprocessing will exhibit lower cross-device performance variance than models without preprocessing.
 
 Datasets and devices:
 
@@ -300,7 +360,32 @@ Metrics:
 
 ---
 
-# 10. Image Quality Improvement Analysis
+# 10. Experiment 7 — Clinical Validation (Dirty Data Pipeline)
+
+**Purpose:**
+Test the full preprocessing pipeline on clinical fundus images from Kazakh medical centers. These images represent "dirty data" — variable quality, non-standardized acquisition protocols, potential artifacts, and diverse camera hardware.
+
+**Tests whether:** The preprocessing pipeline maintains effectiveness under real-world clinical imaging conditions outside of curated benchmark datasets.
+
+**Dataset:** Clinical fundus images from Kazakh medical centers (access pending institutional agreements).
+
+**Protocol:**
+1. Apply the full 6-stage preprocessing pipeline to clinical images
+2. Evaluate classification performance using the CNN model trained on EyePACS (no retraining)
+3. Compare performance with and without preprocessing on the clinical images
+4. Document image quality characteristics and preprocessing effects
+
+**Metrics:**
+
+* Accuracy, Weighted F1, ROC-AUC on clinical images
+* ALO and IoU on images with available lesion annotations (if applicable)
+* Qualitative assessment of preprocessing effects on clinical image characteristics
+
+**Linkage:** Results supplement PC-1 (preprocessing dominance under real-world conditions). Bounded per NC-15 (validation is specific to the tested clinical data source).
+
+---
+
+# 11. Image Quality Improvement Analysis
 
 To quantify the effect of preprocessing, image quality metrics are calculated:
 
@@ -312,3 +397,25 @@ To quantify the effect of preprocessing, image quality metrics are calculated:
 These metrics measure improvement in vascular feature visibility.
 
 ---
+
+# 12. Argument Map
+
+The experimental protocol is grounded in the following causal argument:
+
+**Causal Chain 1 (Problem):**
+Device variability → image distribution shift → degraded CNN performance
+
+**Causal Chain 2 (Solution):**
+Preprocessing pipeline → image normalization → improved feature visibility → improved CNN generalization
+
+**Experiment-to-Argument Mapping:**
+
+| Experiment | Tests |
+|---|---|
+| Exp 1 | Preprocessing improves CNN performance (Chain 2, terminal node) |
+| Exp 2 | Which preprocessing components drive improvement (Chain 2, decomposition) |
+| Exp 3 | Robustness to noise and illumination (Chain 1, resistance to variability) |
+| Exp 4 | Preprocessing directs attention to lesions (Chain 2, feature visibility node) |
+| Exp 5 | Cross-database generalization (Chain 2, generalization node) |
+| Exp 6 | Cross-device generalization (Chain 1 + Chain 2, device variability) |
+| Exp 7 | Clinical validation under real-world conditions (Chain 2, external validation) |

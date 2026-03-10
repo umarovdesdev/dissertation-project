@@ -4,7 +4,7 @@
 **Research Domain:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification  
 **Candidate:** Yesmukhamedov N.S.  
 **Document Status:** Binding constraint system — supersedes informal claim formulations across all dissertation chapters.  
-**Document Version:** 2.1. Supersedes v1.0. Updated to reflect Dissertation Project v2.1 experimental protocol integration — expanded hypotheses (H-4 through H-6), updated preprocessing pipeline (5-component system), expanded dataset architecture, new scope boundaries, and additional non-claims (NC-14 through NC-17).
+**Document Version:** 2.2. Supersedes v2.1. Updated to add central unifying hypothesis, ALO as primary explainability metric (H-5), cross-device mechanism (H-6), OD-7 (ALO definition), Experiment 7 reference, and pipeline-as-model framing.
 
 ---
 
@@ -21,6 +21,12 @@
 ---
 
 ## II. CORE HYPOTHESES (Operational Form)
+
+### Central Unifying Hypothesis
+
+The proposed preprocessing pipeline reduces domain variability across fundus imaging devices and acquisition conditions while preserving diagnostically relevant retinal features, leading to improved CNN-based diabetic retinopathy detection. Hypotheses H-1 through H-6 are decompositions of this central hypothesis, each testing a specific aspect of the overarching claim.
+
+---
 
 **H-1 (Primary — Preprocessing Dominance):**
 
@@ -82,7 +88,7 @@
 **H-6 (Secondary — Device Robustness):**
 
 *If* a CNN model trained on EyePACS with the full preprocessing pipeline is evaluated on fundus images from datasets captured by different camera hardware (RFMiD: Topcon/Kowa; DDR: Canon/Topcon; ODIR-5K: Canon/Zeiss),  
-*then* classification performance will be maintained across camera domains, with cross-device performance variance remaining within acceptable bounds relative to in-domain performance.
+*then* classification performance will be maintained across camera domains, with cross-device performance variance remaining within acceptable bounds relative to in-domain performance. Preprocessing standardizes retinal image appearance and reduces distribution differences between camera devices, leading to improved cross-device generalization.
 
 - **Independent variable:** Camera/device domain (grouped by camera model across RFMiD, DDR, ODIR-5K).
 - **Dependent variables:** Accuracy, F1-score, ROC-AUC per camera group.
@@ -166,7 +172,7 @@ The following metrics are reported as supplementary and cannot independently est
 - Clinical screening metrics: Sensitivity, Specificity, PPV, NPV for referable DR (grade ≥ 2) — reported for Experiments 3 and 5
 - Calibration metrics: Expected Calibration Error (ECE) and Brier Score — reported for Experiments 1 and 5
 - Image quality metrics: Contrast-to-Noise Ratio (CNR), Vessel Visibility Index, Entropy, SSIM — reported for pipeline analysis in Experiment 2
-- Explainability metrics: Grad-CAM IoU with lesion masks, attention consistency score — reported for Experiment 4
+- Explainability metrics: Grad-CAM ALO (primary) and IoU (secondary) with lesion masks, attention consistency score — reported for Experiment 4
 - Generalization ratio: G = F1_external / F1_EyePACS per OD-4 — reported for Experiments 5 and 6
 
 **EH-3: Empirical Dominance Criterion**
@@ -249,7 +255,7 @@ Projected outcomes for Kazakhstan deployment cited in LC-2025-Yesmukhamedov-01 (
 
 ## VIII. THESIS VERSION CONTROL RULE
 
-**VCR-1:** The Central Thesis (Section I) and Core Hypotheses (Section II) are immutable post-ratification of this document. Modifications to the thesis or hypotheses require the creation of a new versioned Invariants document; they do not propagate retroactively to literature cards.
+**VCR-1:** The Central Thesis (Section I) and Core Hypotheses (Section II) are immutable post-ratification of this document. Modifications to the thesis or hypotheses require the creation of a new versioned Invariants document; they do not propagate retroactively to literature cards. Note: The addition of a Central Unifying Hypothesis in v2.2 is a structural addition (providing an umbrella formulation) that does not modify the substance of H-1 through H-6. The addition of ALO as a supplementary primary metric to H-5 (alongside IoU as secondary) constitutes a metric specification clarification, not a modification of the hypothesis direction.
 
 **VCR-2:** Literature cards record the state of source interpretation at the time of extraction. If new sources are added to the dissertation, new literature cards must be created and appended to the literature card corpus. Existing literature cards are not modified to accommodate new sources.
 
@@ -283,4 +289,4 @@ EfficientNetB0, EfficientNet-B3, EfficientNet-B4, and ResNet-50 weights were pre
 
 ---
 
-*Document version: 2.1. Supersedes v1.0. Binding upon ratification. All subsequent dissertation drafts are subject to constraint verification against this document.*
+*Document version: 2.2. Supersedes v2.1. Binding upon ratification. All subsequent dissertation drafts are subject to constraint verification against this document.*

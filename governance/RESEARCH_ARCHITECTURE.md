@@ -5,7 +5,7 @@
 **Candidate:** Yesmukhamedov N.S.
 **Status:** Binding Methodological Blueprint
 **Function:** Experimental, statistical, and architectural formalization of the dissertation research
-**Document Version:** 2.1. Supersedes v1.0. Consistent with INVARIANTS v2.1 and Dissertation Project v2.1.
+**Document Version:** 2.2. Supersedes v2.1. Consistent with INVARIANTS v2.2 and Dissertation Project v2.2.
 
 ---
 
@@ -108,7 +108,9 @@ where F1_EyePACS is the test-set F1-score on the primary training dataset (EyePA
 
 # 3. PREPROCESSING PIPELINE ARCHITECTURE
 
-Defined per OD-3 (v2.1).
+Defined per OD-3 (v2.2).
+
+**Key Scientific Framing:** The preprocessing pipeline is defined as an integral component of the diagnostic model — Stage 1 of a two-stage system: `model = preprocessing + CNN`. This is the central design decision of this work: preprocessing is not ancillary data preparation but defines the feature space available to the CNN. See `methods/preprocessing-pipeline.md` for the full 6-stage pipeline specification.
 
 ## 3.1 Ordered Pipeline (5-Component System)
 
@@ -158,6 +160,21 @@ These metrics are reported in Experiment 2 (pipeline analysis) and provide evide
 ---
 
 # 4. MODEL ARCHITECTURE LAYER
+
+## 4.0 Standardized Training Configuration
+
+| Parameter | Value |
+| --- | --- |
+| Optimizer | Adam |
+| Learning rate | 1e-4 |
+| Batch size | 16 |
+| Maximum epochs | 50 (with early stopping) |
+| Loss function | Cross-entropy |
+| Input resolution | 512×512 |
+
+See `methods/implementation.md` for full implementation details.
+
+---
 
 ## 4.1 ResNet-50 (Architecture A in Factorial Design)
 
@@ -297,14 +314,14 @@ Performance drop is measured relative to clean (undistorted) images.
 
 **Explainability method:** Grad-CAM (Gradient-weighted Class Activation Mapping).
 
-**Quantitative evaluation:** Intersection-over-Union (IoU) between Grad-CAM activation regions and pixel-level lesion masks from the IDRiD dataset. Four lesion types: microaneurysms, hemorrhages, hard exudates, soft exudates.
+**Quantitative evaluation:** Attention–Lesion Overlap (ALO, primary) and Intersection-over-Union (IoU, secondary) between Grad-CAM activation regions and pixel-level lesion masks from the IDRiD dataset. Four lesion types: microaneurysms, hemorrhages, hard exudates, soft exudates.
 
-**Hypothesis:** IoU(preprocessing) > IoU(baseline), demonstrating that preprocessing directs model attention to clinically relevant structures.
+**Hypothesis:** ALO(preprocessing) > ALO(baseline) (primary), IoU(preprocessing) > IoU(baseline) (secondary), demonstrating that preprocessing directs model attention to clinically relevant structures.
 
 **Deliverables:**
 
 * Grad-CAM overlays for representative images from each DR class (0–4) — with vs. without preprocessing
-* IoU scores between Grad-CAM activations and IDRiD pixel-level lesion masks (per lesion type)
+* ALO scores (primary) and IoU scores (secondary) between Grad-CAM activations and IDRiD pixel-level lesion masks (per lesion type)
 * Attention consistency maps across datasets — whether the model attends to similar features on EyePACS, Messidor, and IDRiD images
 
 ---
@@ -348,6 +365,20 @@ Performance drop is measured relative to clean (undistorted) images.
 **Cross-camera evaluation:** Performance comparison across four camera manufacturer domains (Canon, Topcon, Kowa, Zeiss). Evaluates device-induced distribution shift.
 
 **Metrics:** Accuracy, F1-score, ROC-AUC per camera group. Generalization ratio G per camera domain.
+
+---
+
+## 5.7 Experiment 7 — Clinical Validation (Dirty Data Pipeline)
+
+**Purpose:** Test the preprocessing pipeline on clinical fundus images from Kazakh medical centers. These images represent real-world clinical data with variable quality and non-standardized acquisition.
+
+**Dataset:** Clinical fundus images from Kazakh medical centers.
+
+**Protocol:** Apply full preprocessing pipeline to clinical images; evaluate classification using EyePACS-trained model without retraining; compare performance with and without preprocessing.
+
+**Metrics:** Primary metrics (Weighted F1, ROC-AUC, Accuracy); ALO and IoU where lesion annotations are available.
+
+**Linkage:** Results supplement PC-1. Bounded per NC-15.
 
 ---
 
@@ -407,7 +438,8 @@ Reported for pipeline analysis in Experiment 2.
 
 ## 6.6 Explainability Metrics
 
-* Grad-CAM IoU with lesion masks (per lesion type)
+* **ALO (Attention–Lesion Overlap)** — Primary: `ALO = area(GradCAM ∩ lesion_mask) / area(lesion_mask)` — measures lesion coverage by attention
+* **IoU (Intersection-over-Union)** — Secondary: `IoU = area(GradCAM ∩ lesion_mask) / area(GradCAM ∪ lesion_mask)` — measures symmetric spatial precision
 * Attention consistency score
 
 Reported for Experiment 4.
@@ -467,6 +499,12 @@ Resource-limited defined per OD-6:
 * Limited network access
 
 All experiments bounded to actual hardware conditions.
+
+---
+
+# 8.5 Implementation Details
+
+Software stack: Python 3.11, PyTorch, Torchvision, OpenCV, NumPy, Scikit-learn, Matplotlib. Hardware configuration documented at experiment execution time (TBD). See `methods/implementation.md` for full specification.
 
 ---
 
@@ -531,6 +569,7 @@ Novelty IS:
 | PC-7 | Exp 4 Grad-CAM IoU (IoU_preproc > IoU_baseline on IDRiD masks) |
 | PC-8 | Exp 2 component ablation (preprocessing component hierarchy) |
 | PC-9 | Exp 6 cross-camera metrics (device domain shift robustness) |
+| PC-1 (supplementary) | Exp 7 clinical validation (dirty data pipeline) |
 
 Mapped to ARGUMENT_MAP.
 
