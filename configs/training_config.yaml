@@ -1,0 +1,49 @@
+model:
+  architecture: resnet50
+  pretrained: true
+  num_classes: 5          # DR grades 0-4 (No DR, Mild, Moderate, Severe, Proliferative)
+  dropout: 0.5
+  freeze_backbone: false  # Set true to only train the classifier head
+
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  splits_dir: data/splits
+  image_size: 224
+  num_workers: 4
+  augmentation:
+    horizontal_flip: true
+    vertical_flip: false
+    rotation_degrees: 15
+    color_jitter: true
+
+training:
+  epochs: 50
+  batch_size: 32
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-4
+  optimizer: adam         # adam | sgd
+  scheduler: cosine       # cosine | step | none
+  step_size: 10           # for StepLR only
+  gamma: 0.1              # for StepLR only
+  early_stopping_patience: 10
+  mixed_precision: true
+
+loss:
+  type: cross_entropy     # cross_entropy | focal | label_smoothing
+  label_smoothing: 0.1    # used when type is label_smoothing
+  focal_gamma: 2.0        # used when type is focal
+
+logging:
+  experiment_name: exp1_baseline
+  checkpoint_dir: experiments/checkpoints
+  log_interval: 10        # log every N batches
+  save_best_only: true
+
+evaluation:
+  metrics:
+    - accuracy
+    - quadratic_kappa
+    - auc_roc
+    - f1_macro
+  threshold: 0.5
