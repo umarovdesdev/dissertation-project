@@ -30,13 +30,18 @@ def compute_class_weights(
 
     counts = Counter(labels)
     n_total = len(labels)
+    missing = [c for c in range(num_classes) if counts.get(c, 0) == 0]
+    if missing:
+        import warnings
+        warnings.warn(
+            f"compute_class_weights: classes {missing} have zero samples. "
+            "Using count=1 as fallback weight — check dataset split.",
+            UserWarning,
+            stacklevel=2,
+        )
     weights = []
     for cls in range(num_classes):
-        n_c = counts.get(cls, 0)
-        if n_c == 0:
-            raise ValueError(
-                f"Class {cls} has zero samples — cannot compute inverse-frequency weight."
-            )
+        n_c = counts.get(cls, 0) or 1  # fallback to 1 to avoid division by zero
         weights.append(n_total / (num_classes * n_c))
 
     w_tensor = torch.tensor(weights, dtype=torch.float32)
