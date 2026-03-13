@@ -2,6 +2,8 @@
 
 Automated Diabetic Retinopathy Detection via Preprocessing and CNN Classification
 
+**Document Version:** 3.0 — V3 sync: Experiment 3 (robustness/APTOS) DROPPED; old Experiments 5+6 MERGED into V3 Experiment 3; Experiment 7 → future work placeholder; "dynamic clip limit" → "optimized clip limit"; "6-stage" → "5-component pipeline".
+
 ---
 
 ## Research Objective
@@ -20,13 +22,13 @@ The proposed preprocessing pipeline reduces domain variability across fundus ima
 
 The study uses multiple publicly available retinal image datasets.
 
-| Dataset               | Role                                        |
-| --------------------- | ------------------------------------------- |
-| EyePACS               | Primary training and ablation experiments   |
-| APTOS 2019            | Robustness experiments                      |
-| IDRiD                 | Clinical validation and lesion localization |
-| Messidor / Messidor-2 | External generalization                     |
-| RFMiD / DDR / ODIR    | Device domain shift evaluation              |
+| Dataset               | Role                                                                              |
+| --------------------- | --------------------------------------------------------------------------------- |
+| EyePACS               | Primary training (V3 Experiments 1 and 2). ~35,126 labeled images (Kaggle labeled partition). |
+| APTOS 2019            | [V3: NOT ACTIVE — old Experiment 3 (robustness under image degradation) is DROPPED in V3] |
+| IDRiD                 | Clinical validation, CLAHE sweep, lesion localization (V3 Experiments 2, 3, 4)   |
+| Messidor / Messidor-2 | External generalization (V3 Experiment 3)                                         |
+| RFMiD / DDR / ODIR    | Device domain shift evaluation (V3 Experiment 3)                                  |
 
 ---
 
@@ -176,7 +178,7 @@ Preprocessing pipeline consists of:
 4. **CLAHE enhancement**
 
    * LAB color space
-   * dynamic clip limit
+   * optimized clip limit (selected via parameter sweep in V3 Experiment 2; per DGL-5)
 
 5. **HSV contrast enhancement**
 
@@ -194,7 +196,11 @@ Purpose: determine which components contribute most to performance.
 
 ---
 
-# 6. Experiment 3 — Robustness to Image Degradation
+<!-- DROPPED V3: Experiment 3 (Robustness to Image Degradation) is DROPPED in V3. Old Exp 3 tested robustness under Gaussian noise, blur, and low illumination using APTOS 2019. This experiment and APTOS 2019 are no longer active in V3. Historical content preserved below. -->
+
+### DROPPED (V3): Old Experiment 3 — Robustness to Image Degradation
+
+> **V3 NOTE:** This experiment is DROPPED in V3. The old Exp 3 (robustness under image degradation, using APTOS 2019) is not executed. APTOS 2019 is not an active V3 experimental dataset. Cross-device generalization is instead handled by V3 Experiment 3 (merged from old Exp 5+6). The content below is preserved for historical reference only.
 
 **Purpose:**
 Evaluate model robustness under degraded imaging conditions.
@@ -221,7 +227,7 @@ Performance drop is measured relative to clean images.
 
 ---
 
-## Clinical threshold experiment
+## Clinical threshold experiment (DROPPED V3 — part of old Exp 3)
 
 Binary classification:
 
@@ -236,7 +242,7 @@ Metrics:
 
 ---
 
-# 7. Experiment 4 — Explainability Analysis
+# 7. V3 Experiment 4 — Explainability Analysis
 
 **Purpose:**
 Determine whether preprocessing shifts CNN attention toward clinically relevant lesion regions.
@@ -247,8 +253,7 @@ Determine whether preprocessing shifts CNN attention toward clinically relevant 
 
 Images:
 
-* 10 randomly sampled images per DR class
-* additional degraded images
+* 10 randomly sampled images per DR class from IDRiD (with lesion annotations)
 
 Two pipelines:
 
@@ -301,87 +306,83 @@ This subsection provides the quantitative bridge between "preprocessing improves
 
 ---
 
-# 8. Experiment 5 — Clinical Generalization
+<!-- MERGED V3: Old Experiments 5 and 6 are MERGED into V3 Experiment 3 (Generalization + Device Robustness). Historical content preserved below. -->
+
+# 8. V3 Experiment 3 — Cross-Dataset Generalization and Device Robustness (Merged from old Exp 5+6)
+
+> **V3 NOTE:** Old Experiments 5 (Clinical Generalization) and 6 (Device Domain Shift) are MERGED into a single V3 Experiment 3. This combined experiment tests both H-4 (cross-database transferability) and H-6 (device robustness) in one experimental design.
 
 **Purpose:**
-Evaluate generalization to independent clinical datasets.
+Evaluate generalization to independent clinical datasets and robustness across imaging devices without retraining.
 
-**Tests whether:** The preprocessing pipeline enables cross-database generalization without retraining (H-4).
+**Tests whether:** The preprocessing pipeline enables cross-database generalization (H-4) and reduces cross-device performance variance (H-6).
 
-Training dataset:
+**Training dataset:** EyePACS (checkpoints from V3 Experiment 1)
 
-* EyePACS
+**Testing datasets:**
 
-Testing datasets:
+| Dataset       | Role                        | Cameras                |
+| ------------- | --------------------------- | ---------------------- |
+| Messidor      | External generalization     | Topcon                 |
+| Messidor-2    | External generalization     | Topcon                 |
+| IDRiD         | External generalization     | Kowa                   |
+| RFMiD         | Device domain shift         | Topcon, Kowa           |
+| DDR           | Device domain shift         | Canon, Topcon          |
+| ODIR-5K       | Device domain shift         | Canon, Zeiss           |
 
-* Messidor
-* Messidor-2
-* IDRiD
+No retraining performed. Models evaluated in zero-shot transfer.
 
-No retraining is performed.
+**Metrics:**
+* Accuracy, Weighted F1, ROC-AUC (per dataset and per camera group)
+* Generalization ratio G = F1_external / F1_EyePACS per OD-4 (H-4 criterion: G ≥ 0.85)
+* Cross-device performance variance (H-6 criterion: lower variance for preprocessed models)
 
-Metrics:
-
-* Accuracy
-* Weighted F1
-* ROC-AUC
+**Statistical analysis:** Bootstrap 95% CI across datasets; DeLong test for ROC-AUC comparison.
 
 ---
 
-# 9. Experiment 6 — Device Domain Shift
+### DROPPED (V3): Old Experiment 5 — Clinical Generalization (historical reference)
 
-**Purpose:**
-Evaluate robustness to images captured by different fundus cameras.
+> Subsumed into V3 Experiment 3 above.
 
-**Tests whether:** Preprocessing standardizes retinal image appearance and reduces distribution differences between camera devices, leading to improved cross-device generalization (H-6).
-
-**Hypothesis:** Preprocessing standardizes retinal image appearance and reduces distribution differences between camera devices, leading to improved cross-device generalization. Models with preprocessing will exhibit lower cross-device performance variance than models without preprocessing.
-
-Datasets and devices:
-
-| Dataset  | Cameras       |
-| -------- | ------------- |
-| RFMiD    | Topcon, Kowa  |
-| DDR      | Canon, Topcon |
-| EyePACS  | Canon CR-1    |
-| ODIR-5K  | Canon, Zeiss  |
-| IDRiD    | Kowa          |
-| Messidor | Topcon        |
-
-Dataset subsets are grouped by camera model.
-
-Performance comparison across domains evaluates **device-induced distribution shift**.
-
-Metrics:
-
-* Accuracy
-* F1-score
-* ROC-AUC
+Training dataset: EyePACS. Testing: Messidor, Messidor-2, IDRiD. No retraining. Metrics: Accuracy, Weighted F1, ROC-AUC.
 
 ---
 
-# 10. Experiment 7 — Clinical Validation (Dirty Data Pipeline)
+### DROPPED (V3): Old Experiment 6 — Device Domain Shift (historical reference)
+
+> Subsumed into V3 Experiment 3 above.
+
+Tested H-6: preprocessing standardizes retinal image appearance and reduces distribution differences between camera devices. Datasets grouped by camera model. Evaluated device-induced distribution shift.
+
+---
+
+<!-- FUTURE WORK V3: Experiment 7 (Clinical Validation with Kazakh medical center data) is NOT an active V3 experiment. No Kazakh clinical data is available. This experiment is preserved as future work placeholder. -->
+
+# 10. FUTURE WORK (V3): Old Experiment 7 — Clinical Validation (Dirty Data Pipeline)
+
+> **V3 NOTE:** This experiment is NOT part of V3 active experiments. Kazakh clinical data is not yet available (no institutional agreements). This section is preserved as a future work placeholder per VCR-4 and NC-15. The dissertation references this as planned future work only.
 
 **Purpose:**
-Test the full preprocessing pipeline on clinical fundus images from Kazakh medical centers. These images represent "dirty data" — variable quality, non-standardized acquisition protocols, potential artifacts, and diverse camera hardware.
+Test the full 5-component preprocessing pipeline on clinical fundus images from Kazakh medical centers. These images represent "dirty data" — variable quality, non-standardized acquisition protocols, potential artifacts, and diverse camera hardware.
 
 **Tests whether:** The preprocessing pipeline maintains effectiveness under real-world clinical imaging conditions outside of curated benchmark datasets.
 
-**Dataset:** Clinical fundus images from Kazakh medical centers (access pending institutional agreements).
+**Dataset:** Clinical fundus images from Kazakh medical centers (access pending institutional agreements). **NOT AVAILABLE — future work only.**
 
-**Protocol:**
-1. Apply the full 6-stage preprocessing pipeline to clinical images
+**Protocol (future):**
+1. Apply the full 5-component preprocessing pipeline (implemented as 6 ordered stages) to clinical images
 2. Evaluate classification performance using the CNN model trained on EyePACS (no retraining)
 3. Compare performance with and without preprocessing on the clinical images
 4. Document image quality characteristics and preprocessing effects
 
-**Metrics:**
+**Metrics (future):**
 
 * Accuracy, Weighted F1, ROC-AUC on clinical images
 * ALO and IoU on images with available lesion annotations (if applicable)
 * Qualitative assessment of preprocessing effects on clinical image characteristics
 
-**Linkage:** Results supplement PC-1 (preprocessing dominance under real-world conditions). Bounded per NC-15 (validation is specific to the tested clinical data source).
+**Linkage:** Results would supplement PC-1 (preprocessing dominance under real-world conditions). Bounded per NC-15.
 
 ---
 
@@ -410,12 +411,11 @@ Preprocessing pipeline → image normalization → improved feature visibility �
 
 **Experiment-to-Argument Mapping:**
 
-| Experiment | Tests |
-|---|---|
-| Exp 1 | Preprocessing improves CNN performance (Chain 2, terminal node) |
-| Exp 2 | Which preprocessing components drive improvement (Chain 2, decomposition) |
-| Exp 3 | Robustness to noise and illumination (Chain 1, resistance to variability) |
-| Exp 4 | Preprocessing directs attention to lesions (Chain 2, feature visibility node) |
-| Exp 5 | Cross-database generalization (Chain 2, generalization node) |
-| Exp 6 | Cross-device generalization (Chain 1 + Chain 2, device variability) |
-| Exp 7 | Clinical validation under real-world conditions (Chain 2, external validation) |
+| Experiment | Tests | V3 Status |
+|---|---|---|
+| V3 Exp 1 | Preprocessing improves CNN performance (Chain 2, terminal node) — H-1 | ACTIVE |
+| V3 Exp 2 | Which preprocessing components drive improvement; CLAHE threshold sensitivity (Chain 2, decomposition) — H-1, H-2 | ACTIVE |
+| V3 Exp 3 | Cross-database generalization + cross-device generalization (merged) (Chain 2, generalization+device variability) — H-4, H-6 | ACTIVE (merged from old Exp 5+6) |
+| V3 Exp 4 | Preprocessing directs attention to lesions, ALO primary (Chain 2, feature visibility node) — H-5 | ACTIVE |
+| ~~Exp 3~~ | ~~Robustness to noise and illumination (Chain 1, resistance to variability)~~ | DROPPED V3 — old Exp 3 |
+| ~~Exp 7~~ | ~~Clinical validation under real-world conditions (Chain 2, external validation)~~ | FUTURE WORK — no data available |

@@ -35,7 +35,7 @@ The proposed model is defined as a **two-stage system**:
 model = preprocessing_pipeline + CNN_classifier
 ```
 
-**Stage 1 — Preprocessing Pipeline:** The 6-stage ordered pipeline (see `methods/preprocessing-pipeline.md`) transforms raw fundus images into a standardized feature space. The preprocessing pipeline is an integral component of the model, not an external data preparation step. It defines the feature space available to the CNN.
+**Stage 1 — Preprocessing Pipeline:** The 5-component pipeline (implemented as 6 ordered stages; see `methods/preprocessing-pipeline.md`) transforms raw fundus images into a standardized feature space. The preprocessing pipeline is an integral component of the model, not an external data preparation step. It defines the feature space available to the CNN.
 
 **Stage 2 — CNN Classifier:** A pre-trained CNN backbone adapted via transfer learning for 5-class DR classification (DR 0–4).
 
@@ -46,7 +46,7 @@ model = preprocessing_pipeline + CNN_classifier
 | ResNet-50 | Factorial design Arm A (Experiment 1) | ImageNet |
 | EfficientNet-B3 | Factorial design Arm B (Experiment 1) | ImageNet |
 | EfficientNet-B4 | Explainability analysis (Experiment 4) | ImageNet |
-| EfficientNetB0 | Two-stage fine-tuning (Experiment 3) | ImageNet |
+| EfficientNetB0 | Two-stage fine-tuning training strategy (training method; H-3 dropped in V3) | ImageNet |
 
 ---
 
@@ -56,7 +56,7 @@ model = preprocessing_pipeline + CNN_classifier
 |---|---|
 | Color space | LAB (L-channel) |
 | Tile grid size | 8×8 |
-| Clip limit | Dynamic (optimized within experimental framework) |
+| Clip limit | Optimized via parameter sweep (Experiment 2; per DGL-5) |
 | Theoretical reference | CL = T/80 (LC-AlTimemy-2021, STARE dataset) |
 
 The clip limit is treated as an optimizable parameter rather than a fixed constant. The T/80 formulation from LC-AlTimemy-2021 serves as theoretical reference; the dissertation validates its own clip limit configuration independently (DGL-5).

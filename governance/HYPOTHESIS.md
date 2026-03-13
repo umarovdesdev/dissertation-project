@@ -4,11 +4,17 @@ The proposed preprocessing pipeline reduces domain variability across fundus ima
 
 ---
 
-**H-1 (Preprocessing Dominance).** If fundus images from EyePACS are processed through the 5-component preprocessing pipeline — comprising FOV standardization, green channel imaging, normalization, CLAHE enhancement (LAB color space, dynamic clip limit), and HSV contrast enhancement — and a CNN classifier (ResNet-50 or EfficientNet-B3, pre-trained on ImageNet, adapted via fine-tuning) is trained on the processed images under a 2×2 factorial design, then classification performance measured by accuracy, precision, recall, F1-score (macro and weighted), ROC-AUC, and Cohen's Kappa (quadratic weights) will be statistically significantly higher than that of the same architecture trained on unprocessed images (resize only) of equivalent source distribution, independently for both ResNet-50 and EfficientNet-B3, satisfying the dominance criterion of weighted F1 Δ ≥ 5 pp, ROC-AUC Δ ≥ 0.02, and no Kappa degradation.
+**H-1 (Preprocessing Dominance).** If fundus images from EyePACS are processed through the 5-component preprocessing pipeline — comprising FOV standardization, green channel imaging, normalization, CLAHE enhancement (LAB color space, optimized clip limit), and HSV contrast enhancement — and a CNN classifier (ResNet-50 or EfficientNet-B3, pre-trained on ImageNet, adapted via fine-tuning) is trained on the processed images under a 2×2 factorial design, then classification performance measured by accuracy, precision, recall, F1-score (macro and weighted), ROC-AUC, and Cohen's Kappa (quadratic weights) will be statistically significantly higher than that of the same architecture trained on unprocessed images (resize only) of equivalent source distribution, independently for both ResNet-50 and EfficientNet-B3, satisfying the dominance criterion of weighted F1 Δ ≥ 5 pp, ROC-AUC Δ ≥ 0.02, and no Kappa degradation.
 
 **H-2 (CLAHE Threshold Sensitivity).** If the CLAHE clip limit parameter is varied across controlled values on IDRiD, then per-class F1-score for DR 1 and DR 2 will exhibit a parameter-dependent sensitivity profile with at least one local optimum within the tested range.
 
-**H-3 (Two-Stage Fine-Tuning).** If EfficientNetB0 (pre-trained on ImageNet) is adapted using a two-stage protocol — frozen base layers with classification head training, followed by progressive unfreezing of upper layers — under the same preprocessing regime, then test-set precision, recall, F1-score, and Cohen's Kappa will exceed those obtained from the frozen-only strategy (Stage 1 alone).
+### DROPPED (V3)
+
+**H-3 (Two-Stage Fine-Tuning) — DROPPED IN V3.** If EfficientNetB0 (pre-trained on ImageNet) is adapted using a two-stage protocol — frozen base layers with classification head training, followed by progressive unfreezing of upper layers — under the same preprocessing regime, then test-set precision, recall, F1-score, and Cohen's Kappa will exceed those obtained from the frozen-only strategy (Stage 1 alone).
+
+> **V3 Note:** H-3 is not tested in any V3 experiment. The two-stage fine-tuning protocol is retained as a training strategy but is not an independent hypothesis. Historical text preserved for audit trail.
+
+### (End of dropped section)
 
 **H-4 (Cross-Database Transferability).** If models trained on EyePACS with the 5-component preprocessing pipeline are evaluated on Messidor-2 and IDRiD without retraining, then the generalization ratio G = F1_external / F1_EyePACS will be ≥ 0.85 on both external datasets.
 
@@ -28,4 +34,4 @@ The hypotheses above are linked by the following causal argument:
 
 **Premise 3 (Preprocessing Normalizes):** The proposed 5-component preprocessing pipeline standardizes retinal image appearance — normalizing illumination, enhancing contrast, extracting the most informative channel, and reducing device-specific artifacts — thereby reducing inter-domain distribution shift while preserving diagnostically relevant retinal features.
 
-**Conclusion:** Application of the preprocessing pipeline prior to CNN classification improves diagnostic performance (H-1), is robust to parameter variation (H-2), benefits from progressive fine-tuning (H-3), transfers across datasets (H-4), directs attention to clinically relevant lesions (H-5), and generalizes across imaging devices (H-6).
+**Conclusion:** Application of the preprocessing pipeline prior to CNN classification improves diagnostic performance (H-1), is robust to parameter variation (H-2), transfers across datasets (H-4), directs attention to clinically relevant lesions (H-5), and generalizes across imaging devices (H-6). [Note V3: H-3 (two-stage fine-tuning) removed from causal chain — the fine-tuning protocol is used as a training strategy but is not an independently tested hypothesis.]

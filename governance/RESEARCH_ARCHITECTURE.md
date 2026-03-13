@@ -5,7 +5,7 @@
 **Candidate:** Yesmukhamedov N.S.
 **Status:** Binding Methodological Blueprint
 **Function:** Experimental, statistical, and architectural formalization of the dissertation research
-**Document Version:** 2.2. Supersedes v2.1. Consistent with INVARIANTS v2.2 and Dissertation Project v2.2.
+**Document Version:** 3.0. Supersedes v2.2. Consistent with INVARIANTS v3.0 and Dissertation Project v3.0. V3 changes: 4 experiments (not 7); H-3 dropped; "optimized clip limit" → "optimized clip limit"; EyePACS size → ~35,126 labeled; APTOS robustness role removed; old Exp 3 dropped; old Exp 5+6 merged into new Exp 3 (V3).
 
 ---
 
@@ -15,7 +15,7 @@
 
 Contrast-Adaptive Preprocessing (5-component pipeline)
 → Improved Microvascular Feature Visibility (quantified via CNR, VVI, Entropy, SSIM)
-→ Stabilized CNN Feature Extraction (validated via Grad-CAM IoU with lesion masks)
+→ Stabilized CNN Feature Extraction (validated via Grad-CAM ALO (primary) and IoU (secondary) with lesion masks)
 → Improved Multi-Class DR Classification (across multiple datasets and camera hardware)
 → Measurable Statistical Dominance (EH-3 criteria, independently for ResNet-50 and EfficientNet-B3)
 
@@ -32,23 +32,26 @@ The v2.1 dataset architecture comprises seven datasets organized into four funct
 ### 2.1.1 TRAINING Tier — EyePACS (Primary Training & Ablation)
 
 * **Role:** Primary training dataset for Experiments 1 and 2 (causal ablation and component ablation)
-* **Approximate size:** ~88,000 labeled fundus images
+* **Approximate size:** ~35,126 labeled fundus images (Kaggle labeled partition)
 * **Taxonomy:** Five-class DR staging (DR 0–4)
 * **Camera models:** Canon CR-1
 * **Public availability:** Yes (Kaggle)
 * **Class imbalance:** Severe — must be documented and all performance claims interpreted in context of distributional asymmetry (per SB-2.1)
 
-### 2.1.2 ROBUSTNESS Tier — APTOS 2019 (Robustness Experiments)
+### 2.1.2 ~~ROBUSTNESS Tier~~ — APTOS 2019 [DROPPED V3 — No Active Role]
 
-* **Role:** Dataset for Experiment 3 — robustness to synthetic image degradation (Gaussian noise, blur, low illumination)
+<!-- DROPPED V3: Old Experiment 3 (robustness to synthetic image degradation) has been removed from V3 scope. APTOS 2019 no longer serves as an active experimental dataset. Historical entry preserved for audit trail. -->
+
+* **Role [V3: DROPPED]:** Was dataset for old Experiment 3 — robustness to synthetic image degradation (Gaussian noise, blur, low illumination). This experiment is not part of V3.
 * **Approximate size:** ~3,662 labeled fundus images
 * **Taxonomy:** Five-class DR staging (DR 0–4)
 * **Camera models:** Mixed
 * **Public availability:** Yes (Kaggle)
+* **V3 Note:** APTOS 2019 may be referenced as a secondary/supplementary dataset in historical or methodological context but is NOT an active V3 experimental dataset.
 
 ### 2.1.3 CLINICAL Tier — IDRiD (Clinical Validation + Lesion Localization)
 
-* **Role:** Clinical validation dataset for Experiments 4 and 5 — explainability analysis (Grad-CAM IoU with pixel-level lesion masks) and external generalization evaluation
+* **Role:** Clinical validation dataset for V3 Experiments 2 (CLAHE sweep), 3 (generalization), and 4 (explainability) — explainability analysis (Grad-CAM ALO/IoU with pixel-level lesion masks), CLAHE parameter sweep, and external generalization evaluation
 * **Approximate size:** ~516 images (81 with pixel-level lesion annotations for four lesion types: microaneurysms, hemorrhages, hard exudates, soft exudates)
 * **Taxonomy:** Five-class DR staging + pixel-level lesion masks
 * **Camera models:** Kowa
@@ -56,7 +59,7 @@ The v2.1 dataset architecture comprises seven datasets organized into four funct
 
 ### 2.1.4 EXTERNAL Tier — Messidor / Messidor-2 (External Generalization)
 
-* **Role:** External generalization targets for Experiment 5 — model trained on EyePACS evaluated without retraining
+* **Role:** External generalization targets for V3 Experiment 3 — model trained on EyePACS evaluated without retraining
 * **Approximate size:** Messidor: ~1,200 images; Messidor-2: ~1,748 images
 * **Taxonomy:** Referable/non-referable DR grading + severity grade
 * **Camera models:** Topcon
@@ -64,7 +67,7 @@ The v2.1 dataset architecture comprises seven datasets organized into four funct
 
 ### 2.1.5 DOMAIN Tier — RFMiD (Device Domain Shift)
 
-* **Role:** Device domain shift evaluation for Experiment 6 — cross-camera performance testing
+* **Role:** Device domain shift evaluation for V3 Experiment 3 — cross-camera performance testing
 * **Approximate size:** ~3,200 images
 * **Taxonomy:** Multi-disease taxonomy with DR subset (taxonomic mapping to 5-class must be documented)
 * **Camera models:** Topcon, Kowa
@@ -72,7 +75,7 @@ The v2.1 dataset architecture comprises seven datasets organized into four funct
 
 ### 2.1.6 DOMAIN Tier — DDR (Device Domain Shift)
 
-* **Role:** Device domain shift evaluation for Experiment 6
+* **Role:** Device domain shift evaluation for V3 Experiment 3
 * **Approximate size:** ~13,673 images
 * **Taxonomy:** Five-class DR staging
 * **Camera models:** Canon, Topcon
@@ -80,7 +83,7 @@ The v2.1 dataset architecture comprises seven datasets organized into four funct
 
 ### 2.1.7 DOMAIN Tier — ODIR-5K (Device Domain Shift)
 
-* **Role:** Device domain shift evaluation for Experiment 6
+* **Role:** Device domain shift evaluation for V3 Experiment 3
 * **Approximate size:** ~5,000 images (bilateral)
 * **Taxonomy:** Multi-disease taxonomy with DR subset (taxonomic mapping to 5-class must be documented)
 * **Camera models:** Canon, Zeiss
@@ -110,7 +113,7 @@ where F1_EyePACS is the test-set F1-score on the primary training dataset (EyePA
 
 Defined per OD-3 (v2.2).
 
-**Key Scientific Framing:** The preprocessing pipeline is defined as an integral component of the diagnostic model — Stage 1 of a two-stage system: `model = preprocessing + CNN`. This is the central design decision of this work: preprocessing is not ancillary data preparation but defines the feature space available to the CNN. See `methods/preprocessing-pipeline.md` for the full 6-stage pipeline specification.
+**Key Scientific Framing:** The preprocessing pipeline is defined as an integral component of the diagnostic model — Stage 1 of a two-stage system: `model = preprocessing + CNN`. This is the central design decision of this work: preprocessing is not ancillary data preparation but defines the feature space available to the CNN. See `methods/preprocessing-pipeline.md` for the full 5-component pipeline specification (implemented as 6 ordered stages).
 
 ## 3.1 Ordered Pipeline (5-Component System)
 
@@ -119,7 +122,7 @@ The v2.1 preprocessing pipeline comprises five ordered components, replacing the
 1. **FOV Standardization** — Fundus circle detection via Hough transform, black border removal, image centering, resize to 512×512. This formalizes and extends the v1.0 resize step with explicit circle detection.
 2. **Green Channel Imaging** — Extraction of the green channel from RGB. The green channel provides the highest vessel-to-background contrast in retinal images. (NEW in v2.1)
 3. **Normalization** — Pixel intensity normalization to [0, 1] range.
-4. **CLAHE Enhancement** — Applied in LAB color space (L-channel) with dynamic clip limit. The clip limit is now dynamic rather than fixed at 2.0 (v1.0). See §3.2 for mathematical formalization. (UPGRADED from v1.0)
+4. **CLAHE Enhancement** — Applied in LAB color space (L-channel) with optimized clip limit. The clip limit is now dynamic rather than fixed at 2.0 (v1.0). See §3.2 for mathematical formalization. (UPGRADED from v1.0)
 5. **HSV Contrast Enhancement** — Additional contrast adjustment in HSV color space. (NEW in v2.1)
 
 Pipeline considered **ACTIVE** only if all five components are applied in the specified order. Pipeline considered **ABSENT** when images are passed to the CNN with resize only (FOV standardization without subsequent pipeline components).
@@ -140,7 +143,7 @@ CL = T / 80
 
 Transferability from STARE to APTOS is NOT assumed (DGL-5).
 
-**Note (v2.1):** The clip limit in the dissertation's experimental pipeline is now dynamic rather than fixed at 2.0. The dynamic clip limit is optimized within the dissertation's experimental framework per DGL-5 constraints. The T/80 formulation from LC-AlTimemy-2021 (STARE dataset) serves as theoretical reference; the dissertation validates its own clip limit configuration independently.
+**Note (v2.1):** The clip limit in the dissertation's experimental pipeline is now dynamic rather than fixed at 2.0. The optimized clip limit is optimized within the dissertation's experimental framework per DGL-5 constraints. The T/80 formulation from LC-AlTimemy-2021 (STARE dataset) serves as theoretical reference; the dissertation validates its own clip limit configuration independently.
 
 ---
 
@@ -202,7 +205,7 @@ The use of two established pretrained backbone families (ResNet, EfficientNet) p
 
 Backbone: EfficientNetB0 (ImageNet pre-trained)
 
-Two strategies (tested in Experiment 3):
+Two strategies (used as training methods; H-3 dropped in V3, not tested as independent hypothesis):
 
 **Method 1 — Frozen:**
 
@@ -224,7 +227,7 @@ Expected empirical baseline (self-publications):
 
 Backbone: EfficientNet-B4 (ImageNet pre-trained)
 
-Used in Experiment 4 for Grad-CAM explainability analysis. EfficientNet-B4 provides higher-resolution feature maps suitable for activation visualization and IoU computation against IDRiD pixel-level lesion masks.
+Used in V3 Experiment 4 for Grad-CAM explainability analysis. EfficientNet-B4 provides higher-resolution feature maps suitable for activation visualization and ALO (primary) / IoU (secondary) computation against IDRiD pixel-level lesion masks.
 
 ---
 
@@ -279,33 +282,29 @@ All experiments use 5-fold cross-validation with patient-level split. For each f
 
 ---
 
-## 5.3 Experiment 3 — Robustness to Image Degradation
+## 5.3 ~~Experiment 3 — Robustness to Image Degradation~~ [DROPPED V3]
 
-**Purpose:** Evaluate model robustness under degraded imaging conditions that simulate real clinical variability.
+<!-- DROPPED V3: Old Experiment 3 (robustness to synthetic image degradation on APTOS 2019) has been removed. Old Experiment 3 tested H-3 which is also dropped. Historical content preserved below. -->
 
-**Dataset:** APTOS 2019
+### DROPPED (V3): Old Experiment 3 — Robustness to Image Degradation
 
-**Image perturbations** applied at three severity levels (low, medium, high):
+> **V3 Status:** DROPPED. This experiment is not part of V3 scope. The robustness to synthetic image degradation experiment (Gaussian noise, blur, low illumination on APTOS 2019) has been removed. APTOS 2019 is no longer an active V3 experimental dataset.
 
-| Distortion Type | Control Parameter | Simulates |
-| --- | --- | --- |
-| Gaussian noise | σ (noise standard deviation) | Sensor noise, low-light acquisition |
-| Gaussian blur | Kernel size | Focus errors, motion blur |
-| Low illumination | Brightness reduction factor | Poor lighting conditions in clinical settings |
+**Was:** Old Experiment 3 — testing model robustness under degraded imaging conditions (APTOS 2019, Gaussian noise/blur/illumination at three severity levels).
 
-Performance drop is measured relative to clean (undistorted) images.
-
-**Binary clinical threshold experiment:** Evaluates binary classification (non-referable DR: grades 0–1 vs. referable DR: grades 2–4) under degraded conditions. Reports sensitivity, specificity, PPV, NPV, and ROC-AUC for the clinical screening use case.
+<!-- END DROPPED V3 -->
 
 ---
 
-## 5.4 Experiment 4 — Explainability Analysis
+## 5.4 Experiment 4 (V3) — Explainability Analysis (Grad-CAM / ALO)
+
+**V3 Experiment Number:** Experiment 4 (renumbered from old Experiment 4 — number unchanged)
 
 **Purpose:** Determine whether preprocessing shifts CNN attention toward clinically relevant lesion regions. Closes the evidential gap in the causal chain: Preprocessing → Improved Feature Visibility → Improved Classification.
 
 **Model:** EfficientNet-B4
 
-**Sampling:** 10 randomly selected images per DR class (50 total), plus additional degraded images from Experiment 3. Two pipelines compared:
+**Sampling:** 10 randomly selected images per DR class (50 total). Two pipelines compared:
 
 | Pipeline | Description |
 | --- | --- |
@@ -326,59 +325,52 @@ Performance drop is measured relative to clean (undistorted) images.
 
 ---
 
-## 5.5 Experiment 5 — Clinical Generalization
+## 5.5 ~~Experiment 5 — Clinical Generalization~~ [MERGED INTO V3 EXP 3]
+## 5.6 ~~Experiment 6 — Device Domain Shift~~ [MERGED INTO V3 EXP 3]
 
-**Purpose:** Evaluate generalization to independent clinical datasets. No retraining is performed — the model trained on EyePACS is applied directly.
+<!-- V3: Old Experiments 5 and 6 have been merged into V3 Experiment 3. See §5.3-NEW below. -->
+
+### V3 Experiment 3 (V3) — Cross-Dataset Generalization and Device Domain Shift
+
+**V3 Experiment Number:** Experiment 3 (merged from old Experiments 5 + 6)
+
+**Purpose:** Evaluate generalization to independent clinical datasets (no retraining) AND robustness to images captured by different fundus cameras. Tests H-4 (cross-database transferability) and H-6 (device robustness).
+
+**Hypotheses tested:** H-4 (Cross-Database Transferability), H-6 (Device Robustness)
 
 **Evaluation datasets:**
 
-| | Dataset | Role |
-| --- | --- | --- |
-| TRAIN | EyePACS | Training source |
-| TEST | Messidor | External generalization |
-| TEST | Messidor-2 | External generalization |
-| TEST | IDRiD | Clinical validation (Indian population) |
+| | Dataset | Role | Camera |
+| --- | --- | --- | --- |
+| TRAIN | EyePACS | Training source | Canon CR-1 |
+| TEST | Messidor | External generalization | Topcon |
+| TEST | Messidor-2 | External generalization | Topcon |
+| TEST | IDRiD | Clinical validation (Indian population) | Kowa |
+| TEST | RFMiD | Device domain shift | Topcon, Kowa |
+| TEST | DDR | Device domain shift | Canon, Topcon |
+| TEST | ODIR-5K | Device domain shift | Canon, Zeiss |
 
-**Metrics:** Accuracy, Weighted F1, ROC-AUC. Generalization ratio G = F1_external / F1_EyePACS per OD-4.
+**Metrics:**
+- Accuracy, Weighted F1, ROC-AUC.
+- Generalization ratio G = F1_external / F1_EyePACS per OD-4.
+- F1-score, ROC-AUC per camera group (cross-device performance matrix).
+- Clinical screening metrics: Sensitivity, Specificity, PPV, NPV for referable DR (grade ≥ 2).
 
 **Published benchmarks for comparison:** Gulshan 2016 (AUC 0.990 on Messidor-2), Rakhlin 2017 (AUC 0.967 on Messidor-2), Saxena 2020 (AUC 0.92 on Messidor-2), Ting 2017 (AUC 0.936 referable DR across 10 datasets).
 
-**Clinical screening metrics:** Sensitivity, Specificity, PPV, NPV for referable DR (grade ≥ 2).
-
 ---
 
-## 5.6 Experiment 6 — Device Domain Shift
+## 5.7 ~~Experiment 7 — Clinical Validation (Dirty Data Pipeline)~~ [FUTURE WORK — V3]
 
-**Purpose:** Evaluate robustness to images captured by different fundus cameras. Tests whether the preprocessing pipeline normalizes device-specific characteristics.
+<!-- V3: Experiment 7 (Kazakh clinical validation) is not an active V3 experiment. No data available. Marked as future work. -->
 
-**Dataset subsets grouped by camera model:**
+### FUTURE WORK: Kazakh Clinical Validation
 
-| Dataset | Camera Models | Taxonomy |
-| --- | --- | --- |
-| EyePACS | Canon CR-1 | 5-class DR |
-| RFMiD | Topcon, Kowa | Multi-disease (DR subset) |
-| DDR | Canon, Topcon | 5-class DR |
-| ODIR-5K | Canon, Zeiss | Multi-disease (DR subset) |
-| IDRiD | Kowa | 5-class DR + lesion masks |
-| Messidor | Topcon | Referable/Non-ref + grade |
+**V3 Status:** Not an active experiment. Retained as future work placeholder.
 
-**Cross-camera evaluation:** Performance comparison across four camera manufacturer domains (Canon, Topcon, Kowa, Zeiss). Evaluates device-induced distribution shift.
+**Was:** Old Experiment 7 — testing the preprocessing pipeline on clinical fundus images from Kazakh medical centers (dirty data, variable quality, non-standardized acquisition).
 
-**Metrics:** Accuracy, F1-score, ROC-AUC per camera group. Generalization ratio G per camera domain.
-
----
-
-## 5.7 Experiment 7 — Clinical Validation (Dirty Data Pipeline)
-
-**Purpose:** Test the preprocessing pipeline on clinical fundus images from Kazakh medical centers. These images represent real-world clinical data with variable quality and non-standardized acquisition.
-
-**Dataset:** Clinical fundus images from Kazakh medical centers.
-
-**Protocol:** Apply full preprocessing pipeline to clinical images; evaluate classification using EyePACS-trained model without retraining; compare performance with and without preprocessing.
-
-**Metrics:** Primary metrics (Weighted F1, ROC-AUC, Accuracy); ALO and IoU where lesion annotations are available.
-
-**Linkage:** Results supplement PC-1. Bounded per NC-15.
+**Future work note:** When Kazakh medical center data becomes available under institutional agreements, this experiment may be executed as an extension (VCR-4). Results would supplement PC-1 under NC-15 constraints.
 
 ---
 
@@ -546,11 +538,11 @@ Boundaries enforced per SB-1.
 Novelty IS:
 
 * Formalization of preprocessing dominance hypothesis (validated via 2×2 factorial ablation on two established architectures)
-* Threshold-controlled CLAHE validation within DR multi-class context (dynamic clip limit in LAB color space)
+* Threshold-controlled CLAHE validation within DR multi-class context (optimized clip limit in LAB color space)
 * Unified ablation-driven causal validation
 * Architecture constrained to resource-limited environments
 * Cross-database transferability validation across 3+ independent datasets (Messidor, Messidor-2, IDRiD)
-* Grad-CAM explainability with quantitative IoU against pixel-level lesion masks (IDRiD)
+* Grad-CAM explainability with quantitative ALO (primary) and IoU (secondary) against pixel-level lesion masks (IDRiD)
 * 5-component preprocessing pipeline with component-level ablation (Experiment 2)
 * Device domain shift evaluation across 4 camera manufacturers (Canon, Topcon, Kowa, Zeiss)
 
@@ -558,18 +550,18 @@ Novelty IS:
 
 # 11. DEFENSE-READY CLAIM MATRIX
 
-| Claim | Validated By |
-| --- | --- |
-| PC-1 | Exp 1 (ResNet-50 + EfficientNet-B3) + EH-3 |
-| PC-2 | Exp 2 curve (CLAHE threshold sensitivity) |
-| PC-3 | Exp 3 metrics (fine-tuning strategy) |
-| PC-4 | Mathematical derivation (laser-tissue model) |
-| PC-5 | UML + system design |
-| PC-6 | Exp 5 generalization ratios (G = F1_external / F1_EyePACS) |
-| PC-7 | Exp 4 Grad-CAM IoU (IoU_preproc > IoU_baseline on IDRiD masks) |
-| PC-8 | Exp 2 component ablation (preprocessing component hierarchy) |
-| PC-9 | Exp 6 cross-camera metrics (device domain shift robustness) |
-| PC-1 (supplementary) | Exp 7 clinical validation (dirty data pipeline) |
+| Claim | Validated By (V3) | V3 Status |
+| --- | --- | --- |
+| PC-1 | V3 Exp 1 (ResNet-50 + EfficientNet-B3) + EH-3 | Active |
+| PC-2 | V3 Exp 2 curve (CLAHE threshold sensitivity on IDRiD) | Active |
+| PC-3 (Two-Stage Fine-Tuning) | — | DEMOTED: Training strategy only; H-3 dropped |
+| PC-4 | Mathematical derivation (laser-tissue model) | Secondary/supplementary |
+| PC-5 | UML + system design | Secondary/supplementary |
+| PC-6 | V3 Exp 3 generalization ratios (G = F1_external / F1_EyePACS) | Active (merged into Exp 3) |
+| PC-7 | V3 Exp 4 Grad-CAM ALO (primary) + IoU (secondary) on IDRiD masks | Active |
+| PC-8 | V3 Exp 2 component ablation (preprocessing component hierarchy) | Active |
+| PC-9 | V3 Exp 3 cross-camera metrics (device domain shift robustness) | Active (merged into Exp 3) |
+| PC-1 (supplementary) | Future work: Kazakh clinical validation (dirty data pipeline) | Future work |
 
 Mapped to ARGUMENT_MAP.
 

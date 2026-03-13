@@ -4,7 +4,7 @@
 
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Formal contributions register
-**Binding Reference:** DISSERTATION_INVARIANTS.md v2.2, ARGUMENT_MAP.md v2.2
+**Binding Reference:** DISSERTATION_INVARIANTS.md v3.0, ARGUMENT_MAP.md v3.0
 
 ---
 
@@ -12,9 +12,9 @@
 
 ### C-1: Cross-Device Normalization Pipeline
 
-**Contribution:** Design, implementation, and experimental validation of a 6-stage fundus image preprocessing pipeline that standardizes retinal image appearance across diverse imaging devices and acquisition conditions while preserving diagnostically relevant retinal features.
+**Contribution:** Design, implementation, and experimental validation of a 5-component fundus image preprocessing pipeline that standardizes retinal image appearance across diverse imaging devices and acquisition conditions while preserving diagnostically relevant retinal features.
 
-**Evidence:** Experiments 1 (preprocessing dominance via 2×2 factorial ablation), 2 (component-level ablation), and 6 (device domain shift evaluation across Canon, Topcon, Kowa, Zeiss camera hardware).
+**Evidence:** Experiments 1 (preprocessing dominance via 2×2 factorial ablation), 2 (component-level ablation), and 3 (V3) (device domain shift evaluation across Canon, Topcon, Kowa, Zeiss camera hardware).
 
 **Novelty:** The pipeline is validated not only for classification improvement on a single dataset (as in prior work) but across a multi-dataset architecture (EyePACS, APTOS, IDRiD, Messidor/Messidor-2, RFMiD, DDR, ODIR-5K) and across multiple CNN architectures (ResNet-50, EfficientNet-B3), establishing preprocessing as an integral model component rather than an ancillary data preparation step.
 
@@ -24,7 +24,7 @@
 
 **Contribution:** Empirical demonstration that CNN models trained with the preprocessing pipeline on EyePACS generalize to independent clinical datasets (Messidor-2, IDRiD) without retraining, achieving generalization ratio G ≥ 0.85.
 
-**Evidence:** Experiment 5 (clinical generalization) and Experiment 6 (device domain shift). Generalization ratio G = F1_external / F1_EyePACS computed per external dataset.
+**Evidence:** Experiment 3 (V3) (cross-dataset generalization and device domain shift). Generalization ratio G = F1_external / F1_EyePACS computed per external dataset.
 
 **Novelty:** While individual preprocessing techniques (CLAHE, normalization) have been used in prior DR classification work, systematic cross-dataset transferability evaluation with a pre-registered generalization threshold across 3+ independent datasets and 4+ camera manufacturers has not been previously reported in the literature.
 
@@ -44,7 +44,7 @@
 
 ### SC-A: Adaptive CLAHE Variant
 
-**Contribution:** Adaptation and validation of a modified CLAHE formulation with dynamic clip limit in LAB color space for fundus image enhancement, extending the T/80 threshold control proposed for STARE (LC-AlTimemy-2021) to the EyePACS/IDRiD context with independent parameter validation.
+**Contribution:** Adaptation and validation of a modified CLAHE formulation with optimized clip limit (selected via parameter sweep) in LAB color space for fundus image enhancement, extending the T/80 threshold control proposed for STARE (LC-AlTimemy-2021) to the EyePACS/IDRiD context with independent parameter validation.
 
 **Evidence:** Experiment 2 (CLAHE threshold sensitivity on IDRiD).
 
@@ -62,7 +62,7 @@
 
 **Contribution:** Systematic evaluation of preprocessing pipeline robustness across four fundus camera manufacturers (Canon, Topcon, Kowa, Zeiss) using five datasets with documented camera metadata, producing a cross-device performance matrix.
 
-**Evidence:** Experiment 6 (device domain shift evaluation on RFMiD, DDR, ODIR-5K, IDRiD, Messidor).
+**Evidence:** Experiment 3 (V3) (device domain shift evaluation on RFMiD, DDR, ODIR-5K, IDRiD, Messidor).
 
 ---
 

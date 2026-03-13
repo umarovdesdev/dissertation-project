@@ -6,9 +6,9 @@ The preprocessing pipeline is defined as an integral component of the diagnostic
 
 ---
 
-## Pipeline Stages (6-Stage Ordered System)
+## Pipeline Stages (5-Component Pipeline — Implementation Detail)
 
-The pipeline comprises six ordered stages. All stages must be applied in the specified order for the pipeline to be considered **ACTIVE**. The pipeline is considered **ABSENT** when images are passed to the CNN with resize only.
+The 5-component pipeline is implemented as six ordered stages (FOV Standardization, Component 1, is split into two sub-steps: circle detection/cropping and centering/resize). All stages must be applied in the specified order for the pipeline to be considered **ACTIVE**. The pipeline is considered **ABSENT** when images are passed to the CNN with resize only.
 
 ### Stage 1 — FOV Standardization
 - **Operation:** Fundus circle detection via Hough transform; black border removal
@@ -31,7 +31,7 @@ The pipeline comprises six ordered stages. All stages must be applied in the spe
 - **Output:** Normalized single-channel image with pixel values in [0, 1]
 
 ### Stage 5 — CLAHE Enhancement (Upgraded)
-- **Operation:** Contrast-Limited Adaptive Histogram Equalization applied in LAB color space (L-channel) with dynamic clip limit
+- **Operation:** Contrast-Limited Adaptive Histogram Equalization applied in LAB color space (L-channel) with optimized clip limit
 - **Configuration:**
   - Color space: LAB (L-channel processing)
   - Tile grid size: 8×8
@@ -66,7 +66,7 @@ The governance documents (INVARIANTS OD-3, RESEARCH_ARCHITECTURE Section 3.1) de
 The CLAHE implementation in this pipeline differs from standard OpenCV CLAHE in the following ways:
 
 1. **LAB color space processing:** CLAHE is applied to the L-channel in LAB color space rather than directly to grayscale, preserving color information integrity
-2. **Dynamic clip limit:** The clip limit is not fixed at a conventional default (e.g., 2.0) but is treated as an optimizable parameter within the experimental framework (H-2)
+2. **Optimized clip limit:** The clip limit is not fixed at a conventional default (e.g., 2.0) but is optimized via a parameter sweep within the experimental framework (H-2, Experiment 2)
 3. **Tile-based adaptive processing:** 8×8 tile grid provides local contrast enhancement adapted to regional image characteristics
 
 ---
