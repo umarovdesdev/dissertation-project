@@ -78,7 +78,8 @@ class CheckpointManager:
         torch.save(checkpoint, self.checkpoint_dir / "last_checkpoint.pt")
 
         # Update best model if improved
-        current_f1 = metrics.get("weighted_f1", -1.0)
+        # Accept both "val_weighted_f1" (trainer output) and "weighted_f1" (raw)
+        current_f1 = metrics.get("val_weighted_f1", metrics.get("weighted_f1", -1.0))
         if current_f1 > self._best_f1:
             self._best_f1 = current_f1
             torch.save(checkpoint, self.checkpoint_dir / "best_model.pt")
