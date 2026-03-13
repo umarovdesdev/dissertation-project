@@ -10,7 +10,7 @@ Camera groups (per RESEARCH_ARCHITECTURE §5.6):
   Mixed  (out-domain): DDR  (Canon + Topcon, no per-image metadata)
   Mixed  (out-domain): ODIR-5K (Canon + Zeiss, no per-image metadata)
   Topcon (out-domain): Messidor — SKIPPED until loader available
-  Mixed  (out-domain): RFMiD   — SKIPPED if dataset directory not found
+  Mixed  (out-domain): RFMiD   — binary DR evaluation (Topcon + Kowa cameras)
 
 H-6 criterion: weighted-F1 variance across camera groups is within
 acceptable bounds (no single group drops below G_threshold = 0.70).
@@ -28,11 +28,12 @@ from typing import Any
 import numpy as np
 import torch
 
-from src.data.datasets import DDRDataset, IDRiDDataset, ODIR5KDataset
+from src.data.datasets import DDRDataset, IDRiDDataset, ODIR5KDataset, RFMiDDataset
 from src.data.label_harmonization import get_dataset_camera_groups
 from src.experiments._eval_utils import (
     build_full_pipeline,
     evaluate_dataset,
+    evaluate_dataset_binary,
     load_or_train_model,
 )
 from src.utils.seed import set_seed
@@ -124,17 +125,17 @@ def run(
         "reason": "Messidor DR grades not available — see harmonize_messidor2_labels()",
     }
 
-    # ── RFMiD (skipped if directory not found) ────────────────────────────────
+    # ── Mixed Topcon+Kowa — RFMiD (binary DR) ────────────────────────────────
     rfmid_root = Path(config["paths"].get("rfmid", ""))
     if rfmid_root.exists():
         print(f"\n{'='*65}")
-        print("Evaluating camera group: Mixed Topcon+Kowa (RFMiD) …")
+        print("Evaluating camera group: Mixed Topcon+Kowa (RFMiD — binary) …")
         print(f"{'='*65}")
         results["cross_device"]["mixed_rfmid"] = _eval_rfmid(
             config, model, pipeline, device, _subset_size
         )
     else:
-        print(f"\nRFMiD: SKIPPED — dataset directory not found at {rfmid_root}")
+        print(f"\nRFMiD: SKIPPED — directory not found at {rfmid_root}")
         results["cross_device"]["mixed_rfmid"] = {
             "status": "skipped",
             "reason": f"RFMiD not found at {rfmid_root}",
@@ -295,11 +296,25 @@ def _eval_rfmid(
     device: torch.device,
     subset_size: int | None,
 ) -> dict[str, Any]:
-    """Evaluate on RFMiD DR subset.  Returns skipped dict if unavailable."""
-    # RFMiD does not have a dedicated loader yet — stub to be filled when
-    # the dataset is added to DATASET_REGISTRY.
-    warnings.warn(
-        "RFMiD evaluation not yet implemented — dataset loader not available.",
-        UserWarning,
-    )
-    return {"status": "skipped", "reason": "RFMiD loader not yet implemented"}
+    """Evaluate on RFMiD DR subset using binary metrics.
+
+    RFMiD provides only binary DR labels (0 = No DR, 1 = DR present).
+    Binary metrics are computed from the 5-class model's "any DR" probability
+    (sum of softmax classes 1–4) against the binary ground truth.
+    weighted_f1 and roc_auc aliases are set for H-6 g_ratio compatibility.
+    """
+    rfmid_root = Path(config["paths"]["rfmid"])
+    try:
+        subset = list(range(subset_size)) if subset_size else None
+        ds = RFMiDDataset.from_directory(
+            root=rfmid_root,
+            split="test",
+            subset_indices=subset,
+            preprocessing=pipeline,
+        )
+        print(f"  RFMiD test: {len(ds)} images  "
+              f"(DR+={sum(ds.labels)}  DR-={len(ds)-sum(ds.labels)})")
+        return evaluate_dataset_binary(model, ds, config, device)
+    except Exception as e:
+        warnings.warn(f"RFMiD evaluation failed: {e}", UserWarning)
+        return {"status": "failed", "error": str(e)}

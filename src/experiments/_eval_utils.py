@@ -12,7 +12,12 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    recall_score,
+    roc_auc_score,
+)
 from torch.utils.data import DataLoader
 
 from src.data.augmentation import FundusAugmentation
@@ -222,3 +227,85 @@ def evaluate_dataset(
         result["binary_roc_auc"] = float("nan")
 
     return result
+
+
+def evaluate_dataset_binary(
+    model: nn.Module,
+    dataset: torch.utils.data.Dataset,
+    config: dict[str, Any],
+    device: torch.device,
+    threshold: float = 0.5,
+) -> dict[str, float]:
+    """Run inference and compute binary DR metrics for binary-labeled datasets.
+
+    Intended for datasets such as RFMiD that provide only binary DR labels
+    (0 = No DR, 1 = DR present).  The 5-class model's "any DR" probability
+    is used as the score: ``any_dr_prob = sum(softmax[:, 1:])``.
+
+    Args:
+        model: Trained 5-class model in eval mode.
+        dataset: Dataset returning (image_tensor, label) where label ∈ {0, 1}.
+        config: Full config (reads batch_size, num_workers, mixed_precision).
+        device: Device to run inference on.
+        threshold: Probability threshold for the positive ("any DR") class.
+
+    Returns:
+        Dict with keys:
+          sensitivity, specificity, binary_f1, binary_accuracy,
+          binary_roc_auc, n_positive, n_negative,
+          weighted_f1 (= binary_f1, for H-6 g_ratio compatibility),
+          roc_auc     (= binary_roc_auc, for H-6 g_ratio compatibility),
+          evaluation_mode, label_scheme.
+    """
+    tc = config.get("training", {})
+    batch_size  = tc.get("batch_size", 16)
+    num_workers = tc.get("num_workers", 4)
+
+    loader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=(device.type == "cuda"),
+    )
+
+    trainer   = Trainer(config, device=str(device))
+    criterion = nn.CrossEntropyLoss()
+
+    _, all_preds, all_probs, all_labels = trainer.evaluate(
+        model, loader, criterion
+    )
+
+    y_true = np.asarray(all_labels, dtype=int)
+
+    # "Any DR" score: sum of softmax probabilities for classes 1–4
+    any_dr_prob  = all_probs[:, 1:].sum(axis=1)
+    y_pred_bin   = (any_dr_prob >= threshold).astype(int)
+
+    try:
+        binary_roc_auc = float(roc_auc_score(y_true, any_dr_prob))
+    except ValueError:
+        binary_roc_auc = float("nan")
+
+    sensitivity = float(recall_score(y_true, y_pred_bin, pos_label=1, zero_division=0))
+    specificity = float(recall_score(y_true, y_pred_bin, pos_label=0, zero_division=0))
+    binary_f1   = float(f1_score(y_true, y_pred_bin, zero_division=0))
+    binary_acc  = float(accuracy_score(y_true, y_pred_bin))
+
+    n_positive = int(y_true.sum())
+    n_negative = int(len(y_true) - n_positive)
+
+    return {
+        "sensitivity":      sensitivity,
+        "specificity":      specificity,
+        "binary_f1":        binary_f1,
+        "binary_accuracy":  binary_acc,
+        "binary_roc_auc":   binary_roc_auc,
+        "n_positive":       n_positive,
+        "n_negative":       n_negative,
+        # Aliases for H-6 g_ratio + variance computation
+        "weighted_f1":      binary_f1,
+        "roc_auc":          binary_roc_auc,
+        "evaluation_mode":  "binary",
+        "label_scheme":     "0=No DR, 1=DR present (any severity)",
+    }

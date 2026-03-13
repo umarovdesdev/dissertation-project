@@ -7,7 +7,7 @@ paths:
   idrid:         /mnt/d/datasets/IDRiD
   messidor:      /mnt/d/datasets/Messidor
   messidor2:     /mnt/d/datasets/Messidor-2
-  rfmid:         /mnt/d/datasets/RFMiD
+  rfmid:         /mnt/d/datasets/RFMiD/A. RFMiD_All_Classes_Dataset
   ddr:           /mnt/d/datasets/DDR
   odir:          /mnt/d/datasets/ODIR-5K
   output_dir:    outputs/

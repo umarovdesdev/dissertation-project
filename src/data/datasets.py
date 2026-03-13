@@ -568,13 +568,101 @@ class ODIR5KDataset(BaseFundusDataset):
         return cls(image_paths, labels, patient_ids, preprocessing, augmentation)
 
 
+class RFMiDDataset(BaseFundusDataset):
+    """RFMiD (Retinal Fundus Multi-disease) dataset — binary DR labels.
+
+    Uses the DR column (0/1) from the ground-truth CSV as the label:
+      0 = No DR present
+      1 = DR present (any severity)
+
+    Each image corresponds to a unique patient; patient ID = image ID number.
+
+    Args:
+        image_paths: Absolute paths to .png images.
+        labels: Binary DR labels (0 or 1).
+        patient_ids: Image ID strings (e.g. "1", "42").
+        preprocessing: Optional preprocessing callable.
+        augmentation: Optional augmentation callable.
+    """
+
+    _SPLIT_DIRS: dict[str, tuple[str, str]] = {
+        "train":      ("a. Training Set",   "a. RFMiD_Training_Labels.csv"),
+        "validation": ("b. Validation Set", "b. RFMiD_Validation_Labels.csv"),
+        "test":       ("c. Testing Set",    "c. RFMiD_Testing_Labels.csv"),
+    }
+
+    def __init__(
+        self,
+        image_paths: list[str],
+        labels: list[int],
+        patient_ids: list[str],
+        preprocessing: Callable | None = None,
+        augmentation: Callable | None = None,
+    ) -> None:
+        super().__init__(image_paths, labels, preprocessing, augmentation)
+        self.patient_ids = patient_ids
+
+    @classmethod
+    def from_directory(
+        cls,
+        root: str | Path,
+        split: str = "train",
+        subset_indices: list[int] | None = None,
+        preprocessing: Callable | None = None,
+        augmentation: Callable | None = None,
+    ) -> "RFMiDDataset":
+        """Build dataset from RFMiD_All_Classes_Dataset/ directory layout.
+
+        Args:
+            root: Path to RFMiD_All_Classes_Dataset/ (contains
+                  ``1. Original Images/`` and ``2. Groundtruths/``).
+            split: One of "train", "validation", "test".
+            subset_indices: Optional list of row indices within the CSV.
+            preprocessing: Optional preprocessing callable.
+            augmentation: Optional augmentation callable.
+
+        Returns:
+            Constructed RFMiDDataset with binary DR labels and patient_ids.
+
+        Raises:
+            ValueError: If split is not one of the recognised split names.
+        """
+        root = Path(root)
+        if split not in cls._SPLIT_DIRS:
+            raise ValueError(
+                f"split must be one of {list(cls._SPLIT_DIRS)}, got {split!r}"
+            )
+
+        img_subdir, csv_name = cls._SPLIT_DIRS[split]
+        images_dir = root / "1. Original Images" / img_subdir
+        labels_csv = root / "2. Groundtruths" / csv_name
+
+        df = pd.read_csv(labels_csv)
+        if subset_indices is not None:
+            df = df.iloc[subset_indices].reset_index(drop=True)
+
+        image_paths, labels, patient_ids = [], [], []
+        for _, row in df.iterrows():
+            img_id   = int(row["ID"])
+            dr_label = int(row["DR"])
+            img_path = images_dir / f"{img_id}.png"
+            if not img_path.exists():
+                continue
+            image_paths.append(str(img_path))
+            labels.append(dr_label)
+            patient_ids.append(str(img_id))
+
+        return cls(image_paths, labels, patient_ids, preprocessing, augmentation)
+
+
 # ---------------------------------------------------------------------------
 # Dataset registry — maps dataset name to class for factory access
 # ---------------------------------------------------------------------------
 DATASET_REGISTRY: dict[str, type] = {
-    "eyepacs": EyePACSDataset,
+    "eyepacs":   EyePACSDataset,
     "aptos2019": APTOS2019Dataset,
-    "idrid": IDRiDDataset,
-    "ddr": DDRDataset,
-    "odir5k": ODIR5KDataset,
+    "idrid":     IDRiDDataset,
+    "ddr":       DDRDataset,
+    "odir5k":    ODIR5KDataset,
+    "rfmid":     RFMiDDataset,
 }
