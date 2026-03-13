@@ -45,6 +45,16 @@ def _create_output_dirs(output_root: Path, exp_name: str, n_folds: int) -> None:
             writer.writerow(METRICS_CSV_HEADER)
 
 
+_EXP_MODULES: dict[str, str] = {
+    "exp1": "src.experiments.exp1_factorial",
+    "exp2": "src.experiments.exp2_ablation",
+    "exp3": "src.experiments.exp3_robustness",
+    "exp4": "src.experiments.exp4_explainability",
+    "exp5": "src.experiments.exp5_generalization",
+    "exp6": "src.experiments.exp6_device_shift",
+}
+
+
 def _dispatch(exp_name: str, config: dict, fold: int | None, resume: bool) -> None:
     """Dispatch to the appropriate experiment module.
 
@@ -54,13 +64,12 @@ def _dispatch(exp_name: str, config: dict, fold: int | None, resume: bool) -> No
         fold: Optional single fold index to run.
         resume: Whether to resume from the last checkpoint.
     """
-    # Experiment modules will be implemented incrementally.
-    # Each exp module must expose: run(config, fold=None, resume=False)
-    exp_number = exp_name[3:]  # e.g. "1"
-    module_path = f"src.experiments.exp{exp_number}"
-
+    import importlib
+    module_path = _EXP_MODULES.get(exp_name)
+    if module_path is None:
+        print(f"Experiment {exp_name} not yet implemented.")
+        return
     try:
-        import importlib
         mod = importlib.import_module(module_path)
         mod.run(config, fold=fold, resume=resume)
     except ModuleNotFoundError:

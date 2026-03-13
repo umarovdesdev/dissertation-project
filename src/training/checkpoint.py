@@ -106,7 +106,7 @@ class CheckpointManager:
         path = self.checkpoint_dir / "last_checkpoint.pt"
         if not path.exists():
             raise FileNotFoundError(f"No checkpoint found at {path}")
-        checkpoint = torch.load(path, map_location="cpu")
+        checkpoint = torch.load(path, map_location="cpu", weights_only=False)
         model.load_state_dict(checkpoint["model_state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         if scheduler is not None and checkpoint.get("scheduler_state_dict") is not None:
@@ -128,6 +128,6 @@ class CheckpointManager:
         path = self.checkpoint_dir / "best_model.pt"
         if not path.exists():
             raise FileNotFoundError(f"No best model checkpoint found at {path}")
-        checkpoint = torch.load(path, map_location="cpu")
+        checkpoint = torch.load(path, map_location="cpu", weights_only=False)
         model.load_state_dict(checkpoint["model_state_dict"])
         return checkpoint

@@ -203,11 +203,12 @@ class Trainer:
         """
         model = model.to(self.device)
 
-        # Class weights from training labels
-        train_labels = [train_loader.dataset.dataset.labels[i]
-                        if hasattr(train_loader.dataset, 'dataset')
-                        else train_loader.dataset.labels[i]
-                        for i in range(len(train_loader.dataset))]
+        # Class weights from training labels — handle torch.utils.data.Subset
+        ds = train_loader.dataset
+        if hasattr(ds, "indices"):  # Subset
+            train_labels = [ds.dataset.labels[i] for i in ds.indices]
+        else:
+            train_labels = ds.labels
 
         if self.use_class_weights:
             weights = compute_class_weights(train_labels, self.num_classes)
