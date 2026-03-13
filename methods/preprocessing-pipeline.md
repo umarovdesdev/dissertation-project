@@ -49,7 +49,7 @@ The 5-component pipeline is implemented as six ordered stages (FOV Standardizati
 
 ## Relationship to 5-Component Governance Definition
 
-The governance documents (INVARIANTS OD-3, RESEARCH_ARCHITECTURE Section 3.1) define a 5-component pipeline. This 6-stage specification is a more granular description of the same operations, splitting "FOV standardization" (governance component 1) into two explicit stages (Stage 1: circle detection/cropping, Stage 2: centering/resize). The mapping is:
+This implementation-level specification describes the same 5-component pipeline at a more granular level, splitting Component 1 (FOV standardization) into two sub-steps (Stage 1: circle detection/cropping, Stage 2: centering/resize). The canonical count is 5 components; the sub-step detail is for implementation clarity only. The mapping is:
 
 | Governance Component | Pipeline Stage(s) |
 |---|---|

@@ -92,7 +92,7 @@ Produce a **complete, self-contained writing prompt** that another instance of t
 
 #### B. BINDING CONSTRAINTS
 Extract and list — verbatim or with precise references — every constraint from `DISSERTATION_INVARIANTS.md` and `ARGUMENT_MAP.md` that applies to this chapter. Organize into:
-1. **Applicable hypotheses** (H-1, H-2, H-3 — which ones does this chapter test, support, or formalize?)
+1. **Applicable hypotheses** (H-1, H-2, H-4, H-5, H-6 — which ones does this chapter test, support, or formalize? Note: H-3 DROPPED in V3.)
 2. **Applicable primary claims** (PC-1 through PC-5 — which claims does this chapter advance evidence for?)
 3. **Applicable sub-claims** (SC-x.x — list every sub-claim whose evidence originates in this chapter)
 4. **Forbidden claims** (CFC-2.x — list every forbidden claim formulation this chapter risks violating)
@@ -146,7 +146,7 @@ Generate a post-writing verification checklist specific to this chapter:
 1. **Do not write the chapter.** Generate only the prompt for writing it.
 2. **Be exhaustive on constraints.** Missing a forbidden claim or scope boundary in the prompt will cause the chapter writer to violate the invariants.
 3. **Map every section to sources.** If a section has no mapped source in the available literature cards, explicitly flag it as requiring additional source material and specify what kind of source is needed.
-4. **Preserve verbatim formulations.** The central thesis (IT-1), hypotheses (H-1, H-2, H-3), and operational definitions (OD-1 through OD-5) must be quoted exactly when they appear in the chapter, not paraphrased.
+4. **Preserve verbatim formulations.** The central thesis (IT-1), hypotheses (H-1, H-2, H-4, H-5, H-6), and operational definitions (OD-1 through OD-5) must be quoted exactly when they appear in the chapter, not paraphrased. (Note: H-3 DROPPED in V3 — do not cite as active hypothesis.)
 5. **Flag gaps.** If the available materials are insufficient for a section, say so explicitly and describe what is missing.
 ~~~
 

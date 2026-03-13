@@ -488,7 +488,7 @@ The following sources carry explicit quality concerns that must be noted when ci
   - "contrast-adaptive preprocessing" → Gap 5 (image quality variability)
   - "variable image quality and constrained computational conditions" → Gap 4 (resource-limited deployment)
   - "multi-stage diabetic retinopathy diagnosis" → Gap 3 (evaluation heterogeneity — binary vs. multi-class)
-**Cross-reference:** Connect to CORE_OBJECTIVE.md (verbatim), HYPOTHESIS.md (H-1, H-2, H-3).
+**Cross-reference:** Connect to CORE_OBJECTIVE.md (verbatim), HYPOTHESIS.md (H-1, H-2, H-4, H-5, H-6). [V3: H-3 DROPPED]
 **Estimated paragraphs:** 5–7
 
 ---

@@ -69,7 +69,7 @@ Using **OCTA images only**, with ground truth defined by ultra-widefield fluores
 
 * **Class taxonomy:**
 
-  * Multiclass (6 stages)
+  * Multiclass (6 severity grades: DR 0–5)
   * Binary tasks:
 
     * DR detection (mild NPDR or worse)

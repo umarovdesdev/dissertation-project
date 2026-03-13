@@ -2,7 +2,7 @@
 
 Automated Diabetic Retinopathy Detection via Preprocessing and CNN Classification
 
-**Document Version:** 3.0 — V3 sync: Experiment 3 (robustness/APTOS) DROPPED; old Experiments 5+6 MERGED into V3 Experiment 3; Experiment 7 → future work placeholder; "dynamic clip limit" → "optimized clip limit"; "6-stage" → "5-component pipeline".
+**Document Version:** 3.0 — V3 sync: Experiment 3 (robustness/APTOS) DROPPED; old Experiments 5+6 MERGED into V3 Experiment 3; Experiment 7 → future work placeholder; formerly "dynamic clip limit" renamed to "optimized clip limit"; formerly "6-stage pipeline" reframed as "5-component pipeline".
 
 ---
 
