@@ -119,7 +119,7 @@ experiments:
 
   exp3:
     name:       "Experiment 3: Robustness to Image Degradation"
-    hypothesis: H-3
+    hypothesis: null  # no specific hypothesis — supporting evidence for PC-1
     dataset:    aptos
     perturbations:
       - type: gaussian_noise
