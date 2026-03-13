@@ -6,6 +6,14 @@ from src.evaluation.metrics import (
     check_overfitting,
 )
 from src.evaluation.calibration import compute_ece, compute_brier_score
+from src.evaluation.statistical_tests import (
+    mcnemar_test,
+    delong_test,
+    bootstrap_ci,
+    bootstrap_ci_all_primary,
+    holm_bonferroni_correction,
+    compute_mixed_effects_summary,
+)
 
 __all__ = [
     "compute_primary_metrics",
@@ -15,4 +23,10 @@ __all__ = [
     "check_overfitting",
     "compute_ece",
     "compute_brier_score",
+    "mcnemar_test",
+    "delong_test",
+    "bootstrap_ci",
+    "bootstrap_ci_all_primary",
+    "holm_bonferroni_correction",
+    "compute_mixed_effects_summary",
 ]
