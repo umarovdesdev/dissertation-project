@@ -3,7 +3,8 @@ deterministic: true
 
 paths:
   eyepacs:       /mnt/d/datasets/EyePACS
-  aptos:         /mnt/d/datasets/APTOS 2019
+  # DROPPED V3 — not an active dataset
+  # aptos:       /mnt/d/datasets/APTOS 2019
   idrid:         /mnt/d/datasets/IDRiD
   messidor:      /mnt/d/datasets/Messidor
   messidor2:     /mnt/d/datasets/Messidor-2
@@ -97,7 +98,7 @@ evaluation:
 
 experiments:
   exp1:
-    name:       "Experiment 1: 2x2 Factorial (Preprocessing vs Architecture)"
+    name:       "V3 Experiment 1: 2x2 Factorial (Preprocessing vs Architecture)"
     hypothesis: H-1
     dataset:    eyepacs
     configurations:
@@ -107,7 +108,7 @@ experiments:
       D: {preprocessing: full,     model: efficientnet_b3}
 
   exp2:
-    name:       "Experiment 2: Preprocessing Component Ablation"
+    name:       "V3 Experiment 2: Preprocessing Component Ablation"
     hypothesis: H-2
     dataset:    eyepacs
     configurations:
@@ -116,34 +117,26 @@ experiments:
       - components: [fov_standardization, clahe]
       - components: [fov_standardization, normalization, clahe]
       - components: [fov_standardization, green_channel, normalization, clahe, hsv_enhancement]
+    clahe_sweep:
+      dataset:    idrid
+      clip_limits: [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0]
+
+  # DROPPED V3: old exp3 robustness (Experiment 3: Robustness to Image Degradation)
+  # — APTOS dataset dropped; degradation perturbation experiment removed from V3 scope
 
   exp3:
-    name:       "Experiment 3: Robustness to Image Degradation"
-    hypothesis: null  # no specific hypothesis — supporting evidence for PC-1
-    dataset:    aptos
-    perturbations:
-      - type: gaussian_noise
-        levels: [low, medium, high]
-      - type: gaussian_blur
-        levels: [low, medium, high]
-      - type: low_illumination
-        levels: [low, medium, high]
+    name:       "V3 Experiment 3: Cross-Dataset Generalization + Device Robustness"
+    hypothesis: [H-4, H-6]   # merged old exp5 (H-4) + old exp6 (H-6)
+    train_dataset: eyepacs
+    test_datasets: [messidor, messidor2, idrid, rfmid, ddr, odir]
+    generalization_threshold: 0.85   # G = F1_external / F1_EyePACS >= 0.85
 
   exp4:
-    name:       "Experiment 4: Grad-CAM Explainability"
+    name:       "V3 Experiment 4: Grad-CAM Explainability"
     hypothesis: H-5
     dataset:    idrid
     model:      efficientnet_b4
     samples_per_class: 10
 
-  exp5:
-    name:       "Experiment 5: Clinical Generalization"
-    hypothesis: H-4
-    train_dataset: eyepacs
-    test_datasets: [messidor, messidor2, idrid]
-
-  exp6:
-    name:       "Experiment 6: Device Domain Shift"
-    hypothesis: H-6
-    train_dataset: eyepacs
-    test_datasets: [rfmid, ddr, odir, idrid, messidor]
+  # old exp5 (Clinical Generalization, H-4) — MERGED into V3 exp3
+  # old exp6 (Device Domain Shift, H-6)    — MERGED into V3 exp3
