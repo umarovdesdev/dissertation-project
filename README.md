@@ -19,7 +19,7 @@ Candidate: Yesmukhamedov N.S. | IITU Doctoral Programme
 | `literature/self/` | Own publications (`yesmukhamedov-venue.md`) |
 | `chapters/` | Dissertation chapter drafts, one subdirectory per chapter |
 | `experiments/` | Experimental protocol and design documents |
-| `prompts/` | LLM meta-prompts for chapter writing, card generation, review, etc. |
+| `prompts/` | AI pipeline templates — section briefs, writing prompts, verification, translation, revision (see `prompts/README.md`) |
 | `assets/` | Figures, diagrams, exported images |
 
 ## Governance Files
@@ -48,7 +48,20 @@ Candidate: Yesmukhamedov N.S. | IITU Doctoral Programme
 - **All filenames**: lowercase, hyphens only, no spaces, no version suffixes (use git)
 - **Governance files**: UPPER_CASE permitted (they act as project constants)
 
+## Writing Pipeline
+
+The dissertation uses a section-level AI-assisted writing pipeline (V3.0):
+
+1. **Section Brief** (planning) → compact instruction per section with governance bindings and source mappings
+2. **Writing Session** (generation) → section text + Continuity Note + Compliance Checklist
+3. **Verification** (review) → governance compliance audit
+4. **Revision** (if needed) → targeted fixes with continuity preservation
+5. **Translation** (EN→KZ) → controlled translation per GLOSSARY_KZ.md
+6. **Translation Review** → terminology and register verification
+
+Templates are in `prompts/`. Assembly script: `scripts/assemble-session-input.py`.
+
 ## Known Issues
 
-- `literature/external/ting-2017-duplicate.md` is a duplicate of `ting-2017.md` (same paper, two cards) — review and merge or remove
-- `literature/external/wikipedia-clahe.md` is not a peer-reviewed source — consider moving to a `references/` directory or flagging in the index
+- `ting-2017-duplicate.md` — RESOLVED: duplicate removed; `ting-2017.md` is canonical
+- `wikipedia-clahe.md` location — RESOLVED: moved to `literature/non-peer-reviewed/`
