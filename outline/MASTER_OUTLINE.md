@@ -144,7 +144,7 @@
 - Camera-dependent image characteristics across major manufacturers: Canon, Topcon, Kowa, Zeiss.
 - Variations in field of view, illumination profile, color rendering, resolution, and compression artifacts across camera models.
 - Device-specific variability as a clinical deployment challenge: models trained on one camera type may not generalize to images from other devices.
-- Motivation for device domain shift evaluation (Experiment 6) and preprocessing pipeline normalization across camera domains.
+- Motivation for device domain shift evaluation (V3 Experiment 3) and preprocessing pipeline normalization across camera domains.
 
 ### 1.3 Deep Learning Approaches to Retinal Image Classification
 
@@ -194,7 +194,7 @@
 - Conventional CLAHE: CLIP LIMIT = ⌈L/T⌉ + β·(φ − ⌈L/T⌉) (Eq. 1, per LC-SQOPUS_Q2, §2.2.1).
 - Upgraded CLAHE (T/80 formulation): CLIP LIMIT = T/80 (Eq. 2, per LC-SQOPUS_Q2, §2.2.1, p. 5).
 - v2.1 update: CLAHE now applied in LAB color space (L-channel) with optimized clip limit, replacing fixed clip limit 2.0 from v1.0.
-- Boundary: T/80 formulation derived on STARE dataset; not directly transferable to EyePACS or APTOS 2019 without independent validation (INVARIANTS DGL-5; GLOSSARY §2, Upgraded CLAHE entry).
+- Boundary: T/80 formulation derived on STARE dataset; not directly transferable to EyePACS without independent validation (INVARIANTS DGL-5; GLOSSARY §2, Upgraded CLAHE entry).
 - Sensitivity formula anomaly in LC-SQOPUS_Q2: Sen = TP/(TP+TN) deviates from standard Sen = TP/(TP+FN) — must be noted per SIR-3.
 
 #### 2.1.3 Spatial Filtering and Noise Reduction Methods
@@ -443,21 +443,32 @@
 - Independent validation of CLAHE parameters within dissertation framework (DGL-5).
 - Sensitivity formula anomaly note if citing LC-SQOPUS_Q2 figures (SIR-3).
 
-### 4.4 Experiment 3: Robustness to Image Degradation on APTOS 2019
-- **Tests:** Preprocessing robustness under degraded imaging conditions
-- **Evidence target:** Robustness evidence supporting PC-1 practical relevance
+### 4.4 Experiment 3: Cross-Dataset Generalization and Device Domain Shift
+- **Tests:** H-4 (Cross-Database Transferability) and H-6 (Device Robustness)
+- **Evidence target:** ARGUMENT_MAP PC-6 (generalization), PC-9 (device robustness)
 
-#### 4.4.1 Synthetic Image Degradation Protocol
-- Three distortion types applied at three severity levels (low, medium, high):
-  - Gaussian noise (σ parameter) — simulates sensor noise, low-light acquisition.
-  - Gaussian blur (kernel size) — simulates focus errors, motion blur.
-  - Low illumination (brightness reduction factor) — simulates poor lighting in clinical settings.
-- Performance drop measured relative to clean (undistorted) images.
+<!-- V3: Merged from old Experiments 5 + 6. Old Experiment 3 (APTOS robustness) DROPPED. -->
 
-#### 4.4.2 Binary Clinical Threshold Evaluation
-- Binary classification: non-referable DR (grades 0–1) vs. referable DR (grades ≥ 2).
-- Clinical screening metrics: sensitivity, specificity, ROC-AUC under degraded conditions.
-- Assessment of preprocessing pipeline's contribution to maintaining clinical screening thresholds under degradation.
+#### 4.4.1 Cross-Database Transferability Without Retraining
+- Models trained on EyePACS (ResNet-50, EfficientNet-B3) with 5-component preprocessing applied directly to Messidor, Messidor-2, and IDRiD without retraining.
+- Generalization ratio G = F1_external / F1_EyePACS per OD-4. Target: G ≥ 0.85 on at least 2 of 3 external datasets.
+- Label harmonization methodology for Messidor (referable/non-referable mapping to 5-class taxonomy).
+- Boundary: No controlled experiment against named systems under identical conditions; contextual benchmarking only (CFC-2.2; ARGUMENT_MAP NC-2).
+
+#### 4.4.2 Device Domain Shift — Cross-Camera Evaluation
+- Dataset subsets grouped by camera model:
+  - Canon (EyePACS, DDR subset, ODIR-5K subset)
+  - Topcon (Messidor, RFMiD subset, DDR subset)
+  - Kowa (IDRiD, RFMiD subset)
+  - Zeiss (ODIR-5K subset)
+- Performance comparison across camera domains: Accuracy, F1-score, ROC-AUC per camera group.
+- Boundary: Device domain shift results do not constitute device certification or regulatory compliance (ARGUMENT_MAP NC-16).
+
+#### 4.4.3 Generalization Ratio and Cross-Device Performance Matrix
+- Generalization ratio G per external dataset.
+- Cross-device performance matrix: per-camera-group metrics.
+- Published benchmarks for comparison: Gulshan 2016 (AUC 0.990 Messidor-2), Rakhlin 2017 (AUC 0.967 Messidor-2), Saxena 2020 (AUC 0.92 Messidor-2), Ting 2017 (AUC 0.936 referable DR across 10 datasets).
+- Clinical screening metrics: Sensitivity, Specificity, PPV, NPV for referable DR (grade ≥ 2).
 
 ### 4.5 Experiment 4: Explainability Analysis via Grad-CAM
 - **Tests:** H-5 (Explainability — preprocessing shifts CNN attention toward lesion regions)
@@ -465,7 +476,7 @@
 
 #### 4.5.1 Grad-CAM Generation Protocol
 - Model: EfficientNet-B4 pre-trained on ImageNet, fine-tuned on EyePACS.
-- Sampling: 10 randomly selected images per DR class (50 total), plus additional degraded images from Experiment 3.
+- Sampling: 10 randomly selected images per DR class (50 total).
 - Two pipelines compared: (1) Baseline — resize only; (2) Proposed — resize + full 5-component preprocessing.
 - Grad-CAM activation maps generated from the final convolutional layer for the predicted class.
 
@@ -481,7 +492,7 @@
 ### Conclusions to Chapter 4
 - State H-1, H-2, H-5 outcomes explicitly.
 - Report falsifying observations if any hypothesis direction not confirmed (VCR-3).
-- Summarize Experiments 1–4 outcomes: preprocessing dominance (H-1), component hierarchy (PC-8), CLAHE sensitivity (H-2), robustness under degradation, and explainability (H-5).
+- Summarize V3 Experiments 1–4 outcomes: preprocessing dominance (H-1), component hierarchy (PC-8), CLAHE sensitivity (H-2), cross-dataset generalization (H-4), device domain shift (H-6), and explainability (H-5).
 - Acknowledge confounds and boundary conditions.
 
 ---
@@ -490,45 +501,13 @@
 
 **Chapter Function:** Strengthen claim robustness through cross-database generalization, device domain shift evaluation, and benchmarking.
 
-### 5.1 Experiment 5: Clinical Generalization — EyePACS to External Datasets
+<!-- V3: Old Experiments 5 and 6 merged into V3 Experiment 3 (now in §4.4). Chapter 5 is restructured as validation and analysis. -->
 
-#### 5.1.1 Cross-Database Transferability Without Retraining
-- Models trained on EyePACS (ResNet-50, EfficientNet-B3) with 5-component preprocessing applied directly to Messidor, Messidor-2, and IDRiD without retraining.
-- Generalization ratio G = F1_external / F1_EyePACS per OD-4. Target: G ≥ 0.85 on at least 2 of 3 external datasets.
-- Label harmonization methodology for Messidor (referable/non-referable mapping to 5-class taxonomy).
-- **Tests:** H-4 (Cross-Database Transferability)
-- **Evidence target:** ARGUMENT_MAP PC-6
-
-#### 5.1.2 Benchmarking Against Published Generalization Results
-- Results compared with published benchmarks: Gulshan 2016 (AUC 0.990 Messidor-2), Rakhlin 2017 (AUC 0.967 Messidor-2), Saxena 2020 (AUC 0.92 Messidor-2), Ting 2017 (AUC 0.936 referable DR across 10 datasets).
-- Boundary: No controlled experiment against named systems under identical conditions; contextual benchmarking only (CFC-2.2; ARGUMENT_MAP NC-2).
-
-#### 5.1.3 Stability Assessment under Varying Image Quality Conditions
-- Test preprocessing pipeline effectiveness under different image quality profiles across datasets.
-- Link to OD-1 (operational definition of image quality).
-
-### 5.2 Explainability Results
-- Presentation of Grad-CAM comparison results from Experiment 4 (§4.5).
+### 5.1 Explainability Results
+- Presentation of Grad-CAM comparison results from V3 Experiment 4 (§4.5).
 - Grad-CAM overlays for representative images from each DR class (0–4) — with vs. without preprocessing.
-- IoU scores between Grad-CAM activations and IDRiD pixel-level lesion masks per lesion type.
+- ALO scores (primary) and IoU scores (secondary) between Grad-CAM activations and IDRiD pixel-level lesion masks per lesion type.
 - Attention consistency maps across datasets — whether the model attends to similar features on EyePACS, Messidor, and IDRiD images.
-
-### 5.3 Experiment 6: Device Domain Shift — Cross-Camera Evaluation
-
-#### 5.3.1 Cross-Device Performance Evaluation
-- Dataset subsets grouped by camera model:
-  - Canon (EyePACS, DDR subset, ODIR-5K subset)
-  - Topcon (Messidor, RFMiD subset, DDR subset)
-  - Kowa (IDRiD, RFMiD subset)
-  - Zeiss (ODIR-5K subset)
-- Performance comparison across camera domains: Accuracy, F1-score, ROC-AUC per camera group.
-- **Tests:** H-6 (Device Robustness across camera domains)
-- **Evidence target:** ARGUMENT_MAP PC-9
-
-#### 5.3.2 Device-Induced Distribution Shift Analysis
-- Quantification of performance variance across camera groups.
-- Assessment of whether the preprocessing pipeline normalizes device-specific image characteristics.
-- Boundary: Device domain shift results do not constitute device certification or regulatory compliance (ARGUMENT_MAP NC-16).
 
 ### 5.4 Statistical Validation
 
@@ -536,7 +515,7 @@
 - Bootstrap 95% CI (≥ 1000 iterations) on all primary metrics across all experiments.
 - Mixed-effects model for cross-fold analysis in Experiment 1 (fold as random effect).
 - McNemar test for paired classification comparison (Experiment 1: B vs A, D vs C).
-- DeLong test for ROC-AUC comparison (Experiments 1, 5).
+- DeLong test for ROC-AUC comparison (V3 Experiments 1 and 3).
 - Bonferroni/Holm correction for multiple comparisons (Experiments 1, 2).
 
 #### 5.4.2 Final Claim Strength Classifications
@@ -596,7 +575,7 @@
 
 #### 6.2.2 Inference Module with Model Selection Logic
 - Model selection between ResNet-50, EfficientNet-B3, and EfficientNet-B4 based on computational resource availability and deployment context.
-- Note: Device domain shift results from Experiment 6 (§5.3) inform deployment variability considerations — performance variance across camera groups should be factored into model selection and deployment strategy for environments with heterogeneous camera hardware.
+- Note: Device domain shift results from V3 Experiment 3 (§4.4) inform deployment variability considerations — performance variance across camera groups should be factored into model selection and deployment strategy for environments with heterogeneous camera hardware.
 
 ### 6.3 Clinical Workflow Integration
 
@@ -671,7 +650,7 @@
 ### Appendix F — Device Domain Shift Supplementary Tables
 - Per-camera performance matrices: Accuracy, F1-score, ROC-AUC for each camera group (Canon, Topcon, Kowa, Zeiss).
 - Cross-dataset × cross-camera performance heatmaps.
-- Supplementary statistical tables for Experiment 6.
+- Supplementary statistical tables for V3 Experiment 3.
 
 ---
 
@@ -683,7 +662,7 @@
 | §4.3 | V3 Exp 2 | H-2 (sub-analysis) | PC-8 / PC-2 | SC-2.1, SC-2.2 | LC-SQOPUS_Q2, LC-SQOPUS_Q3 | DGL-5, CFC-1.2, SIR-3 |
 | §4.4 | ~~Exp 3~~ [DROPPED V3 — robustness] | — | ~~PC-1 (robustness evidence)~~ | — | — | OD-1 |
 | §4.5 | V3 Exp 4 | H-5 | PC-7 | — | — | NC-14 |
-| §5.1 | V3 Exp 3 (merged from old Exp 5+6) | H-4 + H-6 | PC-6, PC-9 | — | — | OD-4, DGL-1, NC-16 |
+| §4.4 | V3 Exp 3 (merged from old Exp 5+6) | H-4 + H-6 | PC-6, PC-9 | — | — | OD-4, DGL-1, NC-16 |
 | §4.4 (v1.0 ref) [DROPPED V3] | — | ~~H-3~~ DROPPED | ~~PC-3~~ DEMOTED | SC-3.1, SC-3.2 | LC-CONF, LC-KBTU, LC-SQOPUS_Q2 | SIR-4, SIR-5, SIR-7 |
 | §2.4 | — | — | PC-4 | SC-4.1 | LC-KazUTB | SB-1.5, SIR-6, CFC-2.4 |
 | §6.1–6.4 | — | — | PC-5 | SC-5.1 | LC-NAN_RK | SB-4.1, SB-4.2, SB-4.3, DGL-4 |
