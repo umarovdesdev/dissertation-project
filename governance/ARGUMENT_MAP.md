@@ -723,7 +723,7 @@ The following propositions are intentionally excluded from the dissertation's ar
 ---
 
 *End of Argument_Map*
-*Document version: 2.2. Supersedes v2.1.*
-*Document bound to: DISSERTATION_INVARIANTS.md v2.2*
-*Changes from v2.1: ALO promoted to primary explainability metric (PC-7, SC-7.1); cross-device mechanism added to PC-9; "Tests whether" linkages added to all PCs; Experiment 7 reference added; central hypothesis and argument structure referenced from HYPOTHESIS.md.*
-*All claims traceable to: LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01, LC-2025-Yesmukhamedov-01, and Experiments 1–7 as specified in the v2.2 Dissertation Project.*
+*Document version: 3.0. Supersedes v2.2.*
+*Document bound to: DISSERTATION_INVARIANTS.md v3.0*
+*V3 changes from v2.2: SC-1.3 removed (implausible processing time claim); H-3 marked DROPPED; old Exp 3/5/6/7 renumbered to V3 Exp 1–4; "optimized clip limit" throughout; EyePACS size corrected to ~35,126 labeled; APTOS 2019 robustness role removed.*
+*All claims traceable to: LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01, LC-2025-Yesmukhamedov-01, and V3 Experiments 1–4 as specified in the v3.0 Dissertation Project.*
