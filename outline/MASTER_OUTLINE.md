@@ -3,7 +3,7 @@
 
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Master Structural Outline — Chapter-by-Chapter Content Specification
-**Binding References:** DISSERTATION_INVARIANTS.md v3.0 | ARGUMENT_MAP.md v3.0 | GLOSSARY_v3.0 | TABLE_OF_CONTENT.pdf
+**Binding References:** DISSERTATION_INVARIANTS.md v3.0 | ARGUMENT_MAP.md v3.0 | GLOSSARY_EN.md | TABLE_OF_CONTENTS_EN.md
 **Source Corpus:** LC-CONF | LC-KBTU | LC-KazUTB | LC-NAN_RK | LC-SQOPUS_Q2 | LC-SQOPUS_Q3
 **Governing Documents:** CENTRAL_THESIS.md | CORE_OBJECTIVE.md | HYPOTHESIS.md
 

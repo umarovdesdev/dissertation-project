@@ -413,7 +413,7 @@ Reported for V3 Experiments 1 and 3.
 * Expected Calibration Error (ECE)
 * Brier Score
 
-Reported for Experiments 1 and 5.
+Reported for V3 Experiments 1 and 3.
 
 ---
 
@@ -442,7 +442,7 @@ Reported for Experiment 4.
 
 G = F1_external / F1_EyePACS
 
-Per OD-4. Reported for Experiments 5 and 6.
+Per OD-4. Reported for V3 Experiment 3.
 
 ---
 
@@ -451,7 +451,7 @@ Per OD-4. Reported for Experiments 5 and 6.
 Mandatory:
 
 * McNemar test (paired classification comparison) — Experiments 1
-* DeLong test (ROC-AUC comparison) — Experiments 1, 5
+* DeLong test (ROC-AUC comparison) — V3 Experiments 1 and 3
 * 95% confidence intervals (bootstrap ≥ 1000 iterations) — All experiments
 * 5-fold cross-validation reporting (mean ± std) — All experiments
 * Mixed-effects model for cross-fold analysis (fold as random effect) — Experiment 1
