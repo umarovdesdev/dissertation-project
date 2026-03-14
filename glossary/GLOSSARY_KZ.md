@@ -5,9 +5,9 @@
 ### Докторлық диссертация: Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 
 **Кандидат:** Есмұхамедов Н.С.\
-**Нұсқа:** 2.1\
-**Күні:** 2026-03-09\
-**Байланыстырушы құжат:** DISSERTATION_INVARIANTS.md v.2.1
+**Нұсқа:** 3.0\
+**Күні:** 2026-03-14\
+**Байланыстырушы құжат:** DISSERTATION_INVARIANTS.md v3.0
 
 ------------------------------------------------------------------------
 

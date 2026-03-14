@@ -5,7 +5,7 @@
 **Candidate:** Yesmukhamedov N.S.
 **Generated from:** Literature Cards in /LITERATURE/
 **Total sources indexed:** 53
-**Version:** Updated to v2.1 — aligned with INVARIANTS v2.1 and MASTER_OUTLINE v2.1
+**Version:** Updated to v3.0 — aligned with INVARIANTS v3.0 and MASTER_OUTLINE v3.0
 
 ---
 
@@ -76,7 +76,6 @@
 | 10 | Porwal et al. (2018) | Dataset descriptor | IDRiD: 516 images, pixel-level lesion masks + DR/DME grading, Indian pop. | IDRiD | §1.1.2, §4.1, §4.5, §5.2, INTRO |
 | 11 | Ting et al. (2017) | External validation | AUC 0.936 referable DR, validated on 10 multiethnic datasets (AUC 0.889–0.983) | SIDRP (private), 10 external cohorts | §1.4, §5.1, §5.5, §6.3 |
 | 12 | Gulshan et al. (2016) | CNN classification | AUC 0.991 EyePACS-1, 0.990 Messidor-2, Inception-v3 ensemble | EyePACS (private), Messidor-2 | §1.3.1, §1.3.2, §1.4, §5.1, §5.5, INTRO |
-| 13 | Ting et al. (2017) | External validation | AUC 0.936 rDR, 100% sens vtDR, 10 multiethnic external datasets | SIDRP (private), 10 external cohorts | §1.4, §5.1, §5.5, §6.3 |
 | 14 | Wewetzer et al. (2021) | Meta-analysis | Pooled sens 87%, spec 90%, SROC AUC 0.9543, 10 DL screening studies in PC | Multiple (pooled) | §1.4, §5.5, §6.3, INTRO |
 | 15 | Liu et al. (2022) | Benchmark study | κw 0.9303 DR grading, 0.70 image quality accuracy, EfficientNet dominant | DeepDRiD | §1.2.2, §1.3.1, §3.1, §4.1 |
 | 16 | Goh et al. (2024) | CNN classification | SWIN AUC 95.7% Kaggle, 97.3% SEED, 96.3% Messidor-1, ViT > CNN | EyePACS/Kaggle, SEED, Messidor-1 | §1.3.1, §5.1, §5.4, §5.5 |
@@ -198,7 +197,7 @@
 **Existing notes (retained):**
 
 1. Sources #06 and #10 are **duplicate entries** for the same article (Porwal et al., 2018 — IDRiD dataset descriptor). Consider consolidating to a single entry.
-2. Sources #11 and #13 are **duplicate entries** for the same article (Ting et al., 2017 — JAMA multiethnic DLS validation). Consider consolidating to a single entry.
+2. ~~Sources #11 and #13 duplicate~~ — RESOLVED: duplicate card removed; Source #11 (ting-2017.md) is the canonical entry.
 3. Source #18 (González-Díaz et al., 2024) addresses **AMD, not diabetic retinopathy**. Its relevance is peripheral (ViT architecture comparison only).
 
 **Self-publication notes (retained):**

@@ -39,8 +39,8 @@ These files must **always** be attached. They form the invariant epistemic scaff
 | `CENTRAL_THESIS.md` | Verbatim central thesis formulation |
 | `CORE_OBJECTIVE.md` | Verbatim core research objective |
 | `HYPOTHESIS.md` | Verbatim hypothesis formulations |
-| `GLOSSARY_v1_0.md` | Canonical terminology, disambiguation rules, misuse risks |
-| `TABLE_OF_CONTENT.pdf` | Full dissertation structure for cross-referencing |
+| `GLOSSARY_EN.md` | Canonical terminology, disambiguation rules, misuse risks |
+| `TABLE_OF_CONTENTS_EN.md` | Full dissertation structure for cross-referencing |
 
 ---
 
@@ -50,13 +50,13 @@ Attach these **in addition to** the invariant files, depending on which chapter 
 
 | Chapter | Additional Sources to Attach |
 |---------|------------------------------|
-| **Introduction** | All Literature Cards (`CONF_Literature_Card.md`, `KazUTB_Literature_Card.md`, `KBTU_Literature_Card.md`, `NAN_RK_Literature_Card.md`, `SQOPUS_Q2_Literature_Card.md`, `SQOPUS_Q3_Literature_Card.md`); any drafts of previously written chapters |
+| Introduction | All self-citation Literature Cards (`literature/self/yesmukhamedov-conf.md`, `literature/self/yesmukhamedov-kazutb.md`, `literature/self/yesmukhamedov-kbtu.md`, `literature/self/yesmukhamedov-nan-rk.md`, `literature/self/yesmukhamedov-scopus-q2.md`, `literature/self/yesmukhamedov-scopus-q3.md`); any drafts of previously written chapters |
 | **Chapter 1** (Problem Domain) | All Literature Cards; external review articles on DR epidemiology, CNN architectures for DR, existing screening systems (IDx-DR, EyeNuk, DeepMind) — attach as PDFs or paste key excerpts |
 | **Chapter 2** (Theoretical Foundations) | All Literature Cards; any mathematical derivation notes you have; textbook excerpts on CLAHE, CNN theory, transfer learning, heat conduction modeling |
-| **Chapter 3** (Methodology) | `CONF_Literature_Card.md`, `KBTU_Literature_Card.md`, `SQOPUS_Q2_Literature_Card.md`, `SQOPUS_Q3_Literature_Card.md`; pipeline source code (`Appendix A` draft if available); hyperparameter configuration files |
+| Chapter 3 (Methodology) | `literature/self/yesmukhamedov-conf.md`, `literature/self/yesmukhamedov-kbtu.md`, `literature/self/yesmukhamedov-scopus-q2.md`, `literature/self/yesmukhamedov-scopus-q3.md`; pipeline source code (`Appendix A` draft if available); hyperparameter configuration files |
 | **Chapter 4** (Experiments) | All Literature Cards; raw experimental results (training logs, metric tables, confusion matrices, plots); `Appendix B` draft if available |
 | **Chapter 5** (Validation) | All Literature Cards; cross-database test results; ablation study data; published benchmark results from IDx-DR / EyeNuk / DeepMind papers |
-| **Chapter 6** (System Architecture) | `NAN_RK_Literature_Card.md`, `KazUTB_Literature_Card.md`; UML diagrams (`Appendix C` draft); Kazakhstan healthcare infrastructure references; GDPR/HIPAA documentation |
+| Chapter 6 (System Architecture) | `literature/self/yesmukhamedov-nan-rk.md`, `literature/self/yesmukhamedov-kazutb.md`; UML diagrams (`Appendix C` draft); Kazakhstan healthcare infrastructure references; GDPR/HIPAA documentation |
 | **Conclusion** | All previously written chapters; all Literature Cards |
 
 ---
@@ -113,7 +113,7 @@ For each section and subsection in the chapter:
 #### D. WRITING DIRECTIVES
 1. **Academic register**: Formal academic English appropriate for a doctoral dissertation in computer science / medical image analysis. Third person. Past tense for completed experiments; present tense for mathematical definitions and established facts.
 2. **Epistemic precision**: Every empirical claim must cite its evidence source. Every scope limitation must be stated at the point where the claim is first introduced. Hedging language must be used for conditional and moderate-strength claims per the Argument Map's strength classifications.
-3. **Terminological discipline**: Use only canonical terms from `GLOSSARY_v1_0.md`. Apply all disambiguation rules. Flag any term not in the glossary that requires definition.
+3. Terminological discipline: Use only canonical terms from `GLOSSARY_EN.md`. Apply all disambiguation rules. Flag any term not in the glossary that requires definition.
 4. **Self-citation protocol**: All prior own publications (LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-2025-Yesmukhamedov-01) must be identified as prior own work. Results must be framed as "previously published results" with a statement of how the dissertation extends them (per SIR-4).
 5. **Non-amplification**: No source may be attributed conclusions stronger than explicitly stated in the source's literature card (per SIR-1).
 6. **Metric consistency**: When citing performance metrics, replicate or explicitly note differences in evaluation context — dataset, partition, class taxonomy, metric formula (per SIR-3). Flag the sensitivity formula anomaly in LC-AlTimemy-2021 if that source is cited.

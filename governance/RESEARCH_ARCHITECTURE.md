@@ -404,7 +404,7 @@ All primary metrics reported as **mean ± standard deviation** across 5-fold cro
 * Positive Predictive Value (PPV)
 * Negative Predictive Value (NPV)
 
-Reported for Experiments 3 and 5.
+Reported for V3 Experiments 1 and 3.
 
 ---
 

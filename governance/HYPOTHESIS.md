@@ -1,3 +1,7 @@
+**Document Version:** 3.0 | **Binding Reference:** INVARIANTS.md v3.0
+
+---
+
 ## Central Hypothesis
 
 The proposed preprocessing pipeline reduces domain variability across fundus imaging devices and acquisition conditions while preserving diagnostically relevant retinal features, leading to improved CNN-based diabetic retinopathy detection. The hypotheses H-1 through H-6 below are decompositions of this central hypothesis, each testing a specific aspect of the overarching claim.
