@@ -1,5 +1,7 @@
 # TABLE OF CONTENTS
 
+**Version:** 3.0 | **Binding Reference:** INVARIANTS.md v3.0
+
 - NORMATIVE REFERENCES  
 - DEFINITIONS  
 - DESIGNATIONS AND ABBREVIATIONS  
@@ -104,7 +106,7 @@
 # 4 EXPERIMENTAL RESEARCH — PREPROCESSING IMPACT ON CNN DIAGNOSTIC PERFORMANCE
 
 ## 4.1 Datasets and Experimental Configuration
-- 4.1.1 Dataset Architecture v2.1  
+- 4.1.1 Dataset Architecture V3  
 - 4.1.2 Class Distribution Analysis and Data Partitioning Strategy  
 - 4.1.3 Hardware Specification and Reproducibility Protocol  
 
@@ -118,41 +120,33 @@
 - 4.3.2 CLAHE Threshold Sensitivity Analysis (H-2 Sub-Analysis)  
 - 4.3.3 Impact on Feature Preservation in Microaneurysms and Small Vessels  
 
-## 4.4 Experiment 3: Robustness to Image Degradation on APTOS 2019
-- 4.4.1 Synthetic Image Degradation Protocol  
-- 4.4.2 Binary Clinical Threshold Evaluation  
+## 4.4 Experiment 3: Cross-Dataset Generalization and Device Domain Shift
+- 4.4.1 Cross-Database Transferability Without Retraining
+- 4.4.2 Device Domain Shift — Cross-Camera Evaluation
+- 4.4.3 Generalization Ratio and Cross-Device Performance Matrix
 
 ## 4.5 Experiment 4: Explainability Analysis via Grad-CAM
-- 4.5.1 Grad-CAM Generation Protocol  
-- 4.5.2 Quantitative IoU with IDRiD Lesion Masks  
-- 4.5.3 Attention Consistency Across Datasets  
+- 4.5.1 Grad-CAM Generation Protocol
+- 4.5.2 Quantitative ALO and IoU with IDRiD Lesion Masks
+- 4.5.3 Attention Consistency Across Datasets
 
-- Conclusions to Chapter 4  
+- Conclusions to Chapter 4
 
 ---
 
 # 5 RELIABILITY VALIDATION AND COMPARATIVE ANALYSIS
 
-## 5.1 Experiment 5: Clinical Generalization — EyePACS to External Datasets
-- 5.1.1 Cross-Database Transferability Without Retraining  
-- 5.1.2 Benchmarking Against Published Generalization Results  
-- 5.1.3 Stability Assessment under Varying Image Quality Conditions  
+## 5.1 Explainability Results
 
-## 5.2 Explainability Results
+## 5.2 Statistical Validation
+- 5.2.1 Bootstrap Confidence Intervals and Mixed-Effects Model
+- 5.2.2 Final Claim Strength Classifications
 
-## 5.3 Experiment 6: Device Domain Shift — Cross-Camera Evaluation
-- 5.3.1 Cross-Device Performance Evaluation  
-- 5.3.2 Device-Induced Distribution Shift Analysis  
+## 5.3 Comparative Analysis with Published Systems
+- 5.3.1 Benchmarking Against Published Results: IDx-DR, EyeNuk, DeepMind
+- 5.3.2 Performance-Complexity Trade-Off Analysis
 
-## 5.4 Statistical Validation
-- 5.4.1 Bootstrap Confidence Intervals and Mixed-Effects Model  
-- 5.4.2 Final Claim Strength Classifications  
-
-## 5.5 Comparative Analysis with Published Systems
-- 5.5.1 Benchmarking Against Published Results: IDx-DR, EyeNuk, DeepMind  
-- 5.5.2 Performance-Complexity Trade-Off Analysis  
-
-## 5.6 Limitations and Boundary Conditions of the Proposed Approach  
+## 5.4 Limitations and Boundary Conditions of the Proposed Approach
 
 - Conclusions to Chapter 5  
 
