@@ -168,6 +168,44 @@ def run(
     )
     print(f"  Found {len(all_paths)} images | {len(set(all_pids))} patients")
 
+    # ── Stratified patient-level subset ───────────────────────────────
+    subset_cfg = config.get("subset", {})
+    if subset_cfg.get("enabled", False):
+        from sklearn.model_selection import train_test_split
+        from collections import defaultdict, Counter
+
+        fraction = subset_cfg["fraction"]
+        sub_seed = subset_cfg.get("seed", 42)
+
+        # Group by patient
+        patient_to_indices: dict[str, list[int]] = defaultdict(list)
+        for idx, pid in enumerate(all_pids):
+            patient_to_indices[pid].append(idx)
+
+        unique_patients = list(patient_to_indices.keys())
+        patient_labels = [
+            max(all_labels[i] for i in patient_to_indices[pid])
+            for pid in unique_patients
+        ]
+
+        # Stratified patient-level subset
+        selected_patients, _ = train_test_split(
+            unique_patients,
+            train_size=fraction,
+            stratify=patient_labels,
+            random_state=sub_seed,
+        )
+        selected_set = set(selected_patients)
+
+        # Filter to selected patients only
+        keep_idx = [i for i, pid in enumerate(all_pids) if pid in selected_set]
+        all_paths = [all_paths[i] for i in keep_idx]
+        all_labels = [all_labels[i] for i in keep_idx]
+        all_pids = [all_pids[i] for i in keep_idx]
+
+        print(f"  Subset mode: {fraction*100:.0f}% → {len(all_paths)} images | {len(selected_set)} patients")
+        print(f"  Subset class distribution: {dict(sorted(Counter(all_labels).items()))}")
+
     # ── Patient-level splits ──────────────────────────────────────────────────
     splitter = PatientLevelKFold(
         n_folds=n_folds,

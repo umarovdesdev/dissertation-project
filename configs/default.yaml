@@ -1,6 +1,11 @@
 seed: 42
 deterministic: true
 
+subset:
+  enabled:    true
+  fraction:   0.4
+  seed:       42
+
 paths:
   eyepacs:       /mnt/d/datasets/EyePACS
   # DROPPED V3 — not an active dataset
@@ -37,7 +42,7 @@ augmentation:
   brightness_range: [0.9, 1.1]
 
 cross_validation:
-  n_folds:              5
+  n_folds:              3
   patient_level_split:  true
   stratified:           true
 
@@ -64,18 +69,18 @@ training:
   learning_rate:      0.0001
   weight_decay:       0.0001
   batch_size:         16
-  max_epochs:         100
+  max_epochs:         20
   mixed_precision:    true
   num_workers:        4
   class_weights:      inverse_frequency
   early_stopping:
-    patience:         10
+    patience:         5
     monitor:          val_weighted_f1
     mode:             max
   scheduler:
     type:             reduce_on_plateau
     factor:           0.5
-    patience:         5
+    patience:         3
     min_lr:           1.0e-6
   two_stage:
     stage1_epochs:    30
