@@ -232,6 +232,8 @@ def run(
                 num_workers=trainer.num_workers,
                 pin_memory=(trainer.device.type == "cuda"),
                 drop_last=True,
+                persistent_workers=(trainer.num_workers > 0),
+                prefetch_factor=2 if trainer.num_workers > 0 else None,
             )
             val_loader = DataLoader(
                 val_ds,
@@ -239,6 +241,8 @@ def run(
                 shuffle=False,
                 num_workers=trainer.num_workers,
                 pin_memory=(trainer.device.type == "cuda"),
+                persistent_workers=(trainer.num_workers > 0),
+                prefetch_factor=2 if trainer.num_workers > 0 else None,
             )
 
             # Checkpoint directory per config + fold

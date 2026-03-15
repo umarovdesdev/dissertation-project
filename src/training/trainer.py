@@ -148,7 +148,7 @@ class Trainer:
                     loss = criterion(logits, labels)
 
                 total_loss += loss.item() * images.size(0)
-                probs = torch.softmax(logits, dim=1)
+                probs = torch.softmax(logits.float(), dim=1)
                 preds = logits.argmax(dim=1)
 
                 all_preds.append(preds.cpu().numpy())
@@ -351,6 +351,8 @@ class Trainer:
                 num_workers=self.num_workers,
                 pin_memory=(self.device.type == "cuda"),
                 drop_last=True,
+                persistent_workers=(self.num_workers > 0),
+                prefetch_factor=2 if self.num_workers > 0 else None,
             )
             val_loader = DataLoader(
                 val_subset,
@@ -358,6 +360,8 @@ class Trainer:
                 shuffle=False,
                 num_workers=self.num_workers,
                 pin_memory=(self.device.type == "cuda"),
+                persistent_workers=(self.num_workers > 0),
+                prefetch_factor=2 if self.num_workers > 0 else None,
             )
 
             ckpt_dir = exp_dir / "checkpoints" / f"fold_{fold_idx}"
