@@ -216,7 +216,7 @@ def run(
     ok = splitter.verify_no_leakage(splits, all_pids)
     if not ok:
         raise RuntimeError("Patient leakage detected in CV splits — aborting.")
-    print(f"  5-fold splits verified (no leakage)")
+    print(f"  {n_folds}-fold splits verified (no leakage)")
 
     # ── Trainer ───────────────────────────────────────────────────────────────
     trainer = Trainer(config, device="auto")
