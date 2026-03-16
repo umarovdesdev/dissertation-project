@@ -143,8 +143,7 @@ class Trainer:
                 images = images.to(self.device, non_blocking=True)
                 labels = labels.to(self.device, non_blocking=True)
 
-                with torch.amp.autocast("cuda", enabled=self.mixed_precision):
-                    logits = model(images)
+                logits = model(images)
                 loss = criterion(logits.float(), labels)
 
                 total_loss += loss.item() * images.size(0)
