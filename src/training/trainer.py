@@ -145,7 +145,7 @@ class Trainer:
 
                 with torch.amp.autocast("cuda", enabled=self.mixed_precision):
                     logits = model(images)
-                    loss = criterion(logits, labels)
+                loss = criterion(logits.float(), labels)
 
                 total_loss += loss.item() * images.size(0)
                 probs = torch.softmax(logits.float(), dim=1)

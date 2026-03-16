@@ -55,7 +55,7 @@ _EXP_MODULES: dict[str, str] = {
 }
 
 
-def _dispatch(exp_name: str, config: dict, fold: int | None, resume: bool) -> None:
+def _dispatch(exp_name: str, config: dict, fold: int | None, resume: bool, configs_filter: list[str] | None = None) -> None:
     """Dispatch to the appropriate experiment module.
 
     Args:
@@ -63,6 +63,7 @@ def _dispatch(exp_name: str, config: dict, fold: int | None, resume: bool) -> No
         config: Merged experiment config dict.
         fold: Optional single fold index to run.
         resume: Whether to resume from the last checkpoint.
+        configs_filter: Optional list of config keys to run (exp1 only).
     """
     import importlib
     module_path = _EXP_MODULES.get(exp_name)
@@ -71,7 +72,7 @@ def _dispatch(exp_name: str, config: dict, fold: int | None, resume: bool) -> No
         return
     try:
         mod = importlib.import_module(module_path)
-        mod.run(config, fold=fold, resume=resume)
+        mod.run(config, fold=fold, resume=resume, _configs_to_run=configs_filter)
     except ModuleNotFoundError:
         print(f"Experiment {exp_name} not yet implemented.")
 
@@ -102,6 +103,12 @@ def main() -> None:
         default=None,
         help="Run a single fold index (0-based) instead of all folds",
     )
+    parser.add_argument(
+        "--configs",
+        type=str,
+        default=None,
+        help="Comma-separated config keys to run (e.g. 'D' or 'A,B'). Only for exp1. Default: all configs.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -113,11 +120,17 @@ def main() -> None:
     n_folds = config["cross_validation"]["n_folds"]
     _create_output_dirs(output_root, args.experiment, n_folds)
 
+    configs_filter = None
+    if args.configs:
+        configs_filter = [c.strip().upper() for c in args.configs.split(",")]
+
     print(f"Running {args.experiment} | config: {args.config} | resume: {args.resume}")
     if args.fold is not None:
         print(f"Single-fold mode: fold {args.fold}")
+    if configs_filter:
+        print(f"Config filter: {configs_filter}")
 
-    _dispatch(args.experiment, exp_config, fold=args.fold, resume=args.resume)
+    _dispatch(args.experiment, exp_config, fold=args.fold, resume=args.resume, configs_filter=configs_filter)
 
 
 if __name__ == "__main__":
