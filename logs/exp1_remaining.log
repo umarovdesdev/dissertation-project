@@ -1,0 +1,66 @@
+nohup: ignoring input
+Running exp1 | config: configs/default.yaml | resume: False
+Single-fold mode: fold 2
+Config filter: ['A', 'B', 'C']
+Loading EyePACS index from /mnt/d/datasets/EyePACS/trainLabels.csv …
+  Found 35126 images | 17563 patients
+  Subset mode: 40% → 14050 images | 7025 patients
+  Subset class distribution: {0: 10336, 1: 960, 2: 2115, 3: 349, 4: 290}
+  3-fold splits verified (no leakage)
+
+=================================================================
+  Config A | baseline preprocessing | resnet50
+=================================================================
+
+  [Config A | Fold 3/3]
+  Train: 9368 images | Val: 4682 images
+  Fold 2 | Epoch 000 | loss 1.3448 → 1.2088 | F1 0.4892 | AUC 0.7990 | κ 0.4391 | 1735.4s
+  Fold 2 | Epoch 001 | loss 1.1341 → 1.1349 | F1 0.3897 | AUC 0.8198 | κ 0.4839 | 1735.6s
+  Fold 2 | Epoch 002 | loss 1.0540 → 1.0954 | F1 0.7104 | AUC 0.8422 | κ 0.6140 | 1727.0s
+  Fold 2 | Epoch 003 | loss 1.0269 → 1.0702 | F1 0.6068 | AUC 0.8423 | κ 0.5575 | 1729.8s
+  Fold 2 | Epoch 004 | loss 0.9804 → 1.0048 | F1 0.7382 | AUC 0.8506 | κ 0.6414 | 1728.4s
+  Fold 2 | Epoch 005 | loss 0.9381 → 1.0955 | F1 0.7475 | AUC 0.8470 | κ 0.6582 | 1736.2s
+  Fold 2 | Epoch 006 | loss 0.9254 → 1.0811 | F1 0.7660 | AUC 0.8609 | κ 0.6838 | 1732.3s
+  Fold 2 | Epoch 007 | loss 0.8958 → 1.0428 | F1 0.7111 | AUC 0.8523 | κ 0.6383 | 1753.2s
+  Fold 2 | Epoch 008 | loss 0.8481 → 1.0668 | F1 0.6838 | AUC 0.8550 | κ 0.6588 | 1735.8s
+  Fold 2 | Epoch 009 | loss 0.8338 → 1.0664 | F1 0.7390 | AUC 0.8607 | κ 0.6648 | 1744.3s
+  Fold 2 | Epoch 010 | loss 0.8246 → 1.2031 | F1 0.7694 | AUC 0.8507 | κ 0.6849 | 1739.3s
+  Fold 2 | Epoch 011 | loss 0.8114 → 1.1840 | F1 0.7614 | AUC 0.8476 | κ 0.6689 | 1735.8s
+  Fold 2 | Epoch 012 | loss 0.7755 → 1.0511 | F1 0.6417 | AUC 0.8592 | κ 0.6157 | 1744.1s
+  Fold 2 | Epoch 013 | loss 0.7650 → 1.0718 | F1 0.7695 | AUC 0.8647 | κ 0.6445 | 1767.3s
+  Fold 2 | Epoch 014 | loss 0.7496 → 1.0375 | F1 0.6831 | AUC 0.8551 | κ 0.6117 | 1742.3s
+  Fold 2 | Epoch 015 | loss 0.7194 → 1.0949 | F1 0.6071 | AUC 0.8598 | κ 0.5793 | 1751.0s
+  Fold 2 | Epoch 016 | loss 0.7060 → 1.0674 | F1 0.6289 | AUC 0.8475 | κ 0.5555 | 1744.1s
+  Fold 2 | Epoch 017 | loss 0.6635 → 1.1895 | F1 0.5510 | AUC 0.8564 | κ 0.5688 | 1752.6s
+  Fold 2 | Epoch 018 | loss 0.5688 → 1.1814 | F1 0.7217 | AUC 0.8615 | κ 0.6854 | 1741.1s
+  Early stopping at epoch 18 (patience=5)
+  Best → F1=0.7695  AUC=0.8647  κ=0.6445  acc=0.7574
+
+=================================================================
+  Config B | full preprocessing | resnet50
+=================================================================
+
+  [Config B | Fold 3/3]
+  Train: 9368 images | Val: 4682 images
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  Fold 2 | Epoch 000 | loss 1.3194 → 1.1623 | F1 0.7148 | AUC 0.7964 | κ 0.4738 | 1701.1s
+  Fold 2 | Epoch 001 | loss 1.1322 → 1.1440 | F1 0.4936 | AUC 0.8180 | κ 0.4947 | 1701.3s
+  Fold 2 | Epoch 002 | loss 1.0927 → 1.3715 | F1 0.7013 | AUC 0.7998 | κ 0.5357 | 1711.5s
+  Fold 2 | Epoch 003 | loss 1.0637 → 1.1514 | F1 0.6312 | AUC 0.8411 | κ 0.5606 | 1705.6s
+  Fold 2 | Epoch 004 | loss 1.0034 → 1.0786 | F1 0.7267 | AUC 0.8286 | κ 0.5991 | 1707.1s
+  Fold 2 | Epoch 005 | loss 0.9647 → 1.1454 | F1 0.7294 | AUC 0.8257 | κ 0.5829 | 1752.2s
+  Fold 2 | Epoch 006 | loss 0.9594 → 1.1243 | F1 0.7709 | AUC 0.8498 | κ 0.6644 | 1765.4s
+  Fold 2 | Epoch 007 | loss 0.9207 → 1.1295 | F1 0.5633 | AUC 0.8508 | κ 0.5330 | 1847.1s
+  Fold 2 | Epoch 008 | loss 0.9237 → 1.0862 | F1 0.6885 | AUC 0.8433 | κ 0.5188 | 1835.1s
+  Fold 2 | Epoch 009 | loss 0.8692 → 1.0323 | F1 0.7111 | AUC 0.8587 | κ 0.6237 | 1843.5s
+  Fold 2 | Epoch 010 | loss 0.8549 → 1.0236 | F1 0.7471 | AUC 0.8565 | κ 0.6637 | 1801.1s
+  Fold 2 | Epoch 011 | loss 0.7560 → 1.0544 | F1 0.7187 | AUC 0.8528 | κ 0.6629 | 1848.0s
+  Early stopping at epoch 11 (patience=5)
+  Best → F1=0.7709  AUC=0.8498  κ=0.6644  acc=0.7896
+
+=================================================================
+  Config C | baseline preprocessing | efficientnet_b3
+=================================================================
+
+  [Config C | Fold 3/3]
+  Train: 9368 images | Val: 4682 images

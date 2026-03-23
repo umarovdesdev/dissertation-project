@@ -231,6 +231,13 @@ def run(
         preproc_kind = cfg_spec["preprocessing"]
         model_cfg    = config["models"][model_name]
 
+        # Disable mixed precision for EfficientNet (known fp16 instability)
+        if "efficientnet" in model_name:
+            trainer.mixed_precision = False
+            print(f"  [INFO] Mixed precision DISABLED for {model_name}")
+        else:
+            trainer.mixed_precision = config.get("training", {}).get("mixed_precision", True)
+
         print(f"\n{'='*65}")
         print(f"  Config {cfg_key} | {preproc_kind} preprocessing | {model_name}")
         print(f"{'='*65}")
