@@ -2,11 +2,15 @@
 Preprocessing pipeline orchestrator.
 
 PreprocessingPipeline applies the five ordered components:
-  1. FOV Standardization
-  2. Green Channel Extraction
-  3. Pixel Normalization
-  4. CLAHE Enhancement (LAB color space)
-  5. HSV Contrast Enhancement
+  1. FOV Standardization — crop/resize (BGR uint8 → BGR uint8)
+  2. CLAHE Enhancement (LAB L-channel, full-color) — (BGR uint8 → BGR uint8)
+  3. HSV Contrast Enhancement (full-color S/V scaling) — (BGR uint8 → BGR uint8)
+  4. Green Channel Extraction — (BGR uint8 → BGR uint8, 3-channel grayscale)
+  5. Pixel Normalization — (uint8 → float32 [0,1])
+
+CLAHE and HSV enhancement are applied to the full-color image BEFORE
+green channel extraction, so that CLAHE operates on the true L-channel
+(not a grayscale L) and HSV enhancement has nonzero saturation to scale.
 
 Each component can be toggled individually via a config dict.  Factory
 class-methods produce common configurations (baseline, full, ablation).
@@ -27,10 +31,10 @@ from .normalization import normalize_pixels
 # Ordered canonical component keys
 _COMPONENT_KEYS: tuple[str, ...] = (
     "fov_standardization",
-    "green_channel",
-    "normalize",
     "clahe",
     "hsv_enhancement",
+    "green_channel",
+    "normalize",
 )
 
 
@@ -76,6 +80,16 @@ class PreprocessingPipeline:
         """
         Apply all enabled pipeline components in order.
 
+        Execution order:
+          1. FOV standardization — crop/resize (BGR uint8 → BGR uint8)
+          2. CLAHE — L-channel enhancement on full-color LAB (BGR uint8 → BGR uint8)
+          3. HSV enhancement — S/V scaling on full-color HSV (BGR uint8 → BGR uint8)
+          4. Green channel extraction — reduces to grayscale (BGR uint8 → BGR uint8, 3ch gray)
+          5. Normalize — pixel values to [0,1] (uint8 → float32)
+
+        CLAHE and HSV must run BEFORE green channel extraction so they
+        operate on the full-color image.
+
         Args:
             image: BGR uint8 NumPy array.
 
@@ -85,12 +99,6 @@ class PreprocessingPipeline:
         """
         if self._enabled["fov_standardization"]:
             image = standardize_fov(image, target_size=self._target_size)
-
-        if self._enabled["green_channel"]:
-            image = extract_green_channel(image)
-
-        if self._enabled["normalize"]:
-            image = normalize_pixels(image)
 
         if self._enabled["clahe"]:
             image = apply_clahe(
@@ -105,6 +113,12 @@ class PreprocessingPipeline:
                 saturation_scale=self._saturation_scale,
                 value_scale=self._value_scale,
             )
+
+        if self._enabled["green_channel"]:
+            image = extract_green_channel(image)
+
+        if self._enabled["normalize"]:
+            image = normalize_pixels(image)
 
         return image
 
