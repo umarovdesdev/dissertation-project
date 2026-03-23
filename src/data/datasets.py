@@ -9,6 +9,13 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
+# PreprocessingPipelineV4 is imported lazily inside methods to avoid circular
+# imports (src.preprocessing.pipeline_v4 imports from src.data.augmentation_v4,
+# which is a sibling of this module).
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.preprocessing.pipeline_v4 import PreprocessingPipelineV4
+
 
 class BaseFundusDataset(Dataset):
     """Base dataset for fundus images.
@@ -114,9 +121,56 @@ class EyePACSDataset(BaseFundusDataset):
         patient_ids: list[str],
         preprocessing: Callable | None = None,
         augmentation: Callable | None = None,
+        eye_sides: list[str] | None = None,
     ) -> None:
         super().__init__(image_paths, labels, preprocessing, augmentation)
         self.patient_ids = patient_ids
+        self.eye_sides: list[str] = (
+            eye_sides if eye_sides is not None
+            else ["unknown"] * len(image_paths)
+        )
+
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, int]:
+        """Load and return one sample, routing through V4 or V3 pipeline.
+
+        Args:
+            idx: Sample index.
+
+        Returns:
+            Tuple of (image_tensor, label) where image_tensor is float32
+            CHW and values are ImageNet-normalised (V4) or in [0, 1] (V3).
+        """
+        image = cv2.imread(str(self.image_paths[idx]))
+        if image is None:
+            raise FileNotFoundError(f"Could not load image: {self.image_paths[idx]}")
+
+        eye_side = self.eye_sides[idx]
+
+        if self.preprocessing is not None:
+            from src.preprocessing.pipeline_v4 import PreprocessingPipelineV4  # noqa: PLC0415
+            if isinstance(self.preprocessing, PreprocessingPipelineV4):
+                # V4 pipeline handles BGR→RGB conversion, all stages, and
+                # returns a normalised tensor directly.
+                tensor = self.preprocessing(image, eye_side=eye_side)
+                return tensor, self.labels[idx]
+            else:
+                # V3 legacy path
+                image = self.preprocessing(image)
+
+        if self.augmentation is not None:
+            image = self.augmentation(image)
+
+        # Legacy normalisation: uint8 → float32 [0, 1]
+        if isinstance(image, np.ndarray):
+            if image.dtype == np.uint8:
+                image = image.astype(np.float32) / 255.0
+            else:
+                image = image.astype(np.float32)
+            tensor = torch.from_numpy(np.ascontiguousarray(image.transpose(2, 0, 1)))
+        else:
+            tensor = image  # already a tensor
+
+        return tensor, self.labels[idx]
 
     @classmethod
     def from_directory(
@@ -146,7 +200,7 @@ class EyePACSDataset(BaseFundusDataset):
         if subset_indices is not None:
             df = df.iloc[subset_indices].reset_index(drop=True)
 
-        image_paths, labels, patient_ids = [], [], []
+        image_paths, labels, patient_ids, eye_sides = [], [], [], []
         for _, row in df.iterrows():
             name: str = str(row["image"])
             img_path = root / f"{name}.jpeg"
@@ -155,8 +209,9 @@ class EyePACSDataset(BaseFundusDataset):
             image_paths.append(str(img_path))
             labels.append(int(row["level"]))
             patient_ids.append(name.split("_")[0])
+            eye_sides.append("left" if "_left" in name else "right")
 
-        return cls(image_paths, labels, patient_ids, preprocessing, augmentation)
+        return cls(image_paths, labels, patient_ids, preprocessing, augmentation, eye_sides)
 
 
 class APTOS2019Dataset(BaseFundusDataset):
@@ -653,6 +708,164 @@ class RFMiDDataset(BaseFundusDataset):
             patient_ids.append(str(img_id))
 
         return cls(image_paths, labels, patient_ids, preprocessing, augmentation)
+
+
+# ---------------------------------------------------------------------------
+# EyePACS patient-pair dataset (per-patient blending)
+# ---------------------------------------------------------------------------
+
+class EyePACSPatientPairDataset(Dataset):
+    """EyePACS dataset returning ``(img_L, img_R, label)`` per patient.
+
+    Each sample represents one patient; a zero tensor is used when an eye
+    is absent, accompanied by a mask flag.  Intended for per-patient
+    blending experiments.
+
+    Args:
+        patient_data: Dict mapping ``patient_id`` to a dict with keys
+            ``"left_path"``, ``"right_path"``, ``"left_label"``,
+            ``"right_label"`` (each is a ``str | None`` / ``int | None``).
+        preprocessing: :class:`PreprocessingPipelineV4` applied to each eye.
+        label_strategy: How to derive a single label per patient.
+            ``"max"`` uses the maximum grade across both eyes (default).
+    """
+
+    def __init__(
+        self,
+        patient_data: dict[str, dict],
+        preprocessing: "PreprocessingPipelineV4",
+        label_strategy: str = "max",
+    ) -> None:
+        self.patient_data = patient_data
+        self.patient_ids: list[str] = list(patient_data.keys())
+        self.preprocessing = preprocessing
+        self.label_strategy = label_strategy
+
+    def __len__(self) -> int:
+        return len(self.patient_ids)
+
+    def __getitem__(self, idx: int) -> dict:
+        """Return one patient sample.
+
+        Returns:
+            Dict with keys:
+
+            - ``"left"``         — float32 tensor ``(3, H, W)``; zero if absent
+            - ``"right"``        — float32 tensor ``(3, H, W)``; zero if absent
+            - ``"label"``        — int DR grade (0–4)
+            - ``"left_mask"``    — 1 if left eye present, else 0
+            - ``"right_mask"``   — 1 if right eye present, else 0
+            - ``"patient_id"``   — str
+        """
+        pid = self.patient_ids[idx]
+        data = self.patient_data[pid]
+
+        target_size = self.preprocessing.config.target_size
+        zero = torch.zeros(3, target_size, target_size, dtype=torch.float32)
+
+        def _load(path: str | None, side: str) -> tuple[torch.Tensor, int]:
+            if path is None:
+                return zero, 0
+            img = cv2.imread(path)
+            if img is None:
+                return zero, 0
+            return self.preprocessing(img, eye_side=side), 1
+
+        left_tensor, left_mask = _load(data.get("left_path"), "left")
+        right_tensor, right_mask = _load(data.get("right_path"), "right")
+
+        # Derive label
+        left_label: int | None = data.get("left_label")
+        right_label: int | None = data.get("right_label")
+        grades = [g for g in (left_label, right_label) if g is not None]
+        label = max(grades) if grades else 0
+
+        return {
+            "left": left_tensor,
+            "right": right_tensor,
+            "label": label,
+            "left_mask": left_mask,
+            "right_mask": right_mask,
+            "patient_id": pid,
+        }
+
+    @classmethod
+    def from_directory(
+        cls,
+        root: str | Path,
+        labels_csv: str | Path,
+        subset_indices: list[int] | None = None,
+        preprocessing: "PreprocessingPipelineV4 | None" = None,
+    ) -> "EyePACSPatientPairDataset":
+        """Build a patient-pair dataset from the EyePACS directory layout.
+
+        Rows are optionally filtered by *subset_indices* first, then grouped
+        by patient ID.
+
+        Args:
+            root: Path to the train/ image directory.
+            labels_csv: Path to ``trainLabels.csv`` (columns: image, level).
+            subset_indices: Optional list of CSV row indices to include.
+            preprocessing: :class:`PreprocessingPipelineV4` instance.
+                Defaults to an inference-mode pipeline with default config.
+
+        Returns:
+            :class:`EyePACSPatientPairDataset` instance.
+        """
+        from src.preprocessing.config import PreprocessingV4Config
+
+        root = Path(root)
+        df = pd.read_csv(labels_csv)
+        if subset_indices is not None:
+            df = df.iloc[subset_indices].reset_index(drop=True)
+
+        if preprocessing is None:
+            preprocessing = PreprocessingPipelineV4.create_for_inference(
+                PreprocessingV4Config()
+            )
+
+        patient_data: dict[str, dict] = {}
+        for _, row in df.iterrows():
+            name: str = str(row["image"])
+            img_path = root / f"{name}.jpeg"
+            grade = int(row["level"])
+            pid = name.split("_")[0]
+            side = "left" if "_left" in name else "right"
+
+            if pid not in patient_data:
+                patient_data[pid] = {
+                    "left_path": None,
+                    "right_path": None,
+                    "left_label": None,
+                    "right_label": None,
+                }
+
+            path_str = str(img_path) if img_path.exists() else None
+            patient_data[pid][f"{side}_path"] = path_str
+            patient_data[pid][f"{side}_label"] = grade
+
+        return cls(patient_data, preprocessing)
+
+
+def patient_pair_collate(batch: list[dict]) -> dict:
+    """Collate a list of patient-pair sample dicts into batched tensors.
+
+    Args:
+        batch: List of dicts as returned by
+            :meth:`EyePACSPatientPairDataset.__getitem__`.
+
+    Returns:
+        Dict with the same keys; tensor values are stacked along dim 0;
+        ``"patient_id"`` is a list of strings.
+    """
+    return {
+        "left":        torch.stack([b["left"] for b in batch]),
+        "right":       torch.stack([b["right"] for b in batch]),
+        "label":       torch.tensor([b["label"] for b in batch], dtype=torch.long),
+        "left_mask":   torch.tensor([b["left_mask"] for b in batch], dtype=torch.long),
+        "right_mask":  torch.tensor([b["right_mask"] for b in batch], dtype=torch.long),
+        "patient_id":  [b["patient_id"] for b in batch],
+    }
 
 
 # ---------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 seed: 42
 deterministic: true
+pipeline_version: "v4"
 
 subset:
   enabled:    true
@@ -17,6 +18,47 @@ paths:
   ddr:           /mnt/d/datasets/DDR
   odir:          /mnt/d/datasets/ODIR-5K
   output_dir:    outputs/
+
+preprocessing_v4:
+  # Toggles
+  use_canonical_flip: true
+  use_flat_field: true
+  use_clahe: true
+  use_pca_color: true
+  use_brightness_contrast: true
+  use_shear: true
+  use_stretch: true
+
+  # Stage 1 — Crop + Resize
+  target_size: 512
+
+  # Stage 2 — Flat-Field
+  flat_field_sigma: 45.0
+
+  # Stage 3 — Upgraded CLAHE
+  clahe_tile_grid_size: [8, 8]
+  clahe_clip_factor: 2.0
+  clahe_global_threshold: 0.01
+  clahe_train_prob: 0.8
+
+  # Stage 5 — Augmentation
+  rotation_sigma: 13.0
+  rotation_clip: 40.0
+  zoom_range: [0.9, 1.1]
+  stretch_range: [0.952381, 1.05]   # [1/1.05, 1.05]
+  shear_range: [-2.0, 2.0]
+  shear_prob: 0.3
+  interp_weights: [0.6, 0.3, 0.1]  # LINEAR, CUBIC, NEAREST
+  border_mode: 4                    # cv2.BORDER_REFLECT
+  pca_color_sigma: 0.1
+  pca_color_prob: 0.5
+  brightness_alpha_range: [0.9, 1.1]
+  brightness_beta_range: [-10.0, 10.0]
+  bc_prob: 0.5
+
+  # Stage 4 — Normalise (ImageNet)
+  normalize_mean: [0.485, 0.456, 0.406]
+  normalize_std: [0.229, 0.224, 0.225]
 
 preprocessing:
   fov_standardization: true
