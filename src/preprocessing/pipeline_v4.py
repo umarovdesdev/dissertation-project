@@ -44,6 +44,19 @@ class PreprocessingPipelineV4:
     augmentation is applied only during training, inserted *before* Stage 4
     normalisation so that it operates on uint8 images.
 
+    All internal processing is done in **RGB**.  The ``input_color_space``
+    parameter controls whether the input image is converted before any stage
+    runs:
+
+    - ``"bgr"`` (default) — converts BGR→RGB on entry.  Use this when images
+      are loaded with :func:`cv2.imread`, which returns BGR.
+    - ``"rgb"`` — no conversion.  Use this when the caller already provides
+      an RGB array (e.g. loaded via PIL or a dataset that returns RGB).
+
+    Passing an already-RGB image to a ``"bgr"`` pipeline silently swaps R and
+    B channels, corrupting the image.  Always match this parameter to how the
+    caller loads images.
+
     Args:
         config: :class:`PreprocessingV4Config` controlling all parameters
             and toggle flags.
@@ -52,6 +65,9 @@ class PreprocessingPipelineV4:
             augmentation.  ``None`` disables PCA colour jitter.
         pca_eigvals: PCA eigenvalues of shape ``(3,)``.  ``None`` disables
             PCA colour jitter.
+        input_color_space: ``"bgr"`` or ``"rgb"``.  Controls BGR→RGB
+            conversion at the pipeline entry point.  Default ``"bgr"``
+            matches :func:`cv2.imread` output.
     """
 
     def __init__(
@@ -60,9 +76,15 @@ class PreprocessingPipelineV4:
         is_training: bool = False,
         pca_eigvecs: np.ndarray | None = None,
         pca_eigvals: np.ndarray | None = None,
+        input_color_space: str = "bgr",
     ) -> None:
+        if input_color_space not in ("bgr", "rgb"):
+            raise ValueError(
+                f"input_color_space must be 'bgr' or 'rgb', got {input_color_space!r}"
+            )
         self.config = config
         self.is_training = is_training
+        self._input_color_space = input_color_space
 
         self._clahe_params = ClaheParams(
             tile_grid_size=config.clahe_tile_grid_size,
@@ -91,19 +113,18 @@ class PreprocessingPipelineV4:
 
         Args:
             image: Raw image as a uint8 NumPy array of shape ``(H, W, 3)``.
-                BGR images (as loaded by ``cv2.imread``) are converted to RGB
-                automatically.  Already-RGB arrays are passed through.
+                Must match ``input_color_space`` set at construction:
+                ``"bgr"`` for :func:`cv2.imread` output,
+                ``"rgb"`` for PIL/already-converted arrays.
             eye_side: ``"left"``, ``"right"``, or ``"unknown"``.
 
         Returns:
             ImageNet-normalised float32 tensor of shape
             ``(3, target_size, target_size)``.
         """
-        # Ensure RGB — V4 pipeline works in RGB throughout.
-        # Heuristic: assume BGR if the caller loaded with cv2 (common case).
-        # Callers that already have RGB should pass it directly; the conversion
-        # is idempotent for symmetric images but callers should be explicit.
-        if image.ndim == 3 and image.shape[2] == 3:
+        # Convert to RGB if input is BGR (e.g. from cv2.imread).
+        # If caller already provides RGB, pass input_color_space="rgb" at construction.
+        if self._input_color_space == "bgr":
             import cv2
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -160,6 +181,7 @@ class PreprocessingPipelineV4:
         config: PreprocessingV4Config,
         pca_eigvecs: np.ndarray | None = None,
         pca_eigvals: np.ndarray | None = None,
+        input_color_space: str = "bgr",
     ) -> "PreprocessingPipelineV4":
         """
         Create a pipeline in training mode (stochastic CLAHE + augmentation).
@@ -168,6 +190,7 @@ class PreprocessingPipelineV4:
             config: :class:`PreprocessingV4Config` instance.
             pca_eigvecs: Optional PCA eigenvectors for colour jitter.
             pca_eigvals: Optional PCA eigenvalues for colour jitter.
+            input_color_space: ``"bgr"`` (default) or ``"rgb"``.
 
         Returns:
             :class:`PreprocessingPipelineV4` with ``is_training=True``.
@@ -177,29 +200,33 @@ class PreprocessingPipelineV4:
             is_training=True,
             pca_eigvecs=pca_eigvecs,
             pca_eigvals=pca_eigvals,
+            input_color_space=input_color_space,
         )
 
     @classmethod
     def create_for_inference(
         cls,
         config: PreprocessingV4Config,
+        input_color_space: str = "bgr",
     ) -> "PreprocessingPipelineV4":
         """
         Create a pipeline in inference mode (deterministic, no augmentation).
 
         Args:
             config: :class:`PreprocessingV4Config` instance.
+            input_color_space: ``"bgr"`` (default) or ``"rgb"``.
 
         Returns:
             :class:`PreprocessingPipelineV4` with ``is_training=False``.
         """
-        return cls(config, is_training=False)
+        return cls(config, is_training=False, input_color_space=input_color_space)
 
     @classmethod
     def create_baseline(
         cls,
         target_size: int = 512,
         is_training: bool = False,
+        input_color_space: str = "bgr",
     ) -> "PreprocessingPipelineV4":
         """
         Create a minimal baseline pipeline (crop + resize + normalize only).
@@ -211,6 +238,7 @@ class PreprocessingPipelineV4:
             target_size: Output spatial resolution in pixels.
             is_training: Whether to enable augmentation (no-op here since
                 all augmentation toggles are off).
+            input_color_space: ``"bgr"`` (default) or ``"rgb"``.
 
         Returns:
             :class:`PreprocessingPipelineV4` configured as a resize-only baseline.
@@ -225,4 +253,4 @@ class PreprocessingPipelineV4:
             use_stretch=False,
             target_size=target_size,
         )
-        return cls(config, is_training=is_training)
+        return cls(config, is_training=is_training, input_color_space=input_color_space)
