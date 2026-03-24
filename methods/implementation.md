@@ -32,10 +32,10 @@ All hardware conditions are documented at experiment execution time per DGL-2 (h
 The proposed model is defined as a **two-stage system**:
 
 ```
-model = preprocessing_pipeline + CNN_classifier
+model = V4_preprocessing + CNN_classifier
 ```
 
-**Stage 1 — Preprocessing Pipeline:** The 5-component pipeline (implemented as 6 ordered stages; see `methods/preprocessing-pipeline.md`) transforms raw fundus images into a standardized feature space. The preprocessing pipeline is an integral component of the model, not an external data preparation step. It defines the feature space available to the CNN.
+**Stage 1 — Preprocessing Pipeline:** The 6-stage V4 pipeline (see `methods/preprocessing-pipeline.md`) transforms raw fundus images into a standardized feature space. The preprocessing pipeline is an integral component of the model, not an external data preparation step. It defines the feature space available to the CNN.
 
 **Stage 2 — CNN Classifier:** A pre-trained CNN backbone adapted via transfer learning for 5-class DR classification (DR 0–4).
 
@@ -46,20 +46,24 @@ model = preprocessing_pipeline + CNN_classifier
 | ResNet-50 | Factorial design Arm A (Experiment 1) | ImageNet |
 | EfficientNet-B3 | Factorial design Arm B (Experiment 1) | ImageNet |
 | EfficientNet-B4 | Explainability analysis (Experiment 4) | ImageNet |
-| EfficientNetB0 | Two-stage fine-tuning training strategy (training method; H-3 dropped in V3) | ImageNet |
+| EfficientNet-B0 | Two-stage fine-tuning training strategy (training method; H-3 dropped in V3 — retained as training protocol only, not an independently tested hypothesis) | ImageNet |
 
 ---
 
-## 4. CLAHE Configuration
+## 4. CLAHE Configuration (V4 Dual-Constraint)
 
 | Parameter | Value |
 |---|---|
 | Color space | LAB (L-channel) |
 | Tile grid size | 8×8 |
-| Clip limit | Optimized via parameter sweep (Experiment 2; per DGL-5) |
+| Clip limit formula | CL_tile = min(clip_factor × tile_area/256, global_threshold × tile_area) |
+| clip_factor | Tunable hyperparameter (optimized via parameter sweep, Experiment 2; per DGL-5) |
+| global_threshold | Tunable hyperparameter (optimized via parameter sweep, Experiment 2; per DGL-5) |
+| Train-time application | Stochastic — 80% probability |
+| Inference-time application | Deterministic |
 | Theoretical reference | CL = T/80 (LC-AlTimemy-2021, STARE dataset) |
 
-The clip limit is treated as an optimizable parameter rather than a fixed constant. The T/80 formulation from LC-AlTimemy-2021 serves as theoretical reference; the dissertation validates its own clip limit configuration independently (DGL-5).
+The dual-constraint clip limit is treated as a two-parameter optimizable formulation rather than a single fixed constant. The T/80 formulation from LC-AlTimemy-2021 serves as theoretical reference; the dissertation validates its own clip limit configuration independently (DGL-5).
 
 ---
 
@@ -70,10 +74,12 @@ The clip limit is treated as an optimizable parameter rather than a fixed consta
 | Optimizer | Adam |
 | Learning rate | 1e-4 |
 | Batch size | 16 |
-| Maximum epochs | 50 |
+| Maximum epochs | 20 |
 | Loss function | Cross-entropy |
-| Early stopping | Monitored on validation loss; patience TBD |
+| Early stopping | Monitored on validation loss; patience=5 (ResNet-50), patience=3 (EfficientNet) |
 | Input resolution | 512×512 |
+| Mixed precision | Enabled for ResNet-50; **DISABLED for EfficientNet** (fp16 overflow) |
+| DataLoader workers | num_workers=4; persistent_workers=True; prefetch_factor=2 |
 
 ### Two-Stage Fine-Tuning Protocol (EfficientNetB0)
 
@@ -91,20 +97,19 @@ The clip limit is treated as an optimizable parameter rather than a fixed consta
 
 ## 6. Data Splitting
 
-**Strategy:** 5-fold cross-validation with patient-level split.
+**Strategy:** 3-fold cross-validation with patient-level split.
 
 - No patient's images appear in both training and test partitions within any fold
-- All metrics reported as mean ± standard deviation across folds
+- All metrics reported as mean ± standard deviation across 3 folds
 - Data augmentation applied only to training partitions
 
-**Augmentation (training only):**
-- Horizontal flip
-- Vertical flip
-- Rotation ±15°
-- Zoom ±10%
-- Brightness variation
+**Augmentation (V4 — integrated into pipeline as Stage 5, training only):**
+- Unified affine: rotation + zoom + stretch + shear
+- Brightness/contrast adjustment
+- PCA color jitter
+- Model-specific presets: "resnet" (full augmentation) vs. "efficientnet" (reduced augmentation)
 
-Augmentation is a separate layer from preprocessing (see `methods/preprocessing-pipeline.md`).
+Augmentation is integrated into the V4 pipeline as Stage 5 (not a separate layer). See `methods/preprocessing-pipeline.md` for full specification.
 
 ---
 
@@ -132,12 +137,27 @@ IoU measures symmetric spatial precision of attention overlap.
 
 ---
 
-## 8. Reproducibility
+## 8. Per-Patient Binocular Blending (Configs E and F)
+
+**Purpose:** Optional extension to patient-level inference by combining left-eye and right-eye feature representations.
+
+**Architecture — PatientHead:**
+1. Backbone CNN processes left-eye and right-eye images independently → two feature vectors (f_L, f_R)
+2. Fusion: concatenate(f_L, f_R) + element-wise absolute difference |f_L − f_R| → MLP
+3. MLP → 5-class softmax logits
+
+**Prerequisite:** Canonical flip (Stage 0) must be applied to ensure consistent right-eye orientation before bilateral feature comparison. Without Stage 0, left/right feature alignment is undefined.
+
+**Experiment 1 role:** Configs E (PatientHead + ResNet-50) and F (PatientHead + EfficientNet-B3) are optional supplementary extensions to the core 2×2 factorial (A–D). EH-3 satisfaction requires only A–D; E and F provide additional evidence per EH-4 (Configs E and F are not required for EH-4 satisfaction).
+
+---
+
+## 9. Reproducibility
 
 | Control | Implementation |
 |---|---|
-| Random seed | Fixed across all experiments |
-| Deterministic mode | PyTorch deterministic operations enabled |
+| Random seed | 42 (fixed across all experiments) |
+| Deterministic mode | PyTorch deterministic operations enabled (deterministic=True) |
 | Augmentation parameters | Fixed (not randomized per run) |
 | Learning rate schedule | Documented and reproducible |
 | Software versions | Pinned in requirements.txt |

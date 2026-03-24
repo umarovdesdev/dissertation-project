@@ -5,7 +5,7 @@
 **Candidate:** Yesmukhamedov N.S.
 **Status:** Binding Methodological Blueprint
 **Function:** Experimental, statistical, and architectural formalization of the dissertation research
-**Document Version:** 3.0. Supersedes v2.2. Consistent with INVARIANTS v3.0 and Dissertation Project v3.0. V3 changes: 4 experiments (not 7); H-3 dropped; "optimized clip limit" → "optimized clip limit"; EyePACS size → ~35,126 labeled; APTOS robustness role removed; old Exp 3 dropped; old Exp 5+6 merged into new Exp 3 (V3).
+**Document Version:** 4.0. Supersedes V3/v2.2. Consistent with INVARIANTS v4.0 and Dissertation Project V4.0. V4 changes: 6-stage pipeline replacing 5-component V3; green channel and HSV enhancement removed; flat-field correction (Stage 2) and canonical flip (Stage 0) added; CLAHE upgraded to dual-constraint stochastic; normalization changed to ImageNet channel-wise; augmentation integrated as Stage 5; Experiment 1 expanded to 6 configurations (A–F) including binocular blending; baseline updated from "resize only" to "crop+resize+ImageNet normalize".
 
 ---
 
@@ -13,7 +13,7 @@
 
 ## 1.1 Central Causal Chain
 
-Contrast-Adaptive Preprocessing (5-component pipeline)
+V4 Preprocessing Pipeline (6-stage)
 → Improved Microvascular Feature Visibility (quantified via CNR, VVI, Entropy, SSIM)
 → Stabilized CNN Feature Extraction (validated via Grad-CAM ALO (primary) and IoU (secondary) with lesion masks)
 → Improved Multi-Class DR Classification (across multiple datasets and camera hardware)
@@ -113,37 +113,40 @@ where F1_EyePACS is the test-set F1-score on the primary training dataset (EyePA
 
 Defined per OD-3 (v2.2).
 
-**Key Scientific Framing:** The preprocessing pipeline is defined as an integral component of the diagnostic model — Stage 1 of a two-stage system: `model = preprocessing + CNN`. This is the central design decision of this work: preprocessing is not ancillary data preparation but defines the feature space available to the CNN. See `methods/preprocessing-pipeline.md` for the full 5-component pipeline specification (implemented as 6 ordered stages).
+**Key Scientific Framing:** The preprocessing pipeline is defined as an integral component of the diagnostic model — Stage 1 of a two-stage system: `model = V4_preprocessing + CNN`. This is the central design decision of this work: preprocessing is not ancillary data preparation but defines the feature space available to the CNN. See `methods/preprocessing-pipeline.md` for the full V4 6-stage pipeline specification.
 
-## 3.1 Ordered Pipeline (5-Component System)
+## 3.1 V4 Ordered Pipeline (6-Stage System)
 
-The v2.1 preprocessing pipeline comprises five ordered components, replacing the v1.0 4-stage pipeline:
+The V4 preprocessing pipeline comprises six ordered stages, replacing the V3 5-component pipeline:
 
-1. **FOV Standardization** — Fundus circle detection via Hough transform, black border removal, image centering, resize to 512×512. This formalizes and extends the v1.0 resize step with explicit circle detection.
-2. **CLAHE Enhancement** — Applied in LAB color space (L-channel) with dynamic clip limit. The clip limit is now dynamic rather than fixed at 2.0 (v1.0). See §3.2 for mathematical formalization. (UPGRADED from v1.0)
-3. **HSV Contrast Enhancement** — Additional contrast adjustment in HSV color space. (NEW in v2.1)
-4. **Green Channel Imaging** — Extraction of the green channel from RGB. The green channel provides the highest vessel-to-background contrast in retinal images. (NEW in v2.1)
-5. **Normalization** — Pixel intensity normalization to [0, 1] range.
+- **Stage 0: Canonical Flip** — Left→right eye orientation normalization (toggleable). Ensures consistent retinal orientation across bilateral image pairs.
+- **Stage 1: PIL-based FOV Crop and Resize** — Foreground detection via PIL, black border removal, image centering, resize to 512×512. Always on. Replaces V3 Hough circle detection.
+- **Stage 2: Flat-Field Correction** — Gaussian blur subtraction with σ=45 to normalize illumination gradients across the fundus image (toggleable). NEW in V4.
+- **Stage 3: Upgraded CLAHE** — Applied in LAB color space (L-channel) with dual-constraint clip limit: clip_factor × tile_area/256, capped by global_threshold × tile_area. Stochastic application at train time (80% probability). Toggleable. (UPGRADED from V3 dynamic clip limit)
+- **Stage 4: ImageNet Channel-wise Normalization** — (x − mean)/std → tensor, using ImageNet statistics. Always on, always applied last to image. Replaces V3 pixel normalization [0,1].
+- **Stage 5: Integrated Augmentation** — Unified affine (rotation + zoom + stretch + shear) + brightness/contrast + PCA color jitter. Train time only, inserted before Stage 4. NEW in V4; replaces separate augmentation layer.
 
-Pipeline considered **ACTIVE** only if all five components are applied in the specified order. Pipeline considered **ABSENT** when images are passed to the CNN with resize only (FOV standardization without subsequent pipeline components).
+Pipeline considered **ACTIVE** (full V4) when all toggleable stages (0, 2, 3, 5) are applied in specified order. Pipeline considered **ABSENT** (V4 baseline) when images are processed with crop + resize + ImageNet normalize only (Stages 1 + 4).
 
-**Data augmentation separation:** Augmentation operations (horizontal flip, vertical flip, rotation ±15°, zoom ±10%, brightness variation) are applied during training as a separate data augmentation layer and are NOT a preprocessing component. This separation enables clean ablation in Experiment 2.
+Augmentation is integrated as Stage 5 of the V4 pipeline. Individual augmentation sub-transforms are toggleable via config flags, enabling ablation within the pipeline framework.
+
+*[V3 Historical Pipeline (5-component): (1) FOV Standardization via Hough circle detection, (2) CLAHE enhancement (LAB, dynamic clip limit), (3) HSV contrast enhancement, (4) Green channel imaging, (5) Pixel normalization [0,1]. Augmentation was separate. V3 pipeline is used for Exp 2 ablation historical comparison.]*
 
 ---
 
-## 3.2 CLAHE Mathematical Formalization
+## 3.2 CLAHE Mathematical Formalization (V4)
 
-Conventional:
+V4 Dual-Constraint Clip Limit:
 
-CL = ⌈L/T⌉ + β(φ − ⌈L/T⌉)
+CL_tile = min(clip_factor × tile_area / 256, global_threshold × tile_area)
 
-Modified:
+where clip_factor and global_threshold are tunable hyperparameters. Applied stochastically at train time (probability = 0.80); applied deterministically at inference time.
 
-CL = T / 80
+V3 Reference Formulations (Historical):
+- Conventional: CL = ⌈L/T⌉ + β(φ − ⌈L/T⌉)
+- LC-AlTimemy-2021 (STARE dataset): CL = T / 80
 
-Transferability from STARE to APTOS is NOT assumed (DGL-5).
-
-**Note (v2.1):** The clip limit in the dissertation's experimental pipeline is now dynamic rather than fixed at 2.0. The optimized clip limit is optimized within the dissertation's experimental framework per DGL-5 constraints. The T/80 formulation from LC-AlTimemy-2021 (STARE dataset) serves as theoretical reference; the dissertation validates its own clip limit configuration independently.
+Transferability from STARE to EyePACS is NOT assumed (DGL-5). V4 clip limit parameters must be independently validated within the dissertation's experimental framework.
 
 ---
 
@@ -153,8 +156,8 @@ To quantify the effect of preprocessing independently of downstream classificati
 
 | Metric | Measures | Expected Improvement |
 | --- | --- | --- |
-| Contrast-to-Noise Ratio (CNR) | Signal quality of vessel structures vs. background | Higher CNR after CLAHE and HSV stages |
-| Vessel Visibility Index (VVI) | Detectability of retinal vasculature | Improved after green channel + CLAHE |
+| Contrast-to-Noise Ratio (CNR) | Signal quality of vessel structures vs. background | Higher CNR after flat-field correction and CLAHE |
+| Vessel Visibility Index (VVI) | Detectability of retinal vasculature | Improved after flat-field correction and CLAHE |
 | Image Entropy | Information content of the image | Increased after contrast enhancement |
 | Structural Similarity (SSIM) | Preservation of structural information relative to original | High SSIM confirms no destructive artifacts introduced |
 
@@ -174,6 +177,7 @@ These metrics are reported in Experiment 2 (pipeline analysis) and provide evide
 | Maximum epochs | 50 (with early stopping) |
 | Loss function | Cross-entropy |
 | Input resolution | 512×512 |
+| Mixed precision (fp16) | Enabled for ResNet-50; DISABLED for EfficientNet (fp16 overflow fix) |
 
 See `methods/implementation.md` for full implementation details.
 
@@ -183,7 +187,7 @@ See `methods/implementation.md` for full implementation details.
 
 * Pre-trained on ImageNet
 * Adapted via fine-tuning for 5-class DR classification
-* Serves as one arm of the 2×2 factorial design in Experiment 1
+* Serves as one architecture arm of the 6-config factorial design (A–F) in Experiment 1
 * Represents the residual-connection architecture family
 
 ---
@@ -192,7 +196,7 @@ See `methods/implementation.md` for full implementation details.
 
 * Pre-trained on ImageNet
 * Adapted via fine-tuning for 5-class DR classification
-* Serves as the second arm of the 2×2 factorial design in Experiment 1
+* Serves as the second architecture arm of the 6-config factorial design (A–F) in Experiment 1
 * Represents the compound-scaling architecture family (EfficientNet)
 
 The use of two established pretrained backbone families (ResNet, EfficientNet) provides a replication test across architecture families and satisfies the EH-4 replication requirement.
@@ -227,7 +231,19 @@ Expected empirical baseline (self-publications):
 
 Backbone: EfficientNet-B4 (ImageNet pre-trained)
 
-Used in V3 Experiment 4 for Grad-CAM explainability analysis. EfficientNet-B4 provides higher-resolution feature maps suitable for activation visualization and ALO (primary) / IoU (secondary) computation against IDRiD pixel-level lesion masks.
+Used in V4 Experiment 4 for Grad-CAM explainability analysis. EfficientNet-B4 provides higher-resolution feature maps suitable for activation visualization and ALO (primary) / IoU (secondary) computation against IDRiD pixel-level lesion masks.
+
+---
+
+### Per-Patient Binocular Blending — Configs E, F (Optional Extension)
+
+PatientHead model for per-patient fusion of bilateral fundus images (left eye + right eye):
+
+**Architecture:** Backbone (ResNet-50 or EfficientNet-B3) extracts feature vectors independently for each eye. Left-eye and right-eye feature vectors are combined via concatenation + element-wise absolute difference → MLP → 5-class logits.
+
+**Purpose:** Tests whether bilateral information improves DR grading beyond single-image classification. Config E uses ResNet-50 backbone; Config F uses EfficientNet-B3 backbone.
+
+**Scope:** Configs E and F provide supplementary evidence for PC-1 (H-1) but are not required for EH-4 satisfaction. Results reported alongside A–D as optional extension evidence.
 
 ---
 
@@ -245,14 +261,18 @@ All experiments use 5-fold cross-validation with patient-level split. For each f
 
 **Dataset:** EyePACS
 
-**Design:** 2×2 factorial using ResNet-50 and EfficientNet-B3.
+**Design:** Factorial using ResNet-50 and EfficientNet-B3, 6 configurations.
 
 | Configuration | Preprocessing | Architecture |
 | --- | --- | --- |
-| A | resize only | ResNet-50 |
-| B | full preprocessing (all 5 components) | ResNet-50 |
-| C | resize only | EfficientNet-B3 |
-| D | full preprocessing (all 5 components) | EfficientNet-B3 |
+| A | baseline (crop + resize + ImageNet normalize) | ResNet-50 |
+| B | full V4 pipeline | ResNet-50 |
+| C | baseline (crop + resize + ImageNet normalize) | EfficientNet-B3 |
+| D | full V4 pipeline | EfficientNet-B3 |
+| E | full V4 pipeline + per-patient binocular blending (optional) | ResNet-50 |
+| F | full V4 pipeline + per-patient binocular blending (optional) | EfficientNet-B3 |
+
+*[V3 Historical: 4 configurations A–D; baseline was "resize only"; pipeline was 5-component V3]*
 
 **Dominance validation:** Preprocessing Dominance validated if Performance(B) > Performance(A) AND Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures.
 
@@ -266,15 +286,18 @@ All experiments use 5-fold cross-validation with patient-level split. For each f
 
 **Dataset:** EyePACS
 
-**Ablation configurations (5 levels):**
+**Ablation configurations (V4 levels):**
 
-| Pipeline Configuration | Components Included |
+| Pipeline Configuration | Stages Included |
 | --- | --- |
-| resize | Stage 1 only (FOV standardization) |
-| resize + normalize | Stages 1 + 3 |
-| resize + CLAHE | Stages 1 + 4 |
-| resize + normalize + CLAHE | Stages 1 + 3 + 4 |
-| full preprocessing pipeline | All 5 stages |
+| baseline | Stages 1 + 4 only (FOV crop+resize + ImageNet normalize) |
+| baseline + canonical flip | Stages 0 + 1 + 4 |
+| baseline + flat-field correction | Stages 1 + 2 + 4 |
+| baseline + CLAHE | Stages 1 + 3 + 4 |
+| baseline + augmentation | Stages 1 + 4 + 5 |
+| full V4 pipeline | All stages (0 + 1 + 2 + 3 + 4 + 5) |
+
+*[V3 Historical: resize → resize + normalize → resize + CLAHE → resize + normalize + CLAHE → full 5-component pipeline]*
 
 **Metrics:** Primary metrics (Weighted F1, ROC-AUC, Cohen's Kappa, Accuracy) plus image quality metrics (CNR, VVI, Entropy, SSIM) measured at each pipeline stage.
 
@@ -308,8 +331,8 @@ All experiments use 5-fold cross-validation with patient-level split. For each f
 
 | Pipeline | Description |
 | --- | --- |
-| Baseline | resize only |
-| Proposed | resize + full preprocessing (all 5 stages) |
+| Baseline | crop + resize + ImageNet normalize only (Stages 1 + 4) |
+| Proposed | full V4 pipeline (all 6 stages) |
 
 **Explainability method:** Grad-CAM (Gradient-weighted Class Activation Mapping).
 
@@ -330,9 +353,11 @@ All experiments use 5-fold cross-validation with patient-level split. For each f
 
 <!-- V3: Old Experiments 5 and 6 have been merged into V3 Experiment 3. See §5.3-NEW below. -->
 
-### V3 Experiment 3 (V3) — Cross-Dataset Generalization and Device Domain Shift
+### V4 Experiments 5 + 6 — Cross-Dataset Generalization and Device Domain Shift
 
-**V3 Experiment Number:** Experiment 3 (merged from old Experiments 5 + 6)
+**V3 Historical:** Experiment 3 (merged from old Experiments 5 + 6). In V4, these are split into Experiment 5 (cross-database generalization, H-4) and Experiment 6 (device domain shift, H-6).
+
+**Preprocessing:** All trained models use the V4 6-stage preprocessing pipeline. Baseline models use crop+resize+ImageNet normalize only (Stages 1+4).
 
 **Purpose:** Evaluate generalization to independent clinical datasets (no retraining) AND robustness to images captured by different fundus cameras. Tests H-4 (cross-database transferability) and H-6 (device robustness).
 
@@ -461,16 +486,20 @@ Mandatory:
 
 # 7. ABLATION PROTOCOL
 
-To isolate driver of improvement (v2.1 Experiment 1 design):
+To isolate driver of improvement (V4 Experiment 1 design):
 
 | Configuration | Preprocessing | Architecture |
 | --- | --- | --- |
-| A | resize only | ResNet-50 |
-| B | full preprocessing (all 5 components) | ResNet-50 |
-| C | resize only | EfficientNet-B3 |
-| D | full preprocessing (all 5 components) | EfficientNet-B3 |
+| A | baseline (crop + resize + ImageNet normalize) | ResNet-50 |
+| B | full V4 pipeline | ResNet-50 |
+| C | baseline (crop + resize + ImageNet normalize) | EfficientNet-B3 |
+| D | full V4 pipeline | EfficientNet-B3 |
+| E | full V4 pipeline + binocular blending (optional) | ResNet-50 |
+| F | full V4 pipeline + binocular blending (optional) | EfficientNet-B3 |
 
-**Dominance validation criterion (v2.1):** Preprocessing Dominance validated if:
+*[V3 Historical: 4 configs A–D only; baseline was "resize only"; pipeline was 5-component V3. This V4 update adds configs E, F and updates baseline definition.]*
+
+**Dominance validation criterion (V4):** Preprocessing Dominance validated if:
 
 * Performance(B) > Performance(A) — independently for ResNet-50, AND
 * Performance(D) > Performance(C) — independently for EfficientNet-B3
@@ -537,30 +566,34 @@ Boundaries enforced per SB-1.
 
 Novelty IS:
 
-* Formalization of preprocessing dominance hypothesis (validated via 2×2 factorial ablation on two established architectures)
-* Threshold-controlled CLAHE validation within DR multi-class context (optimized clip limit in LAB color space)
+* Formalization of preprocessing dominance hypothesis (validated via factorial ablation on two established architectures, 6 configurations A–F)
+* Dual-constraint stochastic CLAHE validation within DR multi-class context (LAB color space, dual-constraint clip limit, 80% train-time probability)
+* Flat-field correction via Gaussian blur subtraction as novel preprocessing stage (Stage 2)
+* Canonical flip (left→right eye orientation normalization) as novel preprocessing stage (Stage 0)
+* Per-patient binocular blending as optional extension (configs E, F)
+* Integrated augmentation within pipeline (Stage 5), not separate layer
 * Unified ablation-driven causal validation
 * Architecture constrained to resource-limited environments
 * Cross-database transferability validation across 3+ independent datasets (Messidor, Messidor-2, IDRiD)
 * Grad-CAM explainability with quantitative ALO (primary) and IoU (secondary) against pixel-level lesion masks (IDRiD)
-* 5-component preprocessing pipeline with component-level ablation (Experiment 2)
+* V4 6-stage preprocessing pipeline with component-level ablation (Experiment 2)
 * Device domain shift evaluation across 4 camera manufacturers (Canon, Topcon, Kowa, Zeiss)
 
 ---
 
 # 11. DEFENSE-READY CLAIM MATRIX
 
-| Claim | Validated By (V3) | V3 Status |
+| Claim | Validated By (V4) | V4 Status |
 | --- | --- | --- |
-| PC-1 | V3 Exp 1 (ResNet-50 + EfficientNet-B3) + EH-3 | Active |
-| PC-2 | V3 Exp 2 curve (CLAHE threshold sensitivity on IDRiD) | Active |
+| PC-1 | V4 Exp 1 (6 configs A–F, ResNet-50 + EfficientNet-B3) + EH-3 | Active |
+| PC-2 | V4 Exp 2 CLAHE dual-constraint parameter sweep (clip_factor, global_threshold) on IDRiD | Active |
 | PC-3 (Two-Stage Fine-Tuning) | — | DEMOTED: Training strategy only; H-3 dropped |
 | PC-4 | Mathematical derivation (laser-tissue model) | Secondary/supplementary |
 | PC-5 | UML + system design | Secondary/supplementary |
-| PC-6 | V3 Exp 3 generalization ratios (G = F1_external / F1_EyePACS) | Active (merged into Exp 3) |
-| PC-7 | V3 Exp 4 Grad-CAM ALO (primary) + IoU (secondary) on IDRiD masks | Active |
-| PC-8 | V3 Exp 2 component ablation (preprocessing component hierarchy) | Active |
-| PC-9 | V3 Exp 3 cross-camera metrics (device domain shift robustness) | Active (merged into Exp 3) |
+| PC-6 | V4 Exp 5 generalization ratios (G = F1_external / F1_EyePACS) on Messidor, Messidor-2, IDRiD | Active |
+| PC-7 | V4 Exp 4 Grad-CAM ALO (primary) + IoU (secondary) on IDRiD masks | Active |
+| PC-8 | V4 Exp 2 component ablation (V4 Levels 0–4: baseline → +flip → +flat-field → +CLAHE → full V4 pipeline) | Active |
+| PC-9 | V4 Exp 6 cross-camera metrics (device domain shift robustness across Canon, Topcon, Kowa, Zeiss) | Active |
 | PC-1 (supplementary) | Future work: Kazakh clinical validation (dirty data pipeline) | Future work |
 
 Mapped to ARGUMENT_MAP.

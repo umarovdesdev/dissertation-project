@@ -38,7 +38,7 @@ Candidate: Yesmukhamedov N.S. | IITU Doctoral Programme
 
 | File | Purpose |
 |------|---------|
-| `methods/preprocessing-pipeline.md` | 5-component pipeline specification with design principle and pipeline-as-model assertion |
+| `methods/preprocessing-pipeline.md` | V4 6-stage pipeline specification with design principle and pipeline-as-model assertion (V3 5-component pipeline retained as historical reference for Exp 2 ablation) |
 | `methods/implementation.md` | Software stack, hardware config, training config, model definition, Grad-CAM with ALO |
 
 ## Naming Conventions

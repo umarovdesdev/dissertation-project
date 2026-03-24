@@ -1,6 +1,6 @@
 # TABLE OF CONTENTS
 
-**Version:** 3.0 | **Binding Reference:** INVARIANTS.md v3.0
+**Version:** 4.0 | **Binding Reference:** INVARIANTS.md v4.0
 
 - NORMATIVE REFERENCES  
 - DEFINITIONS  
@@ -70,7 +70,7 @@
 ## 2.5 Explainability in Deep Learning for Medical Imaging
 - 2.5.1 Class Activation Mapping (CAM) and Grad-CAM Mathematical Formulation  
 - 2.5.2 Interpretation of Attention Maps in Ophthalmic Context  
-- 2.5.3 IoU as a Quantitative Explainability Metric  
+- 2.5.3 ALO and IoU as Quantitative Explainability Metrics
 
 ## 2.6 Image Quality Metrics for Preprocessing Evaluation
 
@@ -81,8 +81,8 @@
 # 3 METHODOLOGY OF INTEGRATED PREPROCESSING-CNN PIPELINE DESIGN
 
 ## 3.1 Formalization of the Unified Preprocessing Pipeline
-- 3.1.1 Pipeline Component Specification: 5-Component System  
-- 3.1.2 Modified CLAHE Algorithm with Simplified Threshold Control  
+- 3.1.1 Pipeline Stage Specification: V4 6-Stage System
+- 3.1.2 Modified CLAHE Algorithm with Dual-Constraint Clip Limit
 - 3.1.3 Augmentation Strategy for Class Imbalance Mitigation  
 - 3.1.4 External Image Ingestion Protocol  
 
@@ -106,17 +106,17 @@
 # 4 EXPERIMENTAL RESEARCH — PREPROCESSING IMPACT ON CNN DIAGNOSTIC PERFORMANCE
 
 ## 4.1 Datasets and Experimental Configuration
-- 4.1.1 Dataset Architecture V3  
+- 4.1.1 Dataset Architecture V4
 - 4.1.2 Class Distribution Analysis and Data Partitioning Strategy  
 - 4.1.3 Hardware Specification and Reproducibility Protocol  
 
 ## 4.2 Experiment 1: Causal Improvement — Preprocessing vs. Architecture on EyePACS
-- 4.2.1 2×2 Factorial Design  
+- 4.2.1 Factorial Design (6 Configurations A–F)
 - 4.2.2 Training Dynamics and Convergence Analysis  
 - 4.2.3 Quantitative Comparison of Diagnostic Metrics  
 
 ## 4.3 Experiment 2: Preprocessing Component Ablation on EyePACS
-- 4.3.1 5-Level Component Ablation Design  
+- 4.3.1 V4 Ablation Design (Levels 0–4)
 - 4.3.2 CLAHE Threshold Sensitivity Analysis (H-2 Sub-Analysis)  
 - 4.3.3 Impact on Feature Preservation in Microaneurysms and Small Vessels  
 
