@@ -6,13 +6,13 @@ See `docs/RESEARCH_ARCHITECTURE.md` for the full experimental design.
 ```bash
 conda activate dr-classifier
 
-# Run Experiment 1 (2×2 factorial, V4 pipeline)
+# Run Experiment 1 (6-config factorial A-F, V4 pipeline)
 python run_experiment.py --experiment exp1 --config configs/default.yaml
 
 # Run specific configs only
 python run_experiment.py --experiment exp1 --config configs/default.yaml --configs A,B
 
-# Run Experiment 2 (component ablation, V3 pipeline)
+# Run Experiment 2 (component ablation, V4 pipeline stages)
 python run_experiment.py --experiment exp2 --config configs/default.yaml
 
 # Smoke test (1% subset)

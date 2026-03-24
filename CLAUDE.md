@@ -64,7 +64,7 @@ scripts/smoke_test_v4.py       — V4 pipeline smoke test
 data/raw/                      — raw datasets (not in git)
 data/processed/                — preprocessed data cache, PCA eigenvecs
 
-## V3 Preprocessing Pipeline (5 ordered components)
+## V3 Preprocessing Pipeline (5 ordered components) — LEGACY (used by Exp2 ablation in V3 compat mode only)
 Used by: Exp2 ablation, Exp3–Exp6.
 1. FOV Standardization — Hough circle detection, border removal, resize to 512×512 (BGR uint8)
 2. CLAHE — applied to L-channel of LAB color space, dynamic clip limit (BGR uint8)
@@ -73,10 +73,10 @@ Used by: Exp2 ablation, Exp3–Exp6.
 5. Normalize — pixel values to [0, 1] (float32)
 
 CLAHE and HSV run BEFORE green channel so they operate on the full-color image.
-Pipeline = "active" when all 5 on. Baseline = resize only.
+Pipeline = "active" when all 5 on. Baseline = crop + resize + ImageNet normalize.
 V3 augmentation (flip, rotate ±15°, zoom ±10%, brightness) is SEPARATE from preprocessing.
 
-## V4 Preprocessing Pipeline (6-stage)
+## V4 Preprocessing Pipeline (6-stage) — CANONICAL (used by all V4 experiments)
 Used by: Exp1 configs A–F.
 Stage 0: Canonical flip (left→right eye orientation) — toggleable
 Stage 1: FOV crop + resize (PIL-based foreground detection) — always
@@ -90,9 +90,9 @@ Presets: "resnet" (full preprocessing + full aug), "efficientnet" (reduced aug).
 
 ## Experiment 1: 2×2 Factorial (CRITICAL — everything depends on this)
 Dataset: EyePACS (~35,126 labeled images, 40% subset = ~14,050). 6 configurations:
-- A: baseline (resize+normalize) + ResNet-50
+- A: baseline (crop+resize+normalize) + ResNet-50
 - B: full V4 pipeline + ResNet-50
-- C: baseline (resize+normalize) + EfficientNet-B3
+- C: baseline (crop+resize+normalize) + EfficientNet-B3
 - D: full V4 pipeline + EfficientNet-B3
 - E: full V4 pipeline + ResNet-50 + per-patient blending (optional)
 - F: full V4 pipeline + EfficientNet-B3 + per-patient blending (optional)
@@ -103,7 +103,7 @@ Dominance criterion (EH-3) — ALL THREE must hold:
 - No Cohen Kappa degradation
 
 ## Cross-Validation
-Current config: 3-fold CV with patient-level split (stratified).
+Current config: 3-fold CV with patient-level split (stratified). (changed from 5-fold; 5-fold used in original V3 governance documents)
 MANDATORY: no patient images in both train and val within any fold.
 Report: mean ± std across folds.
 
@@ -141,7 +141,7 @@ python run_experiment.py --experiment exp2 --config configs/default.yaml
 - Use pathlib.Path not os.path
 
 ## Detailed specs in docs/:
-- docs/RESEARCH_ARCHITECTURE.md — full experimental protocol with 4 experiments (V3)
+- docs/RESEARCH_ARCHITECTURE.md — full experimental protocol with 6 experiments (V4)
 - docs/INVARIANTS.md — hypotheses, scope boundaries, forbidden claims
 - docs/HYPOTHESIS.md — H-1 through H-6 formal definitions
 - docs/ARGUMENT_MAP.md — claim-evidence dependency structure
