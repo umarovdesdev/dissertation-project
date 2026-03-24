@@ -11,7 +11,7 @@
 
 **IT-1 (Verbatim from Invariants, Section I):**
 
-> An integrated preprocessing-CNN pipeline — comprising FOV standardization, green channel imaging, pixel normalization, CLAHE enhancement (LAB color space, optimized clip limit), and HSV contrast enhancement — applied to fundus images sourced from EyePACS (primary training), IDRiD (clinical validation, lesion localization, and CLAHE parameter sweep), Messidor/Messidor-2 (external generalization), and RFMiD/DDR/ODIR-5K (device domain shift), produces statistically measurable improvement in five-class diabetic retinopathy classification performance relative to a baseline CNN trained without preprocessing, under constrained computational conditions defined by hardware limitations operative during experimental execution.
+> An integrated preprocessing-CNN pipeline — comprising FOV standardization, CLAHE enhancement (LAB color space, dynamic clip limit), HSV contrast enhancement, green channel imaging, and pixel normalization — applied to fundus images sourced from EyePACS (primary training), IDRiD (clinical validation, lesion localization, and CLAHE parameter sweep), Messidor/Messidor-2 (external generalization), and RFMiD/DDR/ODIR-5K (device domain shift), produces statistically measurable improvement in five-class diabetic retinopathy classification performance relative to a baseline CNN trained without preprocessing, under constrained computational conditions defined by hardware limitations operative during experimental execution.
 
 **Scope boundary:**
 - Five-stage DR classification (DR 0–4 per standard clinical grading).
@@ -29,7 +29,7 @@
 
 ### PC-1
 **Claim ID:** PC-1
-**Formal Statement:** The integrated 5-component preprocessing pipeline (FOV standardization → green channel imaging → normalization → CLAHE enhancement (LAB color space, optimized clip limit) → HSV contrast enhancement) produces statistically measurable improvement in five-class DR classification performance relative to a baseline CNN trained on unprocessed fundus images (resize only) from EyePACS, independently for both ResNet-50 and EfficientNet-B3, on the metrics: weighted F1-score, ROC-AUC, Cohen's Kappa, and Accuracy.
+**Formal Statement:** The integrated 5-component preprocessing pipeline (FOV standardization → CLAHE enhancement (LAB color space, dynamic clip limit) → HSV contrast enhancement → green channel imaging → normalization) produces statistically measurable improvement in five-class DR classification performance relative to a baseline CNN trained on unprocessed fundus images (resize only) from EyePACS, independently for both ResNet-50 and EfficientNet-B3, on the metrics: weighted F1-score, ROC-AUC, Cohen's Kappa, and Accuracy.
 **Claim Type:** Empirical
 **Required Evidence Type:** 2×2 factorial ablation on EyePACS (Experiment 1); four configurations — (A) resize only + ResNet-50, (B) preprocessing + ResNet-50, (C) resize only + EfficientNet-B3, (D) preprocessing + EfficientNet-B3; 5-fold cross-validation with patient-level split; mixed-effects model. Preprocessing dominance validated if Performance(B) > Performance(A) AND Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures.
 **Dependency:** None (foundational claim; corresponds to H-1)
@@ -102,7 +102,7 @@
 
 ---
 **Claim ID:** PC-8
-**Formal Statement:** Component-level ablation of the 5-component pipeline identifies a ranked contribution hierarchy among FOV standardization, green channel imaging, normalization, CLAHE enhancement, and HSV contrast enhancement, measured by incremental weighted F1 improvement on EyePACS.
+**Formal Statement:** Component-level ablation of the 5-component pipeline identifies a ranked contribution hierarchy among FOV standardization, CLAHE enhancement, HSV contrast enhancement, green channel imaging, and normalization, measured by incremental weighted F1 improvement on EyePACS.
 **Claim Type:** Empirical
 **Required Evidence Type:** Experiment 2 — component-level ablation. Sequential addition/removal of individual pipeline components; weighted F1 measured at each ablation level (resize only → full pipeline) on EyePACS.
 **Dependency:** Depends on PC-1 (full pipeline must be established before component-level ablation is meaningful)
@@ -348,7 +348,7 @@
 ### SC-8.1
 **Parent Claim:** PC-8
 **Sub-Claim ID:** SC-8.1
-**Formal Statement:** Component-level ablation produces weighted F1 measurements at each ablation level (resize only → FOV standardization → + green channel → + normalization → + CLAHE → + HSV contrast enhancement = full pipeline) on EyePACS, identifying a ranked contribution hierarchy among the five preprocessing components.
+**Formal Statement:** Component-level ablation produces weighted F1 measurements at each ablation level (resize only → FOV standardization → + CLAHE → + HSV contrast enhancement → + green channel → + normalization = full pipeline) on EyePACS, identifying a ranked contribution hierarchy among the five preprocessing components.
 
 **Evidence Reference:**
 - Dissertation Section: Experiment 2 (Component-Level Ablation)

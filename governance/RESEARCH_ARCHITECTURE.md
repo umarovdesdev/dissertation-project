@@ -120,10 +120,10 @@ Defined per OD-3 (v2.2).
 The v2.1 preprocessing pipeline comprises five ordered components, replacing the v1.0 4-stage pipeline:
 
 1. **FOV Standardization** — Fundus circle detection via Hough transform, black border removal, image centering, resize to 512×512. This formalizes and extends the v1.0 resize step with explicit circle detection.
-2. **Green Channel Imaging** — Extraction of the green channel from RGB. The green channel provides the highest vessel-to-background contrast in retinal images. (NEW in v2.1)
-3. **Normalization** — Pixel intensity normalization to [0, 1] range.
-4. **CLAHE Enhancement** — Applied in LAB color space (L-channel) with optimized clip limit. The clip limit is now dynamic rather than fixed at 2.0 (v1.0). See §3.2 for mathematical formalization. (UPGRADED from v1.0)
-5. **HSV Contrast Enhancement** — Additional contrast adjustment in HSV color space. (NEW in v2.1)
+2. **CLAHE Enhancement** — Applied in LAB color space (L-channel) with dynamic clip limit. The clip limit is now dynamic rather than fixed at 2.0 (v1.0). See §3.2 for mathematical formalization. (UPGRADED from v1.0)
+3. **HSV Contrast Enhancement** — Additional contrast adjustment in HSV color space. (NEW in v2.1)
+4. **Green Channel Imaging** — Extraction of the green channel from RGB. The green channel provides the highest vessel-to-background contrast in retinal images. (NEW in v2.1)
+5. **Normalization** — Pixel intensity normalization to [0, 1] range.
 
 Pipeline considered **ACTIVE** only if all five components are applied in the specified order. Pipeline considered **ABSENT** when images are passed to the CNN with resize only (FOV standardization without subsequent pipeline components).
 
