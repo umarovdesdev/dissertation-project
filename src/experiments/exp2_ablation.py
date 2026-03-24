@@ -51,8 +51,8 @@ _ABLATION_LEVELS: list[dict] = [
     {
         "name": "full_pipeline",
         "components": [
-            "fov_standardization", "green_channel", "normalize",
-            "clahe", "hsv_enhancement",
+            "fov_standardization", "clahe", "hsv_enhancement",
+            "green_channel", "normalize",
         ],
     },
 ]

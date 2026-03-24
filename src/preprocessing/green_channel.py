@@ -1,5 +1,5 @@
 """
-Stage 2: Green Channel Extraction.
+Stage 4: Green Channel Extraction.
 
 The green channel provides the highest vessel-to-background contrast in
 retinal fundus images.  The extracted channel is replicated across three

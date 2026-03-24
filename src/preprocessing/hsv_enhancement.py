@@ -1,5 +1,5 @@
 """
-Stage 5: HSV Contrast Enhancement.
+Stage 3: HSV Contrast Enhancement.
 
 Scales the S (saturation) and V (value/brightness) channels of the HSV
 representation independently, then clips to the valid [0, 255] range before

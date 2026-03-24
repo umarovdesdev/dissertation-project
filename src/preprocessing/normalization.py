@@ -1,5 +1,5 @@
 """
-Stage 3: Pixel Normalization.
+Stage 5: Pixel Normalization.
 
 Converts a uint8 BGR image to float32 with pixel values in [0, 1].
 """

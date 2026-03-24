@@ -1,102 +1,55 @@
 # Experimental Protocol
 
-## Dataset Preparation
+See `docs/RESEARCH_ARCHITECTURE.md` for the full experimental design.
 
-### 1. Data Acquisition
-Place raw fundus images under `data/raw/` organised by class label or dataset source.
-Accepted formats: PNG, JPEG, TIFF.
-
-### 2. Preprocessing
-Run the preprocessing pipeline to produce standardised 224×224 CLAHE-enhanced images:
-
+## Quick Start
 ```bash
-python -c "
-from src.preprocessing.fundus_preprocessing import preprocess_dataset
-counts = preprocess_dataset('data/raw', 'data/processed', image_size=224)
-print(counts)
-"
+conda activate dr-classifier
+
+# Run Experiment 1 (2×2 factorial, V4 pipeline)
+python run_experiment.py --experiment exp1 --config configs/default.yaml
+
+# Run specific configs only
+python run_experiment.py --experiment exp1 --config configs/default.yaml --configs A,B
+
+# Run Experiment 2 (component ablation, V3 pipeline)
+python run_experiment.py --experiment exp2 --config configs/default.yaml
+
+# Smoke test (1% subset)
+python run_experiment.py --experiment exp1 --config configs/smoke_test_1pct.yaml
 ```
 
-### 3. Dataset Splits
-Generate `data/splits/train.csv`, `data/splits/val.csv`, and `data/splits/test.csv`.
-Each CSV must contain at minimum:
-- `image_path` — absolute or project-relative path to the processed image
-- `label`      — integer DR grade (0–4)
+## Datasets
 
-Recommended split ratio: 70 / 15 / 15 (train / val / test), stratified by label.
+All datasets stored at `/mnt/d/datasets/` (Windows NTFS, accessed via WSL2).
+Paths configured in `configs/default.yaml`.
 
----
+| Dataset | Images | Classes | Role |
+|---------|--------|---------|------|
+| EyePACS | ~35,126 labeled | 5 (DR 0–4) | Primary training |
+| IDRiD | 516 | 5 + lesion masks | Clinical validation, Grad-CAM |
+| Messidor/Messidor-2 | ~1,748 | 4 (mapped to 5) | External generalization |
+| DDR | ~13,673 | 5 | Device domain shift |
+| ODIR-5K | ~7,000 | multi-label | Device domain shift |
+| RFMiD | ~3,200 | binary DR | Device domain shift |
 
-## Training
+## Cross-Validation
 
-### Standard run
-```bash
-python src/training/train.py --config configs/training_config.yaml
-```
+3-fold CV with patient-level stratified split. No patient leakage across folds.
 
-### Resume from checkpoint
-```bash
-python src/training/train.py --config configs/training_config.yaml \
-    --resume experiments/checkpoints/last.pt
-```
+## Grading Scale
 
-Checkpoints are saved to `experiments/checkpoints/`:
-- `best.pt` — highest val QWK so far
-- `last.pt` — most recent epoch (for resuming)
+| Grade | Clinical Stage | Approximate Prevalence (EyePACS) |
+|-------|---------------|----------------------------------|
+| 0 | No DR | ~73% |
+| 1 | Mild NPDR | ~7% |
+| 2 | Moderate NPDR | ~15% |
+| 3 | Severe NPDR | ~2% |
+| 4 | Proliferative DR | ~3% |
 
----
+Class imbalance addressed via inverse-frequency weighted cross-entropy loss.
 
-## Evaluation
-
-Load `best.pt` and evaluate on the held-out test set:
-
-```python
-import torch, yaml
-from src.models.resnet50_model import build_model
-from src.evaluation.metrics import compute_metrics, print_metrics
-
-with open("configs/training_config.yaml") as f:
-    config = yaml.safe_load(f)
-
-model = build_model(config["model"])
-ckpt = torch.load("experiments/checkpoints/best.pt", map_location="cpu")
-model.load_state_dict(ckpt["model_state_dict"])
-model.eval()
-
-# ... run inference on test set, then:
-metrics = compute_metrics(y_true, y_pred, y_prob)
-print_metrics(metrics)
-```
-
----
-
-## Experiment Logging
-
-For each experiment:
-1. Copy `experiments/exp1_baseline.md` to `experiments/expN_<short_name>.md`.
-2. Record the exact config diff from the baseline.
-3. Fill in the results table after evaluation.
-4. Note observations and next steps.
-
----
-
-## Grading Scale Reference
-
-| Grade | Clinical Stage       | Approximate Prevalence |
-|-------|----------------------|------------------------|
-| 0     | No DR                | ~73 %                  |
-| 1     | Mild NPDR            | ~7 %                   |
-| 2     | Moderate NPDR        | ~15 %                  |
-| 3     | Severe NPDR          | ~2 %                   |
-| 4     | Proliferative DR     | ~3 %                   |
-
-Class imbalance is severe — factor this into loss function and sampling strategy.
-
----
-
-## Reproducibility Checklist
-- [ ] Random seeds fixed (`torch.manual_seed`, `np.random.seed`)
-- [ ] Config file committed alongside experiment notes
-- [ ] Dataset version / source recorded
-- [ ] Preprocessing parameters recorded
-- [ ] Checkpoint saved and linked in experiment notes
+## Reproducibility
+- seed: 42, deterministic=true
+- All configs committed in `configs/`
+- Checkpoints saved per fold per config

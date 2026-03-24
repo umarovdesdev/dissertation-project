@@ -1,5 +1,5 @@
 """
-Stage 4: CLAHE Enhancement in LAB Color Space.
+Stage 2: CLAHE Enhancement in LAB Color Space.
 
 CLAHE (Contrast Limited Adaptive Histogram Equalization) is applied to the
 L-channel of the LAB representation.  Operating on L only preserves hue and
