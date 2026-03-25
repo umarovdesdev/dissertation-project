@@ -155,4 +155,6 @@ python run_experiment.py --experiment exp2 --config configs/default.yaml
 - docs/ARGUMENT_MAP.md — claim-evidence dependency structure
 
 ## Active Implementation Plan
-See IMPLEMENTATION_PLAN_OD_FOVEA_v2.md for OD-fovea alignment feature (in progress).
+OD–Fovea alignment implementation is COMPLETE (all 11 steps from PROMPT_OD_FOVEA_MINIMAL.md).
+See PROMPT_OD_FOVEA_MINIMAL.md and IMPLEMENTATION_PLAN_OD_FOVEA_v2.md for reference.
+Next step: run `python scripts/visualize_od_fovea.py` on EyePACS images for visual validation.
