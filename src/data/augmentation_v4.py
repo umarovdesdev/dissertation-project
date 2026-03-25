@@ -16,6 +16,11 @@ Wang et al., "Rotation Has Two Sides", ICLR 2024 (rotation distribution).
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.preprocessing.od_fovea_detect import ODFoveaResult
+
 import cv2
 import numpy as np
 
@@ -53,7 +58,11 @@ class FundusAugmentationV4:
     # Public callable
     # ------------------------------------------------------------------
 
-    def __call__(self, image: np.ndarray) -> np.ndarray:
+    def __call__(
+        self,
+        image: np.ndarray,
+        od_fovea_result: ODFoveaResult | None = None,
+    ) -> np.ndarray:
         """
         Apply the full V4 augmentation pipeline to one image.
 
@@ -64,6 +73,10 @@ class FundusAugmentationV4:
 
         Args:
             image: RGB uint8 NumPy array of shape ``(H, W, 3)``.
+            od_fovea_result: Optional detection result from Stage 0b.
+                When provided and confident, the rotation σ is derived
+                from OD/fovea localization uncertainty instead of the
+                fixed ``config.rotation_sigma``.
 
         Returns:
             Augmented RGB uint8 NumPy array of the same shape.
@@ -72,7 +85,7 @@ class FundusAugmentationV4:
         center = (w / 2.0, h / 2.0)
 
         # 1. Unified affine
-        params = self._sample_affine_params()
+        params = self._sample_affine_params(od_fovea_result=od_fovea_result)
         M = self._build_affine_matrix(
             theta=params["theta"],
             sx=params["sx"],
@@ -97,17 +110,41 @@ class FundusAugmentationV4:
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _sample_affine_params(self) -> dict[str, float]:
+    def _sample_affine_params(
+        self,
+        od_fovea_result: ODFoveaResult | None = None,
+    ) -> dict[str, float]:
         """
         Sample affine transform parameters.
+
+        Args:
+            od_fovea_result: Optional OD/fovea detection result.
+                When provided, confident, and ``config.adaptive_rotation_sigma``
+                is enabled, the rotation σ is derived from localization
+                uncertainty.  Otherwise ``config.fallback_rotation_sigma``
+                (or ``config.rotation_sigma`` if adaptive is disabled) is used.
 
         Returns:
             Dict with keys ``theta`` (°), ``sx``, ``sy``, ``shear_rad`` (rad).
         """
         cfg = self.config
 
-        # Rotation: truncated Gaussian σ=rotation_sigma, clipped at ±rotation_clip
-        theta = float(np.random.normal(0.0, cfg.rotation_sigma))
+        # Rotation σ: adaptive (per-image) or fixed (fallback)
+        if (
+            cfg.adaptive_rotation_sigma
+            and od_fovea_result is not None
+            and od_fovea_result.confident
+        ):
+            rotation_sigma = od_fovea_result.rotation_sigma_deg
+        elif cfg.adaptive_rotation_sigma:
+            # Adaptive enabled but detection failed → use fallback
+            rotation_sigma = cfg.fallback_rotation_sigma
+        else:
+            # Adaptive disabled → use original fixed σ
+            rotation_sigma = cfg.rotation_sigma
+
+        # Rotation: truncated Gaussian, clipped at ±rotation_clip
+        theta = float(np.random.normal(0.0, rotation_sigma))
         theta = float(np.clip(theta, -cfg.rotation_clip, cfg.rotation_clip))
 
         # Zoom: isotropic, log-uniform in zoom_range

@@ -25,7 +25,9 @@ src/preprocessing/clahe.py            — V3 Stage 2: CLAHE in LAB color space
 src/preprocessing/hsv_enhancement.py  — V3 Stage 3: HSV contrast enhancement
 src/preprocessing/green_channel.py    — V3 Stage 4: green channel extraction
 src/preprocessing/normalization.py    — V3 Stage 5: pixel normalization [0,1]
-src/preprocessing/canonical_flip.py   — V4 Stage 0: left→right eye canonical orientation
+src/preprocessing/od_fovea_detect.py  — V4 Stage 0b: OD/fovea detection (classical CV)
+src/preprocessing/canonical_orientation.py — V4 Stage 0: canonical flip + OD-fovea rotation
+src/preprocessing/canonical_flip.py   — backward-compat shim → canonical_orientation.py
 src/preprocessing/crop_resize.py      — V4 Stage 1: PIL-based FOV crop + resize
 src/preprocessing/flat_field.py       — V4 Stage 2: Gaussian flat-field correction
 src/preprocessing/upgraded_clahe.py   — V4 Stage 3: dual-constraint CLAHE (L-channel)
@@ -78,11 +80,17 @@ V3 augmentation (flip, rotate ±15°, zoom ±10%, brightness) is SEPARATE from p
 
 ## V4 Preprocessing Pipeline (6-stage) — CANONICAL (used by all V4 experiments)
 Used by: Exp1 configs A–F.
-Stage 0: Canonical flip (left→right eye orientation) — toggleable
+Stage 0: Canonical Orientation
+  0a. Canonical flip (left→right eye orientation) — toggleable
+  0b. OD-fovea rotation normalization (classical CV detection) — toggleable
+      Detects OD (brightest region) and fovea (darkest region with distance prior)
+      Rotates image so OD→fovea axis is horizontal
+      When detection confidence is low, rotation is skipped (fallback)
 Stage 1: FOV crop + resize (PIL-based foreground detection) — always
 Stage 2: Flat-field correction (Gaussian blur subtraction, σ=45) — toggleable
 Stage 3: Upgraded CLAHE (dual-constraint, L-channel, stochastic at train time) — toggleable
 Stage 5: Augmentation (unified affine + brightness/contrast + PCA color) — train only
+  rotation_sigma: adaptive per-image (from OD/fovea uncertainty) or fallback 13.0°
 Stage 4: ImageNet normalize → tensor — always last
 
 V4 augmentation is INTEGRATED into the pipeline (not separate).
@@ -145,3 +153,6 @@ python run_experiment.py --experiment exp2 --config configs/default.yaml
 - docs/INVARIANTS.md — hypotheses, scope boundaries, forbidden claims
 - docs/HYPOTHESIS.md — H-1 through H-6 formal definitions
 - docs/ARGUMENT_MAP.md — claim-evidence dependency structure
+
+## Active Implementation Plan
+See IMPLEMENTATION_PLAN_OD_FOVEA_v2.md for OD-fovea alignment feature (in progress).

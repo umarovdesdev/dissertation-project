@@ -22,6 +22,7 @@ paths:
 preprocessing_v4:
   # Toggles
   use_canonical_flip: true
+  use_od_fovea_rotation: true
   use_flat_field: true
   use_clahe: true
   use_pca_color: true
@@ -34,6 +35,15 @@ preprocessing_v4:
 
   # Stage 2 — Flat-Field
   flat_field_sigma: 45.0
+
+  # Stage 0b — OD-Fovea Rotation Detection
+  od_blur_sigma: 15.0
+  od_percentile: 97.0
+  fovea_blur_sigma: 25.0
+  fovea_inner_factor: 1.5
+  fovea_outer_factor: 3.5
+  adaptive_rotation_sigma: true
+  fallback_rotation_sigma: 13.0
 
   # Stage 3 — Upgraded CLAHE
   clahe_tile_grid_size: [8, 8]

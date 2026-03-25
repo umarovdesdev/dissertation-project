@@ -25,7 +25,8 @@ from __future__ import annotations
 import numpy as np
 import torch
 
-from .canonical_flip import canonical_flip
+from .canonical_orientation import canonical_flip, canonical_orientation
+from .od_fovea_detect import ODFoveaResult
 from .config import PreprocessingV4Config
 from .crop_resize import crop_and_resize
 from .flat_field import apply_flat_field
@@ -128,9 +129,14 @@ class PreprocessingPipelineV4:
             import cv2
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        # Stage 0: canonical flip
-        if self.config.use_canonical_flip:
-            image = canonical_flip(image, eye_side)
+        # Stage 0: canonical orientation (flip + OD–fovea rotation)
+        od_fovea_result: ODFoveaResult | None = None
+        if self.config.use_canonical_flip or self.config.use_od_fovea_rotation:
+            image, od_fovea_result = canonical_orientation(
+                image,
+                eye_side=eye_side if self.config.use_canonical_flip else "unknown",
+                enable_rotation=self.config.use_od_fovea_rotation,
+            )
 
         # Stage 1: FOV crop + resize (always)
         image = crop_and_resize(image, self.config.target_size)
@@ -150,7 +156,7 @@ class PreprocessingPipelineV4:
 
         # Stage 5: augmentation (train only, uint8, before normalize)
         if self.is_training:
-            image = self._augmentation(image)
+            image = self._augmentation(image, od_fovea_result=od_fovea_result)
 
         # Stage 4: ImageNet normalize → tensor (always last)
         return imagenet_normalize(

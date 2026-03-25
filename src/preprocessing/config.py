@@ -56,10 +56,21 @@ class PreprocessingV4Config:
         bc_prob: Probability of applying brightness/contrast augmentation.
         normalize_mean: Per-channel mean for ImageNet normalisation.
         normalize_std: Per-channel std for ImageNet normalisation.
+        use_od_fovea_rotation: Enable Stage 0b OD–fovea axis rotation normalization.
+        od_blur_sigma: Gaussian σ for OD detection blur.
+        od_percentile: Intensity percentile for OD mask threshold.
+        fovea_blur_sigma: Gaussian σ for fovea detection blur.
+        fovea_inner_factor: Inner annulus boundary as multiple of OD diameter.
+        fovea_outer_factor: Outer annulus boundary as multiple of OD diameter.
+        adaptive_rotation_sigma: Use per-image adaptive σ (from OD/fovea uncertainty)
+            instead of fixed rotation_sigma for augmentation.
+        fallback_rotation_sigma: Rotation σ used when adaptive detection fails
+            or adaptive_rotation_sigma is False.
     """
 
     # --- Toggles ---
     use_canonical_flip: bool = True
+    use_od_fovea_rotation: bool = True      # NEW: Stage 0b rotation normalization
     use_flat_field: bool = True
     use_clahe: bool = True
     use_pca_color: bool = True
@@ -97,6 +108,15 @@ class PreprocessingV4Config:
     # --- Stage 4: Normalise ---
     normalize_mean: tuple[float, float, float] = (0.485, 0.456, 0.406)
     normalize_std: tuple[float, float, float] = (0.229, 0.224, 0.225)
+
+    # --- Stage 0b: OD-Fovea Rotation Detection ---
+    od_blur_sigma: float = 15.0
+    od_percentile: float = 97.0
+    fovea_blur_sigma: float = 25.0
+    fovea_inner_factor: float = 1.5
+    fovea_outer_factor: float = 3.5
+    adaptive_rotation_sigma: bool = True
+    fallback_rotation_sigma: float = 13.0
 
     # ------------------------------------------------------------------
     # Factory: from dict
@@ -177,6 +197,8 @@ PIPELINE_PRESETS: dict[str, dict[str, Any]] = {
         "use_shear": True,
         "shear_prob": 0.3,
         "use_stretch": True,
+        "use_od_fovea_rotation": True,
+        "adaptive_rotation_sigma": True,
     },
     "efficientnet": {
         "use_flat_field": True,
@@ -187,5 +209,7 @@ PIPELINE_PRESETS: dict[str, dict[str, Any]] = {
         "bc_prob": 0.3,
         "use_shear": False,
         "use_stretch": True,
+        "use_od_fovea_rotation": True,
+        "adaptive_rotation_sigma": True,
     },
 }
