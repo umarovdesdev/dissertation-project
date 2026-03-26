@@ -16,7 +16,7 @@
 
 **Evidence:** Experiment 1 (preprocessing dominance via 6-config factorial ablation A–F, ResNet-50 and EfficientNet-B3), Experiment 2 (component-level ablation, V4 Levels 0–4), and Experiment 6 (device domain shift evaluation across Canon, Topcon, Kowa, Zeiss camera hardware).
 
-**Novelty:** The V4 pipeline introduces flat-field correction and canonical flip as novel stages, upgrades CLAHE to a dual-constraint stochastic formulation, and integrates augmentation as a pipeline stage (not a separate layer). The pipeline is validated not only for classification improvement on a single dataset (as in prior work) but across a multi-dataset architecture (EyePACS, IDRiD, Messidor/Messidor-2, RFMiD, DDR, ODIR-5K) and across multiple CNN architectures (ResNet-50, EfficientNet-B3), establishing preprocessing as an integral model component rather than an ancillary data preparation step.
+**Novelty:** The V4 pipeline introduces canonical orientation (Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization), flat-field correction (Stage 2) as novel stages, upgrades CLAHE to a dual-constraint stochastic formulation, and integrates augmentation as a pipeline stage (not a separate layer). The pipeline is validated not only for classification improvement on a single dataset (as in prior work) but across a multi-dataset architecture (EyePACS, IDRiD, Messidor/Messidor-2, RFMiD, DDR, ODIR-5K) and across multiple CNN architectures (ResNet-50, EfficientNet-B3), establishing preprocessing as an integral model component rather than an ancillary data preparation step.
 
 ---
 
@@ -98,6 +98,16 @@
 | SC-C | PC-9 |
 | SC-D | PC-1, PC-8 |
 | SC-E | PC-1 |
+
+---
+
+### SC-F: OD-Fovea Rotation Normalization (Stage 0b)
+
+**Contribution:** Design and implementation of classical-CV-based optic disc (OD) and fovea detection for fundus image rotation normalization (Stage 0b). The optic disc is identified as the brightest region; the fovea is identified as the darkest region with a distance prior from the OD. The image is rotated so the OD→fovea axis is horizontal. When detection confidence is low, rotation is skipped (fallback). The rotation sigma for Stage 5 augmentation is adapted per-image from OD/fovea detection uncertainty (fallback: σ = 13.0°).
+
+**Evidence:** Experiment 2 (component-level ablation, Stage 0b contribution isolated from Stage 0a). Implementation: `src/preprocessing/od_fovea_detect.py`, `src/preprocessing/canonical_orientation.py`.
+
+**Novelty:** OD-fovea rotation normalization standardizes the retinal axis orientation across images from different cameras and acquisition angles, reducing orientation-induced distribution shift beyond what horizontal flip (Stage 0a) alone achieves. The adaptive rotation_sigma links anatomical detection confidence to augmentation intensity, providing principled uncertainty-aware augmentation.
 
 ---
 

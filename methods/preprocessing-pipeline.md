@@ -10,11 +10,23 @@ The preprocessing pipeline is defined as an integral component of the diagnostic
 
 The V4 pipeline comprises six ordered stages. All toggleable stages must be applied in the specified order for the pipeline to be considered **ACTIVE** (full V4). The pipeline is considered **ABSENT** (V4 baseline) when images are passed to the CNN with crop + resize + ImageNet normalize only (Stages 1 + 4).
 
-### Stage 0 — Canonical Flip (toggleable)
-- **Operation:** Left→right eye orientation normalization; flip image horizontally if the image is identified as a left-eye fundus image to produce a canonical right-eye orientation
+### Stage 0 — Canonical Orientation (toggleable)
+
+Stage 0 comprises two sub-stages applied in sequence:
+
+#### Stage 0a — Canonical Flip (toggleable)
+- **Operation:** Horizontal flip for left-eye images to produce a canonical right-eye orientation (optic disc on the right, macula on the left). Eye laterality determined from image metadata or heuristic detection.
 - **Purpose:** Ensure consistent retinal orientation across bilateral image pairs; reduces orientation-induced distribution shift in training data
 - **Output:** Canonically oriented fundus image (right-eye orientation)
-- **V4 Status:** NEW in V4
+- **Implementation:** `src/preprocessing/canonical_orientation.py` (canonical flip sub-component); backward-compatible shim at `src/preprocessing/canonical_flip.py`
+- **V4 Status:** NEW in V4 (Stage 0a)
+
+#### Stage 0b — OD-Fovea Rotation Normalization (toggleable)
+- **Operation:** Classical CV detection of the optic disc (OD, identified as the brightest region) and fovea (identified as the darkest region with a distance prior from the OD). The image is rotated so the OD→fovea axis is horizontal. When detection confidence is low (below threshold), rotation is skipped (fallback to identity). Augmentation rotation_sigma (Stage 5) is set adaptively per-image from OD/fovea detection uncertainty; fallback rotation_sigma = 13.0°.
+- **Purpose:** Standardize the retinal axis orientation across images from different acquisition angles and camera hardware, reducing axis-orientation-induced distribution shift beyond what Stage 0a achieves
+- **Output:** Rotation-normalized fundus image with horizontal OD→fovea axis (or original image if fallback triggered)
+- **Implementation:** `src/preprocessing/od_fovea_detect.py`; `src/preprocessing/canonical_orientation.py`
+- **V4 Status:** NEW in V4 (Stage 0b); added to V4 pipeline after Stage 0a was established
 
 ### Stage 1 — PIL-based FOV Crop and Resize (always on)
 - **Operation:** Foreground detection via PIL thresholding; black border removal; image centering; resize to 512×512 pixels
@@ -48,6 +60,7 @@ The V4 pipeline comprises six ordered stages. All toggleable stages must be appl
 
 ### Stage 5 — Integrated Augmentation (train only, inserted before Stage 4)
 - **Operation:** Unified affine transformation (rotation + zoom + stretch + shear) + brightness/contrast adjustment + PCA color jitter
+- **Rotation sigma:** Adaptive per-image from OD/fovea detection uncertainty (Stage 0b); fallback rotation_sigma = 13.0° when Stage 0b detection confidence is low or Stage 0b is disabled. Rotation is truncated Gaussian clipped at ±40°.
 - **Purpose:** Expand effective training set diversity while preserving diagnostic features; model-specific presets ("resnet": full augmentation; "efficientnet": reduced augmentation)
 - **Output:** Augmented image (applied stochastically at train time; identity transform at inference)
 - **V4 Status:** NEW in V4; augmentation is INTEGRATED into the pipeline (not a separate layer as in V3)

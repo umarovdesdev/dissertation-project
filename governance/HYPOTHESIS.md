@@ -1,4 +1,4 @@
-**Document Version:** 4.0 | **Binding Reference:** INVARIANTS.md v4.0
+**Document Version:** 4.1 | **Binding Reference:** INVARIANTS.md v4.1 | Updated 2026-03-26: H-1 and Premise 3 updated with Stage 0a/0b expansion
 
 ---
 
@@ -8,7 +8,7 @@ The proposed preprocessing pipeline reduces domain variability across fundus ima
 
 ---
 
-**H-1 (Preprocessing Dominance).** If fundus images from EyePACS are processed through the 6-stage V4 preprocessing pipeline — comprising canonical flip (left→right orientation), FOV crop and resize (PIL-based), flat-field correction (Gaussian, σ=45), upgraded CLAHE (dual-constraint clip limit, LAB L-channel, stochastic at train time), ImageNet normalization, and integrated augmentation (Stage 5, train only) — and a CNN classifier (ResNet-50 or EfficientNet-B3, pre-trained on ImageNet, adapted via fine-tuning) is trained on the processed images under a factorial design (6 configurations A–F), then classification performance measured by accuracy, precision, recall, F1-score (macro and weighted), ROC-AUC, and Cohen's Kappa (quadratic weights) will be statistically significantly higher than that of the same architecture trained on baseline images (crop+resize+ImageNet normalize) of equivalent source distribution, independently for both ResNet-50 and EfficientNet-B3, satisfying the dominance criterion of weighted F1 Δ ≥ 5 pp, ROC-AUC Δ ≥ 0.02, and no Kappa degradation.
+**H-1 (Preprocessing Dominance).** If fundus images from EyePACS are processed through the 6-stage V4 preprocessing pipeline — comprising canonical orientation (Stage 0a: canonical flip left→right; Stage 0b: OD-fovea rotation normalization), FOV crop and resize (PIL-based, Stage 1), flat-field correction (Gaussian, σ=45, Stage 2), upgraded CLAHE (dual-constraint clip limit, LAB L-channel, stochastic at train time, Stage 3), ImageNet normalization (Stage 4), and integrated augmentation (Stage 5, train only) — and a CNN classifier (ResNet-50 or EfficientNet-B3, pre-trained on ImageNet, adapted via fine-tuning) is trained on the processed images under a factorial design (6 configurations A–F), then classification performance measured by accuracy, precision, recall, F1-score (macro and weighted), ROC-AUC, and Cohen's Kappa (quadratic weights) will be statistically significantly higher than that of the same architecture trained on baseline images (crop+resize+ImageNet normalize) of equivalent source distribution, independently for both ResNet-50 and EfficientNet-B3, satisfying the dominance criterion of weighted F1 Δ ≥ 5 pp, ROC-AUC Δ ≥ 0.02, and no Kappa degradation.
 
 *[V3 Historical: H-1 previously referred to a 5-component pipeline — FOV Standardization, green channel imaging, normalization, CLAHE (LAB, optimized clip limit), HSV contrast enhancement — with "resize only" baseline and 2×2 factorial (4 configs A–D). The V4 update replaces component list, baseline definition, and expands to 6 configs; the dominance criterion (EH-3) is unchanged.]*
 
@@ -38,7 +38,7 @@ The hypotheses above are linked by the following causal argument:
 
 **Premise 2 (Distribution Shift Degrades CNN):** This domain variability manifests as distribution shift in the input feature space, causing CNN models trained on one domain to generalize poorly to others.
 
-**Premise 3 (Preprocessing Normalizes):** The proposed 6-stage V4 preprocessing pipeline standardizes retinal image appearance — correcting illumination gradients (flat-field correction), normalizing orientation (canonical flip), enhancing contrast stochastically (dual-constraint CLAHE), and applying ImageNet normalization — thereby reducing inter-domain distribution shift while preserving diagnostically relevant retinal features.
+**Premise 3 (Preprocessing Normalizes):** The proposed 6-stage V4 preprocessing pipeline standardizes retinal image appearance — normalizing orientation (Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization so the OD→fovea axis is horizontal), correcting illumination gradients (flat-field correction, Stage 2), enhancing contrast stochastically (dual-constraint CLAHE, Stage 3), and applying ImageNet normalization (Stage 4) — thereby reducing inter-domain distribution shift while preserving diagnostically relevant retinal features.
 
 *[V3 Historical — Premise 3 previously read: "The proposed 5-component preprocessing pipeline standardizes retinal image appearance — normalizing illumination, enhancing contrast, extracting the most informative channel, and reducing device-specific artifacts."]*
 

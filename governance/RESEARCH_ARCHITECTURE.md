@@ -5,7 +5,7 @@
 **Candidate:** Yesmukhamedov N.S.
 **Status:** Binding Methodological Blueprint
 **Function:** Experimental, statistical, and architectural formalization of the dissertation research
-**Document Version:** 4.0. Supersedes V3/v2.2. Consistent with INVARIANTS v4.0 and Dissertation Project V4.0. V4 changes: 6-stage pipeline replacing 5-component V3; green channel and HSV enhancement removed; flat-field correction (Stage 2) and canonical flip (Stage 0) added; CLAHE upgraded to dual-constraint stochastic; normalization changed to ImageNet channel-wise; augmentation integrated as Stage 5; Experiment 1 expanded to 6 configurations (A–F) including binocular blending; baseline updated from "resize only" to "crop+resize+ImageNet normalize".
+**Document Version:** 4.1. Supersedes V3/v2.2. Consistent with INVARIANTS v4.1 and Dissertation Project V4.1. V4.0 changes: 6-stage pipeline replacing 5-component V3; green channel and HSV enhancement removed; flat-field correction (Stage 2) and canonical flip (Stage 0) added; CLAHE upgraded to dual-constraint stochastic; normalization changed to ImageNet channel-wise; augmentation integrated as Stage 5; Experiment 1 expanded to 6 configurations (A–F) including binocular blending; baseline updated from "resize only" to "crop+resize+ImageNet normalize". V4.1 changes (2026-03-26): Stage 0 expanded to Stage 0a (Canonical Flip) + Stage 0b (OD-Fovea Rotation Normalization); 5-fold → 3-fold; EyePACS 40% subset (~14,050 used); max_epochs 50 → 20; binocular blending Optional Extension paragraph added to §3.1.
 
 ---
 
@@ -32,7 +32,7 @@ The v2.1 dataset architecture comprises seven datasets organized into four funct
 ### 2.1.1 TRAINING Tier — EyePACS (Primary Training & Ablation)
 
 * **Role:** Primary training dataset for Experiments 1 and 2 (causal ablation and component ablation)
-* **Approximate size:** ~35,126 labeled fundus images (Kaggle labeled partition)
+* **Approximate size:** ~35,126 labeled fundus images (40% subset of full EyePACS; ~14,050 used for experiments)
 * **Taxonomy:** Five-class DR staging (DR 0–4)
 * **Camera models:** Canon CR-1
 * **Public availability:** Yes (Kaggle)
@@ -93,7 +93,9 @@ The v2.1 dataset architecture comprises seven datasets organized into four funct
 
 ## 2.2 Split Strategy
 
-All experiments use **5-fold cross-validation with patient-level split** to prevent data leakage. For each fold iteration, 4 folds serve as training data and 1 fold as test data. The process is repeated 5 times. All metrics are reported as mean ± standard deviation across folds. This replaces the v1.0 fixed 80/10/10 split.
+All experiments use **3-fold cross-validation with patient-level stratified split** to prevent data leakage. For each fold iteration, 2 folds serve as training data and 1 fold as test data. The process is repeated 3 times. All metrics are reported as mean ± standard deviation across folds. This replaces the v2.1 5-fold CV and the v1.0 fixed 80/10/10 split.
+
+<!-- 5-fold CV → 3-fold CV change: updated 2026-03-26 per dr-classifier/CLAUDE.md: "Current config: 3-fold CV with patient-level split (stratified). (changed from 5-fold)" -->
 
 Patient-level leakage control is mandatory: no patient's images may appear in both training and test partitions within any fold.
 
@@ -119,7 +121,9 @@ Defined per OD-3 (v2.2).
 
 The V4 preprocessing pipeline comprises six ordered stages, replacing the V3 5-component pipeline:
 
-- **Stage 0: Canonical Flip** — Left→right eye orientation normalization (toggleable). Ensures consistent retinal orientation across bilateral image pairs.
+- **Stage 0: Canonical Orientation** — Two-sub-stage orientation normalization (toggleable):
+  - **Stage 0a: Canonical Flip** — Left→right eye horizontal flip (toggleable). Ensures consistent retinal orientation so the optic disc is on the right and the macula on the left.
+  - **Stage 0b: OD-Fovea Rotation Normalization** — Classical CV detection of optic disc (brightest region) and fovea (darkest region with distance prior); rotates image so the OD→fovea axis is horizontal (toggleable). When detection confidence is low, rotation is skipped (fallback). Augmentation rotation_sigma is adaptive per-image from OD/fovea detection uncertainty, or fallback 13.0°.
 - **Stage 1: PIL-based FOV Crop and Resize** — Foreground detection via PIL, black border removal, image centering, resize to 512×512. Always on. Replaces V3 Hough circle detection.
 - **Stage 2: Flat-Field Correction** — Gaussian blur subtraction with σ=45 to normalize illumination gradients across the fundus image (toggleable). NEW in V4.
 - **Stage 3: Upgraded CLAHE** — Applied in LAB color space (L-channel) with dual-constraint clip limit: clip_factor × tile_area/256, capped by global_threshold × tile_area. Stochastic application at train time (80% probability). Toggleable. (UPGRADED from V3 dynamic clip limit)
@@ -131,6 +135,8 @@ Pipeline considered **ACTIVE** (full V4) when all toggleable stages (0, 2, 3, 5)
 Augmentation is integrated as Stage 5 of the V4 pipeline. Individual augmentation sub-transforms are toggleable via config flags, enabling ablation within the pipeline framework.
 
 *[V3 Historical Pipeline (5-component): (1) FOV Standardization via Hough circle detection, (2) CLAHE enhancement (LAB, dynamic clip limit), (3) HSV contrast enhancement, (4) Green channel imaging, (5) Pixel normalization [0,1]. Augmentation was separate. V3 pipeline is used for Exp 2 ablation historical comparison.]*
+
+**Optional Extension — Per-Patient Binocular Blending:** When both left-eye and right-eye images are available for a patient, the backbone CNN extracts feature vectors independently for each eye; the left-eye and right-eye feature vectors are combined via concatenation + element-wise absolute difference → MLP → 5-class logits (PatientHead architecture). Stage 0a (canonical flip) is a necessary prerequisite: without standardized eye orientation, bilateral feature alignment is undefined. Per-patient blending is applied in Experiment 1 configurations E (ResNet-50) and F (EfficientNet-B3) as optional supplementary evidence for PC-1; it is not required for EH-4 satisfaction.
 
 ---
 
@@ -174,7 +180,7 @@ These metrics are reported in Experiment 2 (pipeline analysis) and provide evide
 | Optimizer | Adam |
 | Learning rate | 1e-4 |
 | Batch size | 16 |
-| Maximum epochs | 50 (with early stopping) |
+| Maximum epochs | 20 (with early stopping, patience=5) |
 | Loss function | Cross-entropy |
 | Input resolution | 512×512 |
 | Mixed precision (fp16) | Enabled for ResNet-50; DISABLED for EfficientNet (fp16 overflow fix) |
@@ -251,7 +257,7 @@ PatientHead model for per-patient fusion of bilateral fundus images (left eye + 
 
 ## 5.0 Cross-Validation Protocol (Applies to All Experiments)
 
-All experiments use 5-fold cross-validation with patient-level split. For each fold iteration, 4 folds serve as training data and 1 fold as test data. The process is repeated 5 times. All metrics are reported as mean ± standard deviation across folds.
+All experiments use 3-fold cross-validation with patient-level stratified split. For each fold iteration, 2 folds serve as training data and 1 fold as test data. The process is repeated 3 times. All metrics are reported as mean ± standard deviation across folds.
 
 ---
 
@@ -410,7 +416,7 @@ In descending order of evidentiary weight:
 3. Cohen's Kappa with quadratic weights (penalizes clinically significant ordinal misclassification)
 4. Accuracy (reported but subject to inflation under class imbalance; not sufficient alone)
 
-All primary metrics reported as **mean ± standard deviation** across 5-fold cross-validation.
+All primary metrics reported as **mean ± standard deviation** across 3-fold cross-validation.
 
 ---
 
@@ -478,7 +484,7 @@ Mandatory:
 * McNemar test (paired classification comparison) — Experiments 1
 * DeLong test (ROC-AUC comparison) — V3 Experiments 1 and 3
 * 95% confidence intervals (bootstrap ≥ 1000 iterations) — All experiments
-* 5-fold cross-validation reporting (mean ± std) — All experiments
+* 3-fold cross-validation reporting (mean ± std) — All experiments
 * Mixed-effects model for cross-fold analysis (fold as random effect) — Experiment 1
 * Bonferroni/Holm correction for multiple comparisons — Experiments 1, 2
 
@@ -534,7 +540,7 @@ Software stack: Python 3.11, PyTorch, Torchvision, OpenCV, NumPy, Scikit-learn, 
 ## 9.1 Leakage Control
 
 * No augmented images in validation/test
-* No patient overlap across splits (enforced by patient-level 5-fold CV)
+* No patient overlap across splits (enforced by patient-level 3-fold CV)
 
 ## 9.2 Overfitting Control
 
@@ -569,7 +575,7 @@ Novelty IS:
 * Formalization of preprocessing dominance hypothesis (validated via factorial ablation on two established architectures, 6 configurations A–F)
 * Dual-constraint stochastic CLAHE validation within DR multi-class context (LAB color space, dual-constraint clip limit, 80% train-time probability)
 * Flat-field correction via Gaussian blur subtraction as novel preprocessing stage (Stage 2)
-* Canonical flip (left→right eye orientation normalization) as novel preprocessing stage (Stage 0)
+* Canonical orientation as novel preprocessing stage (Stage 0): Stage 0a (canonical flip, left→right eye normalization) + Stage 0b (OD-fovea rotation normalization so OD→fovea axis is horizontal)
 * Per-patient binocular blending as optional extension (configs E, F)
 * Integrated augmentation within pipeline (Stage 5), not separate layer
 * Unified ablation-driven causal validation

@@ -34,13 +34,13 @@
 - **Boundary:** Projected deployment benefits (20–30% late-stage DR reduction; 15–20% cost reduction) are third-party projections, not dissertation findings (INVARIANTS SB-1.6; ARGUMENT_MAP NC-3; SIR-8).
 
 ### Scientific Novelty
-1. Integration of a 6-stage V4 preprocessing pipeline — comprising canonical orientation normalization (Stage 0), FOV crop+resize (Stage 1), flat-field illumination correction (Stage 2), upgraded CLAHE with dual-constraint clip limit in LAB color space (Stage 3), ImageNet normalization (Stage 4), and integrated augmentation (Stage 5) — into a CNN-based DR classification pipeline as a unified framework, not isolated techniques (LC-SQOPUS_Q3, p. 81; LC-SQOPUS_Q2, §1).
+1. Integration of a 6-stage V4 preprocessing pipeline — comprising canonical orientation (Stage 0: Stage 0a canonical flip + Stage 0b OD-fovea rotation normalization), FOV crop+resize (Stage 1), flat-field illumination correction (Stage 2), upgraded CLAHE with dual-constraint clip limit in LAB color space (Stage 3), ImageNet normalization (Stage 4), and integrated augmentation (Stage 5) — into a CNN-based DR classification pipeline as a unified framework, not isolated techniques (LC-SQOPUS_Q3, p. 81; LC-SQOPUS_Q2, §1).
 2. Two-stage fine-tuning protocol for EfficientNetB0 tailored to fundus image variability (LC-CONF, p. 497; LC-KBTU, §II.1) [V3: retained as training strategy; H-3 dropped].
 3. Mathematical modeling of laser-tissue interaction for retinal therapy with qualitative simulation (LC-KazUTB, §II.1) — bounded as theoretical contribution only (INVARIANTS SB-1.5; ARGUMENT_MAP PC-4).
 4. Modular AI-driven system architecture for DR screening in resource-limited environments (LC-NAN_RK, §II.1) — bounded as design specification only (INVARIANTS SB-4.1; ARGUMENT_MAP PC-5).
 5. Cross-database transferability validation across 3+ independent datasets (Messidor, Messidor-2, IDRiD) with generalization ratio metric (G = F1_external / F1_EyePACS) — demonstrating pipeline robustness beyond the training domain (ARGUMENT_MAP PC-6).
 6. Grad-CAM explainability analysis with quantitative ALO (primary metric: Attention–Lesion Overlap, `ALO = area(GradCAM ∩ lesion) / area(lesion)`) and IoU (secondary metric) against IDRiD pixel-level lesion masks (microaneurysms, hemorrhages, hard exudates, soft exudates) — providing causal evidence that preprocessing redirects CNN attention to clinically relevant structures (ARGUMENT_MAP PC-7).
-7. 6-stage V4 preprocessing pipeline (canonical flip, FOV crop+resize, flat-field correction, upgraded CLAHE, ImageNet normalization, integrated augmentation) with component-level ablation identifying ranked contribution hierarchy (ARGUMENT_MAP PC-8).
+7. 6-stage V4 preprocessing pipeline (canonical orientation [Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization], FOV crop+resize, flat-field correction, upgraded CLAHE, ImageNet normalization, integrated augmentation) with component-level ablation identifying ranked contribution hierarchy (ARGUMENT_MAP PC-8).
 8. Device domain shift evaluation across 4 camera manufacturers (Canon, Topcon, Kowa, Zeiss) on RFMiD, DDR, ODIR-5K — quantifying cross-device performance variability for deployment readiness assessment (ARGUMENT_MAP PC-9).
 
 ### Research Goal
@@ -49,7 +49,7 @@
 ### Research Objectives
 1. Analyze the current state of automated DR diagnosis, fundus image quality variability, device-specific acquisition challenges, and deep learning approaches to retinal image classification (→ Chapter 1).
 2. Formalize the mathematical foundations of image enhancement techniques, CNN-based classification, transfer learning theory, explainability methods (CAM, Grad-CAM), and image quality metrics (CNR, VVI, SSIM, Entropy) (→ Chapter 2).
-3. Design the 6-stage V4 preprocessing pipeline (canonical flip → FOV crop+resize (PIL-based) → flat-field correction (σ=45) → upgraded CLAHE (dual-constraint clip limit, LAB L-channel, stochastic) → ImageNet normalization → integrated augmentation) and integrate it with ResNet-50, EfficientNet-B3, and EfficientNet-B4 architectures (→ Chapter 3).
+3. Design the 6-stage V4 preprocessing pipeline (canonical orientation [Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization] → FOV crop+resize (PIL-based, Stage 1) → flat-field correction (σ=45, Stage 2) → upgraded CLAHE (dual-constraint clip limit, LAB L-channel, stochastic, Stage 3) → ImageNet normalization (Stage 4) → integrated augmentation (Stage 5)) and integrate it with ResNet-50, EfficientNet-B3, and EfficientNet-B4 architectures (→ Chapter 3).
 4. Experimentally validate the preprocessing dominance hypothesis (H-1) via factorial ablation on EyePACS with ResNet-50 and EfficientNet-B3, 6 configurations A–F (→ Chapter 4, Experiment 1).
 5. Validate the preprocessing component contribution hierarchy via component-level ablation on EyePACS (→ Chapter 4, Experiment 2) and CLAHE threshold sensitivity (H-2) as a sub-analysis.
 6. [V3: Old Objective 6 dropped — Experiment 3 (robustness to synthetic image degradation on APTOS 2019) is no longer active in V3.] Validate explainability via Grad-CAM on EfficientNet-B4 with ALO (primary) and IoU (secondary) against IDRiD lesion masks (→ Chapter 4, V3 Experiment 4).
@@ -81,7 +81,7 @@
 - Cross-validation and statistical reliability protocols (INVARIANTS EH-4).
 
 ### Provisions Submitted for Defense
-1. The integrated 6-stage V4 preprocessing pipeline (canonical flip, FOV crop+resize, flat-field correction, upgraded CLAHE, ImageNet normalization, integrated augmentation) produces statistically measurable improvement in five-class DR classification independently for both ResNet-50 and EfficientNet-B3 on EyePACS (ARGUMENT_MAP PC-1).
+1. The integrated 6-stage V4 preprocessing pipeline (canonical orientation [Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization], FOV crop+resize, flat-field correction, upgraded CLAHE, ImageNet normalization, integrated augmentation) produces statistically measurable improvement in five-class DR classification independently for both ResNet-50 and EfficientNet-B3 on EyePACS (ARGUMENT_MAP PC-1).
 2. CLAHE clip limit parameter exhibits a parameter-dependent sensitivity profile with identifiable local optimum on IDRiD (ARGUMENT_MAP PC-2).
 3. Two-stage fine-tuning of EfficientNetB0 outperforms frozen-only strategy (ARGUMENT_MAP PC-3) [V3 DEMOTED: PC-3 is no longer a primary provision; cited as prior work only].
 4. Coupled thermal-optical mathematical model provides theoretical grounding for laser-tissue interaction (ARGUMENT_MAP PC-4; theoretical claim only).
@@ -284,12 +284,14 @@
 #### 3.1.1 Pipeline Component Specification: 6-Stage V4 System
 
 - V4 pipeline definition (replaces V3 5-component pipeline per INVARIANTS OD-3 v4.0):
-  - **(Stage 0) Canonical Flip:** Left→right eye orientation normalization (toggleable). NEW in V4.
+  - **(Stage 0) Canonical Orientation** (toggleable): Two-sub-stage orientation normalization. NEW in V4.
+    - **(Stage 0a) Canonical Flip:** Left→right eye horizontal flip to canonical right-eye orientation.
+    - **(Stage 0b) OD-Fovea Rotation Normalization:** Classical CV detection of OD (brightest) and fovea (darkest with distance prior); rotates image so OD→fovea axis is horizontal; fallback to identity when detection confidence is low. Augmentation rotation_sigma (Stage 5) is adaptive from detection uncertainty; fallback σ=13.0°.
   - **(Stage 1) PIL-based FOV Crop and Resize:** Foreground detection, border removal, resize to 512×512 (always on). Replaces V3 Hough circle detection.
   - **(Stage 2) Flat-Field Correction:** Gaussian blur subtraction — `corrected = image − GaussianBlur(image, σ=45) + 128` (toggleable). NEW in V4.
   - **(Stage 3) Upgraded CLAHE:** Dual-constraint clip limit (`CL_tile = min(clip_factor × tile_area/256, global_threshold × tile_area)`) on LAB L-channel; stochastic at train time (80% probability) (toggleable). UPGRADED from V3 dynamic clip limit.
   - **(Stage 4) ImageNet Normalization:** `(x − mean)/std → tensor`; mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225]; always on, always last. Replaces V3 pixel normalization [0,1].
-  - **(Stage 5) Integrated Augmentation:** Unified affine + brightness/contrast + PCA color jitter; train only, inserted before Stage 4. NEW in V4 (was separate layer in V3).
+  - **(Stage 5) Integrated Augmentation:** Unified affine (rotation_sigma adaptive from Stage 0b OD/fovea uncertainty or fallback 13.0°, clipped ±40°) + brightness/contrast + PCA color jitter; train only, inserted before Stage 4. NEW in V4 (was separate layer in V3).
 - "Active" pipeline definition (full V4): all toggleable stages (0, 2, 3, 5) applied in order. "Absent" (V4 baseline): crop + resize + ImageNet normalize only (Stages 1 + 4).
 - Augmentation (Stage 5) is integrated into the V4 pipeline at train time; differs from V3 where augmentation was a separate layer.
 
@@ -385,7 +387,7 @@
 - Supplementary clinical images from Kazakh medical centers: not publicly available; future work only (VCR-4; NC-15).
 
 #### 4.1.2 Class Distribution Analysis and Data Partitioning Strategy
-- EyePACS class distribution and 5-fold cross-validation with patient-level split.
+- EyePACS class distribution (~35,126 labeled images, 40% subset, ~14,050 used for experiments) and 3-fold cross-validation with patient-level stratified split.
 - Class imbalance as primary confounding factor necessitating weighted F1 and Cohen's Kappa (ARGUMENT_MAP SC-1.4).
 - Label harmonization methodology for datasets with non-standard taxonomies (Messidor, RFMiD, ODIR-5K).
 
@@ -434,10 +436,11 @@
 #### 4.3.1 V4 Ablation Design (Levels 0–4)
 - Sequential addition of V4 pipeline stages to isolate individual contributions:
   - Level 0: V4 baseline (crop+resize+ImageNet normalize, Stages 1+4) — no toggleable stages
-  - Level 1: baseline + canonical flip (Stages 0+1+4)
+  - Level 1a: baseline + canonical flip only (Stages 0a+1+4)
+  - Level 1b: baseline + canonical orientation (Stage 0a + Stage 0b OD-fovea rotation, Stages 0a+0b+1+4)
   - Level 2: baseline + flat-field correction (Stages 1+2+4)
   - Level 3: baseline + upgraded CLAHE (Stages 1+3+4)
-  - Level 4: full V4 pipeline (all stages: 0+1+2+3+4+5)
+  - Level 4: full V4 pipeline (all stages: 0a+0b+1+2+3+4+5)
 - Weighted F1 measured at each ablation level on EyePACS.
 - Image quality metrics (CNR, VVI, Entropy, SSIM) calculated before and after each pipeline stage to quantify preprocessing effect independently of downstream classification.
 
@@ -581,7 +584,7 @@
 ### 6.2 AI Processing Module Design
 
 #### 6.2.1 Preprocessing Engine with Configurable Pipeline Parameters
-- Configurable pipeline parameters based on the validated 6-stage V4 preprocessing pipeline (§3.1): canonical flip, FOV crop+resize (PIL-based), flat-field correction (σ=45), upgraded CLAHE (dual-constraint clip limit, LAB L-channel), ImageNet normalization, integrated augmentation.
+- Configurable pipeline parameters based on the validated 6-stage V4 preprocessing pipeline (§3.1): canonical orientation (Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization), FOV crop+resize (PIL-based), flat-field correction (σ=45), upgraded CLAHE (dual-constraint clip limit, LAB L-channel), ImageNet normalization, integrated augmentation.
 - Link to PC-1: the preprocessing-CNN pipeline validated experimentally constitutes the AI processing module core.
 
 #### 6.2.2 Inference Module with Model Selection Logic
@@ -683,5 +686,5 @@
 
 *End of MASTER_OUTLINE.md*
 *Binding references: DISSERTATION_INVARIANTS.md v4.0 | ARGUMENT_MAP.md v4.0 | GLOSSARY_v4.0*
-*Document Version: 4.0 — V4 sync: V4 6-stage pipeline (canonical flip, flat-field correction, dual-constraint CLAHE, ImageNet normalization, integrated augmentation); Exp 1 expanded to 6 configs A–F; V3 merged Exp 3 split back into V4 Exp 5 (generalization) and V4 Exp 6 (device shift); 5-fold CV → 3-fold; ALO primary metric; IoU secondary.*
+*Document Version: 4.1 — V4 sync: V4 6-stage pipeline (canonical orientation [Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization], flat-field correction, dual-constraint CLAHE, ImageNet normalization, integrated augmentation); Exp 1 expanded to 6 configs A–F; V3 merged Exp 3 split back into V4 Exp 5 (generalization) and V4 Exp 6 (device shift); 5-fold CV → 3-fold; ALO primary metric; IoU secondary. Updated 2026-03-26: Stage 0 expanded to 0a+0b; EyePACS 40% subset notation added.*
 *All structural decisions traceable to the governing source corpus.*

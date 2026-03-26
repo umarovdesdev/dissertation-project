@@ -24,7 +24,7 @@ The study uses multiple publicly available retinal image datasets.
 
 | Dataset               | Role                                                                              |
 | --------------------- | --------------------------------------------------------------------------------- |
-| EyePACS               | Primary training (V4 Experiments 1 and 2). ~35,126 labeled images (Kaggle labeled partition). |
+| EyePACS               | Primary training (V4 Experiments 1 and 2). ~35,126 labeled images (40% subset of full EyePACS; ~14,050 used for experiments). |
 | APTOS 2019            | [NOT ACTIVE — old Experiment 3 (robustness under image degradation) is DROPPED] |
 | IDRiD                 | Clinical validation, CLAHE sweep, lesion localization (V4 Experiments 2, 4, 5)   |
 | Messidor / Messidor-2 | External generalization (V4 Experiment 5)                                         |
@@ -171,11 +171,12 @@ Quantify the contribution of each preprocessing component.
 | V4 Pipeline Configuration | Stages Included |
 | ------------------------- | --------------- |
 | baseline | Stages 1 + 4 (crop+resize + ImageNet normalize) |
-| baseline + canonical flip | Stages 0 + 1 + 4 |
+| baseline + canonical flip (Stage 0a only) | Stages 0a + 1 + 4 |
+| baseline + canonical orientation (Stage 0a + 0b) | Stages 0a + 0b + 1 + 4 |
 | baseline + flat-field correction | Stages 1 + 2 + 4 |
 | baseline + CLAHE | Stages 1 + 3 + 4 |
 | baseline + augmentation | Stages 1 + 4 + 5 |
-| full V4 pipeline | All stages (0+1+2+3+4+5) |
+| full V4 pipeline | All stages (0a+0b+1+2+3+4+5) |
 
 **V3 Ablation (historical reference):** The V3 5-component pipeline stages are also studied for historical component-level analysis:
 

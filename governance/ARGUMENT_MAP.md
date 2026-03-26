@@ -3,7 +3,7 @@
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Formal Claim-Evidence-Dependency Structure
 **Binding Reference:** DISSERTATION_INVARIANTS.md v4.0
-**Document Version:** 4.0. Supersedes V3/v2.2. V4 changes: pipeline upgraded from 5-component to 6-stage V4 system; green channel and HSV enhancement removed; baseline redefined as crop+resize+ImageNet normalize; Experiment 1 expanded to 6 configurations (A–F) with optional binocular blending; PC-8 ablation updated to V4 stages (Levels 0–4); SC-2.1 updated to dual-constraint CLAHE parameterization with T/80 as historical context; 'dynamic clip limit' → 'dual-constraint clip limit'; footer updated to v4.0.
+**Document Version:** 4.1. Supersedes V3/v2.2. V4.0 changes: pipeline upgraded from 5-component to 6-stage V4 system; green channel and HSV enhancement removed; baseline redefined as crop+resize+ImageNet normalize; Experiment 1 expanded to 6 configurations (A–F) with optional binocular blending; PC-8 ablation updated to V4 stages (Levels 0–4); SC-2.1 updated to dual-constraint CLAHE parameterization with T/80 as historical context; 'dynamic clip limit' → 'dual-constraint clip limit'. V4.1 changes (2026-03-26): IT-1 updated with Stage 0a/0b expansion and APTOS DROPPED annotation; PC-1 updated with Stage 0a/0b and 3-fold CV; PC-1 promotion criteria 5-fold → 3-fold; EyePACS scope boundary updated with 40% subset.
 
 ---
 
@@ -11,16 +11,17 @@
 
 **IT-1 (Verbatim from Invariants, Section I):**
 
-> An integrated preprocessing-CNN pipeline — comprising canonical orientation normalization, FOV crop and resize, flat-field illumination correction, upgraded CLAHE enhancement (LAB color space, dual-constraint clip limit with stochastic application), and ImageNet-standard normalization, with augmentation integrated as Stage 5 (train only) — applied to fundus images sourced from EyePACS (primary training), IDRiD (clinical validation, lesion localization, and CLAHE parameter sweep), Messidor/Messidor-2 (external generalization), and RFMiD/DDR/ODIR-5K (device domain shift), produces statistically measurable improvement in five-class diabetic retinopathy classification performance relative to a baseline CNN trained without preprocessing (crop + resize + ImageNet normalize only), under constrained computational conditions defined by hardware limitations operative during experimental execution.
+> An integrated preprocessing-CNN pipeline — comprising canonical orientation (Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization), PIL-based FOV crop and resize to 512×512 (Stage 1, always on), flat-field correction via Gaussian blur subtraction σ=45 (Stage 2), dual-constraint stochastic CLAHE on LAB L-channel (Stage 3), ImageNet channel-wise normalization to tensor (Stage 4, always on), and integrated augmentation at train time (Stage 5) — applied to fundus images sourced from EyePACS (primary training), APTOS 2019 (robustness — DROPPED, Experiment 3 not conducted; dataset retained in architecture but not used in active experiments), IDRiD (clinical validation and lesion localization), Messidor/Messidor-2 (external generalization), and RFMiD/DDR/ODIR-5K (device domain shift), produces statistically measurable improvement in five-class diabetic retinopathy classification performance relative to a baseline CNN trained without preprocessing (crop + resize + ImageNet normalize only), under constrained computational conditions defined by hardware limitations operative during experimental execution.
+
+<!-- IT-1 updated 2026-03-26: aligned with dr-classifier/docs/INVARIANTS.md v4.0; Stage 0 expanded to 0a (canonical flip) + 0b (OD-fovea rotation normalization); APTOS 2019 DROPPED annotation added. -->
 
 *[V3 Historical IT-1: "comprising FOV standardization, CLAHE enhancement (LAB color space, dynamic clip limit), HSV contrast enhancement, green channel imaging, and pixel normalization … relative to a baseline CNN trained without preprocessing"]*
 
 **Scope boundary:**
 - Five-stage DR classification (DR 0–4 per standard clinical grading).
-- Dataset architecture: EyePACS (~35,126 labeled images, Kaggle labeled partition, primary training), IDRiD (clinical validation with pixel-level lesion annotations and CLAHE parameter sweep), Messidor/Messidor-2 (external generalization), RFMiD/DDR/ODIR-5K (device domain shift evaluation across Topcon, Kowa, Canon, Zeiss camera hardware).
+- Dataset architecture: EyePACS (~35,126 labeled images, 40% subset of full EyePACS, ~14,050 used for experiments, primary training), APTOS 2019 (robustness — DROPPED, Experiment 3 not conducted; dataset retained in architecture but not used in active experiments), IDRiD (clinical validation with pixel-level lesion annotations), Messidor/Messidor-2 (external generalization), RFMiD/DDR/ODIR-5K (device domain shift evaluation across Topcon, Kowa, Canon, Zeiss camera hardware).
 - "Improvement" = measurable difference in primary metrics (weighted F1-score, ROC-AUC, Cohen's Kappa, Accuracy) under matched experimental conditions.
 - Scope extends to cross-database transferability evaluation (Messidor/Messidor-2, IDRiD), explainability via Grad-CAM with ALO/IoU against lesion masks (IDRiD), and device domain shift across camera hardware (RFMiD, DDR, ODIR-5K).
-- [V3 NOTE: Robustness to synthetic image degradation (APTOS 2019) was in old Exp 3, which is DROPPED from V3.]
 - Does not extend to: general retinal disease classification, other ophthalmological imaging modalities, imaging contexts not representable by the dataset architecture specified above.
 
 ---
@@ -31,9 +32,9 @@
 
 ### PC-1
 **Claim ID:** PC-1
-**Formal Statement:** The integrated V4 6-stage preprocessing pipeline (canonical flip → FOV crop+resize (PIL-based) → flat-field correction → upgraded CLAHE (dual-constraint clip limit, LAB L-channel, stochastic at train time) → ImageNet normalization [+ integrated augmentation Stage 5 train only]) produces statistically measurable improvement in five-class DR classification performance relative to a baseline CNN trained on images processed with crop + resize + ImageNet normalize only (Stages 1+4) from EyePACS, independently for both ResNet-50 and EfficientNet-B3, on the metrics: weighted F1-score, ROC-AUC, Cohen's Kappa, and Accuracy.
+**Formal Statement:** The integrated V4 6-stage preprocessing pipeline (canonical orientation [Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization] → FOV crop+resize (PIL-based, Stage 1) → flat-field correction (Stage 2) → upgraded CLAHE (dual-constraint clip limit, LAB L-channel, stochastic at train time, Stage 3) → ImageNet normalization (Stage 4) [+ integrated augmentation Stage 5 train only]) produces statistically measurable improvement in five-class DR classification performance relative to a baseline CNN trained on images processed with crop + resize + ImageNet normalize only (Stages 1+4) from EyePACS, independently for both ResNet-50 and EfficientNet-B3, on the metrics: weighted F1-score, ROC-AUC, Cohen's Kappa, and Accuracy.
 **Claim Type:** Empirical
-**Required Evidence Type:** Factorial ablation on EyePACS (Experiment 1); six configurations — (A) baseline + ResNet-50, (B) full V4 pipeline + ResNet-50, (C) baseline + EfficientNet-B3, (D) full V4 pipeline + EfficientNet-B3, (E) full V4 pipeline + ResNet-50 + binocular blending (optional), (F) full V4 pipeline + EfficientNet-B3 + binocular blending (optional); 5-fold cross-validation with patient-level split; mixed-effects model. Preprocessing dominance validated if Performance(B) > Performance(A) AND Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures. Configs E and F test per-patient binocular blending as optional extensions beyond the core 2×2 factorial.
+**Required Evidence Type:** Factorial ablation on EyePACS (Experiment 1); six configurations — (A) baseline + ResNet-50, (B) full V4 pipeline + ResNet-50, (C) baseline + EfficientNet-B3, (D) full V4 pipeline + EfficientNet-B3, (E) full V4 pipeline + ResNet-50 + binocular blending (optional), (F) full V4 pipeline + EfficientNet-B3 + binocular blending (optional); 3-fold cross-validation with patient-level stratified split; mixed-effects model. Preprocessing dominance validated if Performance(B) > Performance(A) AND Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures. Configs E and F test per-patient binocular blending as optional extensions beyond the core 2×2 factorial.
 **Dependency:** None (foundational claim; corresponds to H-1)
 **Tests whether:** Preprocessing improves CNN performance independently of architecture.
 
@@ -584,7 +585,7 @@ IT-1 (Main Thesis)
 - Direct experimental evidence exists (LC-SAPAKOVA-2025-01): validation accuracy 71% → 86%; classification accuracy 88% → 91%; ROC-AUC = 0.9638; Weighted F1 = 0.91.
 - Evidence satisfies EH-3 criteria direction (weighted F1 Δ ≥ 5 pp; ROC-AUC ≥ 0.9638) on the dataset tested.
 - Strength is MODERATE rather than STRONG because: (a) preprocessing and architectural complexity change are confounded in the existing source (SC-1.1 boundary); (b) supplementary clinical dataset is non-public (SB-2.2); (c) ablation study isolating preprocessing from architectural change is required for Strong classification and is not yet documented in a separate independent source; (d) binary vs. five-class classification ambiguity exists in LC-SAPAKOVA-2025-01 reporting (SC-1.1 boundary).
-- Promotion to STRONG requires: Experiment 1 ablation on EyePACS with 2×2 factorial design (ResNet-50 + EfficientNet-B3), satisfying EH-3 independently for both architectures, with 5-fold cross-validation and mixed-effects model.
+- Promotion to STRONG requires: Experiment 1 ablation on EyePACS with 2×2 factorial design (ResNet-50 + EfficientNet-B3), satisfying EH-3 independently for both architectures, with 3-fold cross-validation and mixed-effects model.
 
 ---
 
