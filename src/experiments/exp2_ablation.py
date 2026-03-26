@@ -1,11 +1,11 @@
 """Experiment 2: Preprocessing Component Ablation + CLAHE Sweep (H-2, PC-8).
 
 Part A — Component ablation:
-  5 pipeline levels trained on EyePACS with 5-fold CV using EfficientNet-B3.
-  Image quality metrics (CNR, Entropy, SSIM) measured on 100 sample images.
+  6 V4 pipeline levels trained on EyePACS with k-fold CV using EfficientNet-B3.
+  Image quality metrics (CNR, Entropy, SSIM) measured on sample images.
 
 Part B — CLAHE threshold sensitivity:
-  Sweep clip_limit values on IDRiD, record per-class F1 for DR 1 and DR 2.
+  Sweep clahe_clip_factor values on IDRiD, record per-class F1 for DR 1 and DR 2.
 """
 
 from __future__ import annotations
@@ -20,11 +20,11 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 
-from src.data.augmentation import FundusAugmentation
 from src.data.datasets import EyePACSDataset, IDRiDDataset
 from src.data.splits import PatientLevelKFold
 from src.models.factory import create_model
-from src.preprocessing.pipeline import PreprocessingPipeline
+from src.preprocessing.pipeline_v4 import PreprocessingPipelineV4
+from src.preprocessing.config import PreprocessingV4Config
 from src.training.checkpoint import CheckpointManager
 from src.training.trainer import Trainer
 from src.utils.image_quality import compute_all_quality_metrics
@@ -33,27 +33,46 @@ from src.utils.seed import set_seed
 # ── Ablation levels ───────────────────────────────────────────────────────────
 _ABLATION_LEVELS: list[dict] = [
     {
-        "name": "resize_only",
-        "components": ["fov_standardization"],
+        "name": "baseline",
+        "description": "Stages 1+4 only: FOV crop+resize + ImageNet normalize",
+        "flags": dict(use_canonical_flip=False, use_flat_field=False,
+                      use_clahe=False, use_pca_color=False,
+                      use_brightness_contrast=False, use_shear=False, use_stretch=False),
     },
     {
-        "name": "resize_norm",
-        "components": ["fov_standardization", "normalize"],
+        "name": "baseline_canonical_flip",
+        "description": "Stages 0+1+4",
+        "flags": dict(use_canonical_flip=True, use_flat_field=False,
+                      use_clahe=False, use_pca_color=False,
+                      use_brightness_contrast=False, use_shear=False, use_stretch=False),
     },
     {
-        "name": "resize_clahe",
-        "components": ["fov_standardization", "clahe"],
+        "name": "baseline_flat_field",
+        "description": "Stages 1+2+4",
+        "flags": dict(use_canonical_flip=False, use_flat_field=True,
+                      use_clahe=False, use_pca_color=False,
+                      use_brightness_contrast=False, use_shear=False, use_stretch=False),
     },
     {
-        "name": "resize_norm_clahe",
-        "components": ["fov_standardization", "normalize", "clahe"],
+        "name": "baseline_clahe",
+        "description": "Stages 1+3+4",
+        "flags": dict(use_canonical_flip=False, use_flat_field=False,
+                      use_clahe=True, use_pca_color=False,
+                      use_brightness_contrast=False, use_shear=False, use_stretch=False),
     },
     {
-        "name": "full_pipeline",
-        "components": [
-            "fov_standardization", "clahe", "hsv_enhancement",
-            "green_channel", "normalize",
-        ],
+        "name": "baseline_augmentation",
+        "description": "Stages 1+4+5 (train-time aug only)",
+        "flags": dict(use_canonical_flip=False, use_flat_field=False,
+                      use_clahe=False, use_pca_color=True,
+                      use_brightness_contrast=True, use_shear=True, use_stretch=True),
+    },
+    {
+        "name": "full_v4",
+        "description": "All stages 0+1+2+3+4+5",
+        "flags": dict(use_canonical_flip=True, use_flat_field=True,
+                      use_clahe=True, use_pca_color=True,
+                      use_brightness_contrast=True, use_shear=True, use_stretch=True),
     },
 ]
 
@@ -85,9 +104,46 @@ def _load_eyepacs_index(
     return paths, labels, pids
 
 
+def _build_v4_pipeline(
+    v4_cfg: dict[str, Any],
+    level_flags: dict[str, bool],
+    is_training: bool,
+) -> PreprocessingPipelineV4:
+    """Instantiate a PreprocessingPipelineV4 for a given ablation level.
+
+    Args:
+        v4_cfg: The ``preprocessing_v4`` section of the merged config dict.
+        level_flags: Toggle overrides for this ablation level (from ``_ABLATION_LEVELS``).
+        is_training: Whether to enable stochastic CLAHE and augmentation.
+
+    Returns:
+        Configured :class:`PreprocessingPipelineV4` instance.
+    """
+    preproc_config = PreprocessingV4Config(
+        target_size=v4_cfg.get("target_size", 512),
+        flat_field_sigma=v4_cfg.get("flat_field_sigma", 45.0),
+        clahe_clip_factor=v4_cfg.get("clahe_clip_factor", 2.0),
+        clahe_global_threshold=v4_cfg.get("clahe_global_threshold", 0.01),
+        clahe_tile_grid_size=tuple(v4_cfg.get("clahe_tile_grid_size", [8, 8])),
+        clahe_train_prob=v4_cfg.get("clahe_train_prob", 0.8),
+        rotation_sigma=v4_cfg.get("rotation_sigma", 13.0),
+        rotation_clip=v4_cfg.get("rotation_clip", 40.0),
+        zoom_range=tuple(v4_cfg.get("zoom_range", [0.9, 1.1])),
+        shear_range=tuple(v4_cfg.get("shear_range", [-2.0, 2.0])),
+        shear_prob=v4_cfg.get("shear_prob", 0.3),
+        pca_color_sigma=v4_cfg.get("pca_color_sigma", 0.1),
+        pca_color_prob=v4_cfg.get("pca_color_prob", 0.5),
+        brightness_alpha_range=tuple(v4_cfg.get("brightness_alpha_range", [0.9, 1.1])),
+        brightness_beta_range=tuple(v4_cfg.get("brightness_beta_range", [-10.0, 10.0])),
+        bc_prob=v4_cfg.get("bc_prob", 0.5),
+        **level_flags,
+    )
+    return PreprocessingPipelineV4(preproc_config, is_training=is_training)
+
+
 def _measure_quality_on_sample(
     image_paths: list[str],
-    pipeline: PreprocessingPipeline,
+    pipeline: PreprocessingPipelineV4,
     n_samples: int = 100,
     seed: int = 42,
 ) -> dict[str, float]:
@@ -157,8 +213,7 @@ def _run_ablation(
     trainer: Trainer,
     fold_range: list[int],
     levels_to_run: list[str] | None,
-    preproc_cfg: dict,
-    aug_cfg: dict,
+    v4_cfg: dict,
     model_name: str,
     model_cfg: dict,
     quality_n_samples: int,
@@ -175,29 +230,20 @@ def _run_ablation(
         if levels_to_run is not None and level_name not in levels_to_run:
             continue
 
-        components = level_spec["components"]
+        level_flags = level_spec["flags"]
         print(f"\n{'='*65}")
         print(f"  Ablation Level: {level_name}")
-        print(f"  Components: {components}")
+        print(f"  Description: {level_spec['description']}")
         print(f"{'='*65}")
 
-        pipeline = PreprocessingPipeline.create_ablation(
-            config={
-                "target_size": preproc_cfg.get("target_size", 512),
-                "clahe_clip_limit": preproc_cfg.get("clahe", {}).get("clip_limit", 2.0),
-                "clahe_grid_size":  preproc_cfg.get("clahe", {}).get("tile_grid_size", [8, 8]),
-                "saturation_scale": preproc_cfg.get("hsv", {}).get("saturation_scale", 1.2),
-                "value_scale":      preproc_cfg.get("hsv", {}).get("value_scale", 1.1),
-            },
-            components=components,
-        )
-        augmentation = FundusAugmentation(aug_cfg)
+        pipeline_train = _build_v4_pipeline(v4_cfg, level_flags, is_training=True)
+        pipeline_val   = _build_v4_pipeline(v4_cfg, level_flags, is_training=False)
 
         # Image quality on sample images (train pool only — fold 0 train split)
         train_idx_0 = splits[0][0]
         sample_paths = [all_paths[i] for i in train_idx_0]
         quality = _measure_quality_on_sample(
-            sample_paths, pipeline, n_samples=quality_n_samples, seed=seed
+            sample_paths, pipeline_val, n_samples=quality_n_samples, seed=seed
         )
         print(f"  Quality — CNR={quality.get('mean_cnr', float('nan')):.3f}  "
               f"Entropy={quality.get('mean_entropy', float('nan')):.3f}  "
@@ -214,14 +260,14 @@ def _run_ablation(
                 image_paths=[all_paths[i] for i in train_idx],
                 labels=[all_labels[i] for i in train_idx],
                 patient_ids=[all_pids[i] for i in train_idx],
-                preprocessing=pipeline,
-                augmentation=augmentation,
+                preprocessing=pipeline_train,
+                augmentation=None,
             )
             val_ds = EyePACSDataset(
                 image_paths=[all_paths[i] for i in val_idx],
                 labels=[all_labels[i] for i in val_idx],
                 patient_ids=[all_pids[i] for i in val_idx],
-                preprocessing=pipeline,
+                preprocessing=pipeline_val,
                 augmentation=None,
             )
 
@@ -272,12 +318,11 @@ def _run_clahe_sweep(
     subset_size: int | None,
     max_epochs: int | None,
 ) -> dict[str, Any]:
-    """Run Part B: CLAHE clip_limit sweep on IDRiD.
+    """Run Part B: CLAHE clip_factor sweep on IDRiD.
 
-    Returns dict mapping str(clip_limit) -> {"per_class_f1": [...], "dr1_f1", "dr2_f1"}.
+    Returns dict mapping str(clip_factor) -> {"per_class_f1": [...], "dr1_f1", "dr2_f1"}.
     """
-    preproc_cfg = config["preprocessing"]
-    target_size = preproc_cfg.get("target_size", 512)
+    v4_cfg = config["preprocessing_v4"]
 
     # Load IDRiD
     idrid_ds_full = IDRiDDataset.from_directory(
@@ -306,18 +351,21 @@ def _run_clahe_sweep(
 
     sweep_results: dict[str, Any] = {}
 
-    for clip_limit in clip_values:
-        key = str(clip_limit)
-        print(f"\n  CLAHE sweep — clip_limit={clip_limit}")
+    for clip_factor in clip_values:
+        key = str(clip_factor)
+        print(f"\n  CLAHE sweep — clahe_clip_factor={clip_factor}")
 
-        pipeline = PreprocessingPipeline.create_ablation(
-            config={
-                "target_size": target_size,
-                "clahe_clip_limit": clip_limit,
-                "clahe_grid_size":  preproc_cfg.get("clahe", {}).get("tile_grid_size", [8, 8]),
-            },
-            components=["fov_standardization", "clahe"],
+        # Build a V4 config with clahe enabled and the swept clip_factor
+        sweep_flags = dict(
+            use_canonical_flip=False, use_flat_field=False,
+            use_clahe=True, use_pca_color=False,
+            use_brightness_contrast=False, use_shear=False, use_stretch=False,
         )
+        sweep_v4_cfg = dict(v4_cfg)
+        sweep_v4_cfg["clahe_clip_factor"] = clip_factor
+
+        pipeline_train = _build_v4_pipeline(sweep_v4_cfg, sweep_flags, is_training=True)
+        pipeline_val   = _build_v4_pipeline(sweep_v4_cfg, sweep_flags, is_training=False)
 
         train_ds = IDRiDDataset(
             image_paths=[idrid_ds_full.image_paths[i] for i in train_idx],
@@ -325,8 +373,8 @@ def _run_clahe_sweep(
             patient_ids=[idrid_ds_full.patient_ids[i] for i in train_idx],
             image_stems=[idrid_ds_full.image_stems[i] for i in train_idx],
             masks_root=None,
-            preprocessing=pipeline,
-            augmentation=FundusAugmentation(config["augmentation"]),
+            preprocessing=pipeline_train,
+            augmentation=None,
         )
         val_ds = IDRiDDataset(
             image_paths=[idrid_ds_full.image_paths[i] for i in val_idx],
@@ -334,7 +382,7 @@ def _run_clahe_sweep(
             patient_ids=[idrid_ds_full.patient_ids[i] for i in val_idx],
             image_stems=[idrid_ds_full.image_stems[i] for i in val_idx],
             masks_root=None,
-            preprocessing=pipeline,
+            preprocessing=pipeline_val,
             augmentation=None,
         )
 
@@ -371,15 +419,15 @@ def _run_clahe_sweep(
         per_class_f1 = best.get("val_per_class_f1", [])
         dr1_f1 = per_class_f1[1] if len(per_class_f1) > 1 else float("nan")
         dr2_f1 = per_class_f1[2] if len(per_class_f1) > 2 else float("nan")
-        print(f"  clip={clip_limit}: weighted_F1={best.get('val_weighted_f1', float('nan')):.4f}  "
+        print(f"  clip_factor={clip_factor}: weighted_F1={best.get('val_weighted_f1', float('nan')):.4f}  "
               f"DR1_F1={dr1_f1:.4f}  DR2_F1={dr2_f1:.4f}")
 
         sweep_results[key] = {
-            "clip_limit":    clip_limit,
-            "weighted_f1":   best.get("val_weighted_f1", float("nan")),
-            "per_class_f1":  per_class_f1,
-            "dr1_f1":        dr1_f1,
-            "dr2_f1":        dr2_f1,
+            "clahe_clip_factor": clip_factor,
+            "weighted_f1":       best.get("val_weighted_f1", float("nan")),
+            "per_class_f1":      per_class_f1,
+            "dr1_f1":            dr1_f1,
+            "dr2_f1":            dr2_f1,
         }
 
     return sweep_results
@@ -396,7 +444,7 @@ def run(
     _clahe_values: list[float] | None = None,
     _quality_n_samples: int = 100,
 ) -> None:
-    """Run Experiment 2: component ablation + CLAHE sweep.
+    """Run Experiment 2: V4 component ablation + CLAHE clip_factor sweep.
 
     Args:
         config: Full merged config dict.
@@ -404,7 +452,7 @@ def run(
         resume: Resume from checkpoint (Part A only).
         _subset_size: Limit EyePACS CSV rows (smoke test).
         _levels_to_run: Run only these level names (smoke test).
-        _clahe_values: Override CLAHE sweep values (smoke test).
+        _clahe_values: Override CLAHE sweep clip_factor values (smoke test).
         _quality_n_samples: Number of images for quality metric sampling.
     """
     set_seed(config.get("seed", 42))
@@ -415,14 +463,18 @@ def run(
     (output_dir / "logs").mkdir(exist_ok=True)
     metrics_csv = output_dir / "metrics.csv"
 
-    cv_cfg    = config["cross_validation"]
-    preproc_cfg = config["preprocessing"]
-    aug_cfg   = config["augmentation"]
-    n_folds   = cv_cfg["n_folds"]
+    cv_cfg  = config["cross_validation"]
+    v4_cfg  = config["preprocessing_v4"]
+    n_folds = cv_cfg["n_folds"]
     fold_range = [fold] if fold is not None else list(range(n_folds))
 
     model_name = "efficientnet_b3"
     model_cfg  = config["models"][model_name]
+
+    # EfficientNet-B3 must run with mixed_precision=False (fp16 overflow fix)
+    config = dict(config)
+    config["training"] = dict(config["training"])
+    config["training"]["mixed_precision"] = False
 
     trainer = Trainer(config, device="auto")
 
@@ -443,13 +495,13 @@ def run(
     ok = splitter.verify_no_leakage(splits, all_pids)
     if not ok:
         raise RuntimeError("Patient leakage in CV splits — aborting.")
-    print(f"  5-fold splits verified (no leakage)")
+    print(f"  {n_folds}-fold splits verified (no leakage)")
 
     # ════════════════════════════════════════════════════════════
     # PART A — Component Ablation
     # ════════════════════════════════════════════════════════════
     print(f"\n{'='*65}")
-    print("PART A — Component Ablation")
+    print("PART A — V4 Component Ablation")
     print(f"{'='*65}")
 
     ablation_results = _run_ablation(
@@ -463,8 +515,7 @@ def run(
         trainer=trainer,
         fold_range=fold_range,
         levels_to_run=_levels_to_run,
-        preproc_cfg=preproc_cfg,
-        aug_cfg=aug_cfg,
+        v4_cfg=v4_cfg,
         model_name=model_name,
         model_cfg=model_cfg,
         quality_n_samples=_quality_n_samples,
@@ -488,7 +539,7 @@ def run(
     # PART B — CLAHE Sweep
     # ════════════════════════════════════════════════════════════
     print(f"\n{'='*65}")
-    print("PART B — CLAHE Clip Limit Sweep (H-2)")
+    print("PART B — CLAHE Clip Factor Sweep (H-2)")
     print(f"{'='*65}")
 
     clahe_values = _clahe_values if _clahe_values is not None else _CLAHE_SWEEP_VALUES
@@ -519,4 +570,4 @@ def run(
             f1_str = entry["metrics"].get("weighted_f1", "N/A")
             cnr    = entry["quality"].get("mean_cnr", float("nan"))
             ent    = entry["quality"].get("mean_entropy", float("nan"))
-            print(f"  {level_name:<22s}: F1={f1_str}  CNR={cnr:.3f}  Entropy={ent:.3f}")
+            print(f"  {level_name:<28s}: F1={f1_str}  CNR={cnr:.3f}  Entropy={ent:.3f}")
