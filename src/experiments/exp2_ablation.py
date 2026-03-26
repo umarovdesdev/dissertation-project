@@ -30,6 +30,31 @@ from src.training.trainer import Trainer
 from src.utils.image_quality import compute_all_quality_metrics
 from src.utils.seed import set_seed
 
+
+class _V4PipelineAdapter:
+    """Wraps PreprocessingPipelineV4 to return numpy HWC uint8 instead of torch.Tensor.
+
+    datasets.py.__getitem__ expects preprocessing to return a numpy array
+    (it handles float conversion and HWC→CHW transposition itself).
+    PreprocessingPipelineV4 returns a normalised torch.Tensor (CHW float32).
+    This adapter converts the tensor back to numpy HWC uint8 so datasets.py
+    can process it correctly.
+    """
+
+    def __init__(self, pipeline: "PreprocessingPipelineV4") -> None:
+        self._pipeline = pipeline
+
+    def __call__(self, image: np.ndarray) -> np.ndarray:
+        tensor = self._pipeline(image)          # (C, H, W) float32 tensor, ImageNet-normalised
+        # Undo ImageNet normalisation → [0,1], then → uint8 HWC
+        # datasets.py will re-normalise to [0,1] float32 and transpose to CHW
+        arr = tensor.permute(1, 2, 0).cpu().numpy()   # (H, W, C) float32
+        mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+        std  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+        arr  = arr * std + mean                        # undo normalisation → [0,1]
+        arr  = (arr * 255).clip(0, 255).astype(np.uint8)
+        return arr
+
 # ── Ablation levels ───────────────────────────────────────────────────────────
 _ABLATION_LEVELS: list[dict] = [
     {
@@ -168,12 +193,10 @@ def _measure_quality_on_sample(
         if raw is None:
             continue
         processed = pipeline(raw)
-        # pipeline_v4 returns a torch.Tensor (C, H, W) — convert to numpy (H, W, C) uint8
+        # adapter returns numpy HWC uint8 — pass directly to quality metrics
         if isinstance(processed, torch.Tensor):
-            processed_np = (processed.permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype(np.uint8)
-        else:
-            processed_np = processed
-        q = compute_all_quality_metrics(processed_np, original=raw)
+            processed = (processed.permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype(np.uint8)
+        q = compute_all_quality_metrics(processed, original=raw)
         cnrs.append(q["cnr"])
         entropies.append(q["entropy"])
         if q["ssim"] is not None:
@@ -241,8 +264,8 @@ def _run_ablation(
         print(f"  Description: {level_spec['description']}")
         print(f"{'='*65}")
 
-        pipeline_train = _build_v4_pipeline(v4_cfg, level_flags, is_training=True)
-        pipeline_val   = _build_v4_pipeline(v4_cfg, level_flags, is_training=False)
+        pipeline_train = _V4PipelineAdapter(_build_v4_pipeline(v4_cfg, level_flags, is_training=True))
+        pipeline_val   = _V4PipelineAdapter(_build_v4_pipeline(v4_cfg, level_flags, is_training=False))
 
         # Image quality on sample images (train pool only — fold 0 train split)
         train_idx_0 = splits[0][0]
@@ -369,8 +392,8 @@ def _run_clahe_sweep(
         sweep_v4_cfg = dict(v4_cfg)
         sweep_v4_cfg["clahe_clip_factor"] = clip_factor
 
-        pipeline_train = _build_v4_pipeline(sweep_v4_cfg, sweep_flags, is_training=True)
-        pipeline_val   = _build_v4_pipeline(sweep_v4_cfg, sweep_flags, is_training=False)
+        pipeline_train = _V4PipelineAdapter(_build_v4_pipeline(sweep_v4_cfg, sweep_flags, is_training=True))
+        pipeline_val   = _V4PipelineAdapter(_build_v4_pipeline(sweep_v4_cfg, sweep_flags, is_training=False))
 
         train_ds = IDRiDDataset(
             image_paths=[idrid_ds_full.image_paths[i] for i in train_idx],
