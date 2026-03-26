@@ -35,43 +35,43 @@ _ABLATION_LEVELS: list[dict] = [
     {
         "name": "baseline",
         "description": "Stages 1+4 only: FOV crop+resize + ImageNet normalize",
-        "flags": dict(use_canonical_flip=False, use_flat_field=False,
-                      use_clahe=False, use_pca_color=False,
+        "flags": dict(use_canonical_flip=False, use_od_fovea_rotation=False,
+                      use_flat_field=False, use_clahe=False, use_pca_color=False,
                       use_brightness_contrast=False, use_shear=False, use_stretch=False),
     },
     {
         "name": "baseline_canonical_flip",
         "description": "Stages 0+1+4",
-        "flags": dict(use_canonical_flip=True, use_flat_field=False,
-                      use_clahe=False, use_pca_color=False,
+        "flags": dict(use_canonical_flip=True, use_od_fovea_rotation=False,
+                      use_flat_field=False, use_clahe=False, use_pca_color=False,
                       use_brightness_contrast=False, use_shear=False, use_stretch=False),
     },
     {
         "name": "baseline_flat_field",
         "description": "Stages 1+2+4",
-        "flags": dict(use_canonical_flip=False, use_flat_field=True,
-                      use_clahe=False, use_pca_color=False,
+        "flags": dict(use_canonical_flip=False, use_od_fovea_rotation=False,
+                      use_flat_field=True, use_clahe=False, use_pca_color=False,
                       use_brightness_contrast=False, use_shear=False, use_stretch=False),
     },
     {
         "name": "baseline_clahe",
         "description": "Stages 1+3+4",
-        "flags": dict(use_canonical_flip=False, use_flat_field=False,
-                      use_clahe=True, use_pca_color=False,
+        "flags": dict(use_canonical_flip=False, use_od_fovea_rotation=False,
+                      use_flat_field=False, use_clahe=True, use_pca_color=False,
                       use_brightness_contrast=False, use_shear=False, use_stretch=False),
     },
     {
         "name": "baseline_augmentation",
         "description": "Stages 1+4+5 (train-time aug only)",
-        "flags": dict(use_canonical_flip=False, use_flat_field=False,
-                      use_clahe=False, use_pca_color=True,
+        "flags": dict(use_canonical_flip=False, use_od_fovea_rotation=False,
+                      use_flat_field=False, use_clahe=False, use_pca_color=True,
                       use_brightness_contrast=True, use_shear=True, use_stretch=True),
     },
     {
         "name": "full_v4",
         "description": "All stages 0+1+2+3+4+5",
-        "flags": dict(use_canonical_flip=True, use_flat_field=True,
-                      use_clahe=True, use_pca_color=True,
+        "flags": dict(use_canonical_flip=True, use_od_fovea_rotation=True,
+                      use_flat_field=True, use_clahe=True, use_pca_color=True,
                       use_brightness_contrast=True, use_shear=True, use_stretch=True),
     },
 ]
@@ -168,7 +168,12 @@ def _measure_quality_on_sample(
         if raw is None:
             continue
         processed = pipeline(raw)
-        q = compute_all_quality_metrics(processed, original=raw)
+        # pipeline_v4 returns a torch.Tensor (C, H, W) — convert to numpy (H, W, C) uint8
+        if isinstance(processed, torch.Tensor):
+            processed_np = (processed.permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype(np.uint8)
+        else:
+            processed_np = processed
+        q = compute_all_quality_metrics(processed_np, original=raw)
         cnrs.append(q["cnr"])
         entropies.append(q["entropy"])
         if q["ssim"] is not None:
@@ -443,6 +448,7 @@ def run(
     _levels_to_run: list[str] | None = None,
     _clahe_values: list[float] | None = None,
     _quality_n_samples: int = 100,
+    _configs_to_run: list[str] | None = None,  # ignored — accepted for CLI compat
 ) -> None:
     """Run Experiment 2: V4 component ablation + CLAHE clip_factor sweep.
 
@@ -454,6 +460,7 @@ def run(
         _levels_to_run: Run only these level names (smoke test).
         _clahe_values: Override CLAHE sweep clip_factor values (smoke test).
         _quality_n_samples: Number of images for quality metric sampling.
+        _configs_to_run: Ignored — accepted for run_experiment.py CLI compatibility.
     """
     set_seed(config.get("seed", 42))
     seed = config.get("seed", 42)
