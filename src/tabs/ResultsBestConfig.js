@@ -1,7 +1,9 @@
 import { C, CONFIGS, CLS, CLS_AUC } from '../data';
-import { Card, Sec, DataTable, Paired, Note, ImageFigure } from '../components';
+import { Card, Sec, DataTable, Paired, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ResultsBestConfig() {
+  const { t } = useLang();
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
@@ -27,7 +29,7 @@ export default function ResultsBestConfig() {
         </Note>
       </Sec>
 
-      <Sec title="Per-Class F1 — Baseline (C) vs Pipeline (D)">
+      <Sec title={t('results.perClassF1')}>
         <Paired
           items={CLS.map(d => ({ label: `${d.g} (n≈${d.n.toLocaleString()})`, v1: d.b, v2: d.pp }))}
           c1={C.gray}
@@ -50,7 +52,7 @@ export default function ResultsBestConfig() {
         </Note>
       </Sec>
 
-      <Sec title="Per-Class ROC-AUC">
+      <Sec title={t('results.perClassAUC')}>
         <DataTable
           headers={['DR Grade', 'Baseline AUC', 'Pipeline AUC', 'ΔAUC']}
           rows={CLS_AUC.map(d => [
@@ -61,10 +63,11 @@ export default function ResultsBestConfig() {
       </Sec>
 
       <Sec title="Confusion Matrix">
-        <ImageFigure
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/20_confusion_matrix.png'}
           caption="Confusion matrix for Config D. Strong diagonal dominance. Primary confusions: DR 1↔DR 0 (mild NPDR vs no DR), DR 2↔DR 3 (adjacent grades). These are clinically expected: adjacent-grade boundaries are ambiguous even for expert graders."
-          figNum="20"
+          figNum={20}
+          tooltip="tooltip.fig20"
         />
       </Sec>
     </div>

@@ -1,7 +1,9 @@
 import { C, CONFIGS, HYPOTHESES } from '../data';
-import { Card, Sec, DataTable, ImageFigure } from '../components';
+import { Card, Sec, DataTable, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function Overview() {
+  const { t } = useLang();
   const D = CONFIGS.D;
   const deltaF1 = ((D.f1 - CONFIGS.C.f1) * 100).toFixed(1);
   const deltaAUC = ((D.auc - CONFIGS.C.auc) * 100).toFixed(1);
@@ -20,7 +22,7 @@ export default function Overview() {
         </div>
       </div>
 
-      <Sec title="Best Configuration (D) — Key Metrics">
+      <Sec title={t('overview.bestConfig')}>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
           <Card label="Weighted F1" value="0.780" delta={`+${deltaF1}pp vs Config C`} color="blue" sub="EH-3: ≥5pp ✓" />
           <Card label="ROC-AUC" value="0.865" delta={`+${deltaAUC}pp vs Config C`} color="teal" sub="EH-3: ≥2pp ✓" />
@@ -30,14 +32,15 @@ export default function Overview() {
       </Sec>
 
       <Sec title="Summary Radar Chart">
-        <ImageFigure
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/11_summary_radar.png'}
           caption="Summary performance radar across all 6 configurations (A–F). Config F (binocular + EfficientNet-B3) achieves highest metrics overall; Config D is best single-image configuration."
-          figNum="11"
+          figNum={11}
+          tooltip="tooltip.fig11"
         />
       </Sec>
 
-      <Sec title="Hypothesis Status">
+      <Sec title={t('overview.hypothesisStatus')}>
         <DataTable
           headers={['Hypothesis', 'Name', 'Experiment', 'Status', 'Key Finding']}
           rows={HYPOTHESES.map(h => [

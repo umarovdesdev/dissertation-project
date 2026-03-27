@@ -1,18 +1,21 @@
 import { COMPUTE } from '../data';
-import { Sec, DataTable, Note, ImageFigure } from '../components';
+import { Sec, DataTable, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ValComputational() {
+  const { t } = useLang();
   return (
     <div>
-      <Sec title="Computational Efficiency">
+      <Sec title={t('compute.efficiency')}>
         <DataTable
           headers={['Metric', 'ResNet-50', 'EfficientNet-B3', 'Unit']}
           rows={COMPUTE.map(d => [d.metric, d.resnet, d.effnet, d.unit])}
         />
-        <ImageFigure
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/17_computational.png'}
           caption="Computational cost comparison: training time, inference latency, and GPU memory for ResNet-50 and EfficientNet-B3. Pipeline adds ~27ms preprocessing overhead per image — acceptable for screening throughput."
-          figNum="17"
+          figNum={17}
+          tooltip="tooltip.fig17"
         />
         <Note>
           EfficientNet-B3 has fewer parameters (12.2M vs 25.6M) but longer training time per epoch (12.3 vs 8.5 min)

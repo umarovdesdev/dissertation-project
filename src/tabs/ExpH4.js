@@ -1,7 +1,9 @@
 import { C, GEN, GEN_AUC, G_RATIO } from '../data';
-import { Card, Sec, DataTable, Paired, Note, ImageFigure } from '../components';
+import { Card, Sec, DataTable, Paired, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ExpH4() {
+  const { t } = useLang();
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
@@ -13,7 +15,7 @@ export default function ExpH4() {
         </div>
       </div>
 
-      <Sec title="Generalization Ratio G">
+      <Sec title={t('exp.genRatio')}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
           {G_RATIO.map(d => (
             <Card
@@ -33,7 +35,7 @@ export default function ExpH4() {
         </Note>
       </Sec>
 
-      <Sec title="Cross-Dataset F1 — Baseline vs Pipeline">
+      <Sec title={t('exp.crossDataset')}>
         <Paired
           items={GEN.map(d => ({ label: d.d, v1: d.fb, v2: d.fp }))}
           c2={C.blue}
@@ -51,7 +53,7 @@ export default function ExpH4() {
             d.Gp ? `${d.Gp.toFixed(2)} ✓` : '1.00',
           ])}
         />
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/08_exp5_generalization.png'} caption="Cross-dataset F1 comparison: EyePACS (train), IDRiD (transfer), Messidor-2 (transfer). Pipeline reduces performance drop during domain shift." figNum="8" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/08_exp5_generalization.png'} caption="Cross-dataset F1 comparison: EyePACS (train), IDRiD (transfer), Messidor-2 (transfer). Pipeline reduces performance drop during domain shift." figNum={8} tooltip="tooltip.fig08" />
       </Sec>
 
       <Sec title="Cross-Dataset AUC">
@@ -67,7 +69,7 @@ export default function ExpH4() {
       </Sec>
 
       <Sec title="Generalization Ratio G — Chart">
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/09_exp5_G_ratio.png'} caption="Generalization ratio G for IDRiD and Messidor-2. Dashed line at G=0.85 (H-4 threshold). Baseline falls below threshold on IDRiD; pipeline exceeds threshold on both datasets." figNum="9" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/09_exp5_G_ratio.png'} caption="Generalization ratio G for IDRiD and Messidor-2. Dashed line at G=0.85 (H-4 threshold). Baseline falls below threshold on IDRiD; pipeline exceeds threshold on both datasets." figNum={9} tooltip="tooltip.fig09" />
         <Note>
           Models trained on Canon CR-1 (EyePACS) evaluated on Kowa VX-10α (IDRiD) and Topcon TRC NW6 (Messidor-2)
           without any retraining. The V4 preprocessing pipeline normalizes device-specific artifacts, reducing

@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { C } from './data';
+import { useLang } from './i18n';
+import { LangSwitcher } from './components';
 import Overview from './tabs/Overview';
 import ModelArchitecture from './tabs/ModelArchitecture';
 import ModelPipeline from './tabs/ModelPipeline';
+import ModelMethods from './tabs/ModelMethods';
 import ModelExplainability from './tabs/ModelExplainability';
 import Datasets from './tabs/Datasets';
 import ExpH1 from './tabs/ExpH1';
@@ -17,34 +20,38 @@ import ValClinical from './tabs/ValClinical';
 import ValQuality from './tabs/ValQuality';
 import ValComputational from './tabs/ValComputational';
 
-const NAV = [
-  { id: 'overview', label: 'Overview' },
-  { type: 'group', label: 'Model' },
-  { id: 'arch', label: 'Architecture', indent: true },
-  { id: 'pipeline', label: 'Pipeline', indent: true },
-  { id: 'explainability', label: 'Explainability', indent: true },
-  { type: 'group', label: 'Datasets' },
-  { id: 'datasets', label: 'Datasets' },
-  { type: 'group', label: 'Experiments' },
-  { id: 'exph1', label: 'H-1: Preprocessing', indent: true },
-  { id: 'exph2', label: 'H-2: CLAHE', indent: true },
-  { id: 'exph4', label: 'H-4: Transfer', indent: true },
-  { id: 'exph5', label: 'H-5: Explainability', indent: true },
-  { id: 'exph6', label: 'H-6: Robustness', indent: true },
-  { type: 'group', label: 'Results' },
-  { id: 'results-main', label: 'Main Metrics', indent: true },
-  { id: 'results-best', label: 'Best Config (D)', indent: true },
-  { id: 'results-stat', label: 'Statistical Tests', indent: true },
-  { type: 'group', label: 'Validation' },
-  { id: 'val-clinical', label: 'Clinical', indent: true },
-  { id: 'val-quality', label: 'Image Quality', indent: true },
-  { id: 'val-compute', label: 'Computational', indent: true },
-];
+function getNav(t) {
+  return [
+    { id: 'overview', label: t('nav.overview') },
+    { type: 'group', label: t('nav.model') },
+    { id: 'arch', label: t('nav.model.architecture'), indent: true },
+    { id: 'pipeline', label: t('nav.model.pipeline'), indent: true },
+    { id: 'methods', label: t('nav.model.methods'), indent: true },
+    { id: 'explainability', label: t('nav.model.explainability'), indent: true },
+    { type: 'group', label: t('nav.datasets') },
+    { id: 'datasets', label: t('nav.datasets') },
+    { type: 'group', label: t('nav.experiments') },
+    { id: 'exph1', label: t('nav.experiments.h1'), indent: true },
+    { id: 'exph2', label: t('nav.experiments.h2'), indent: true },
+    { id: 'exph4', label: t('nav.experiments.h4'), indent: true },
+    { id: 'exph5', label: t('nav.experiments.h5'), indent: true },
+    { id: 'exph6', label: t('nav.experiments.h6'), indent: true },
+    { type: 'group', label: t('nav.results') },
+    { id: 'results-main', label: t('nav.results.main'), indent: true },
+    { id: 'results-best', label: t('nav.results.bestConfig'), indent: true },
+    { id: 'results-stat', label: t('nav.results.statistical'), indent: true },
+    { type: 'group', label: t('nav.validation') },
+    { id: 'val-clinical', label: t('nav.validation.clinical'), indent: true },
+    { id: 'val-quality', label: t('nav.validation.quality'), indent: true },
+    { id: 'val-compute', label: t('nav.validation.compute'), indent: true },
+  ];
+}
 
 const COMPONENTS = {
   overview: Overview,
   arch: ModelArchitecture,
   pipeline: ModelPipeline,
+  methods: ModelMethods,
   explainability: ModelExplainability,
   datasets: Datasets,
   exph1: ExpH1,
@@ -62,6 +69,8 @@ const COMPONENTS = {
 
 export default function App() {
   const [tab, setTab] = useState('overview');
+  const { t } = useLang();
+  const NAV = getNav(t);
   const TabComponent = COMPONENTS[tab] || Overview;
 
   return (
@@ -71,6 +80,9 @@ export default function App() {
         <div style={{ padding: '0 12px 14px 12px', borderBottom: '1px solid var(--color-border-tertiary,#e5e5e3)', marginBottom: 8 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: C.teal, letterSpacing: '0.03em' }}>DR DASHBOARD</div>
           <div style={{ fontSize: 9, color: 'var(--color-text-secondary,#999)', marginTop: 2 }}>PhD Dissertation Defense</div>
+          <div style={{ marginTop: 8 }}>
+            <LangSwitcher />
+          </div>
         </div>
         {NAV.map((item, i) => {
           if (item.type === 'group') {

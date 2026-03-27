@@ -1,18 +1,21 @@
 import { C } from '../data';
 import { Sec, DataTable, Note, DiagramViewer } from '../components';
+import { useLang } from '../i18n';
 
 export default function ModelArchitecture() {
+  const { t } = useLang();
   return (
     <div>
-      <Sec title="System Architecture Diagram">
+      <Sec title={t('arch.title')}>
         <DiagramViewer
           src={process.env.PUBLIC_URL + '/diagrams/dr_diagnosis_system_architecture.svg'}
           alt="DR Diagnosis System Architecture"
           caption="Full system architecture: bilateral input → V4 5-component preprocessing pipeline → CNN backbone → feature fusion (binocular mode) → 5-class DR grading output."
+          tooltip="tooltip.arch_diagram"
         />
       </Sec>
 
-      <Sec title="Formal Model Definition">
+      <Sec title={t('arch.equation')}>
         <div style={{ background: 'var(--color-background-secondary,#f7f7f5)', borderRadius: 8, padding: '14px 16px', fontFamily: 'monospace', fontSize: 13, lineHeight: 2 }}>
           <div><strong>Image-level:</strong> ŷ = f(CNN(P(I)))</div>
           <div><strong>Binocular:</strong> ŷ = S(I<sub>L</sub>, I<sub>R</sub>) = g(Φ(CNN(P(I<sub>L</sub>)), CNN(P(I<sub>R</sub>))))</div>
@@ -24,7 +27,7 @@ export default function ModelArchitecture() {
         </Note>
       </Sec>
 
-      <Sec title="CNN Backbone Specifications">
+      <Sec title={t('arch.cnnSpecs')}>
         <DataTable
           headers={['Backbone', 'Parameters', 'Library', 'Pretrain', 'Used in']}
           rows={[
@@ -40,7 +43,7 @@ export default function ModelArchitecture() {
         </Note>
       </Sec>
 
-      <Sec title="Operating Modes">
+      <Sec title={t('arch.operatingModes')}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[
             { mode: 'Image-level', desc: 'Single fundus image → 5-class DR grade. Standard mode for Exp 1–3.', color: C.blue },

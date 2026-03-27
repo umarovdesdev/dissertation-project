@@ -1,10 +1,12 @@
 import { C, CLIN, CALIBRATION, TRAIN_TEST_GAP } from '../data';
-import { Card, Sec, DataTable, Paired, Note, ImageFigure } from '../components';
+import { Card, Sec, DataTable, Paired, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ValClinical() {
+  const { t } = useLang();
   return (
     <div>
-      <Sec title="Clinical Screening — Referable DR (Grade ≥ 2)">
+      <Sec title={t('clinical.referableDR')}>
         <Paired
           items={CLIN.map(d => ({ label: d.m, v1: d.b, v2: d.v }))}
           c1={C.gray}
@@ -19,10 +21,11 @@ export default function ValClinical() {
             `+${((d.v - d.b) * 100).toFixed(1)}pp`,
           ])}
         />
-        <ImageFigure
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/14_clinical_metrics.png'}
           caption="Clinical screening metrics for referable DR (binary: non-referable DR 0–1 vs referable DR 2–4). Pipeline improves sensitivity by +8pp (0.82→0.90), reducing missed referrals."
-          figNum="14"
+          figNum={14}
+          tooltip="tooltip.fig14"
         />
         <Note>
           WHO screening guidelines recommend Sensitivity ≥ 80%, Specificity ≥ 80%.
@@ -32,7 +35,7 @@ export default function ValClinical() {
         </Note>
       </Sec>
 
-      <Sec title="Model Calibration">
+      <Sec title={t('clinical.calibration')}>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
           <Card label="ECE (Baseline)" value="0.082" color="gray" />
           <Card label="ECE (Pipeline)" value="0.045" color="purple" delta="−45% ✓" />
@@ -43,10 +46,11 @@ export default function ValClinical() {
           headers={['Calibration Metric', 'Baseline', 'Pipeline', 'Improvement']}
           rows={CALIBRATION.map(d => [d.metric, d.baseline.toFixed(3), d.pipeline.toFixed(3), d.improvement])}
         />
-        <ImageFigure
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/15_calibration.png'}
           caption="Reliability diagram (calibration curves) for baseline and pipeline. Pipeline curve is closer to the diagonal (perfect calibration), particularly for high-confidence predictions."
-          figNum="15"
+          figNum={15}
+          tooltip="tooltip.fig15"
         />
         <Note>
           Expected Calibration Error (ECE) reduced by 45% (0.082→0.045): probability outputs are significantly
@@ -55,7 +59,7 @@ export default function ValClinical() {
         </Note>
       </Sec>
 
-      <Sec title="Training-Test Gap">
+      <Sec title={t('clinical.trainTestGap')}>
         <DataTable
           headers={['Config', 'Train F1', 'Test F1', 'Gap (pp)']}
           rows={TRAIN_TEST_GAP.map(d => [

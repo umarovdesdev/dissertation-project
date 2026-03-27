@@ -1,10 +1,12 @@
 import { C } from '../data';
-import { Sec, Note, ImageFigure } from '../components';
+import { Sec, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ModelExplainability() {
+  const { t } = useLang();
   return (
     <div>
-      <Sec title="Grad-CAM Methodology">
+      <Sec title={t('explainability.method')}>
         <div style={{ fontSize: 12, lineHeight: 1.7, color: 'var(--color-text-primary,#333)' }}>
           <p style={{ margin: '0 0 10px 0' }}>
             Gradient-weighted Class Activation Mapping (Grad-CAM) computes a saliency map by backpropagating
@@ -24,7 +26,7 @@ export default function ModelExplainability() {
         </Note>
       </Sec>
 
-      <Sec title="ALO Metric Definition">
+      <Sec title={t('explainability.formulas')}>
         <div style={{ background: 'var(--color-background-secondary,#f7f7f5)', borderRadius: 8, padding: '12px 16px', fontFamily: 'monospace', fontSize: 13, lineHeight: 2 }}>
           <div style={{ marginBottom: 8 }}>
             <strong style={{ color: C.teal }}>ALO</strong> = area(GradCAM ∩ lesion_mask) / area(lesion_mask)
@@ -41,11 +43,12 @@ export default function ModelExplainability() {
         </Note>
       </Sec>
 
-      <Sec title="Grad-CAM Overlay — Baseline vs Pipeline">
-        <ImageFigure
+      <Sec title={t('explainability.overlay')}>
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/27_gradcam_overlay.png'}
           caption="Grad-CAM saliency overlaid on fundus images. Left: baseline preprocessing — diffuse, unfocused activation. Right: V4 pipeline — concentrated activation on lesion regions (hemorrhages and hard exudates highlighted). ALO improvement: +61% for hard exudates, +31% for microaneurysms."
-          figNum="27"
+          figNum={27}
+          tooltip="tooltip.fig27"
         />
       </Sec>
 

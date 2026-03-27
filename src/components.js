@@ -1,5 +1,7 @@
 // src/components.js — Reusable UI components for DR Dashboard
+import { useState } from 'react';
 import { C } from './data';
+import { useLang } from './i18n';
 
 export function Card({ label, value, delta, color, sub }) {
   const bg = C[color + 'Bg'] || C.grayBg;
@@ -148,19 +150,109 @@ export function ImageFigure({ src, caption, figNum }) {
   );
 }
 
-export function DiagramViewer({ src, alt, caption }) {
+export function DiagramViewer({ src, alt, caption, tooltip }) {
+  const [show, setShow] = useState(false);
+  const { t } = useLang();
+  const tooltipText = tooltip && tooltip.startsWith('tooltip.') ? t(tooltip) : tooltip;
   return (
-    <div style={{ marginBottom: 16 }}>
+    <div
+      style={{ marginBottom: 16, position: 'relative' }}
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      onClick={() => setShow(s => !s)}
+    >
       <img
         src={src}
         alt={alt || caption || ''}
-        style={{ width: '100%', borderRadius: 8, border: '1px solid var(--color-border-tertiary,#eee)', display: 'block', background: '#fff' }}
+        style={{ width: '100%', borderRadius: 8, border: '1px solid var(--color-border-tertiary,#eee)', display: 'block', background: '#fff', cursor: tooltipText ? 'help' : 'default' }}
       />
       {caption && (
         <div style={{ fontSize: 10, color: 'var(--color-text-secondary,#888)', marginTop: 4, textAlign: 'center' }}>
           {caption}
         </div>
       )}
+      {show && tooltipText && (
+        <div style={{
+          position: 'absolute', bottom: '100%', left: '50%',
+          transform: 'translateX(-50%)', marginBottom: 8,
+          padding: '10px 14px', background: 'rgba(0,0,0,0.88)', color: 'white',
+          borderRadius: 8, fontSize: 12, lineHeight: 1.5,
+          maxWidth: 380, width: 'max-content', zIndex: 1000,
+          pointerEvents: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        }}>
+          {tooltipText}
+          <div style={{
+            position: 'absolute', top: '100%', left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0, height: 0,
+            borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
+            borderTop: '6px solid rgba(0,0,0,0.88)',
+          }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function ImageWithTooltip({ src, alt, tooltip, figNum, caption, style }) {
+  const [show, setShow] = useState(false);
+  const { t } = useLang();
+  const tooltipText = tooltip && tooltip.startsWith('tooltip.') ? t(tooltip) : tooltip;
+  return (
+    <div
+      style={{ position: 'relative', marginBottom: 16, ...(style || {}) }}
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      onClick={() => setShow(s => !s)}
+    >
+      <img
+        src={src}
+        alt={alt || caption || ''}
+        style={{ width: '100%', borderRadius: 8, border: '1px solid var(--color-border-tertiary,#eee)', cursor: 'help', display: 'block' }}
+      />
+      {caption && (
+        <div style={{ fontSize: 10, color: 'var(--color-text-secondary,#888)', marginTop: 4, lineHeight: 1.4 }}>
+          {figNum && <strong>Fig. {figNum}. </strong>}{caption}
+        </div>
+      )}
+      {show && tooltipText && (
+        <div style={{
+          position: 'absolute', bottom: '100%', left: '50%',
+          transform: 'translateX(-50%)', marginBottom: 8,
+          padding: '10px 14px', background: 'rgba(0,0,0,0.88)', color: 'white',
+          borderRadius: 8, fontSize: 12, lineHeight: 1.5,
+          maxWidth: 380, width: 'max-content', zIndex: 1000,
+          pointerEvents: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        }}>
+          {tooltipText}
+          <div style={{
+            position: 'absolute', top: '100%', left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0, height: 0,
+            borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
+            borderTop: '6px solid rgba(0,0,0,0.88)',
+          }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function LangSwitcher() {
+  const { lang, setLang } = useLang();
+  const C_teal = '#1D9E75';
+  return (
+    <div style={{ display: 'flex', gap: 3 }}>
+      {[['en', 'EN'], ['kz', 'ҚАЗ']].map(([code, label]) => (
+        <button key={code} onClick={() => setLang(code)} style={{
+          padding: '3px 8px', borderRadius: 4, border: 'none', cursor: 'pointer',
+          fontSize: 10, fontWeight: lang === code ? 700 : 400,
+          background: lang === code ? C_teal : 'var(--color-background-primary,#e8e8e6)',
+          color: lang === code ? 'white' : 'var(--color-text-secondary,#666)',
+        }}>
+          {label}
+        </button>
+      ))}
     </div>
   );
 }

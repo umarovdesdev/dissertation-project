@@ -1,7 +1,9 @@
 import { C, CONFIGS } from '../data';
-import { Sec, DataTable, Hbar, Note, ImageFigure } from '../components';
+import { Sec, DataTable, Hbar, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ExpH1() {
+  const { t } = useLang();
   const factorial = ['A', 'B', 'C', 'D'];
   const all6 = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -19,7 +21,7 @@ export default function ExpH1() {
         </div>
       </div>
 
-      <Sec title="2×2 Factorial — Configs A–D">
+      <Sec title={t('exp.factorial')}>
         <DataTable
           headers={['Config', 'Preprocessing', 'CNN', 'W.F1 ± σ', 'ROC-AUC ± σ', 'κ ± σ', 'Acc']}
           rows={factorial.map(k => {
@@ -48,7 +50,7 @@ export default function ExpH1() {
         />
       </Sec>
 
-      <Sec title="All 6 Configurations (including binocular)">
+      <Sec title={t('exp.allConfigs')}>
         <DataTable
           headers={['Config', 'Preprocessing', 'CNN', 'W.F1 ± σ', 'ROC-AUC ± σ', 'κ ± σ', 'Acc']}
           rows={all6.map(k => {
@@ -71,38 +73,38 @@ export default function ExpH1() {
       </Sec>
 
       <Sec title="Factorial F1 Chart">
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/01_exp1_factorial_f1.png'} caption="Weighted F1 comparison for 2×2 factorial design (Configs A–D). Bars show mean ± std across 3 folds." figNum="1" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/01_exp1_factorial_f1.png'} caption="Weighted F1 comparison for 2×2 factorial design (Configs A–D). Bars show mean ± std across 3 folds." figNum={1} tooltip="tooltip.fig01" />
       </Sec>
 
       <Sec title="All Metrics Comparison">
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/02_exp1_all_metrics.png'} caption="F1, AUC, κ, and Accuracy for all 2×2 factorial configurations. Config D dominates on all four metrics." figNum="2" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/02_exp1_all_metrics.png'} caption="F1, AUC, κ, and Accuracy for all 2×2 factorial configurations. Config D dominates on all four metrics." figNum={2} tooltip="tooltip.fig02" />
       </Sec>
 
       <Sec title="Delta vs Baseline">
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/03_exp1_delta.png'} caption="Preprocessing improvement (Δ) relative to baseline. EfficientNet-B3 (D−C) shows significantly larger gain than ResNet-50 (B−A), confirming architecture × preprocessing interaction." figNum="3" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/03_exp1_delta.png'} caption="Preprocessing improvement (Δ) relative to baseline. EfficientNet-B3 (D−C) shows significantly larger gain than ResNet-50 (B−A), confirming architecture × preprocessing interaction." figNum={3} tooltip="tooltip.fig03" />
       </Sec>
 
       <Sec title="All 6 Configurations Chart">
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/22_exp1_all_6_configs.png'} caption="Extended comparison including binocular configurations E and F. Binocular mode provides consistent +1pp improvement over single-image baseline." figNum="22" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/22_exp1_all_6_configs.png'} caption="Extended comparison including binocular configurations E and F. Binocular mode provides consistent +1pp improvement over single-image baseline." figNum={22} tooltip="tooltip.fig22" />
       </Sec>
 
       <Sec title="Per-Class F1 (EfficientNet-B3)">
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/18_per_class_f1.png'} caption="Per-class weighted F1: Baseline (Config C) vs Pipeline (Config D). Largest improvement on minority classes: DR 1 (+12pp), DR 3 (+12pp). DR 0 near-saturated at baseline." figNum="18" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/18_per_class_f1.png'} caption="Per-class weighted F1: Baseline (Config C) vs Pipeline (Config D). Largest improvement on minority classes: DR 1 (+12pp), DR 3 (+12pp). DR 0 near-saturated at baseline." figNum={18} tooltip="tooltip.fig18" />
       </Sec>
 
       <Sec title="Training Curves">
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/19_training_curves.png'} caption="Training and validation loss/F1 curves across 3 folds. Pipeline configuration (D) converges to lower validation loss and higher F1. Consistent across folds." figNum="19" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/19_training_curves.png'} caption="Training and validation loss/F1 curves across 3 folds. Pipeline configuration (D) converges to lower validation loss and higher F1. Consistent across folds." figNum={19} tooltip="tooltip.fig19" />
       </Sec>
 
       <Sec title="Confusion Matrix — Config D">
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/20_confusion_matrix.png'} caption="Confusion matrix for Config D (best single-image configuration). Diagonal dominance confirms correct classification. Main confusions: DR 1↔DR 0, DR 2↔DR 3 (adjacent grade confusion)." figNum="20" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/20_confusion_matrix.png'} caption="Confusion matrix for Config D (best single-image configuration). Diagonal dominance confirms correct classification. Main confusions: DR 1↔DR 0, DR 2↔DR 3 (adjacent grade confusion)." figNum={20} tooltip="tooltip.fig20" />
       </Sec>
 
       <Sec title="ROC Curves — All Configs">
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/24_roc_curves.png'} caption="One-vs-rest ROC curves for all 4 factorial configurations. Config D shows consistently higher AUC across all DR grades, particularly DR 1 and DR 3." figNum="24" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/24_roc_curves.png'} caption="One-vs-rest ROC curves for all 4 factorial configurations. Config D shows consistently higher AUC across all DR grades, particularly DR 1 and DR 3." figNum={24} tooltip="tooltip.fig24" />
       </Sec>
 
-      <Sec title="EH-3 Dominance Criterion">
+      <Sec title={t('exp.dominanceCriterion')}>
         <DataTable
           headers={['Criterion', 'ResNet-50 (B−A)', 'EfficientNet-B3 (D−C)', 'Threshold', 'Met?']}
           rows={[

@@ -1,13 +1,15 @@
 import { C, IQ } from '../data';
-import { Sec, ImageFigure } from '../components';
+import { Sec, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ValQuality() {
+  const { t } = useLang();
   const colors = [C.coral, C.blue, C.amber, C.teal];
 
   return (
     <div>
       <Sec
-        title="Image Quality — Before vs After V4 Pipeline"
+        title={t('quality.imageQuality')}
         note="CNR (+81%): dramatically improved vessel/background contrast. VVI (+51%): enhanced vascular tree visibility. Entropy (+15%): richer local detail. SSIM (+18%): structural fidelity maintained during enhancement. These metrics quantify the visual improvements that drive downstream CNN performance gains."
       >
         {IQ.map((d, i) => (
@@ -24,10 +26,11 @@ export default function ValQuality() {
           </div>
         ))}
 
-        <ImageFigure
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/16_image_quality.png'}
           caption="Image quality metrics before (baseline) and after (V4 pipeline) preprocessing. CNR and VVI show the largest improvements, directly linked to CLAHE contrast enhancement and flat-field correction."
-          figNum="16"
+          figNum={16}
+          tooltip="tooltip.fig16"
         />
       </Sec>
 

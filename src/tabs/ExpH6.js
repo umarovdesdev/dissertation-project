@@ -1,7 +1,9 @@
 import { C, DEV } from '../data';
-import { Card, Sec, DataTable, Paired, Note, ImageFigure } from '../components';
+import { Card, Sec, DataTable, Paired, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ExpH6() {
+  const { t } = useLang();
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
@@ -13,7 +15,7 @@ export default function ExpH6() {
         </div>
       </div>
 
-      <Sec title="Cross-Device F1 — Baseline vs Pipeline">
+      <Sec title={t('exp.deviceShift')}>
         <Paired
           items={DEV.map(d => ({ label: d.c, v1: d.fb, v2: d.fp }))}
           c1={C.gray}
@@ -31,7 +33,7 @@ export default function ExpH6() {
           ])}
           highlightRow={(row, i) => i === 0}
         />
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/10_exp6_device_shift.png'} caption="Cross-device F1 across 6 camera systems. Pipeline (orange) consistently outperforms baseline (gray). Largest improvement on most distant cameras: ODIR-5K (+9pp), RFMiD (+9pp)." figNum="10" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/10_exp6_device_shift.png'} caption="Cross-device F1 across 6 camera systems. Pipeline (orange) consistently outperforms baseline (gray). Largest improvement on most distant cameras: ODIR-5K (+9pp), RFMiD (+9pp)." figNum={10} tooltip="tooltip.fig10" />
         <Note>
           Models trained exclusively on Canon CR-1 (EyePACS) evaluated on 5 external camera systems without retraining.
           Preprocessing pipeline reduces device-specific artifacts (vignetting, illumination gradients, color cast),
@@ -39,7 +41,7 @@ export default function ExpH6() {
         </Note>
       </Sec>
 
-      <Sec title="Cross-Device Variance">
+      <Sec title={t('exp.variance')}>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Card label="Variance (Baseline)" value="0.0052" color="red" sub="σ² across camera groups" />
           <Card label="Variance (Pipeline)" value="0.0028" color="green" delta="−46% ✓" sub="σ² across camera groups" />

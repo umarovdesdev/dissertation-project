@@ -1,12 +1,14 @@
 import { C, CONFIGS } from '../data';
-import { Sec, DataTable, Hbar, Note, ImageFigure } from '../components';
+import { Sec, DataTable, Hbar, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ResultsMain() {
+  const { t } = useLang();
   const all6 = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   return (
     <div>
-      <Sec title="All 6 Configurations — Summary">
+      <Sec title={t('results.allConfigs')}>
         <DataTable
           headers={['Config', 'Preprocessing', 'CNN', 'W.F1 ± σ', 'ROC-AUC ± σ', 'κ ± σ', 'Acc']}
           rows={all6.map(k => {
@@ -36,18 +38,20 @@ export default function ResultsMain() {
       </Sec>
 
       <Sec title="Summary Radar Chart">
-        <ImageFigure
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/11_summary_radar.png'}
           caption="Performance radar across all 6 configurations showing F1, AUC, κ, Accuracy, and robustness. Config F (binocular + EfficientNet-B3) leads overall; Config D is best single-image mode."
-          figNum="11"
+          figNum={11}
+          tooltip="tooltip.fig11"
         />
       </Sec>
 
       <Sec title="EH-3 Dominance Check">
-        <ImageFigure
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/12_eh3_dominance.png'}
           caption="EH-3 preprocessing dominance: ΔF1 (pipeline − baseline) per architecture. EfficientNet-B3 exceeds the 5pp threshold (D−C = +5.3pp). ResNet-50 shows near-zero effect (B−A = −0.1pp), confirming architecture × preprocessing interaction."
-          figNum="12"
+          figNum={12}
+          tooltip="tooltip.fig12"
         />
         <DataTable
           headers={['Criterion', 'ResNet-50 (B−A)', 'EfficientNet-B3 (D−C)', 'Threshold', 'Result']}

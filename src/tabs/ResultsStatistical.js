@@ -1,18 +1,21 @@
 import { C, STAT_TESTS, TRAIN_TEST_GAP } from '../data';
-import { Sec, DataTable, Note, ImageFigure } from '../components';
+import { Sec, DataTable, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ResultsStatistical() {
+  const { t } = useLang();
   return (
     <div>
-      <Sec title="Statistical Significance Tests">
+      <Sec title={t('results.statTests')}>
         <DataTable
           headers={['Test', 'ResNet-50 (B vs A)', 'EfficientNet-B3 (D vs C)']}
           rows={STAT_TESTS.map(d => [d.test, d.resnet, d.effnet])}
         />
-        <ImageFigure
+        <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/21_statistical_tests.png'}
           caption="Statistical test results visualized. Left: ResNet-50 (B−A) — no significant difference. Right: EfficientNet-B3 (D−C) — significant across all tests. Bootstrap CI excludes zero for EfficientNet-B3."
-          figNum="21"
+          figNum={21}
+          tooltip="tooltip.fig21"
         />
         <Note>
           EfficientNet-B3 results are statistically significant at α=0.05 across all tests after correction.

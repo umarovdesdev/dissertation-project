@@ -1,7 +1,9 @@
 import { C, ABL, ABL_INDIV, CLAHE1, CLAHE2 } from '../data';
-import { Sec, DataTable, Hbar, Note, ImageFigure } from '../components';
+import { Sec, DataTable, Hbar, Note, ImageWithTooltip } from '../components';
+import { useLang } from '../i18n';
 
 export default function ExpH2() {
+  const { t } = useLang();
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
@@ -13,12 +15,12 @@ export default function ExpH2() {
         </div>
       </div>
 
-      <Sec title="Cumulative Ablation — V4 Pipeline Stages">
+      <Sec title={t('exp.ablation')}>
         <Hbar
           items={ABL.map((d, i) => ({ label: d.n, v: d.f1, color: i === 0 ? C.gray : i === ABL.length - 1 ? C.teal : C.blue }))}
           maxV={0.82}
         />
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/04_exp2_ablation.png'} caption="Cumulative ablation: each row adds one pipeline stage. Starting from baseline (F1=0.727), each component adds incremental improvement, reaching F1=0.780 at full V4." figNum="4" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/04_exp2_ablation.png'} caption="Cumulative ablation: each row adds one pipeline stage. Starting from baseline (F1=0.727), each component adds incremental improvement, reaching F1=0.780 at full V4." figNum={4} tooltip="tooltip.fig04" />
         <DataTable
           headers={['Pipeline State', 'F1', 'AUC', 'ΔF1 vs Prev']}
           rows={ABL.map((d, i) => [
@@ -37,7 +39,7 @@ export default function ExpH2() {
         </Note>
       </Sec>
 
-      <Sec title="Per-Stage Marginal Contribution (ΔF1)">
+      <Sec title={t('exp.perStage')}>
         <Hbar
           items={ABL.slice(1).map((d, i) => ({
             label: d.n,
@@ -46,7 +48,7 @@ export default function ExpH2() {
           }))}
           maxV={2.0}
         />
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/05_exp2_per_stage.png'} caption="Marginal F1 contribution of each pipeline stage. CLAHE contributes the most (+1.4pp), followed by flat-field correction (+1.0pp) and OD-fovea rotation (+1.0pp)." figNum="5" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/05_exp2_per_stage.png'} caption="Marginal F1 contribution of each pipeline stage. CLAHE contributes the most (+1.4pp), followed by flat-field correction (+1.0pp) and OD-fovea rotation (+1.0pp)." figNum={5} tooltip="tooltip.fig05" />
       </Sec>
 
       <Sec title="Individual Ablation — Single-Stage Contribution">
@@ -54,7 +56,7 @@ export default function ExpH2() {
           headers={['Stage', 'Individual ΔF1 (pp)']}
           rows={ABL_INDIV.map(d => [d.stage, `+${d.individual_f1.toFixed(1)}pp`])}
         />
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/23_exp2_individual_ablation.png'} caption="Individual ablation: each stage removed from full pipeline in isolation. Sum of individual contributions (5.5pp) slightly exceeds actual gain (5.3pp), consistent with synergistic interaction between stages." figNum="23" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/23_exp2_individual_ablation.png'} caption="Individual ablation: each stage removed from full pipeline in isolation. Sum of individual contributions (5.5pp) slightly exceeds actual gain (5.3pp), consistent with synergistic interaction between stages." figNum={23} tooltip="tooltip.fig23" />
         <Note>
           Individual ablation (each stage removed from full pipeline) yields sum of 5.5pp individual contributions vs
           5.3pp actual. This small positive interaction confirms the stages are not fully independent — CLAHE benefits
@@ -111,7 +113,7 @@ export default function ExpH2() {
             </div>
           );
         })}
-        <ImageFigure src={process.env.PUBLIC_URL + '/results/13_exp2_clahe_sensitivity.png'} caption="CLAHE parameter sensitivity heatmap for DR grades 1 and 2. Optimal parameters identified at clip_factor=2.5 (DR 1) and 2.0 (DR 2) with global_threshold=0.03." figNum="13" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/13_exp2_clahe_sensitivity.png'} caption="CLAHE parameter sensitivity heatmap for DR grades 1 and 2. Optimal parameters identified at clip_factor=2.5 (DR 1) and 2.0 (DR 2) with global_threshold=0.03." figNum={13} tooltip="tooltip.fig13" />
       </Sec>
     </div>
   );
