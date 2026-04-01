@@ -121,7 +121,8 @@ class PreprocessingPipelineV4:
 
         Returns:
             ImageNet-normalised float32 tensor of shape
-            ``(3, target_size, target_size)``.
+            ``(4, target_size, target_size)``.
+            Channel 3 is a binary FOV mask (1.0 = real data, 0.0 = padding).
         """
         # Convert to RGB if input is BGR (e.g. from cv2.imread).
         # If caller already provides RGB, pass input_color_space="rgb" at construction.
@@ -138,8 +139,8 @@ class PreprocessingPipelineV4:
                 enable_rotation=self.config.use_od_fovea_rotation,
             )
 
-        # Stage 1: FOV crop + resize (always)
-        image = crop_and_resize(image, self.config.target_size)
+        # Stage 1: FOV crop + isotropic resize (always) — returns (image, mask)
+        image, fov_mask = crop_and_resize(image, self.config.target_size)
 
         # Stage 2: flat-field correction
         if self.config.use_flat_field:
@@ -159,11 +160,15 @@ class PreprocessingPipelineV4:
             image = self._augmentation(image, od_fovea_result=od_fovea_result)
 
         # Stage 4: ImageNet normalize → tensor (always last)
-        return imagenet_normalize(
+        rgb_tensor = imagenet_normalize(
             image,
             mean=self.config.normalize_mean,
             std=self.config.normalize_std,
         )
+
+        # Append FOV mask as 4th channel
+        mask_tensor = torch.from_numpy(fov_mask).unsqueeze(0)  # (1, H, W)
+        return torch.cat([rgb_tensor, mask_tensor], dim=0)      # (4, H, W)
 
     # ------------------------------------------------------------------
     # State queries

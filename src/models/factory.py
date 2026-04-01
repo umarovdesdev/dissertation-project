@@ -31,6 +31,7 @@ def create_model(model_name: str, config: dict) -> nn.Module:
     num_classes: int = config.get("num_classes", 5)
     dropout: float = config.get("dropout", 0.4)
     freeze_base: bool = config.get("freeze_base", False)
+    in_channels: int = config.get("in_channels", 4)
 
     if model_name == "resnet50":
         return create_resnet50(
@@ -38,6 +39,7 @@ def create_model(model_name: str, config: dict) -> nn.Module:
             pretrained=pretrained,
             dropout=dropout,
             freeze_base=freeze_base,
+            in_channels=in_channels,
         )
     elif model_name in _EFFICIENTNET_VARIANTS:
         variant = model_name.split("_")[1]  # "b0", "b3", or "b4"
@@ -47,6 +49,7 @@ def create_model(model_name: str, config: dict) -> nn.Module:
             pretrained=pretrained,
             dropout=dropout,
             freeze_base=freeze_base,
+            in_channels=in_channels,
         )
     else:
         raise ValueError(

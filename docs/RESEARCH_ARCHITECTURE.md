@@ -606,3 +606,29 @@ This file is:
 * The defense shield during committee questioning
 
 ---
+
+## Protocol Revision — Exp1 Supplement (2026-04-01)
+
+The following changes were made to all Exp1 configurations (A–F) after initial scaffold completion. All configs must be re-run from scratch after these changes.
+
+### 1. Loss Function: Weighted CrossEntropyLoss → Focal Loss
+
+All Exp1 configurations now use `FocalLoss(γ=2, α=inverse-frequency class weights)` instead of `nn.CrossEntropyLoss(weight=class_weights)`. Implementation in `src/training/losses.py`. Config keys: `training.loss_type: focal`, `training.focal_gamma: 2.0`.
+
+Rationale: DR is severely class-imbalanced (grade 0 dominates). Focal Loss down-weights easy, well-classified examples and focuses gradient on hard/rare-grade samples. The α weights (inverse-frequency) are identical to those used in the old weighted CE, so class balance is preserved while the γ=2 focusing term adds additional emphasis on hard examples.
+
+### 2. Image Input: 3-Channel RGB → 4-Channel RGB + FOV Mask
+
+All Exp1 configurations now receive 4-channel input tensors. Channel 4 is a binary FOV mask (1.0 = real pixel data, 0.0 = zero-padding added by isotropic resize). Generated in `src/preprocessing/crop_resize.py`, appended in `src/preprocessing/pipeline_v4.py` after ImageNet normalization.
+
+Both ResNet-50 (`conv1`) and EfficientNet-B3 (`conv_stem`) first Conv2d layers are replaced with 4-channel equivalents. Pretrained RGB weights are copied for channels 1–3; channel 4 is initialized with the mean of the RGB weights.
+
+### 3. Resize Strategy: Direct Resize → Isotropic Resize with Centered Padding
+
+`crop_and_resize()` in `src/preprocessing/crop_resize.py` now uses isotropic scaling (scale = target_size / max(crop_h, crop_w)) followed by centered zero-padding, instead of direct stretch-resize. This preserves the circular geometry of the fundus FOV.
+
+### 4. Factorial Design Integrity
+
+All six configurations (A–F) use both changes. The factorial contrast (baseline vs. full V4 pipeline) is clean: the only difference between A/C and B/D is the V4 preprocessing stages (flat-field, CLAHE, canonical flip), NOT the mask channel or loss function — those are universal infrastructure present in all configs.
+
+---

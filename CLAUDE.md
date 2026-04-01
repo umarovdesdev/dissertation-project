@@ -86,7 +86,10 @@ Stage 0: Canonical Orientation
       Detects OD (brightest region) and fovea (darkest region with distance prior)
       Rotates image so OD→fovea axis is horizontal
       When detection confidence is low, rotation is skipped (fallback)
-Stage 1: FOV crop + resize (PIL-based foreground detection) — always
+Stage 1: FOV crop + isotropic resize + padding + mask generation — always
+  - Isotropic scaling preserves fundus circle geometry
+  - Centered padding fills unused canvas with zeros
+  - Binary FOV mask (4th channel) marks real data (1.0) vs padding (0.0)
 Stage 2: Flat-field correction (Gaussian blur subtraction, σ=45) — toggleable
 Stage 3: Upgraded CLAHE (dual-constraint, L-channel, stochastic at train time) — toggleable
 Stage 5: Augmentation (unified affine + brightness/contrast + PCA color) — train only
@@ -119,6 +122,8 @@ Report: mean ± std across folds.
 - batch_size: 16 (RTX 3060 12GB limit at 512×512)
 - mixed_precision: true for ResNet-50, DISABLED for EfficientNet (fp16 overflow fix)
 - image_size: 512×512
+- input_channels: 4 (RGB + FOV mask)
+- loss_function: Focal Loss (γ=2, α=inverse-frequency class weights)
 - optimizer: Adam, lr=0.0001, weight_decay=0.0001
 - early_stopping: patience=5, monitor=val_weighted_f1, mode=max
 - scheduler: ReduceOnPlateau, factor=0.5, patience=3, min_lr=1e-6

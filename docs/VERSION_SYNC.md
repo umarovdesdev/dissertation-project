@@ -1,6 +1,27 @@
 # VERSION_SYNC.md
 
-## V3 → V4 Documentation Sync Status
+## V4.0 → V4.1 Documentation Sync Status
+
+**Sync Date:** 2026-03-26
+**Sync Scope:** V4.0 → V4.1 (dissertation/ governance files)
+**Performed by:** Claude Code
+
+### V4.1 Changes Applied to dissertation/ (2026-03-26)
+
+| Change Category | File(s) Updated |
+|----------------|-----------------|
+| Stage 0 expansion: Canonical Flip → Stage 0a + Stage 0b (OD-Fovea Rotation Normalization) | INVARIANTS.md, ARGUMENT_MAP.md, RESEARCH_ARCHITECTURE.md, HYPOTHESIS.md, CONTRIBUTIONS.md (SC-F added), GLOSSARY_EN.md, GLOSSARY_KZ.md, preprocessing-pipeline.md, experimental-protocol.md, MASTER_OUTLINE.md |
+| 5-fold → 3-fold CV | INVARIANTS.md (H-1), ARGUMENT_MAP.md (PC-1, PC-1 promotion), RESEARCH_ARCHITECTURE.md (§2.2, §5.0, §6.1, §6.8, §9.1), MASTER_OUTLINE.md |
+| EyePACS 40% subset + ~14,050 used | INVARIANTS.md (SB-2.1), ARGUMENT_MAP.md (IT-1 scope), RESEARCH_ARCHITECTURE.md (§2.1.1), experimental-protocol.md, MASTER_OUTLINE.md |
+| APTOS 2019 DROPPED annotation | INVARIANTS.md (IT-1, DGL-1, scope boundary), ARGUMENT_MAP.md (IT-1 scope) |
+| SC-1.3 divergence documented | VERSION_SYNC.md (Known Divergences table) |
+| max_epochs 50 → 20 | RESEARCH_ARCHITECTURE.md (§4.0 training config table) |
+| Binocular blending Optional Extension paragraph | RESEARCH_ARCHITECTURE.md (§3.1) |
+| VERSION_SYNC.md updated | dissertation/governance/VERSION_SYNC.md, dr-classifier/docs/VERSION_SYNC.md |
+
+---
+
+## V3 → V4 Documentation Sync Status (2026-03-24, preserved for audit trail)
 
 **Sync Date:** 2026-03-24
 **Sync Scope:** V3.0 → V4.0

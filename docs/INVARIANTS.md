@@ -288,6 +288,12 @@ The system architecture described in Chapter 6 (LC-2025-Yesmukhamedov-01) has no
 **DGL-5: CLAHE Parameter Portability**
 CLAHE parameters validated in the dissertation context (dual-constraint stochastic clip limit on LAB L-channel per V4 pipeline: clip_factor × tile_area/256, capped by global_threshold × tile_area; applied with 80% probability at train time; and clip limit 2.0 / grid size 8×8 per prior self-publications LC-SAPAKOVA-2025-01) were optimized for specific image distributions and CNN architectures. The T/80 threshold formulation from LC-AlTimemy-2021 was derived on the STARE dataset with different image characteristics. No parameter-level equivalence between these configurations is asserted. If the dissertation adopts modified CLAHE parameters, those parameters must be independently validated within the dissertation's experimental framework.
 
+**DGL-7: Loss Function — Exp1**
+All Exp1 configurations (A–F) use `FocalLoss(γ=2, α=inverse-frequency class weights)`. No Exp1 config uses plain CrossEntropyLoss or any other loss function. Config keys: `training.loss_type: focal`, `training.focal_gamma: 2.0`. The α weights are computed identically to the old weighted CE (inverse-frequency, normalized to sum to num_classes).
+
+**DGL-8: Input Channels — Exp1**
+All Exp1 configurations (A–F) receive 4-channel input tensors (RGB + FOV mask). Channel 4 is a binary mask with 1.0 where real image data exists and 0.0 where zero-padding was added by the isotropic resize. The first Conv2d layer of both ResNet-50 (conv1) and EfficientNet-B3 (conv_stem) is replaced with a 4-channel equivalent; pretrained weights are copied for channels 1–3 and channel 4 is initialized with the mean of the RGB weights.
+
 **DGL-6: Transfer Learning Domain Gap**
 EfficientNetB0, EfficientNet-B3, EfficientNet-B4, and ResNet-50 weights were pre-trained on ImageNet (natural images). Transfer of these weights to fundus image classification represents a domain shift. The degree to which ImageNet features transfer to retinal microvascular feature representations is not theoretically guaranteed and is evaluated empirically within the dissertation's experimental framework only. Claims about feature transferability are bounded to the architectures, fine-tuning protocols, and datasets documented in the literature cards and V4 experimental protocol.
 

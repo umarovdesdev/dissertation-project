@@ -103,18 +103,22 @@ models:
     pretrained:   true
     num_classes:  5
     dropout:      0.4
+    in_channels:  4
   efficientnet_b0:
     pretrained:   true
     num_classes:  5
     dropout:      0.4
+    in_channels:  4
   efficientnet_b3:
     pretrained:   true
     num_classes:  5
     dropout:      0.4
+    in_channels:  4
   efficientnet_b4:
     pretrained:   true
     num_classes:  5
     dropout:      0.4
+    in_channels:  4
 
 training:
   optimizer:          adam
@@ -125,6 +129,8 @@ training:
   mixed_precision:    true
   num_workers:        4
   class_weights:      inverse_frequency
+  loss_type:          focal           # "focal" or "ce"
+  focal_gamma:        2.0             # focusing parameter (ignored if loss_type=ce)
   early_stopping:
     patience:         5
     monitor:          val_weighted_f1

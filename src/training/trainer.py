@@ -16,7 +16,7 @@ from src.evaluation.metrics import (
     compute_clinical_metrics,
 )
 from src.training.checkpoint import CheckpointManager
-from src.training.losses import compute_class_weights, create_weighted_loss
+from src.training.losses import compute_class_weights, create_loss
 
 
 class Trainer:
@@ -48,6 +48,8 @@ class Trainer:
         self.mixed_precision: bool = tc.get("mixed_precision", True)
         self.num_workers: int = tc.get("num_workers", 4)
         self.use_class_weights: bool = tc.get("class_weights") == "inverse_frequency"
+        self.loss_type: str = tc.get("loss_type", "focal")
+        self.focal_gamma: float = tc.get("focal_gamma", 2.0)
 
         es = tc.get("early_stopping", {})
         self.es_patience: int = es.get("patience", 10)
@@ -215,7 +217,12 @@ class Trainer:
             weights = compute_class_weights(train_labels, self.num_classes)
         else:
             weights = None
-        criterion = create_weighted_loss(weights, device=str(self.device))
+        criterion = create_loss(
+            class_weights=weights,
+            device=str(self.device),
+            loss_type=self.loss_type,
+            gamma=self.focal_gamma,
+        )
 
         optimizer = torch.optim.Adam(
             filter(lambda p: p.requires_grad, model.parameters()),

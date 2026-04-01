@@ -33,11 +33,13 @@ def test_individual_stages() -> None:
     assert flipped.shape == img.shape
     print("  Stage 0 (canonical flip): OK")
 
-    # Stage 1: Crop + resize
-    cropped = crop_and_resize(img, target_size=512)
+    # Stage 1: Crop + isotropic resize + mask
+    cropped, fov_mask = crop_and_resize(img, target_size=512)
     assert cropped.shape == (512, 512, 3)
     assert cropped.dtype == np.uint8
-    print("  Stage 1 (crop+resize): OK")
+    assert fov_mask.shape == (512, 512)
+    assert fov_mask.dtype == np.float32
+    print("  Stage 1 (crop+resize+mask): OK")
 
     # Stage 2: Flat-field
     corrected = apply_flat_field(cropped, sigma=45.0)

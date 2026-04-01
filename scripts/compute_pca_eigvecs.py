@@ -141,8 +141,8 @@ def preprocess_for_pca(
     image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
     # Stage 0: canonical flip
     image_rgb = canonical_flip(image_rgb, eye_side)
-    # Stage 1: crop + resize
-    image_rgb = crop_and_resize(image_rgb, target_size)
+    # Stage 1: crop + resize (discard mask — PCA only needs the image)
+    image_rgb, _ = crop_and_resize(image_rgb, target_size)
     # Stage 2: flat-field
     image_rgb = apply_flat_field(image_rgb)
     # Stage 3: CLAHE (deterministic — inference mode)

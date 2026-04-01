@@ -97,18 +97,22 @@ models:
     pretrained: true
     num_classes: 5
     dropout: 0.4
+    in_channels: 4
   efficientnet_b0:
     pretrained: true
     num_classes: 5
     dropout: 0.4
+    in_channels: 4
   efficientnet_b3:
     pretrained: true
     num_classes: 5
     dropout: 0.4
+    in_channels: 4
   efficientnet_b4:
     pretrained: true
     num_classes: 5
     dropout: 0.4
+    in_channels: 4
 training:
   optimizer: adam
   learning_rate: 0.0001
@@ -118,6 +122,8 @@ training:
   mixed_precision: true
   num_workers: 4
   class_weights: inverse_frequency
+  loss_type: focal
+  focal_gamma: 2.0
   early_stopping:
     patience: 5
     monitor: val_weighted_f1
@@ -157,3 +163,16 @@ experiments:
       D:
         preprocessing: full
         model: efficientnet_b3
+  exp2:
+    name: 'V4 Experiment 2: Preprocessing Component Ablation'
+    hypothesis: H-2
+    dataset: eyepacs
+    configurations:
+      - baseline
+      - full_v4
+    clahe_sweep:
+      dataset: idrid
+      clip_limits:
+      - 1.0
+      - 2.0
+      - 4.0
