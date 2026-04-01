@@ -1,0 +1,65 @@
+nohup: ignoring input
+
+CondaError: Run 'conda init' before 'conda activate'
+
+Running exp1 | config: configs/default.yaml | resume: False
+Single-fold mode: fold 1
+Loading EyePACS index from /mnt/d/datasets/EyePACS/trainLabels.csv …
+  Found 35126 images | 17563 patients
+  Subset mode: 40% → 14050 images | 7025 patients
+  Subset class distribution: {0: 10336, 1: 960, 2: 2115, 3: 349, 4: 290}
+  3-fold splits verified (no leakage)
+
+=================================================================
+  Config A | baseline preprocessing | resnet50
+=================================================================
+
+  [Config A | Fold 2/3]
+  Train: 9366 images | Val: 4684 images
+  Fold 1 | Epoch 000 | loss 1.3572 → 1.1923 | F1 0.6317 | AUC 0.8010 | κ 0.5206 | 1760.7s
+  Fold 1 | Epoch 001 | loss 1.1329 → 1.1205 | F1 0.6166 | AUC 0.8287 | κ 0.5734 | 1798.0s
+  Fold 1 | Epoch 002 | loss 1.0642 → 1.1412 | F1 0.7460 | AUC 0.8387 | κ 0.6592 | 1809.5s
+  Fold 1 | Epoch 003 | loss 1.0190 → 1.0691 | F1 0.7576 | AUC 0.8547 | κ 0.6901 | 1845.1s
+  Fold 1 | Epoch 004 | loss 0.9816 → 1.1135 | F1 0.7112 | AUC 0.8461 | κ 0.6381 | 1803.5s
+  Fold 1 | Epoch 005 | loss 0.9332 → 1.0432 | F1 0.7265 | AUC 0.8582 | κ 0.6898 | 1774.9s
+  Fold 1 | Epoch 006 | loss 0.9015 → 1.1106 | F1 0.6627 | AUC 0.8505 | κ 0.6283 | 1773.2s
+  Fold 1 | Epoch 007 | loss 0.8952 → 1.1279 | F1 0.5858 | AUC 0.8572 | κ 0.5646 | 1789.5s
+  Fold 1 | Epoch 008 | loss 0.7737 → 1.2919 | F1 0.7481 | AUC 0.8607 | κ 0.6813 | 1772.5s
+  Early stopping at epoch 8 (patience=5)
+  Best → F1=0.7576  AUC=0.8547  κ=0.6901  acc=0.7442
+
+=================================================================
+  Config B | full preprocessing | resnet50
+=================================================================
+
+  [Config B | Fold 2/3]
+  Train: 9366 images | Val: 4684 images
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  Fold 1 | Epoch 000 | loss 1.2933 → 1.1918 | F1 0.6632 | AUC 0.8032 | κ 0.5082 | 1727.7s
+  Fold 1 | Epoch 001 | loss 1.1243 → 1.1726 | F1 0.6396 | AUC 0.8199 | κ 0.5176 | 1724.1s
+  Fold 1 | Epoch 002 | loss 1.1052 → 1.1567 | F1 0.7008 | AUC 0.8316 | κ 0.5846 | 1737.6s
+  Fold 1 | Epoch 003 | loss 1.0380 → 1.1740 | F1 0.7382 | AUC 0.8448 | κ 0.6187 | 1783.6s
+  Fold 1 | Epoch 004 | loss 1.0070 → 1.2222 | F1 0.6682 | AUC 0.7924 | κ 0.5579 | 1733.5s
+  Fold 1 | Epoch 005 | loss 0.9770 → 1.2440 | F1 0.6848 | AUC 0.8538 | κ 0.6005 | 1756.1s
+  Fold 1 | Epoch 006 | loss 0.9468 → 1.0614 | F1 0.7457 | AUC 0.8517 | κ 0.6464 | 1732.1s
+  Fold 1 | Epoch 007 | loss 0.9254 → 1.2049 | F1 0.7169 | AUC 0.8570 | κ 0.6177 | 1732.1s
+  Fold 1 | Epoch 008 | loss 0.8900 → 1.1399 | F1 0.5063 | AUC 0.8278 | κ 0.5233 | 1737.0s
+  Fold 1 | Epoch 009 | loss 0.8882 → 1.1794 | F1 0.7582 | AUC 0.8605 | κ 0.6395 | 1738.5s
+  Fold 1 | Epoch 010 | loss 0.8366 → 1.1848 | F1 0.6140 | AUC 0.8240 | κ 0.5723 | 1736.0s
+  Fold 1 | Epoch 011 | loss 0.8201 → 1.1299 | F1 0.7157 | AUC 0.8592 | κ 0.6234 | 1731.1s
+  Fold 1 | Epoch 012 | loss 0.7944 → 1.1344 | F1 0.7674 | AUC 0.8409 | κ 0.6733 | 1735.5s
+  Fold 1 | Epoch 013 | loss 0.7831 → 1.2004 | F1 0.7183 | AUC 0.8599 | κ 0.6418 | 1737.9s
+  Fold 1 | Epoch 014 | loss 0.7774 → 1.2507 | F1 0.5080 | AUC 0.8486 | κ 0.5215 | 1732.4s
+  Fold 1 | Epoch 015 | loss 0.7439 → 1.3528 | F1 0.7722 | AUC 0.8620 | κ 0.6769 | 1737.4s
+  Fold 1 | Epoch 016 | loss 0.7240 → 1.3257 | F1 0.7131 | AUC 0.8414 | κ 0.6394 | 1739.2s
+  Fold 1 | Epoch 017 | loss 0.7206 → 1.2481 | F1 0.7212 | AUC 0.8466 | κ 0.6499 | 1736.2s
+  Fold 1 | Epoch 018 | loss 0.6950 → 1.2776 | F1 0.6715 | AUC 0.8294 | κ 0.6174 | 1740.2s
+  Fold 1 | Epoch 019 | loss 0.6721 → 1.2790 | F1 0.7672 | AUC 0.8498 | κ 0.6673 | 1742.1s
+  Best → F1=0.7722  AUC=0.8620  κ=0.6769  acc=0.7713
+
+=================================================================
+  Config C | baseline preprocessing | efficientnet_b3
+=================================================================
+
+  [Config C | Fold 2/3]
+  Train: 9366 images | Val: 4684 images

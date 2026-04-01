@@ -1,0 +1,33 @@
+nohup: ignoring input
+Running exp1 | config: configs/default.yaml | resume: False
+Single-fold mode: fold 2
+Config filter: ['D']
+  PCA eigenvectors not found — colour augmentation disabled.
+Loading EyePACS index from /mnt/d/datasets/EyePACS/trainLabels.csv …
+  Found 35126 images | 17563 patients
+  Subset mode: 40% → 14050 images | 7025 patients
+  Subset class distribution: {0: 10336, 1: 960, 2: 2115, 3: 349, 4: 290}
+  3-fold splits verified (no leakage)
+  [INFO] Mixed precision DISABLED for efficientnet_b3
+
+=================================================================
+  Config D | full preprocessing | efficientnet_b3
+=================================================================
+
+  [Config D | Fold 3/3]
+  Train: 9368 images | Val: 4682 images
+  Fold 2 | Epoch 000 | loss 1.2824 → 1.1601 | F1 0.6316 | AUC 0.7956 | κ 0.3994 | 4274.9s
+  Fold 2 | Epoch 001 | loss 1.0327 → 1.1249 | F1 0.6573 | AUC 0.8362 | κ 0.6383 | 4267.0s
+  Fold 2 | Epoch 002 | loss 0.9014 → 1.0494 | F1 0.7348 | AUC 0.8500 | κ 0.6816 | 4278.6s
+  Fold 2 | Epoch 003 | loss 0.7696 → 1.1699 | F1 0.7120 | AUC 0.8391 | κ 0.6608 | 4283.5s
+  Fold 2 | Epoch 004 | loss 0.6291 → 1.3802 | F1 0.7192 | AUC 0.8240 | κ 0.6253 | 4265.7s
+  Fold 2 | Epoch 005 | loss 0.5238 → 1.5227 | F1 0.7777 | AUC 0.8267 | κ 0.7163 | 4262.7s
+  Fold 2 | Epoch 006 | loss 0.4059 → 1.8040 | F1 0.6927 | AUC 0.8027 | κ 0.6212 | 4250.8s
+  Fold 2 | Epoch 007 | loss 0.3406 → 2.0316 | F1 0.7651 | AUC 0.8091 | κ 0.7238 | 4246.4s
+  Fold 2 | Epoch 008 | loss 0.2854 → 2.2814 | F1 0.7616 | AUC 0.7978 | κ 0.6871 | 4257.8s
+  Fold 2 | Epoch 009 | loss 0.2427 → 2.6657 | F1 0.7529 | AUC 0.7693 | κ 0.6790 | 4254.4s
+  Fold 2 | Epoch 010 | loss 0.1465 → 2.7475 | F1 0.7556 | AUC 0.7852 | κ 0.6783 | 4272.4s
+  Early stopping at epoch 10 (patience=5)
+  Best → F1=0.7777  AUC=0.8267  κ=0.7163  acc=0.7760
+
+Single-fold run complete (fold 2). Full summary emitted after all folds finish.

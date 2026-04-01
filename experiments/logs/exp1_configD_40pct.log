@@ -1,0 +1,32 @@
+Running exp1 | config: configs/default.yaml | resume: False
+Config filter: ['D']
+  PCA eigenvectors not found — colour augmentation disabled.
+Loading EyePACS index from /mnt/d/datasets/EyePACS/trainLabels.csv …
+  Found 35126 images | 17563 patients
+  Subset mode: 40% → 14050 images | 7025 patients
+  Subset class distribution: {0: 10336, 1: 960, 2: 2115, 3: 349, 4: 290}
+  3-fold splits verified (no leakage)
+  [INFO] Mixed precision DISABLED for efficientnet_b3
+
+=================================================================
+  Config D | full preprocessing | efficientnet_b3
+=================================================================
+
+  [Config D | Fold 1/3]
+  Train: 9366 images | Val: 4684 images
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  Fold 0 | Epoch 000 | loss 1.2794 → 1.0948 | F1 0.6608 | AUC 0.8107 | κ 0.4865 | 3262.2s
+  Fold 0 | Epoch 001 | loss 1.0536 → 1.0601 | F1 0.7528 | AUC 0.8541 | κ 0.6939 | 3226.9s
+  Fold 0 | Epoch 002 | loss 0.9005 → 1.0724 | F1 0.7585 | AUC 0.8535 | κ 0.6788 | 3248.5s
+  Fold 0 | Epoch 003 | loss 0.7529 → 1.1338 | F1 0.7120 | AUC 0.8469 | κ 0.6608 | 3231.7s
+  Fold 0 | Epoch 004 | loss 0.6373 → 1.3770 | F1 0.8003 | AUC 0.8452 | κ 0.7360 | 3231.9s
+  Fold 0 | Epoch 005 | loss 0.5422 → 1.8596 | F1 0.7512 | AUC 0.7845 | κ 0.6651 | 3217.8s
+  Fold 0 | Epoch 006 | loss 0.4467 → 1.7383 | F1 0.7280 | AUC 0.8154 | κ 0.6562 | 3229.1s
+  Fold 0 | Epoch 007 | loss 0.3440 → 2.0755 | F1 0.7778 | AUC 0.8138 | κ 0.7135 | 3223.9s
+  Fold 0 | Epoch 008 | loss 0.2754 → 2.2782 | F1 0.7887 | AUC 0.8113 | κ 0.7322 | 3228.5s
+  Fold 0 | Epoch 009 | loss 0.1428 → 2.6198 | F1 0.7985 | AUC 0.8115 | κ 0.7486 | 3230.0s
+  Early stopping at epoch 9 (patience=5)
+  Best → F1=0.8003  AUC=0.8452  κ=0.7360  acc=0.8117
+
+  [Config D | Fold 2/3]
+  Train: 9366 images | Val: 4684 images
