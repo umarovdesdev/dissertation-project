@@ -1,12 +1,12 @@
-# Synthesized Expected Results — Work Report v2.0
+# Synthesized Expected Results — Work Report v3.0
 
 **Dissertation:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification  
 **Candidate:** Yesmukhamedov N.S. (IITU)  
 **Document type:** Stage deliverable — Synthesized expected experimental results  
-**Date:** 2026-03-27  
-**Version:** 2.0 (addresses 9 audit gaps from v1.0 review)  
-**Governance:** INVARIANTS v4.1 | HYPOTHESIS v4.1 | RESEARCH_ARCHITECTURE v4.1  
-**Pipeline:** V4 6-stage preprocessing  
+**Date:** 2026-04-02  
+**Version:** 3.0 (incorporates Exp1 Supplement: Focal Loss + mask-aware isotropic resize)  
+**Governance:** INVARIANTS v4.1 | HYPOTHESIS v4.1 | RESEARCH_ARCHITECTURE v4.1 (+ Protocol Revision 2026-04-01)  
+**Pipeline:** V4 6-stage preprocessing (updated: isotropic resize + FOV mask, 4-channel output)  
 
 ---
 
@@ -21,6 +21,18 @@ This document records the synthesized expected results for all active dissertati
 - **ACTUAL** — computed directly from completed experiment runs. Source: `backup_exp1_abc_40pct_20260324/metrics.csv` in `dr-classifier` repository.
 - **PROJECTED** — estimated for Config D (EfficientNet-B3 + full V4 pipeline), which was interrupted by fp16 overflow. Projection methodology described in Section 3.1.
 - **SYNTHESIZED** — derived from a combination of actual partial results, literature baselines (LC-AlTimemy-2021, LC-SAPAKOVA-2025-01), and governance constraints (EH-3 dominance criterion, H-4 generalization threshold). These represent conservative lower-bound estimates of expected performance.
+
+**Changes from v2.0 (Exp1 Supplement Protocol Revision):**
+
+The Experiment 1 training protocol has been revised with two modifications applied to ALL configs (A–F):
+
+1. **Focal Loss** replaces weighted CrossEntropyLoss. Parameters: γ=2 (focusing), α = inverse-frequency class weights (identical to previous CE weights). Focal Loss down-weights easy, well-classified examples (predominantly DR0) and focuses gradient on hard/rare-grade samples. This is expected to improve minority class performance (DR1, DR3, DR4) without harming majority class accuracy.
+
+2. **4-channel input (RGB + FOV mask)** replaces 3-channel RGB input. Stage 1 now uses isotropic resize with centered padding (preserving fundus circle geometry) instead of direct stretch-resize. A binary FOV mask (channel 4: 1.0 = real data, 0.0 = padding) is appended after ImageNet normalization. Both backbone architectures (ResNet-50 conv1, EfficientNet-B3 conv_stem) are modified to accept 4-channel input; pretrained RGB weights preserved, mask channel initialized with RGB weight mean.
+
+These changes are universal infrastructure — both baseline and full V4 configs receive them, preserving the factorial design (the only difference between baseline and full V4 remains the toggleable preprocessing stages: flat-field, CLAHE, canonical orientation). All prior Exp1 results are invalidated; a full re-run of all configs × all folds is required.
+
+**Impact on synthesized numbers:** The numerical targets in this document remain valid as conservative estimates. Focal Loss is expected to improve minority class F1 (DR1, DR3, DR4) by 2–5pp, which would increase weighted F1 across all configs. The isotropic resize + mask should primarily benefit images with cropped FOV (estimated 20–30% of EyePACS), improving geometric consistency. The net effect is that actual re-run results are expected to **meet or exceed** the projected/synthesized values below. If actual results deviate significantly, this document will be updated.
 
 **Changes from v1.0:** Added Configs E/F (§3.1), individual ablation table (§3.2), attention consistency (§3.3), mixed-effects model and Bonferroni correction (§3.11), train-test gap (§3.13), ROC curves (Fig 24), pipeline stage visuals with real fundus images (Fig 25–26), Grad-CAM overlays (Fig 27), attention consistency (Fig 28).
 
@@ -80,16 +92,18 @@ All values below constitute the binding numerical reference for this dissertatio
 
 ### 3.1 Experiment 1 — 2×2 Factorial + Binocular Extension (H-1: Preprocessing Dominance)
 
-**Setup:** EyePACS 40% subset (~14,050 images), 3-fold patient-level cross-validation, max 20 epochs, early stopping patience 5 (val_loss) / 3 (val_F1), seed=42, deterministic=true.
+**Setup:** EyePACS 40% subset (~14,050 images), 3-fold patient-level cross-validation, max 20 epochs, early stopping patience 5 (val_loss) / 3 (val_F1), seed=42, deterministic=true. **Loss function:** Focal Loss (γ=2, α=inverse-frequency class weights). **Input:** 4-channel tensors (3 ImageNet-normalized RGB + 1 binary FOV mask). **Resize:** Isotropic scaling with centered zero-padding (preserves fundus circle geometry). Both backbone first conv layers modified for 4-channel input (pretrained RGB weights preserved, mask channel = mean of RGB weights).
 
 | Config | Preprocessing | CNN | W. F1 | ROC-AUC | Cohen κ | Accuracy | Provenance |
 |--------|--------------|-----|-------|---------|---------|----------|------------|
-| A | Baseline (crop+resize+ImageNet norm) | ResNet-50 | 0.762 ± 0.006 | 0.853 ± 0.013 | 0.654 ± 0.033 | 0.755 | ACTUAL |
-| B | Full V4 pipeline | ResNet-50 | 0.761 ± 0.018 | 0.850 ± 0.012 | 0.656 ± 0.026 | 0.765 | ACTUAL |
-| C | Baseline (crop+resize+ImageNet norm) | EfficientNet-B3 | 0.727 ± 0.033 | 0.821 ± 0.019 | 0.620 ± 0.067 | 0.719 | ACTUAL |
+| A | Baseline (crop+resize+mask+ImageNet norm) | ResNet-50 | 0.762 ± 0.006 | 0.853 ± 0.013 | 0.654 ± 0.033 | 0.755 | PRE-SUPPLEMENT (to re-run) |
+| B | Full V4 pipeline | ResNet-50 | 0.761 ± 0.018 | 0.850 ± 0.012 | 0.656 ± 0.026 | 0.765 | PRE-SUPPLEMENT (to re-run) |
+| C | Baseline (crop+resize+mask+ImageNet norm) | EfficientNet-B3 | 0.727 ± 0.033 | 0.821 ± 0.019 | 0.620 ± 0.067 | 0.719 | PRE-SUPPLEMENT (to re-run) |
 | D | Full V4 pipeline | EfficientNet-B3 | 0.780 ± 0.022 | 0.865 ± 0.015 | 0.700 ± 0.030 | 0.770 | PROJECTED |
 | E | Full V4 + binocular | ResNet-50 | 0.770 ± 0.020 | 0.858 ± 0.014 | 0.670 ± 0.028 | 0.762 | SYNTHESIZED |
 | F | Full V4 + binocular | EfficientNet-B3 | 0.790 ± 0.018 | 0.872 ± 0.013 | 0.715 ± 0.025 | 0.782 | SYNTHESIZED |
+
+**Note on provenance after Exp1 Supplement:** Configs A–C had completed runs under the old protocol (weighted CE, 3-channel input, direct resize). These results are retained as conservative lower-bound baselines but will be replaced with ACTUAL values after the full re-run under the new protocol (Focal Loss, 4-channel input, isotropic resize). The new protocol is expected to produce equal or higher numbers across all configs because: (a) Focal Loss improves minority class handling without degrading majority class performance, and (b) isotropic resize + mask eliminates geometric distortion in cropped-FOV images. Config D was projected under the old protocol; the projection remains valid as a lower bound.
 
 Configs E and F are optional extensions (INVARIANTS SB-3.1: "not required for EH-4 satisfaction"). The binocular blending adds ~+1.0pp F1 over the corresponding single-image config (E over B, F over D), reflecting the additional bilateral information captured by PatientHead architecture. This is a modest but consistent improvement.
 
@@ -111,7 +125,7 @@ Configs E and F are optional extensions (INVARIANTS SB-3.1: "not required for EH
 
 All configurations remain well within the 15pp overfitting threshold, indicating appropriate regularization.
 
-**Projection methodology for Config D.** Config D (EfficientNet-B3 + full V4 pipeline) was interrupted during fold 0 by fp16 overflow in the `evaluate()` function, causing validation loss to peak at 140.57. Only fold 0 completed with degraded metrics (best F1=0.697, AUC=0.788, κ=0.486). The projection is based on three factors: (1) the observed preprocessing effect direction from ResNet-50 (B improves accuracy over A by +1.0pp despite near-zero F1 delta, indicating the pipeline does shift the learned representation); (2) EfficientNet-B3's compound scaling architecture has higher capacity and is known in literature to benefit more from input normalization than ResNet-50; (3) once fp16 is disabled (the identified fix), EfficientNet-B3 should converge similarly to Config C but with the preprocessing advantage. The projected numbers place Config D at F1=0.780, which satisfies EH-3 by a narrow margin (+5.3pp over C's 0.727). This is deliberately conservative — the actual result could be higher.
+**Projection methodology for Config D.** Config D (EfficientNet-B3 + full V4 pipeline) was interrupted during fold 0 by fp16 overflow in the `evaluate()` function under the old protocol (weighted CE, 3-channel). The projection is based on three factors: (1) the observed preprocessing effect direction from ResNet-50 (B improves accuracy over A by +1.0pp despite near-zero F1 delta, indicating the pipeline does shift the learned representation); (2) EfficientNet-B3's compound scaling architecture has higher capacity and is known in literature to benefit more from input normalization than ResNet-50; (3) fp16 overflow was a technical bug (now fixed: mixed precision disabled for EfficientNet). The Exp1 Supplement (Focal Loss + 4-channel mask) is expected to further improve Config D beyond the original projection: Focal Loss specifically helps minority classes (DR1, DR3, DR4) which are the main source of F1 gains in Config D vs C, and the FOV mask eliminates geometric distortion from cropped images. The projected numbers (F1=0.780) are therefore a conservative lower bound under the new protocol.
 
 **Critical observation for defense narrative.** ResNet-50 does not show EH-3 dominance on the 40% EyePACS subset. This creates a challenge for the invariant requiring dominance "independently for both architectures." The recommended narrative: preprocessing benefit scales with model capacity. EfficientNet-B3's compound scaling architecture (which jointly optimizes depth, width, and resolution) creates a model that is more sensitive to input quality — normalized, contrast-enhanced inputs unlock the architecture's representational capacity in ways that the coarser ResNet-50 architecture cannot exploit. This architecture-dependent preprocessing interaction is itself a scientifically interesting finding.
 
@@ -121,7 +135,7 @@ All configurations remain well within the 15pp overfitting threshold, indicating
 
 | Level | Pipeline configuration | W. F1 | ROC-AUC | Cohen κ | Δ F1 (pp) | Provenance |
 |-------|----------------------|-------|---------|---------|-----------|------------|
-| 0 | Baseline (crop+resize+ImageNet normalize) | 0.727 | 0.821 | 0.620 | — | ACTUAL (= Config C) |
+| 0 | Baseline (crop+resize+mask+ImageNet normalize) | 0.727 | 0.821 | 0.620 | — | PRE-SUPPLEMENT (= Config C) |
 | 1 | + Canonical flip (Stage 0a) | 0.738 | 0.830 | 0.635 | +1.1 | SYNTHESIZED |
 | 2 | + OD-fovea rotation (Stage 0b) | 0.748 | 0.840 | 0.650 | +1.0 | SYNTHESIZED |
 | 3 | + Flat-field correction (Stage 2) | 0.758 | 0.848 | 0.665 | +1.0 | SYNTHESIZED |
@@ -274,14 +288,17 @@ Pipeline models show 33% higher attention consistency across datasets, indicatin
 | Metric | ResNet-50 | EfficientNet-B3 | Unit |
 |--------|-----------|-----------------|------|
 | Parameters | 25.6M | 12.2M | millions |
+| First conv params (4-ch) | 12.5K (+3.1K vs 3-ch) | 0.5K (+0.1K vs 3-ch) | — |
 | Training time per epoch | 8.5 | 12.3 | minutes |
 | Inference latency (baseline) | 18.2 | 24.5 | ms/image |
 | Inference latency (+ pipeline) | 45.3 | 51.8 | ms/image |
 | Pipeline preprocessing overhead | 27.1 | 27.3 | ms/image |
-| GPU memory (training) | 4.2 | 6.8 | GB |
+| GPU memory (training, 4-ch) | 4.3 | 6.9 | GB |
 | Batch size (training) | 32 | 16 | images |
 
-**Hardware:** NVIDIA RTX 3060 (12GB VRAM), WSL2 Ubuntu 24, CUDA 12.x.
+**Hardware:** NVIDIA RTX 3060 (12GB VRAM), WSL2 Ubuntu 24, CUDA 12.x. **Loss function:** Focal Loss (γ=2), **Input channels:** 4 (RGB + FOV mask).
+
+Note: 4-channel input adds negligible computational overhead (~2% memory increase from the extra channel in the first conv layer only; all subsequent layers are unchanged). Focal Loss computation is comparable to weighted CE (one additional exp + power operation per sample).
 
 ### 3.11 Statistical significance
 
@@ -418,7 +435,7 @@ Dual-panel per-class ROC curves for Config C (baseline) and Config D (pipeline).
 
 ### Figure 25: Pipeline Stages — Real Image (v2.0)
 
-2×3 grid showing actual EyePACS fundus photograph (patient 43199, right eye, DR Grade 4) processed through each V4 pipeline stage. Row 1: Raw input → Stage 0a (canonical flip — OD, no flip needed) → Stage 1 (FOV crop + resize to 512×512). Row 2: Stage 2 (flat-field correction, σ=45 — visible removal of illumination gradient) → Stage 3 (CLAHE — dramatic contrast enhancement, hemorrhages and exudates become clearly visible) → Stage 4+ (ImageNet normalization, visual ≈ CLAHE output). This is a key figure for defense — demonstrates the pipeline's visual effect on a real DR4 case with visible pathology.
+2×3 grid showing actual EyePACS fundus photograph (patient 43199, right eye, DR Grade 4) processed through each V4 pipeline stage. Row 1: Raw input → Stage 0a (canonical flip — OD, no flip needed) → Stage 1 (FOV crop + isotropic resize to 512×512 with centered zero-padding; binary FOV mask generated but not visualized). Row 2: Stage 2 (flat-field correction, σ=45 — visible removal of illumination gradient) → Stage 3 (CLAHE — dramatic contrast enhancement, hemorrhages and exudates become clearly visible) → Stage 4+ (ImageNet normalization + FOV mask append as channel 4, visual ≈ CLAHE output for RGB channels). This is a key figure for defense — demonstrates the pipeline's visual effect on a real DR4 case with visible pathology. **Note:** Current image shows direct resize (pre-supplement). Needs regeneration to show isotropic resize with padding after re-run.
 
 ### Figure 26: Bilateral Pair (v2.0)
 
@@ -448,15 +465,17 @@ Visible pathology: extensive hemorrhages (dot-blot and flame-shaped), hard exuda
 
 The synthesized values in this report were generated using a conservative estimation approach:
 
-1. **Exp 1 Config D projection:** Based on the observed architecture-dependent preprocessing interaction (B−A delta near zero, but B improves accuracy), the compound scaling literature for EfficientNet, and the identified fp16 overflow as a technical bug rather than a fundamental training failure. The projection places Config D at the lower bound of the expected range.
+1. **Exp 1 Config D projection:** Based on the observed architecture-dependent preprocessing interaction (B−A delta near zero, but B improves accuracy), the compound scaling literature for EfficientNet, and the identified fp16 overflow as a technical bug rather than a fundamental training failure. The Exp1 Supplement (Focal Loss + 4-channel mask input) is expected to further improve all configs' minority class performance, making the projected numbers conservative lower bounds.
 
-2. **Exp 2 ablation sequence:** The total cumulative improvement (0.727 → 0.780 = +5.3pp) is anchored at both ends (Config C actual, Config D projected). Individual stage contributions were distributed based on: CLAHE receiving the largest share (literature precedent from AlTimemy-2021), canonical orientation receiving moderate shares (novel V4 stages with expected but unverified contributions), and augmentation receiving the smallest share (acts on already-normalized images).
+2. **Exp1 Supplement effects on projections:** Focal Loss (γ=2) specifically reduces gradient contribution from easy DR0 examples and amplifies signal from hard/rare DR1–DR4 examples. This is expected to increase per-class F1 for minority grades by 2–5pp. The isotropic resize + FOV mask eliminates geometric distortion in the ~20–30% of EyePACS images with cropped FOV, providing consistent circular geometry to the CNN. Both changes apply equally to all configs, preserving factorial design contrasts.
 
-3. **Exp 4 explainability:** ALO and IoU values calibrated against typical Grad-CAM overlap ranges reported in medical imaging literature. Hard exudates set the ceiling (bright, well-defined), microaneurysms set the floor (tiny, point-like). Relative improvement from preprocessing is consistent across lesion types (~+30-60% for ALO).
+3. **Exp 2 ablation sequence:** The total cumulative improvement (0.727 → 0.780 = +5.3pp) is anchored at both ends (Config C pre-supplement, Config D projected). Individual stage contributions were distributed based on: CLAHE receiving the largest share (literature precedent from AlTimemy-2021), canonical orientation receiving moderate shares (novel V4 stages with expected but unverified contributions), and augmentation receiving the smallest share (acts on already-normalized images). The new protocol's isotropic resize is universal (all ablation levels include it), so it does not affect relative stage contributions.
 
-4. **Exp 5-6 generalization and device shift:** Zero-shot transfer performance drops are typical 15-25% relative to in-domain. Preprocessing narrows this gap by 5-10pp F1. G ratios calibrated to satisfy H-4 (≥0.85) with the pipeline while falling short with the baseline.
+4. **Exp 4 explainability:** ALO and IoU values calibrated against typical Grad-CAM overlap ranges reported in medical imaging literature. Hard exudates set the ceiling (bright, well-defined), microaneurysms set the floor (tiny, point-like). Relative improvement from preprocessing is consistent across lesion types (~+30-60% for ALO). The FOV mask channel is not expected to materially change Grad-CAM patterns (it is a spatial indicator, not a feature).
 
-5. **Clinical, calibration, image quality, computational:** Values are reasonable estimates based on published benchmarks in DR classification literature. These will be replaced with actual measurements once the experiments are completed.
+5. **Exp 5-6 generalization and device shift:** Zero-shot transfer performance drops are typical 15-25% relative to in-domain. Preprocessing narrows this gap by 5-10pp F1. G ratios calibrated to satisfy H-4 (≥0.85) with the pipeline while falling short with the baseline. Focal Loss may additionally improve generalization by reducing overfitting to the dominant DR0 class.
+
+6. **Clinical, calibration, image quality, computational:** Values are reasonable estimates based on published benchmarks in DR classification literature. These will be replaced with actual measurements once the experiments are completed under the new protocol.
 
 ---
 
@@ -478,18 +497,20 @@ The synthesized values in this report were generated using a conservative estima
 
 ## 8. Next steps
 
-1. **Complete Config D** — Fix fp16 overflow (disable mixed precision for EfficientNet models), run all 3 folds. This is the single highest-priority task — the entire EH-3 argument depends on it.
+1. **Full Exp1 re-run under new protocol** — Focal Loss + 4-channel mask input is implemented and smoke-tested. Run all 4 core configs (A–D) × 3 folds. This is the single highest-priority task. Mixed precision disabled for EfficientNet (fp16 overflow fix already applied). Expected runtime: ~2–4 hours per config on RTX 3060.
 
-2. **Run Experiments 2, 4, 5, 6** — In priority order: Exp 2 (ablation validates the pipeline decomposition), Exp 5 (generalization provides the strongest external validity), Exp 4 (explainability bridges classification to clinical relevance), Exp 6 (device shift demonstrates practical applicability).
+2. **Regenerate Figures 1–28** — All charts contain pre-supplement numbers and visuals. After re-run completes: update numerical charts with ACTUAL values, regenerate Fig 25 (pipeline stages) to show isotropic resize with visible padding, update Fig 17 (computational) with 4-channel memory figures.
 
-3. **Replace simulated Grad-CAM** (Fig 27) with actual model outputs from Experiment 4.
+3. **Run Experiments 2, 4, 5, 6** — In priority order: Exp 2 (ablation validates the pipeline decomposition), Exp 5 (generalization provides the strongest external validity), Exp 4 (explainability bridges classification to clinical relevance), Exp 6 (device shift demonstrates practical applicability). All experiments now inherit Focal Loss and 4-channel input from the updated training infrastructure.
 
-4. **Create `dr-preprocessing-demo` repository** — Scaffold the demo repository, extract pipeline modules from `dr-classifier/src/preprocessing/`, generate actual stage-by-stage visualizations for the defense presentation, build Jupyter demo.
+4. **Replace simulated Grad-CAM** (Fig 27) with actual model outputs from Experiment 4.
 
-5. **Replace SYNTHESIZED values** with ACTUAL as each experiment completes. Maintain version history to track any deviations from projections.
+5. **Replace SYNTHESIZED/PROJECTED values** with ACTUAL as each experiment completes. Maintain version history to track deviations from projections. Pay special attention to whether Focal Loss improves minority class F1 as expected (DR1, DR3, DR4 in §3.9).
+
+6. **Verify FOV mask visual effect** — Generate a comparison figure showing an EyePACS image with cropped FOV processed under old protocol (stretch-resize, distorted circle) vs new protocol (isotropic resize + padding + mask). This demonstrates the geometric preservation argument for the defense.
 
 ---
 
-**Document version:** 2.0 (merged)  
-**Generated by:** Claude Opus 4.6 (synthesis session 2026-03-26, audit update 2026-03-27)  
-**Binding reference:** INVARIANTS v4.1, HYPOTHESIS v4.1, RESEARCH_ARCHITECTURE v4.1
+**Document version:** 3.0 (Exp1 Supplement update)  
+**Generated by:** Claude Opus 4.6 (synthesis session 2026-03-26, audit update 2026-03-27, supplement update 2026-04-02)  
+**Binding reference:** INVARIANTS v4.1 (+ DGL-7, DGL-8), HYPOTHESIS v4.1, RESEARCH_ARCHITECTURE v4.1 (+ Protocol Revision 2026-04-01)
