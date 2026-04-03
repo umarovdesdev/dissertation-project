@@ -37,7 +37,7 @@ The architecture encompasses:
 | Symbol | Meaning |
 |--------|---------|
 | $I$ | Raw fundus image (BGR uint8) |
-| $I'$ | Preprocessed image (float32 CHW tensor) |
+| $I'$ | Preprocessed image (float32 CHW tensor, 4 channels: RGB + FOV mask) |
 | $\mathbf{f}$ | Feature vector (CNN output before classification head) |
 | $\mathbf{z}$ | Logit vector (pre-softmax class scores) |
 | $\hat{\mathbf{p}}$ | Probability vector (post-softmax) |
@@ -102,14 +102,14 @@ $$
 | $s_L$, $s_R$ | `str` | — | Eye laterality: `"left"`, `"right"`, or `"unknown"` |
 | Patient ID | `str` | — | Unique patient identifier for bilateral grouping |
 
-The raw spatial dimensions $(H_0, W_0)$ vary across imaging devices (e.g., EyePACS: $3168 \times 4752$; IDRiD: $2848 \times 4288$). The preprocessing module normalizes all images to a uniform $(512, 512, 3)$ spatial resolution.
+The raw spatial dimensions $(H_0, W_0)$ vary across imaging devices (e.g., EyePACS: $3168 \times 4752$; IDRiD: $2848 \times 4288$). The preprocessing module normalizes all images to a uniform $512 \times 512$ spatial resolution and produces a 4-channel tensor: 3 RGB channels (ImageNet-normalized) plus a binary FOV mask channel indicating real pixel data (1.0) vs. padding (0.0).
 
 ### 3.2 Missing Eye Handling
 
 When one eye is absent from the patient record, the system substitutes a zero tensor:
 
 $$
-I'_{\text{missing}} = \mathbf{0} \in \mathbb{R}^{3 \times 512 \times 512}
+I'_{\text{missing}} = \mathbf{0} \in \mathbb{R}^{4 \times 512 \times 512}
 $$
 
 accompanied by a binary presence mask $m \in \{0, 1\}$ per eye. The downstream aggregation module uses these masks to ensure that absent-eye features do not contribute to the patient-level representation.
@@ -125,16 +125,16 @@ All images belonging to the same patient (identified by Patient ID) are assigned
 ### 4.1 Module Contract
 
 $$
-\mathcal{P}: \bigl(\mathbb{R}^{H_0 \times W_0 \times 3}_{\text{uint8}},\; s\bigr) \;\longrightarrow\; \mathbb{R}^{3 \times 512 \times 512}_{\text{float32}}
+\mathcal{P}: \bigl(\mathbb{R}^{H_0 \times W_0 \times 3}_{\text{uint8}},\; s\bigr) \;\longrightarrow\; \mathbb{R}^{4 \times 512 \times 512}_{\text{float32}}
 $$
 
-The preprocessing module $\mathcal{P}$ transforms a raw BGR fundus image and its eye laterality label into a normalized float32 tensor suitable for CNN input. It is defined by the V4 6-stage pipeline specification (see *V4 Data Processing Pipeline — Comprehensive Specification*) and comprises the following stages executed in strict order:
+The preprocessing module $\mathcal{P}$ transforms a raw BGR fundus image and its eye laterality label into a normalized float32 tensor suitable for CNN input. The output has 4 channels: channels 0–2 are ImageNet-normalized RGB, and channel 3 is a binary FOV mask (1.0 = real pixel data, 0.0 = padding from isotropic resize). It is defined by the V4 6-stage pipeline specification (see *V4 Data Processing Pipeline — Comprehensive Specification*) and comprises the following stages executed in strict order:
 
 | Stage | Operation | Deterministic? |
 |-------|-----------|---------------|
 | 0a | Canonical flip (left → right eye orientation) | Yes |
 | 0b | OD-fovea rotation normalization | Yes (conditional) |
-| 1 | FOV crop + resize to $512 \times 512$ | Yes |
+| 1 | FOV crop + isotropic resize + padding + FOV mask generation | Yes |
 | 2 | Flat-field illumination correction ($\sigma = 45$) | Yes |
 | 3 | Dual-constraint CLAHE (LAB L-channel, stochastic at train) | Stochastic (train) |
 | 5 | Integrated augmentation (affine + color, train only) | Stochastic (train) |
@@ -186,6 +186,8 @@ Two backbone families are employed, corresponding to the two arms of the factori
 | Final spatial map | $\mathbf{A} \in \mathbb{R}^{2048 \times 16 \times 16}$ (for $512 \times 512$ input) |
 | Pooling | Global average pooling $\rightarrow \mathbf{f} \in \mathbb{R}^{2048}$ |
 
+The first convolutional layer (`conv1`) is modified to accept 4-channel input (RGB + FOV mask): `Conv2d(4, 64, 7, stride=2, padding=3)`. Pretrained ImageNet weights are copied for channels 0–2; channel 3 (mask) is initialized with the mean of the RGB channel weights.
+
 The forward pass through the ResNet-50 backbone can be decomposed as:
 
 $$
@@ -204,7 +206,7 @@ where each Stage$_i$ is a sequence of bottleneck residual blocks.
 | Final spatial map | $\mathbf{A} \in \mathbb{R}^{1536 \times 16 \times 16}$ (for $512 \times 512$ input) |
 | Pooling | Global average pooling $\rightarrow \mathbf{f} \in \mathbb{R}^{1536}$ |
 
-EfficientNet employs mobile inverted bottleneck convolutions (MBConv) with squeeze-and-excitation (SE) attention. The `conv_head` layer (1×1 convolution expanding channels before pooling) serves as the Grad-CAM target layer for the explainability module.
+EfficientNet employs mobile inverted bottleneck convolutions (MBConv) with squeeze-and-excitation (SE) attention. The first convolutional layer (`conv_stem`) is modified to accept 4-channel input: `Conv2d(4, 40, 3, stride=2, padding=1)`. Pretrained weights are copied for channels 0–2; channel 3 (mask) is initialized with the mean of the RGB channel weights. The `conv_head` layer (1×1 convolution expanding channels before pooling) serves as the Grad-CAM target layer for the explainability module.
 
 #### 5.2.3 EfficientNet-B4 (Explainability Only)
 
@@ -231,10 +233,10 @@ The head produces raw logits $\mathbf{z} \in \mathbb{R}^K$ (pre-softmax) for eac
 The complete per-eye forward pass is:
 
 $$
-I' \in \mathbb{R}^{3 \times 512 \times 512} \;\xrightarrow{\text{CNN}_\theta^{\text{base}}}\; \mathbf{A} \in \mathbb{R}^{d \times H' \times W'} \;\xrightarrow{\text{GAP}}\; \mathbf{f} \in \mathbb{R}^d \;\xrightarrow{h_\theta}\; \mathbf{z} \in \mathbb{R}^K
+I' \in \mathbb{R}^{4 \times 512 \times 512} \;\xrightarrow{\text{CNN}_\theta^{\text{base}}}\; \mathbf{A} \in \mathbb{R}^{d \times H' \times W'} \;\xrightarrow{\text{GAP}}\; \mathbf{f} \in \mathbb{R}^d \;\xrightarrow{h_\theta}\; \mathbf{z} \in \mathbb{R}^K
 $$
 
-where $H' = W' = 16$ for $512 \times 512$ input images.
+where $H' = W' = 16$ for $512 \times 512$ input images. The CNN backbone's first convolutional layer accepts 4-channel input (3 RGB + 1 FOV mask); pretrained ImageNet weights are preserved for the RGB channels, and the mask channel weights are initialized with the mean of the RGB channel weights.
 
 ---
 
@@ -418,19 +420,21 @@ where grade $\geq 2$ (moderate NPDR or worse) constitutes referable DR requiring
 
 ### 8.4 Loss Function (Training)
 
-The model is trained with weighted cross-entropy loss to address severe class imbalance in the EyePACS dataset (grade 0 constitutes $\sim$74% of samples):
+The model is trained with Focal Loss (Lin et al., 2017) to address severe class imbalance in the EyePACS dataset (grade 0 constitutes $\sim$74% of samples). Focal Loss extends weighted cross-entropy by adding a modulating factor $(1 - p_t)^\gamma$ that down-weights easy, well-classified examples and focuses training on hard, misclassified samples:
 
 $$
-\mathcal{L} = -\sum_{k=0}^{K-1} w_k \cdot y_k \cdot \log(\hat{p}_k)
+\mathcal{L}_{\text{FL}} = -\sum_{i=1}^{B} \alpha_{y_i} \cdot (1 - p_{t,i})^\gamma \cdot \log(p_{t,i})
 $$
 
-where $y_k$ is the one-hot encoded ground truth and $w_k$ is the inverse-frequency class weight:
+where $p_{t,i} = \hat{p}_{y_i}$ is the model's predicted probability for the true class of sample $i$, $\gamma = 2$ is the focusing parameter, and $\alpha_{y_i}$ is the inverse-frequency class weight:
 
 $$
-w_k = \frac{N}{K \cdot n_k}
+\alpha_k = \frac{N}{K \cdot n_k}
 $$
 
-with $N$ the total sample count, $K = 5$ the class count, and $n_k$ the count of samples in class $k$. Weights are normalized so that $\sum_k w_k = K$.
+with $N$ the total sample count, $K = 5$ the class count, and $n_k$ the count of samples in class $k$. Weights are normalized so that $\sum_k \alpha_k = K$.
+
+**Modulating factor effect.** When an example is well-classified ($p_t \to 1$), the factor $(1 - p_t)^\gamma \to 0$, suppressing its gradient contribution. When $p_t = 0.9$ (easy example), the modulating factor is $0.01$ — a 100× reduction versus standard cross-entropy. Hard examples ($p_t \ll 1$) retain near-full gradient signal. This automatically focuses optimization on diagnostically important cases (rare DR grades and ambiguous borderline images) without discarding any training data.
 
 ### 8.5 Training Configuration
 
@@ -583,7 +587,7 @@ Patient Record
 │  (V4 pipeline)   │                  │  (V4 pipeline)   │
 └────────┬─────────┘                  └────────┬─────────┘
          │                                     │
-    I'_L ∈ ℝ^{3×512×512}                 I'_R ∈ ℝ^{3×512×512}
+    I'_L ∈ ℝ^{4×512×512}                 I'_R ∈ ℝ^{4×512×512}
          │                                     │
          ▼                                     ▼
     ┌────────────┐                        ┌────────────┐
@@ -634,7 +638,7 @@ Patient Record
 $$
 I \in \mathbb{R}^{H_0 \times W_0 \times 3}_{\text{uint8}}
 \;\xrightarrow{\mathcal{P}}\;
-I' \in \mathbb{R}^{3 \times 512 \times 512}_{\text{float32}}
+I' \in \mathbb{R}^{4 \times 512 \times 512}_{\text{float32}}
 \;\xrightarrow{\text{CNN}^{\text{base}}}\;
 \mathbf{A} \in \mathbb{R}^{d \times 16 \times 16}
 \;\xrightarrow{\text{GAP}}\;

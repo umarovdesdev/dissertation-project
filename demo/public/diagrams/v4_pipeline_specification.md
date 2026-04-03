@@ -29,11 +29,11 @@ The V4 pipeline comprises **six ordered stages** applied to raw fundus photograp
 |-------|------|--------|--------|--------|
 | 0a | Canonical Flip | toggleable | RGB uint8 → RGB uint8 | Right-eye orientation |
 | 0b | OD-Fovea Rotation Normalization | toggleable | RGB uint8 → RGB uint8 | Horizontal retinal axis |
-| 1 | FOV Crop + Resize | always on | RGB uint8 → RGB uint8 | 512×512 centered fundus |
+| 1 | FOV Crop + Isotropic Resize + Mask | always on | RGB uint8 → RGB uint8 + float32 mask | 512×512 centered fundus + FOV mask |
 | 2 | Flat-Field Correction | toggleable | RGB uint8 → RGB uint8 | Uniform illumination |
 | 3 | Upgraded CLAHE | toggleable | RGB uint8 → RGB uint8 | Enhanced local contrast |
 | 5 | Integrated Augmentation | train only | RGB uint8 → RGB uint8 | Augmented training image |
-| 4 | ImageNet Normalization | always on | RGB uint8 → float32 tensor | CNN-ready (3, H, W) |
+| 4 | ImageNet Normalization + Mask Append | always on | RGB uint8 + mask → float32 tensor | CNN-ready (4, H, W) |
 
 Stage 5 (augmentation) is inserted **before** Stage 4 (normalization) because augmentation operates on uint8 pixel values. Stage 4 is always the final transformation, converting to a normalized float32 tensor.
 
@@ -52,7 +52,7 @@ Stage 5 (augmentation) is inserted **before** Stage 4 (normalization) because au
 | $I_{\text{raw}}$ | `np.ndarray`, uint8 | $(H_0, W_0, 3)$ | Raw fundus image as loaded (BGR from `cv2.imread`) |
 | $I_{\text{rgb}}$ | `np.ndarray`, uint8 | $(H_0, W_0, 3)$ | Image after BGR→RGB conversion |
 | $I^{(k)}$ | `np.ndarray`, uint8 | varies | Image after Stage $k$ |
-| $T$ | `torch.Tensor`, float32 | $(3, 512, 512)$ | Final normalized tensor (pipeline output) |
+| $T$ | `torch.Tensor`, float32 | $(4, 512, 512)$ | Final normalized tensor (pipeline output): channels 0–2 = ImageNet-normalized RGB, channel 3 = binary FOV mask |
 | $s$ | `str` | — | Eye side: `"left"`, `"right"`, or `"unknown"` |
 
 ### 2.4 Color Space Convention
@@ -316,19 +316,19 @@ def rotate_to_horizontal(image: np.ndarray, angle_deg: float) -> np.ndarray:
 
 ---
 
-## 5. Stage 1 — FOV Crop and Resize
+## 5. Stage 1 — FOV Crop, Isotropic Resize, and Mask Generation
 
 ### 5.1 Purpose
 
-Remove non-retinal black background (common in fundus cameras with circular fields of view embedded in rectangular sensors) and resize all images to a uniform spatial resolution of $512 \times 512$ pixels.
+Remove non-retinal black background (common in fundus cameras with circular fields of view embedded in rectangular sensors) and resize all images to a uniform spatial resolution of $512 \times 512$ pixels. Isotropic scaling preserves the circular geometry of the fundus field of view, and a binary mask channel is generated to explicitly distinguish real pixel data from zero-padding.
 
 ### 5.2 Method
 
-**Name:** PIL-based Foreground Detection + Resize  
+**Name:** PIL-based Foreground Detection + Isotropic Resize + FOV Mask Generation  
 **Input:** $I^{(0b)} \in \mathbb{R}^{H \times W \times 3}$ (RGB uint8)  
-**Output:** $I^{(1)} \in \mathbb{R}^{512 \times 512 \times 3}$ (RGB uint8)  
+**Output:** $(I^{(1)}, M^{(1)})$ where $I^{(1)} \in \mathbb{R}^{512 \times 512 \times 3}$ (RGB uint8) and $M^{(1)} \in \{0.0, 1.0\}^{512 \times 512}$ (float32 binary mask)  
 **Key Parameters:** `target_size = 512`  
-**Assumptions:** Fundus images from wide-field cameras are landscape-oriented ($W > 1.2H$) with dark borders on left and right. Square or portrait images use a center-crop fallback.
+**Assumptions:** Fundus images from wide-field cameras are landscape-oriented ($W > 1.2H$) with dark borders on left and right. Square or portrait images use a center-crop fallback. Isotropic scaling ensures the fundus circle is not distorted into an ellipse when the crop region is non-square.
 
 ### 5.3 Mathematical Formalization
 
@@ -355,26 +355,91 @@ $$
 l = \max\!\left(\frac{W - H}{2},\; 0\right), \quad u = 0, \quad r = \min\!\left(W - \frac{W - H}{2},\; W\right), \quad d = H
 $$
 
-**Resize.** Crop to bbox, then resize to $512 \times 512$ via bilinear interpolation:
+**Resize.** Crop to bbox, then apply isotropic scaling with centered padding. The scale factor preserves aspect ratio:
 
 $$
-I^{(1)} = \text{resize}\!\bigl(\text{crop}(I^{(0b)}, \text{bbox}),\; 512, 512\bigr)
+s = \frac{512}{\max(h_{\text{crop}}, w_{\text{crop}})}, \quad w' = \lfloor w_{\text{crop}} \cdot s \rfloor, \quad h' = \lfloor h_{\text{crop}} \cdot s \rfloor
 $$
+
+The resized region is centered on a $512 \times 512$ zero-padded canvas:
+
+$$
+x_{\text{off}} = \left\lfloor \frac{512 - w'}{2} \right\rfloor, \quad y_{\text{off}} = \left\lfloor \frac{512 - h'}{2} \right\rfloor
+$$
+
+$$
+I^{(1)}(x, y, c) = \begin{cases}
+\text{resize}(\text{crop}(I^{(0b)}, \text{bbox}),\; w', h')(x - x_{\text{off}},\; y - y_{\text{off}},\; c) & \text{if } x_{\text{off}} \leq x < x_{\text{off}} + w' \text{ and } y_{\text{off}} \leq y < y_{\text{off}} + h' \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+**FOV mask generation.** A binary mask $M^{(1)}$ records which pixels contain real image data:
+
+$$
+M^{(1)}(x, y) = \begin{cases}
+1.0 & \text{if } x_{\text{off}} \leq x < x_{\text{off}} + w' \text{ and } y_{\text{off}} \leq y < y_{\text{off}} + h' \\
+0.0 & \text{otherwise (padding)}
+\end{cases}
+$$
+
+This mask is carried through Stages 2–5 without modification and appended as channel 3 of the final output tensor in Stage 4.
 
 ### 5.4 Python Implementation
 
 ```python
+import cv2
 import numpy as np
 from PIL import Image, ImageFilter
 
-def crop_and_resize(image: np.ndarray, target_size: int = 512) -> np.ndarray:
-    """Crop to FOV region and resize to target_size × target_size.
+def detect_is_cropped(image: np.ndarray) -> bool:
+    """Detect whether the fundus circle is cropped by the camera frame.
+    
+    Uses three concordant checks:
+    1. Circle fit test — max inscribed circle extends beyond image bounds.
+    2. Border touch test — foreground mask touches image edges.
+    3. Arc coverage test — contour arc length < 90% of expected circumference.
+    
+    Args:
+        image: RGB uint8 array, shape (H, W, 3).
+    Returns:
+        True if the fundus circle appears cropped.
+    """
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    _, binary = cv2.threshold(gray, 15, 255, cv2.THRESH_BINARY)
+    h, w = binary.shape
+
+    dist = cv2.distanceTransform(binary, cv2.DIST_L2, 5)
+    _, max_r, _, max_loc = cv2.minMaxLoc(dist)
+    cx, cy = max_loc
+    margin = 2
+    fits = (cx - max_r >= -margin and cx + max_r <= w + margin and
+            cy - max_r >= -margin and cy + max_r <= h + margin)
+
+    touches_border = (binary[0, :].any() or binary[-1, :].any() or
+                      binary[:, 0].any() or binary[:, -1].any())
+
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    coverage = 1.0
+    if contours and max_r > 10:
+        largest = max(contours, key=cv2.contourArea)
+        arc_length = cv2.arcLength(largest, closed=False)
+        expected = 2.0 * np.pi * max_r
+        coverage = arc_length / expected if expected > 0 else 1.0
+
+    return (not fits) or touches_border or (coverage < 0.9)
+
+def crop_and_resize(image: np.ndarray, target_size: int = 512) -> tuple[np.ndarray, np.ndarray]:
+    """Crop to FOV region and resize isotropically with centered padding.
     
     Args:
         image: RGB uint8 array, shape (H, W, 3).
         target_size: Output resolution (square).
     Returns:
-        RGB uint8 array, shape (target_size, target_size, 3).
+        Tuple of:
+          - image: RGB uint8 array, shape (target_size, target_size, 3).
+          - mask: float32 array, shape (target_size, target_size),
+                  1.0 = real data, 0.0 = padding.
     """
     pil_img = Image.fromarray(image)
     w, h = pil_img.size
@@ -396,8 +461,24 @@ def crop_and_resize(image: np.ndarray, target_size: int = 512) -> np.ndarray:
         bbox = (left, 0, min(w - (w - h) // 2, w), h)
     
     cropped = pil_img.crop(bbox)
-    resized = cropped.resize([target_size, target_size])
-    return np.array(resized, dtype=np.uint8)
+    crop_w, crop_h = cropped.size
+    
+    # Isotropic resize: scale to fit, then pad
+    scale = target_size / max(crop_h, crop_w)
+    new_w = int(crop_w * scale)
+    new_h = int(crop_h * scale)
+    resized = cropped.resize((new_w, new_h), Image.Resampling.LANCZOS)
+    resized_arr = np.array(resized, dtype=np.uint8)
+    
+    canvas = np.zeros((target_size, target_size, 3), dtype=np.uint8)
+    y_off = (target_size - new_h) // 2
+    x_off = (target_size - new_w) // 2
+    canvas[y_off:y_off + new_h, x_off:x_off + new_w] = resized_arr
+    
+    mask = np.zeros((target_size, target_size), dtype=np.float32)
+    mask[y_off:y_off + new_h, x_off:x_off + new_w] = 1.0
+    
+    return canvas, mask
 ```
 
 ---
@@ -804,9 +885,9 @@ Convert the processed RGB uint8 image to a float32 tensor normalized with ImageN
 
 ### 9.2 Method
 
-**Name:** ToTensor + ImageNet Channel-wise Normalization  
-**Input:** $I^{(5)} \in \{0, \ldots, 255\}^{512 \times 512 \times 3}$ (RGB uint8, HWC)  
-**Output:** $T \in \mathbb{R}^{3 \times 512 \times 512}$ (float32 tensor, CHW)  
+**Name:** ToTensor + ImageNet Channel-wise Normalization + FOV Mask Append  
+**Input:** $I^{(5)} \in \{0, \ldots, 255\}^{512 \times 512 \times 3}$ (RGB uint8, HWC) and $M^{(1)} \in \{0.0, 1.0\}^{512 \times 512}$ (FOV mask from Stage 1)  
+**Output:** $T \in \mathbb{R}^{4 \times 512 \times 512}$ (float32 tensor, CHW)  
 **Key Parameters:**
 
 | Parameter | Symbol | Value | Description |
@@ -814,7 +895,7 @@ Convert the processed RGB uint8 image to a float32 tensor normalized with ImageN
 | Mean | $\boldsymbol{\mu}$ | $(0.485, 0.456, 0.406)$ | ImageNet per-channel mean |
 | Std | $\boldsymbol{\sigma}$ | $(0.229, 0.224, 0.225)$ | ImageNet per-channel std |
 
-**Assumptions:** The pre-trained backbone weights were learned on ImageNet-normalized inputs. Matching this distribution preserves the transferability of learned feature representations.
+**Assumptions:** The pre-trained backbone weights were learned on ImageNet-normalized inputs. Matching this distribution preserves the transferability of learned feature representations. The FOV mask channel (channel 3) is not normalized — it is appended directly as a binary indicator (0.0 or 1.0).
 
 ### 9.3 Mathematical Formalization
 
@@ -829,7 +910,17 @@ with axis transposition $(H, W, C) \to (C, H, W)$.
 **Step 2 — Channel-wise normalization:**
 
 $$
-T_c(x,y) = \frac{\tilde{I}_c(x,y) - \mu_c}{\sigma_c}
+T_c(x,y) = \frac{\tilde{I}_c(x,y) - \mu_c}{\sigma_c}, \quad c \in \{0, 1, 2\}
+$$
+
+**Step 3 — FOV mask append.** The binary FOV mask $M^{(1)}$ (generated in Stage 1, unchanged through Stages 2–5) is appended as channel 3:
+
+$$
+T_3(x,y) = M^{(1)}(x,y) \in \{0.0, 1.0\}
+$$
+
+$$
+T = [T_0,\; T_1,\; T_2,\; T_3] \in \mathbb{R}^{4 \times 512 \times 512}
 $$
 
 The combined operation for the red channel ($c = 0$) with ImageNet statistics:
@@ -866,6 +957,14 @@ def imagenet_normalize(
     return transform(image)
 ```
 
+The FOV mask is appended in the pipeline orchestrator (see Section 10.4) after `imagenet_normalize` returns the 3-channel RGB tensor:
+
+```python
+rgb_tensor = imagenet_normalize(image, mean, std)           # (3, 512, 512)
+mask_tensor = torch.from_numpy(fov_mask).unsqueeze(0)       # (1, 512, 512)
+T = torch.cat([rgb_tensor, mask_tensor], dim=0)             # (4, 512, 512)
+```
+
 ---
 
 ## 10. Complete Pipeline Orchestration
@@ -880,20 +979,24 @@ I_raw (BGR uint8, H₀×W₀×3)
   ├─ Stage 0a: Canonical Flip (if eye_side == "left")
   ├─ Stage 0b: OD-Fovea Rotation (if confident)
   │
-  ├─ Stage 1: FOV Crop + Resize → 512×512      [always]
+  ├─ Stage 1: FOV Crop + Isotropic Resize → 512×512 + FOV Mask  [always]
+  │     ├─ image: RGB uint8 (512×512×3), zero-padded
+  │     └─ mask:  float32 (512×512), 1.0=data / 0.0=padding
   │
-  ├─ Stage 2: Flat-Field Correction              [toggleable]
+  ├─ Stage 2: Flat-Field Correction (image only)      [toggleable]
   │
-  ├─ Stage 3: Upgraded CLAHE (stochastic @train) [toggleable]
+  ├─ Stage 3: Upgraded CLAHE (stochastic @train)       [toggleable]
   │
-  ├─ Stage 5: Augmentation (train only)          [train only]
+  ├─ Stage 5: Augmentation (train only)                [train only]
   │     ├─ Unified affine (rotation+zoom+stretch+shear)
   │     ├─ Brightness/contrast
   │     └─ PCA color jitter
   │
-  └─ Stage 4: ImageNet Normalize → Tensor        [always, last]
+  └─ Stage 4: ImageNet Normalize → Tensor + Mask Append [always, last]
        │
-       T (float32, 3×512×512)
+       T (float32, 4×512×512)
+         channels 0–2: ImageNet-normalized RGB
+         channel 3:    binary FOV mask
 ```
 
 ### 10.2 Pipeline Presets
@@ -916,7 +1019,7 @@ The `efficientnet` preset uses reduced augmentation because EfficientNet's compo
 
 | Condition | Stages Executed | Configuration |
 |-----------|----------------|---------------|
-| **Baseline (ABSENT)** | 1 → 4 | Crop + resize + ImageNet normalize only |
+| **Baseline (ABSENT)** | 1 → 4 | Crop + isotropic resize + mask + ImageNet normalize |
 | **Full V4 (ACTIVE)** | 0a → 0b → 1 → 2 → 3 → 5 → 4 | All stages, model-specific preset |
 
 ### 10.4 Unified Pipeline Call
@@ -935,8 +1038,8 @@ class PreprocessingPipelineV4:
                 image, eye_side=eye_side,
                 enable_rotation=self.config.use_od_fovea_rotation)
         
-        # Stage 1: FOV crop + resize (always)
-        image = crop_and_resize(image, self.config.target_size)
+        # Stage 1: FOV crop + isotropic resize (always) — returns (image, mask)
+        image, fov_mask = crop_and_resize(image, self.config.target_size)
         
         # Stage 2: Flat-field correction (toggleable)
         if self.config.use_flat_field:
@@ -952,8 +1055,12 @@ class PreprocessingPipelineV4:
             image = self._augmentation(image, od_fovea_result=od_fovea_result)
         
         # Stage 4: ImageNet normalize → tensor (always last)
-        return imagenet_normalize(image, self.config.normalize_mean,
-                                  self.config.normalize_std)
+        rgb_tensor = imagenet_normalize(image, self.config.normalize_mean,
+                                        self.config.normalize_std)
+        
+        # Append FOV mask as 4th channel
+        mask_tensor = torch.from_numpy(fov_mask).unsqueeze(0)  # (1, H, W)
+        return torch.cat([rgb_tensor, mask_tensor], dim=0)      # (4, H, W)
 ```
 
 ---
@@ -975,7 +1082,8 @@ class PreprocessingPipelineV4:
 | $I^{(0b)}$ | uint8 | $(H_0, W_0, 3)$ | 0b | After rotation normalization |
 | $b_c$ | int | $[0, 255]$ | 1 | Background level per channel |
 | $\text{bbox}$ | (int, int, int, int) | pixels | 1 | FOV bounding box |
-| $I^{(1)}$ | uint8 | $(512, 512, 3)$ | 1 | Cropped + resized |
+| $I^{(1)}$ | uint8 | $(512, 512, 3)$ | 1 | Cropped + isotropic resized (zero-padded) |
+| $M^{(1)}$ | float32 | $(512, 512)$ | 1 | Binary FOV mask: 1.0 = real data, 0.0 = padding |
 | $\sigma_{\text{ff}}$ | float | 45.0 | 2 | Flat-field Gaussian σ |
 | $\hat{L}_c$ | float32 | $(512, 512)$ | 2 | Estimated illumination field |
 | $I^{(2)}$ | uint8 | $(512, 512, 3)$ | 2 | Illumination-corrected |
@@ -997,7 +1105,7 @@ class PreprocessingPipelineV4:
 | $I^{(5)}$ | uint8 | $(512, 512, 3)$ | 5 | Augmented |
 | $\boldsymbol{\mu}$ | float | $(0.485, 0.456, 0.406)$ | 4 | ImageNet mean |
 | $\boldsymbol{\sigma}$ | float | $(0.229, 0.224, 0.225)$ | 4 | ImageNet std |
-| $T$ | float32 | $(3, 512, 512)$ | 4 | **Final output tensor** |
+| $T$ | float32 | $(4, 512, 512)$ | 4 | **Final output tensor**: channels 0–2 = ImageNet-normalized RGB, channel 3 = FOV mask |
 
 ---
 
@@ -1007,11 +1115,11 @@ class PreprocessingPipelineV4:
 |-------|-------------|---------|----------------|
 | 0a | Horizontal Mirror Flip | Standardize eye laterality | Yes |
 | 0b | Classical CV OD/Fovea Detection + Rotation | Standardize retinal axis | Yes (conditional) |
-| 1 | PIL Foreground Detection + Resize | Remove background, unify resolution | Yes |
+| 1 | PIL Foreground Detection + Isotropic Resize + Mask | Remove background, unify resolution, generate FOV mask | Yes |
 | 2 | Gaussian Blur Subtraction | Correct illumination gradient | Yes |
 | 3 | Dual-Constraint Tile CLAHE | Enhance local contrast | Stochastic (train) |
 | 5 | Unified Affine + BC + PCA Color | Data augmentation | Stochastic (train) |
-| 4 | ToTensor + Channel Normalization | Convert to CNN input format | Yes |
+| 4 | ToTensor + Channel Normalization + Mask Append | Convert to CNN input format (4-channel) | Yes |
 
 The pipeline is **fully deterministic at inference** (all stochastic elements are gated by `is_training=False`). At training time, Stages 3 and 5 introduce controlled stochasticity for regularization and diversity.
 
