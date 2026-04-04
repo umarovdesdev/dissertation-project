@@ -1,14 +1,15 @@
 .
+|-- CLAUDE.md
+|-- README.md
 |-- defense
 |   |-- presentation_en.pptx
-|   |-- slides
-|   |   |-- seminar_slide_plan_with_materials.md
-|   |   |-- session_a_slides_1_7.docx
-|   |   |-- session_b_slides_8_12.docx
-|   |   |-- session_c_slides_13_19.docx
-|   |   |-- session_d_slides_20_22.pptx
-|   |   `-- session_e_slides_23_28.docx
-|   `-- ~$presentation_en.pptx
+|   `-- slides
+|       |-- seminar_slide_plan_with_materials.md
+|       |-- session_a_slides_1_7.docx
+|       |-- session_b_slides_8_12.docx
+|       |-- session_c_slides_13_19.docx
+|       |-- session_d_slides_20_22.pptx
+|       `-- session_e_slides_23_28.docx
 |-- demo
 |   |-- CLAUDE.md
 |   |-- README.md
@@ -230,6 +231,7 @@
 |       `-- test_od_fovea_detect.py
 |-- structure.txt
 `-- thesis
+    |-- CLAUDE.md
     |-- README.md
     |-- assets
     |-- chapters
@@ -388,4 +390,4 @@
     `-- scripts
         `-- assemble-session-input.py
 
-109 directories, 279 files
+109 directories, 281 files
