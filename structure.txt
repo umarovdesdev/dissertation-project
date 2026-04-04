@@ -2,14 +2,9 @@
 |-- CLAUDE.md
 |-- README.md
 |-- defense
-|   |-- presentation_en.pptx
+|   |-- slide_plan.md
 |   `-- slides
-|       |-- seminar_slide_plan_with_materials.md
-|       |-- session_a_slides_1_7.docx
-|       |-- session_b_slides_8_12.docx
-|       |-- session_c_slides_13_19.docx
-|       |-- session_d_slides_20_22.pptx
-|       `-- session_e_slides_23_28.docx
+|       `-- NOVELTY_SLIDE.md
 |-- demo
 |   |-- CLAUDE.md
 |   |-- README.md
@@ -390,4 +385,4 @@
     `-- scripts
         `-- assemble-session-input.py
 
-109 directories, 281 files
+109 directories, 276 files
