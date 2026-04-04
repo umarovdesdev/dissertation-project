@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pth
+*.ckpt
+*.pt
+node_modules/
+experiments/data/raw/
+experiments/data/processed/
+experiments/outputs/checkpoints/
+experiments/logs/
+.DS_Store
+Thumbs.db
+~$*
+.idea/
+.vscode/
+*.swp
