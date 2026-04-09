@@ -10,7 +10,7 @@ export default function ModelArchitecture() {
         <DiagramViewer
           src={process.env.PUBLIC_URL + '/diagrams/dr_diagnosis_system_architecture.svg'}
           alt="DR Diagnosis System Architecture"
-          caption="Full system architecture: bilateral input → V4 5-component preprocessing pipeline → CNN backbone → feature fusion (binocular mode) → 5-class DR grading output."
+          caption="Full system architecture: fundus image input → V5 8-stage preprocessing pipeline → CNN backbone → 5-class DR grade output."
           tooltip="tooltip.arch_diagram"
         />
       </Sec>
@@ -18,11 +18,11 @@ export default function ModelArchitecture() {
       <Sec title={t('arch.equation')}>
         <div style={{ background: 'var(--color-background-secondary,#f7f7f5)', borderRadius: 8, padding: '14px 16px', fontFamily: 'monospace', fontSize: 13, lineHeight: 2 }}>
           <div><strong>Image-level:</strong> ŷ = f(CNN(P(I)))</div>
-          <div><strong>Binocular:</strong> ŷ = S(I<sub>L</sub>, I<sub>R</sub>) = g(Φ(CNN(P(I<sub>L</sub>)), CNN(P(I<sub>R</sub>))))</div>
+          <div><strong>Batch:</strong> ŷ<sub>i</sub> = f(CNN(P(I<sub>i</sub>))) for each image I<sub>i</sub> independently</div>
         </div>
         <Note>
-          P(·) — V4 5-component preprocessing pipeline. CNN — backbone (ResNet-50 or EfficientNet-B3).
-          Φ — feature concatenation. g — classification head (FC + softmax). S — binocular scoring function.
+          P(·) — V5 8-stage preprocessing pipeline. CNN — backbone (ResNet-50 or EfficientNet-B3).
+          g — classification head (FC + softmax).
           The pipeline P is an integral component of the model, not a data preparation step.
         </Note>
       </Sec>
@@ -31,8 +31,8 @@ export default function ModelArchitecture() {
         <DataTable
           headers={['Backbone', 'Parameters', 'Library', 'Pretrain', 'Used in']}
           rows={[
-            ['ResNet-50', '25.6M', 'torchvision', 'ImageNet', 'Exp 1 (Configs A, B, E)'],
-            ['EfficientNet-B3', '12.2M', 'timm', 'ImageNet', 'Exp 1 (Configs C, D, F)'],
+            ['ResNet-50', '25.6M', 'torchvision', 'ImageNet', 'Exp 1 (Configs A, B)'],
+            ['EfficientNet-B3', '12.2M', 'timm', 'ImageNet', 'Exp 1 (Configs C, D)'],
             ['EfficientNet-B4', '19.3M', 'timm', 'ImageNet', 'Exp 4 (Grad-CAM/ALO only)'],
           ]}
         />
@@ -47,7 +47,7 @@ export default function ModelArchitecture() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[
             { mode: 'Image-level', desc: 'Single fundus image → 5-class DR grade. Standard mode for Exp 1–3.', color: C.blue },
-            { mode: 'Patient-level (binocular)', desc: 'Left + right eye images processed jointly. Feature concatenation before classification head. Configs E and F.', color: C.teal },
+            { mode: 'Image-level (single-eye)', desc: 'Each fundus image classified independently. Standard mode for all Exp 1–7 configurations (A–D).', color: C.teal },
             { mode: 'Explainability', desc: 'EfficientNet-B4 + Grad-CAM overlay. ALO/IoU metrics computed against IDRiD lesion masks. Exp 4 only.', color: C.purple },
           ].map((m, i) => (
             <div key={i} style={{ display: 'flex', gap: 10, padding: '10px 12px', background: 'var(--color-background-secondary,#f7f7f5)', borderRadius: 7 }}>

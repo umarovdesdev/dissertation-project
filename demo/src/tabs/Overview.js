@@ -34,7 +34,7 @@ export default function Overview() {
       <Sec title="Summary Radar Chart">
         <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/11_summary_radar.png'}
-          caption="Summary performance radar across all 6 configurations (A–F). Config F (binocular + EfficientNet-B3) achieves highest metrics overall; Config D is best single-image configuration."
+          caption="Summary performance radar across 4 configurations (A–D) and all 6 hypotheses. Config D (V5 pipeline + EfficientNet-B3) is the best configuration."
           figNum={11}
           tooltip="tooltip.fig11"
         />

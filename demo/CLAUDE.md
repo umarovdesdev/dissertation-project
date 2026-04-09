@@ -1,6 +1,12 @@
 # demo/ — DR Diagnosis Dashboard
 
-Interactive React dashboard for PhD dissertation defense. Visualises all experiment results, hypothesis status, and the V4 preprocessing pipeline walkthrough.
+## TODO
+
+- [ ] Regenerate all pipeline demonstration images using V5 pipeline (isotropic resize + padding + adaptive flat-field). Current images show V4 stretch-resize.
+
+---
+
+Interactive React dashboard for PhD dissertation defense. Visualises all experiment results, hypothesis status, and the V5 preprocessing pipeline walkthrough.
 
 ## Stack
 
@@ -42,10 +48,10 @@ All experiment metrics come from `src/data.js`. When experiment results update, 
 ## Key Data Constants in data.js
 
 - `C` — colour palette (blue/teal/coral/purple/amber/gray/green/red + backgrounds + text variants)
-- `CONFIGS` (A–F) — Experiment 1 results: f1, auc, kappa, accuracy ± std
+- `CONFIGS` (A–D) — Experiment 1 results: f1, auc, kappa, accuracy ± std
 - `ABL`, `ABL_INDIV` — Experiment 2 ablation data
 - `ALO`, `IOU`, `ATTENTION_CONSISTENCY` — Experiment 4 explainability
-- `GEN`, `GEN_AUC`, `G_RATIO` — Experiment 5 generalization
+- `GEN`, `GEN_AUC`, `G_RATIO` — Experiment 3 generalization
 - `DEV` — Experiment 6 device domain shift
 - `CLS`, `CLS_AUC` — per-class metrics
 - `CLIN`, `CALIBRATION` — clinical validation
@@ -54,8 +60,8 @@ All experiment metrics come from `src/data.js`. When experiment results update, 
 - `PIPE` — pipeline stage definitions
 - `COMPUTE` — computational benchmarks
 - `STAT_TESTS`, `TRAIN_TEST_GAP` — statistical analysis
-- `DATASETS` — 7 datasets
-- `HYPOTHESES` — 5 confirmed hypotheses (H-1, H-2, H-4, H-5, H-6)
+- `DATASETS` — 8 datasets
+- `HYPOTHESES` — 6 confirmed hypotheses (H-1, H-2, H-4, H-5, H-6, H-7)
 
 ## Design Decisions
 
@@ -69,9 +75,9 @@ All experiment metrics come from `src/data.js`. When experiment results update, 
 ## Governance Alignment
 
 Dashboard data must match `../thesis/governance/` invariants exactly:
-- Pipeline: 6-stage V4
-- EyePACS: ~35,126 labeled images; Exp 1 subset: 40% (~14,050), 3-fold CV
-- Hypotheses: H-1, H-2, H-4, H-5, H-6 (H-3 dropped)
+- Pipeline: 8-stage V5
+- EyePACS: ~35,126 labeled images; Exp 1: 100%, 5-fold CV
+- Hypotheses: H-1, H-2, H-4, H-5, H-6, H-7 (H-3 dropped)
 - ALO is primary explainability metric; IoU is secondary
 - EH-3 threshold: ΔF1 ≥ 5pp, ΔAUC ≥ 2pp, no κ degradation
 - H-4 threshold: generalization ratio G ≥ 0.85

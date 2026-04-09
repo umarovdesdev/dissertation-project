@@ -4,17 +4,17 @@ import { useLang } from '../i18n';
 
 export default function ResultsMain() {
   const { t } = useLang();
-  const all6 = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const all4 = ['A', 'B', 'C', 'D'];
 
   return (
     <div>
       <Sec title={t('results.allConfigs')}>
         <DataTable
           headers={['Config', 'Preprocessing', 'CNN', 'W.F1 ± σ', 'ROC-AUC ± σ', 'κ ± σ', 'Acc']}
-          rows={all6.map(k => {
+          rows={all4.map(k => {
             const v = CONFIGS[k];
             return [
-              <span key={k} style={{ fontWeight: 700, color: (k === 'D' || k === 'F') ? C.teal : 'inherit' }}>{k}</span>,
+              <span key={k} style={{ fontWeight: 700, color: k === 'D' ? C.teal : 'inherit' }}>{k}</span>,
               v.preprocessing, v.cnn,
               `${v.f1.toFixed(3)} ± ${v.f1s.toFixed(3)}`,
               `${v.auc.toFixed(3)} ± ${v.aucs.toFixed(3)}`,
@@ -22,16 +22,16 @@ export default function ResultsMain() {
               v.acc.toFixed(3),
             ];
           })}
-          highlightRow={(row, i) => i === 5}
+          highlightRow={(row, i) => i === 3}
         />
       </Sec>
 
-      <Sec title="Weighted F1 — All 6 Configurations">
+      <Sec title="Weighted F1 — All 4 Configurations">
         <Hbar
-          items={all6.map((k, i) => ({
+          items={all4.map((k, i) => ({
             label: `${k}: ${CONFIGS[k].lbl}`,
             v: CONFIGS[k].f1,
-            color: [C.gray, C.blue, C.gray, C.teal, C.blue, C.teal][i],
+            color: [C.gray, C.blue, C.gray, C.teal][i],
           }))}
           maxV={0.85}
         />
@@ -40,7 +40,7 @@ export default function ResultsMain() {
       <Sec title="Summary Radar Chart">
         <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/11_summary_radar.png'}
-          caption="Performance radar across all 6 configurations showing F1, AUC, κ, Accuracy, and robustness. Config F (binocular + EfficientNet-B3) leads overall; Config D is best single-image mode."
+          caption="Performance radar across 4 configurations (A–D) and all 6 hypotheses. Config D (V5 pipeline + EfficientNet-B3) is the best configuration."
           figNum={11}
           tooltip="tooltip.fig11"
         />

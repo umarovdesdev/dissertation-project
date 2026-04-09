@@ -7,14 +7,14 @@ Candidate: Yesmukhamedov N.S., IITU, Almaty, Kazakhstan.
 
 ```
 governance/          — SINGLE SOURCE OF TRUTH for all project claims
-  INVARIANTS.md        v4.1 — scope, forbidden claims, binding constraints
-  HYPOTHESIS.md        v4.1 — H-1 through H-6 formal definitions
-  ARGUMENT_MAP.md      v4.1 — claim-evidence dependency DAG
-  CENTRAL_THESIS.md    v4.0 — one-paragraph thesis statement
-  CORE_OBJECTIVE.md    v4.0 — research goal
-  CONTRIBUTIONS.md     v4.1 — 4 primary + supporting contributions
-  RESEARCH_ARCHITECTURE.md  v4.1 — full experimental design
-  VERSION_SYNC.md      v4.1 — cross-file version register
+  INVARIANTS.md        v5.0 — scope, forbidden claims, binding constraints
+  HYPOTHESIS.md        v5.0 — H-1 through H-7 formal definitions
+  ARGUMENT_MAP.md      v5.0 — claim-evidence dependency DAG
+  CENTRAL_THESIS.md    v5.0 — one-paragraph thesis statement
+  CORE_OBJECTIVE.md    v5.0 — research goal
+  CONTRIBUTIONS.md     v5.0 — 4 primary + supporting contributions
+  RESEARCH_ARCHITECTURE.md  v5.0 — full experimental design
+  VERSION_SYNC.md      v5.0 — cross-file version register
 
 chapters/            — 8 chapters (00–07), each with:
   briefs/              section briefs (writing specs)
@@ -40,7 +40,7 @@ outline/
   TABLE_OF_CONTENTS_KZ.md
 
 methods/
-  preprocessing-pipeline.md   V4 pipeline full specification
+  preprocessing-pipeline.md   V5 pipeline full specification
   implementation.md           implementation details
 
 prompts/              AI writing session templates
@@ -48,15 +48,11 @@ prompts/              AI writing session templates
   section-brief-template.md
   continuity-note-template.md
   revision-session-template.md
-  literature-card-generation.md
   literature-card-review.md
   and others...
 
 experiments/
-  experimental-protocol.md    detailed scientific protocol (426 lines)
-
-scripts/
-  assemble-session-input.py   helper for preparing writing session inputs
+  experimental-protocol.md    detailed scientific protocol
 ```
 
 ## Governance Hierarchy
@@ -104,12 +100,13 @@ INVARIANTS.md is the supreme authority. If any document conflicts with INVARIANT
 
 ## Hypotheses
 
-- H-1: Preprocessing Dominance (Exp 1, EyePACS)
-- H-2: CLAHE Threshold Sensitivity (Exp 2, IDRiD)
+- H-1: Preprocessing Dominance (Exp 1, EyePACS 100%)
+- H-2: V5 Component Ablation + CLAHE/σ sweeps (Exp 2, EyePACS)
 - H-3: DROPPED in V3
-- H-4: Cross-Dataset Generalization (Exp 5, Messidor/IDRiD, G ≥ 0.85)
-- H-5: Explainability — Grad-CAM ALO/IoU (Exp 4, IDRiD)
-- H-6: Device Domain Shift (Exp 6, RFMiD/DDR/ODIR-5K)
+- H-4: Cross-Dataset Transferability on APTOS 2019 (Exp 3, G ≥ 0.85)
+- H-5: Explainability — Grad-CAM ALO/IoU (Exp 4, IDRiD + Clinical)
+- H-6: Device Domain Shift (Exp 6, DDR/ODIR-5K/RFMiD)
+- H-7: Clinical Degradation Resistance (Exp 5, IDRiD + Messidor-2)
 
 ## Language
 

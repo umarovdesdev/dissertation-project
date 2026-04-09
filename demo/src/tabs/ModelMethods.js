@@ -34,25 +34,26 @@ function Overview() {
   return (
     <Sec title={t('methods.overview')}>
       <p style={{ fontSize: 12, lineHeight: 1.75, margin: '0 0 10px 0' }}>
-        The V4 preprocessing pipeline comprises <strong>6 ordered stages</strong>. Each stage uses a technique
+        The V5 preprocessing pipeline comprises <strong>8 ordered stages</strong>. Each stage uses a technique
         specifically adapted for retinal fundus image characteristics — circular FOV, radial illumination
         gradients, bilateral eye laterality, and the need to preserve microvascular features for DR
         classification.
       </p>
       <p style={{ fontSize: 12, lineHeight: 1.75, margin: 0 }}>
-        Five stages constitute the novel scientific contributions (Stages 0a, 0b, 2, 3, 5). Two stages —
-        FOV crop/resize (Stage 1) and ImageNet normalization (Stage 4) — are standard techniques present
-        in both baseline and full pipeline configurations.
+        Novel scientific contributions: canonical flip (Stage 0), OD-fovea rotation (Stage 1), isotropic resize
+        (Stage 2), FOV mask (Stage 3), adaptive flat-field (Stage 4), dual-constraint CLAHE (Stage 5), and
+        integrated augmentation (Stage 6). Stage 7 (dataset-specific normalize → 4ch tensor) is standard.
       </p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
         {[
-          { label: 'Stage 0a', name: 'Canonical Flip', color: 'teal', novel: true },
-          { label: 'Stage 0b', name: 'OD-Fovea Rotation', color: 'teal', novel: true },
-          { label: 'Stage 1', name: 'FOV Crop + Resize', color: 'gray', novel: false },
-          { label: 'Stage 2', name: 'Flat-Field Correction', color: 'teal', novel: true },
-          { label: 'Stage 3', name: 'Dual-Constraint CLAHE', color: 'teal', novel: true },
-          { label: 'Stage 4', name: 'ImageNet Normalization', color: 'gray', novel: false },
-          { label: 'Stage 5', name: 'Stochastic Augmentation', color: 'teal', novel: true },
+          { label: 'Stage 0', name: 'Canonical Flip', color: 'teal', novel: true },
+          { label: 'Stage 1', name: 'OD-Fovea Rotation', color: 'teal', novel: true },
+          { label: 'Stage 2', name: 'FOV Crop + Isotropic Resize', color: 'teal', novel: true },
+          { label: 'Stage 3', name: 'FOV Mask Generation', color: 'teal', novel: true },
+          { label: 'Stage 4', name: 'Adaptive Flat-Field', color: 'teal', novel: true },
+          { label: 'Stage 5', name: 'Dual-Constraint CLAHE', color: 'teal', novel: true },
+          { label: 'Stage 6', name: 'Integrated Augmentation', color: 'teal', novel: true },
+          { label: 'Stage 7', name: 'Dataset-Specific Normalize', color: 'gray', novel: false },
         ].map(s => (
           <div key={s.label} style={{
             padding: '6px 10px', borderRadius: 6, fontSize: 10,
@@ -95,7 +96,7 @@ function Stage0a() {
           </div>
         </div>
         <div style={{ flex: 1, padding: '8px 10px', background: C.tealBg, borderRadius: 6 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, marginBottom: 4 }}>Our V4 adaptation</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, marginBottom: 4 }}>Our V5 adaptation</div>
           <div style={{ fontSize: 11, color: C.tealT, lineHeight: 1.6 }}>
             <em>Deterministic</em> flip based on eye laterality metadata (<code>_left</code> / <code>_right</code> filename suffix in EyePACS). Applied once at load time, not during augmentation.
           </div>
@@ -104,7 +105,7 @@ function Stage0a() {
       <Note>
         Without canonical flip, the CNN must learn separate feature detectors for OD-left and OD-right
         spatial configurations — effectively halving the training data per anatomical layout. Deterministic
-        flip ensures all 14,050 training images share the same retinal topology.
+        flip ensures all ~35,126 training images share the same retinal topology.
       </Note>
       <code style={codeStyle}>
         {`# Single operation — the decision logic is the contribution\nif eye_side == 'left':\n    image = cv2.flip(image, 1)  # horizontal flip`}
@@ -162,7 +163,7 @@ function Stage0b() {
           <div style={{ fontSize: 11, color: C.grayT, lineHeight: 1.6 }}>No rotation normalisation. Random ±15° augmentation used. Camera-to-camera orientation variation treated as noise.</div>
         </div>
         <div style={{ flex: 1, padding: '8px 10px', background: C.tealBg, borderRadius: 6 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, marginBottom: 4 }}>Our V4 adaptation</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, marginBottom: 4 }}>Our V5 adaptation</div>
           <div style={{ fontSize: 11, color: C.tealT, lineHeight: 1.6 }}>Two-landmark detection with annular fovea search prior. Deterministic rotation to canonical axis. Adaptive σ passes uncertainty to augmentation stage.</div>
         </div>
       </div>
@@ -192,7 +193,7 @@ function Stage1() {
           <div style={{ fontSize: 11, color: C.grayT, lineHeight: 1.6 }}>Hough circle detection. Sensitive to image quality, fails on non-circular FOV or partial occlusions.</div>
         </div>
         <div style={{ flex: 1, padding: '8px 10px', background: C.tealBg, borderRadius: 6 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, marginBottom: 4 }}>Our V4 adaptation</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, marginBottom: 4 }}>Our V5 adaptation</div>
           <div style={{ fontSize: 11, color: C.tealT, lineHeight: 1.6 }}>PIL foreground edge sampling: samples edge columns, thresholds at <code>max_background + 10</code>. Fallback: centre-square crop. Robust to non-circular FOV.</div>
         </div>
       </div>
@@ -221,7 +222,7 @@ function Stage2() {
         tooltip="tooltip.method_flatfield"
       />
       <code style={formulaStyle}>
-        corrected = image − GaussianBlur(image, σ=45) + 128
+        corrected = image − GaussianBlur(image, σ=0.07×D) + 128  {'  '}(D = FOV diameter)
       </code>
       <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
         <div style={{ flex: 1, padding: '8px 10px', background: C.grayBg, borderRadius: 6 }}>
@@ -229,14 +230,14 @@ function Stage2() {
           <div style={{ fontSize: 11, color: C.grayT, lineHeight: 1.6 }}>Most DR pipelines skip illumination correction entirely. Some use global histogram normalisation (loses spatial gradient info).</div>
         </div>
         <div style={{ flex: 1, padding: '8px 10px', background: C.tealBg, borderRadius: 6 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, marginBottom: 4 }}>Our V4 adaptation</div>
-          <div style={{ fontSize: 11, color: C.tealT, lineHeight: 1.6 }}>Per-channel blur subtraction. σ=45 at 512×512 captures structures &gt;~90px (illumination scale) while preserving vessels (~5–15px) and lesions (&lt;30px).</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, marginBottom: 4 }}>Our V5 adaptation</div>
+          <div style={{ fontSize: 11, color: C.tealT, lineHeight: 1.6 }}>Adaptive σ = 0.07×D (D = FOV diameter). V5 change from fixed σ=45 to scale-invariant adaptive σ. Captures illumination envelope for any FOV size while preserving vessels (~5–15px) and lesions (&lt;30px).</div>
         </div>
       </div>
       <Note>
-        σ=45 selection: at 512×512, σ=45 ≈ 9% of image width. This captures the illumination envelope
-        (spatial frequency &lt;11 cycles/image) while fully preserving diagnostic structures including
-        neovascularisation and hard exudates. The +128 offset re-centres the output to the valid [0,255] range.
+        Adaptive σ = 0.07×D selection: σ is proportional to FOV diameter D, making it scale-invariant
+        across camera models. At D=512px (typical after resize), σ≈36px. This captures the illumination
+        envelope while fully preserving diagnostic structures. The +128 offset re-centres the output to [0,255] range.
       </Note>
     </Sec>
   );
@@ -319,25 +320,25 @@ function Stage3() {
 }
 
 // ── Section 7: Stage 4 — ImageNet Normalization ──────────────────────────────
-function Stage4() {
+function Stage7() {
   return (
-    <Sec title="Stage 4 — ImageNet Normalization">
+    <Sec title="Stage 7 — Dataset-Specific Normalization → 4ch Tensor">
       <div style={{ marginBottom: 10 }}>
-        <StageTag label="Stage 4" color="gray" /><StageTag label="Standard (in both configs)" color="gray" />
+        <StageTag label="Stage 7" color="gray" /><StageTag label="Standard (in both configs)" color="gray" />
       </div>
       <p style={{ fontSize: 12, lineHeight: 1.7, margin: '0 0 10px 0' }}>
-        Channel-wise normalisation using ImageNet statistics. Required for pre-trained ResNet-50 and
-        EfficientNet-B3/B4 weight initialisation from torchvision and timm.
+        Channel-wise normalisation using dataset-specific statistics (not fixed ImageNet). Stack RGB + FOV mask
+        → 4-channel (RGBM) tensor. Required for pre-trained ResNet-50 and EfficientNet-B3/B4 weight initialisation.
       </p>
       <code style={formulaStyle}>
-        pixel_norm = (pixel − mean) / std<br />
-        mean = [0.485, 0.456, 0.406]  (R, G, B)<br />
-        std  = [0.229, 0.224, 0.225]  (R, G, B)
+        pixel_norm = (pixel − mean_dataset) / std_dataset<br />
+        channels: R, G, B, FOV_mask  (4ch, V5)<br />
+        mean/std: computed from EyePACS training split
       </code>
       <Note>
-        Stage 4 is always the final spatial processing stage. Applied after all visual enhancement
-        steps (flat-field, CLAHE) and before augmentation. Present in both Baseline and Full V4
-        configurations — it is not a novel contribution.
+        Stage 7 is always the final stage. V5 change: dataset-specific statistics (not fixed ImageNet) and
+        4-channel output (RGB + FOV mask). Baseline uses 3ch with ImageNet statistics. Present in both
+        Baseline and Full V5 configurations — it is not a novel contribution.
       </Note>
     </Sec>
   );
@@ -369,7 +370,7 @@ function Stage5() {
           <div key={i} style={{ display: 'flex', gap: 0, borderRadius: 5, overflow: 'hidden', border: '1px solid var(--color-border-tertiary,#eee)' }}>
             <div style={{ width: 140, minWidth: 140, padding: '6px 8px', background: 'var(--color-background-secondary,#f7f7f5)', fontSize: 10, fontWeight: 600 }}>{r.aspect}</div>
             <div style={{ flex: 1, padding: '6px 8px', fontSize: 11, borderLeft: '1px solid var(--color-border-tertiary,#eee)' }}><span style={{ color: C.gray }}>Standard: </span>{r.standard}</div>
-            <div style={{ flex: 1, padding: '6px 8px', fontSize: 11, background: '#E6F9F1', borderLeft: '1px solid var(--color-border-tertiary,#eee)' }}><span style={{ color: C.teal, fontWeight: 600 }}>V4: </span>{r.ours}</div>
+            <div style={{ flex: 1, padding: '6px 8px', fontSize: 11, background: '#E6F9F1', borderLeft: '1px solid var(--color-border-tertiary,#eee)' }}><span style={{ color: C.teal, fontWeight: 600 }}>V5: </span>{r.ours}</div>
           </div>
         ))}
       </div>
@@ -381,13 +382,14 @@ function Stage5() {
 function ComparisonTable() {
   const { t } = useLang();
   const rows = [
-    { stage: '0a: Canonical Flip', standard: 'Random H-flip (augmentation)', ours: 'Deterministic flip by eye metadata', innovation: 'Anatomical consistency' },
-    { stage: '0b: OD-Fovea Rotation', standard: 'None or random rotation', ours: 'Two-landmark detection + rotate to canonical axis', innovation: 'Annular fovea search prior' },
-    { stage: '1: FOV Crop', standard: 'Hough circle detection', ours: 'PIL foreground edge sampling + fallback', innovation: 'Robust to non-circular FOV' },
-    { stage: '2: Flat-Field', standard: 'None (most pipelines skip)', ours: 'Blur subtraction, σ=45, per-channel', innovation: 'Removes gradient, preserves lesions' },
-    { stage: '3: CLAHE', standard: 'cv2.createCLAHE (fixed clip limit)', ours: 'Dual-constraint + stochastic 80%', innovation: 'Global cap + regularisation' },
-    { stage: '4: Normalization', standard: 'ImageNet channel-wise (μ, σ)', ours: 'Same (standard)', innovation: 'Matches pre-training statistics' },
-    { stage: '5: Augmentation', standard: 'Separate transforms, ±15° rotation', ours: 'Integrated affine, 360°, adaptive σ, PCA jitter', innovation: 'Circular FOV enables full rotation' },
+    { stage: 'S0: Canonical Flip', standard: 'Random H-flip (augmentation)', ours: 'Deterministic flip by eye metadata', innovation: 'Anatomical consistency' },
+    { stage: 'S1: OD-Fovea Rotation', standard: 'None or random rotation', ours: 'Two-landmark detection + rotate to canonical axis', innovation: 'Annular fovea search prior' },
+    { stage: 'S2: FOV Crop + Isotropic Resize', standard: 'Stretch-resize to target size', ours: 'PIL foreground edge sampling + isotropic resize + zero-pad', innovation: 'Preserves aspect ratio (V5 change)' },
+    { stage: 'S3: FOV Mask', standard: 'None (discarded after crop)', ours: 'Binary FOV mask → 4th input channel', innovation: 'Spatial boundary for CNN (V5 new)' },
+    { stage: 'S4: Flat-Field', standard: 'None (most pipelines skip)', ours: 'Blur subtraction, adaptive σ=0.07·D, per-channel', innovation: 'Scale-invariant σ (V5 change)' },
+    { stage: 'S5: CLAHE', standard: 'cv2.createCLAHE (fixed clip limit)', ours: 'Dual-constraint + stochastic 80%', innovation: 'Global cap + regularisation' },
+    { stage: 'S6: Augmentation', standard: 'Separate transforms, ±15° rotation', ours: 'Integrated affine, 360°, adaptive σ, PCA jitter', innovation: 'Circular FOV enables full rotation' },
+    { stage: 'S7: Normalization', standard: 'ImageNet channel-wise (μ, σ), 3ch', ours: 'Dataset-specific μ/σ, 4ch (RGB + FOV mask)', innovation: 'Dataset-specific stats + 4ch input' },
   ];
 
   return (
@@ -398,7 +400,7 @@ function ComparisonTable() {
             <tr style={{ borderBottom: '2px solid var(--color-border-secondary,#ccc)' }}>
               <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, minWidth: 110 }}>Stage</th>
               <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, background: C.grayBg }}>Standard Approach</th>
-              <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, background: '#E6F9F1' }}>Our V4 Adaptation</th>
+              <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, background: '#E6F9F1' }}>Our V5 Adaptation</th>
               <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, background: '#FFF8E6' }}>Key Innovation</th>
             </tr>
           </thead>
@@ -415,8 +417,8 @@ function ComparisonTable() {
         </table>
       </div>
       <Note>
-        Stages 0a, 0b, 2, 3, and 5 constitute the five novel scientific contributions of the 5-component
-        pipeline. Stages 1 and 4 are standard techniques included for completeness and present in both
+        Stages S0, S1, S2, S3, S4, S5, and S6 constitute the seven novel scientific contributions of the V5
+        8-stage pipeline. Stage S7 (dataset-specific normalize + 4ch) is standard and present in both
         baseline and full pipeline configurations.
       </Note>
     </Sec>
@@ -433,7 +435,7 @@ export default function ModelMethods() {
       <Stage1 />
       <Stage2 />
       <Stage3 />
-      <Stage4 />
+      <Stage7 />
       <Stage5 />
       <ComparisonTable />
     </div>

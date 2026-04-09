@@ -5,9 +5,9 @@
 ### Докторлық диссертация: Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 
 **Кандидат:** Есмұхамедов Н.С.\
-**Нұсқа:** 4.0\
-**Күні:** 2026-03-24\
-**Байланыстырушы құжат:** DISSERTATION_INVARIANTS.md v4.0
+**Нұсқа:** 5.0\
+**Күні:** 2026-04-09\
+**Байланыстырушы құжат:** DISSERTATION_INVARIANTS.md v5.0
 
 ------------------------------------------------------------------------
 
@@ -474,6 +474,18 @@ Bootstrap
 
 ------------------------------------------------------------------------
 
-*Глоссарий v4.0 аяқталды*\
-*Байланыстырушы құжат: DISSERTATION_INVARIANTS.md v4.0*\
-*Корпус дереккөздері: CENTRAL_THESIS.md, CORE_OBJECTIVE.md, HYPOTHESIS.md, DISSERTATION_INVARIANTS.md, ARGUMENT_MAP.md, TABLE_OF_CONTENT.pdf, LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01, LC-2025-Yesmukhamedov-01*
+## V5 ТОЛЫҚТЫРУЛАР  [ҚОСЫЛДЫ: v5.0 — 2026-04-09]
+
+| Ағылшынша термин | Қазақ тілінде | Ескертпе |
+|---|---|---|
+| **V5 Pipeline** | V5 Pipeline | Техникалық атау — аудармауға |
+| **FOV Mask** | FOV Маскасы | Fundus өрісінің бинарлық маскасы (1.0 = нақты пиксель, 0.0 = толтырылған аумақ); 4-арналы кірістің 4-ші арнасы ретінде қосылады |
+| **Adaptive Flat-Field Correction** | Adaptive Flat-Field Correction | Техникалық атау — аудармауға; σ = 0.07·D; бейімделмелі жарықтық коррекциясы |
+| **Dataset-Specific Normalization** | Деректер жиынтығына тән нормализация | Оқыту жиынтығынан есептелген орташа мән мен стандартты ауытқуды қолдану |
+| **Clinical Degradation Resistance (H-7)** | Клиникалық деградацияға төзімділік (H-7) | V5 pipeline деректер жиынтықтары арасындағы өнімділік төмендеуін азайтуы тиіс |
+
+------------------------------------------------------------------------
+
+*Глоссарий v5.0 аяқталды*\
+*Байланыстырушы құжат: DISSERTATION_INVARIANTS.md v5.0*\
+*Корпус дереккөздері: CENTRAL_THESIS.md, CORE_OBJECTIVE.md, HYPOTHESIS.md, DISSERTATION_INVARIANTS.md, ARGUMENT_MAP.md, RESEARCH_ARCHITECTURE.md, TABLE_OF_CONTENTS_EN.md, LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01, LC-2025-Yesmukhamedov-01*

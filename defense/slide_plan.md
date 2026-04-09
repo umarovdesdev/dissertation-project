@@ -7,7 +7,7 @@
 
 ## How to use this document
 
-Each slide lists the **files to load into the Claude Opus 4.6 chat context** before requesting that slide. Files are given as paths within the two repositories (`dissertation/` and `dr-classifier/`). Where a file is large, a specific section or line range is noted to stay within token budget.
+Each slide lists the **files to load into the Claude Opus 4.6 chat context** before requesting that slide. Files are given as paths within the monorepo (`thesis/` and `experiments/`). Where a file is large, a specific section or line range is noted to stay within token budget.
 
 **Batch strategy:** Slides that share materials are grouped into sessions. A single chat session can typically handle 3–5 slides that draw from the same governance files.
 
@@ -22,8 +22,8 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Dissertation title, candidate name, supervisor, university (IITU), defense date.
 
 **Files to load:**
-- `dissertation/governance/CENTRAL_THESIS.md` — *full file (short, 5 lines)* — for the exact thesis title formulation
-- `dissertation/governance/CORE_OBJECTIVE.md` — *full file (short, 5 lines)* — for the research goal wording
+- `thesis/governance/CENTRAL_THESIS.md` — *full file (short, 5 lines)* — for the exact thesis title formulation
+- `thesis/governance/CORE_OBJECTIVE.md` — *full file (short, 5 lines)* — for the research goal wording
 
 **Instructions to Claude:** Generate a title slide with the exact dissertation title from CENTRAL_THESIS.md, candidate name "Yesmukhamedov N.S.", university "IITU — International Information Technology University", and a placeholder for supervisor name and defense date.
 
@@ -34,11 +34,11 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** DR prevalence statistics, Kazakhstan healthcare context, screening gap.
 
 **Files to load:**
-- `dissertation/literature/external/gulshan-2016.md` — *Section 1 (Bibliographic) + Section 4 (Key Findings)* — for the landmark 34.6% prevalence figure and AUC 0.991 reference
-- `dissertation/literature/self/yesmukhamedov-nan-rk.md` — *Sections 4 (Key Findings) and 12 (Relevance)* — for Kazakhstan-specific statistics (40% rural population, ~1,200 ophthalmologists, projected deployment impact)
-- `dissertation/literature/self/yesmukhamedov-scopus-q2.md` — *Sections 4 and 12* — for screening gap framing and resource-limited context
-- `dissertation/literature/external/ruamviboonsuk-2022.md` — *Section 4 (Key Findings)* — for LMIC deployment precedent (Thailand prospective study)
-- `dissertation/governance/INVARIANTS.md` — *Section IX: DGL-4 (lines ~308–309)* — for the Kazakhstan infrastructure constraints (ensures no overclaiming)
+- `thesis/literature/external/gulshan-2016.md` — *Section 1 (Bibliographic) + Section 4 (Key Findings)* — for the landmark 34.6% prevalence figure and AUC 0.991 reference
+- `thesis/literature/self/yesmukhamedov-nan-rk.md` — *Sections 4 (Key Findings) and 12 (Relevance)* — for Kazakhstan-specific statistics (40% rural population, ~1,200 ophthalmologists, projected deployment impact)
+- `thesis/literature/self/yesmukhamedov-scopus-q2.md` — *Sections 4 and 12* — for screening gap framing and resource-limited context
+- `thesis/literature/external/ruamviboonsuk-2022.md` — *Section 4 (Key Findings)* — for LMIC deployment precedent (Thailand prospective study)
+- `thesis/governance/INVARIANTS.md` — *Section IX: DGL-4 (lines ~308–309)* — for the Kazakhstan infrastructure constraints (ensures no overclaiming)
 
 **Instructions to Claude:** Use the epidemiological data and Kazakhstan-specific statistics to build the motivation slide. Do NOT claim deployment outcomes — frame as screening need vs. clinical capacity gap per DGL-4.
 
@@ -49,11 +49,11 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Fundus image variability, device diversity, the preprocessing-as-ancillary gap.
 
 **Files to load:**
-- `dissertation/governance/HYPOTHESIS.md` — *Premises 1–3 (lines ~37–43)* — for the causal argument (domain variability → distribution shift → degraded CNN)
-- `dissertation/governance/INVARIANTS.md` — *Section I: IT-1 (lines ~13–23)* — for the scope-bounded problem statement
-- `dissertation/methods/preprocessing-pipeline.md` — *"Design Principle" section (lines 1–6)* — for the `model = preprocessing + CNN` formalization
-- `dissertation/literature/external/voets-2019.md` — *Section 4 (Key Findings)* — for evidence of cross-dataset performance degradation
-- `dissertation/literature/external/liu-2022.md` — *Section 4 (Key Findings)* — for device-specific variability evidence (DeepDRiD benchmark)
+- `thesis/governance/HYPOTHESIS.md` — *Premises 1–3 (lines ~37–43)* — for the causal argument (domain variability → distribution shift → degraded CNN)
+- `thesis/governance/INVARIANTS.md` — *Section I: IT-1 (lines ~13–23)* — for the scope-bounded problem statement
+- `thesis/methods/preprocessing-pipeline.md` — *"Design Principle" section (lines 1–6)* — for the `model = preprocessing + CNN` formalization
+- `thesis/literature/external/voets-2019.md` — *Section 4 (Key Findings)* — for evidence of cross-dataset performance degradation
+- `thesis/literature/external/liu-2022.md` — *Section 4 (Key Findings)* — for device-specific variability evidence (DeepDRiD benchmark)
 
 **Instructions to Claude:** Frame the problem as the three-step causal chain from HYPOTHESIS.md Premises 1–3. Cite Voets 2019 and Liu 2022 as evidence of the problem. Introduce the gap: most systems treat preprocessing as ancillary.
 
@@ -64,9 +64,9 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Overarching goal + specific research tasks.
 
 **Files to load:**
-- `dissertation/governance/CORE_OBJECTIVE.md` — *full file* — the canonical goal statement
-- `dissertation/experiments/experimental-protocol.md` — *"Research Objective" section (lines 9–11) + Experiment-to-Argument Mapping table (lines ~417–427)* — for the task breakdown
-- `dissertation/governance/CONTRIBUTIONS.md` — *Primary Contributions section (lines 11–40)* — to ensure objectives align with claimed contributions
+- `thesis/governance/CORE_OBJECTIVE.md` — *full file* — the canonical goal statement
+- `thesis/experiments/experimental-protocol.md` — *"Research Objective" section (lines 9–11) + Experiment-to-Argument Mapping table (lines ~417–427)* — for the task breakdown
+- `thesis/governance/CONTRIBUTIONS.md` — *Primary Contributions section (lines 11–40)* — to ensure objectives align with claimed contributions
 
 **Instructions to Claude:** Decompose the CORE_OBJECTIVE into 6 specific tasks matching the 5 active experiments + the pipeline design task. Each task should map to a hypothesis (H-1 through H-6).
 
@@ -77,9 +77,9 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Object = automated DR diagnosis process; Subject = image enhancement + CNN methods.
 
 **Files to load:**
-- `dissertation/governance/CENTRAL_THESIS.md` — *full file* — for the exact thesis scope
-- `dissertation/governance/INVARIANTS.md` — *Section I: scope boundary paragraph (lines ~19–23)* — for what the subject does NOT cover
-- `dissertation/outline/TABLE_OF_CONTENTS_EN.md` — *lines 1–15* — for the Introduction section structure showing Object and Subject as formal entries
+- `thesis/governance/CENTRAL_THESIS.md` — *full file* — for the exact thesis scope
+- `thesis/governance/INVARIANTS.md` — *Section I: scope boundary paragraph (lines ~19–23)* — for what the subject does NOT cover
+- `thesis/outline/TABLE_OF_CONTENTS_EN.md` — *lines 1–15* — for the Introduction section structure showing Object and Subject as formal entries
 
 **Instructions to Claude:** Define the research object and subject in the formal Kazakh doctoral style (object = process being studied, subject = specific methods applied). Keep tightly bounded to INVARIANTS scope.
 
@@ -90,9 +90,9 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** The six novel elements of the dissertation.
 
 **Files to load:**
-- `dissertation/governance/CONTRIBUTIONS.md` — *full file* — the authoritative contributions register (C-1 through C-3, SC-A through SC-F)
-- `dissertation/methods/preprocessing-pipeline.md` — *V4 Pipeline Stages section (lines 9–67)* — for the pipeline novelty details (Stage 0, Stage 2 as new, Stage 3 upgraded)
-- `dissertation/governance/HYPOTHESIS.md` — *H-5 definition (lines ~27–29)* — for ALO as a novel metric
+- `thesis/governance/CONTRIBUTIONS.md` — *full file* — the authoritative contributions register (C-1 through C-3, SC-A through SC-F)
+- `thesis/methods/preprocessing-pipeline.md` — *V4 Pipeline Stages section (lines 9–67)* — for the pipeline novelty details (Stage 0, Stage 2 as new, Stage 3 upgraded)
+- `thesis/governance/HYPOTHESIS.md` — *H-5 definition (lines ~27–29)* — for ALO as a novel metric
 
 **Instructions to Claude:** Present exactly 6 novelty elements derived from CONTRIBUTIONS.md. Map each to its evidence base. Use the formal novelty language expected in Kazakh doctoral defenses.
 
@@ -103,8 +103,8 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Central hypothesis + H-1 through H-6 tree.
 
 **Files to load:**
-- `dissertation/governance/HYPOTHESIS.md` — *full file* — the authoritative hypothesis decomposition with argument structure
-- `dissertation/governance/INVARIANTS.md` — *Section II: Core Hypotheses (lines ~29–100)* — for the operational form of each hypothesis with IV/DV/control specifications
+- `thesis/governance/HYPOTHESIS.md` — *full file* — the authoritative hypothesis decomposition with argument structure
+- `thesis/governance/INVARIANTS.md` — *Section II: Core Hypotheses (lines ~29–100)* — for the operational form of each hypothesis with IV/DV/control specifications
 
 **Instructions to Claude:** Present the central unifying hypothesis, then decompose into H-1 through H-6 as a visual tree. Note H-3 is DROPPED. For each hypothesis, include the one-line operational summary from HYPOTHESIS.md.
 
@@ -117,12 +117,12 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Landscape of prior work + key gap identification.
 
 **Files to load:**
-- `dissertation/literature/LITERATURE_INDEX.md` — *Source Index table (lines 65–120)* — for the full source landscape with key results
-- `dissertation/literature/external/gulshan-2016.md` — *Section 4 (Key Findings) + Section 8 (Limitations)* — Gulshan 2016 (AUC 0.991)
-- `dissertation/literature/external/ting-2017.md` — *Section 4 + Section 8* — Ting 2017 (10 datasets, AUC 0.936)
-- `dissertation/literature/external/rakhlin-2017.md` — *Section 4* — Rakhlin 2017 (Kaggle 2nd place)
-- `dissertation/literature/external/saxena-2020.md` — *Section 4 + Section 13 (Gaps)* — Saxena 2020 (cross-dataset AUC 0.958)
-- `dissertation/literature/external/senapati-2024.md` — *Section 4 + Section 13* — for field landscape and gap identification
+- `thesis/literature/LITERATURE_INDEX.md` — *Source Index table (lines 65–120)* — for the full source landscape with key results
+- `thesis/literature/external/gulshan-2016.md` — *Section 4 (Key Findings) + Section 8 (Limitations)* — Gulshan 2016 (AUC 0.991)
+- `thesis/literature/external/ting-2017.md` — *Section 4 + Section 8* — Ting 2017 (10 datasets, AUC 0.936)
+- `thesis/literature/external/rakhlin-2017.md` — *Section 4* — Rakhlin 2017 (Kaggle 2nd place)
+- `thesis/literature/external/saxena-2020.md` — *Section 4 + Section 13 (Gaps)* — Saxena 2020 (cross-dataset AUC 0.958)
+- `thesis/literature/external/senapati-2024.md` — *Section 4 + Section 13* — for field landscape and gap identification
 
 **Instructions to Claude:** Create a compact "prior work landscape" table with 4–5 landmark systems (Gulshan, Ting, Rakhlin, Saxena + one recent). Then state the gap: systematic preprocessing validation and cross-device robustness are underexplored.
 
@@ -133,9 +133,9 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** The `model = preprocessing + CNN` formalization with diagram.
 
 **Files to load:**
-- `dissertation/methods/preprocessing-pipeline.md` — *"Design Principle" (lines 1–6) + "Assertion" (lines 114–117)* — the core `model = preprocessing + CNN` framing
-- `dissertation/governance/CENTRAL_THESIS.md` — *full file* — the thesis formulation embedding the two-stage system
-- `dissertation/methods/implementation.md` — *Section 3: "Model Definition" (lines 30–49)* — the `model = V4_preprocessing + CNN_classifier` specification with architecture table
+- `thesis/methods/preprocessing-pipeline.md` — *"Design Principle" (lines 1–6) + "Assertion" (lines 114–117)* — the core `model = preprocessing + CNN` framing
+- `thesis/governance/CENTRAL_THESIS.md` — *full file* — the thesis formulation embedding the two-stage system
+- `thesis/methods/implementation.md` — *Section 3: "Model Definition" (lines 30–49)* — the `model = V4_preprocessing + CNN_classifier` specification with architecture table
 
 **Instructions to Claude:** This is the dissertation's central intellectual contribution. Present a clear two-stage diagram with the pipeline as "Stage 1" and the CNN as "Stage 2." Emphasize: preprocessing *defines the feature space*, it is not external data prep. Quote the Assertion from preprocessing-pipeline.md.
 
@@ -146,10 +146,10 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Visual diagram of all 6 stages with active/baseline definitions.
 
 **Files to load:**
-- `dissertation/methods/preprocessing-pipeline.md` — *full file* — the authoritative V4 pipeline specification
-- `dr-classifier/CLAUDE.md` — *"V4 Preprocessing Pipeline" section (lines 81–97)* — the implementation-level stage descriptions
-- `dr-classifier/src/preprocessing/pipeline_v4.py` — *full file* — the actual pipeline code showing execution order
-- `dr-classifier/src/preprocessing/config.py` — *PIPELINE_PRESETS dict (lines 188–215)* — for the "resnet" vs "efficientnet" preset differences
+- `thesis/methods/preprocessing-pipeline.md` — *full file* — the authoritative V4 pipeline specification
+- `experiments/CLAUDE.md` — *"V4 Preprocessing Pipeline" section (lines 81–97)* — the implementation-level stage descriptions
+- `experiments/src/preprocessing/pipeline_v4.py` — *full file* — the actual pipeline code showing execution order
+- `experiments/src/preprocessing/config.py` — *PIPELINE_PRESETS dict (lines 188–215)* — for the "resnet" vs "efficientnet" preset differences
 
 **Instructions to Claude:** Create a pipeline flow diagram showing: Stage 0a → 0b → 1 → 2 → 3 → [5 train only] → 4. Mark each stage as "toggleable" or "always on." Show the baseline path (Stages 1+4 only) vs. full path. Include the resnet/efficientnet preset differences.
 
@@ -160,10 +160,10 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Dual-constraint formula, stochastic application, LAB processing.
 
 **Files to load:**
-- `dissertation/methods/implementation.md` — *Section 4: "CLAHE Configuration" (lines 53–66)* — parameter table and theoretical reference
-- `dissertation/methods/preprocessing-pipeline.md` — *"Stage 3 — Upgraded CLAHE" subsection (lines 44–53) + "Upgraded CLAHE Modifications (V4)" section (lines 96–103)* — the four V4 upgrades
-- `dr-classifier/src/preprocessing/upgraded_clahe.py` — *full file* — the implementation with ClaheParams dataclass and dual-constraint formula
-- `dissertation/governance/INVARIANTS.md` — *DGL-5 (lines ~311–312)* — for the parameter portability constraint
+- `thesis/methods/implementation.md` — *Section 4: "CLAHE Configuration" (lines 53–66)* — parameter table and theoretical reference
+- `thesis/methods/preprocessing-pipeline.md` — *"Stage 3 — Upgraded CLAHE" subsection (lines 44–53) + "Upgraded CLAHE Modifications (V4)" section (lines 96–103)* — the four V4 upgrades
+- `experiments/src/preprocessing/upgraded_clahe.py` — *full file* — the implementation with ClaheParams dataclass and dual-constraint formula
+- `thesis/governance/INVARIANTS.md` — *DGL-5 (lines ~311–312)* — for the parameter portability constraint
 
 **Instructions to Claude:** Present the formula `CL = min(clip_factor × tile_area/256, global_threshold × tile_area)` prominently. Show the four V4 upgrades over V3. Note the stochastic 80% train-time application as regularization. Reference LC-AlTimemy-2021 T/80 as theoretical origin.
 
@@ -174,10 +174,10 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** ResNet-50 vs. EfficientNet-B3 + training configuration.
 
 **Files to load:**
-- `dissertation/methods/implementation.md` — *Section 3: "CNN Architectures" table (lines 43–49) + Section 5: "Training Configuration" (lines 72–84)* — architecture roles and training params
-- `dr-classifier/src/models/resnet.py` — *full file* — ResNet-50 implementation
-- `dr-classifier/src/models/efficientnet.py` — *full file* — EfficientNet implementation
-- `dr-classifier/CLAUDE.md` — *"Hardware Constraints" section (lines 117–128)* — for the actual training configuration including the fp16 fix
+- `thesis/methods/implementation.md` — *Section 3: "CNN Architectures" table (lines 43–49) + Section 5: "Training Configuration" (lines 72–84)* — architecture roles and training params
+- `experiments/src/models/resnet.py` — *full file* — ResNet-50 implementation
+- `experiments/src/models/efficientnet.py` — *full file* — EfficientNet implementation
+- `experiments/CLAUDE.md` — *"Hardware Constraints" section (lines 117–128)* — for the actual training configuration including the fp16 fix
 
 **Instructions to Claude:** Present ResNet-50 (residual connections, 2048-dim features) and EfficientNet-B3 (compound scaling) side by side. Show the standardized training config: Adam lr=1e-4, batch 16, 20 epochs, early stopping patience=5. Note: mixed precision disabled for EfficientNet due to fp16 overflow.
 
@@ -190,11 +190,11 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** 7-dataset tiered architecture with roles and camera metadata.
 
 **Files to load:**
-- `dissertation/experiments/experimental-protocol.md` — *Section 1: "Datasets" table (lines 24–31)* — role assignments
-- `dr-classifier/configs/default.yaml` — *"paths" section (lines 10–19) + "subset" section (lines 6–8)* — actual dataset paths and 40% subset config
-- `dissertation/governance/INVARIANTS.md` — *DGL-1 (lines ~299–300)* — dataset-bound generalization constraint
-- `dr-classifier/src/data/label_harmonization.py` — *get_dataset_camera_groups() function (lines 96–114)* — camera-to-dataset mapping
-- `dissertation/literature/LITERATURE_INDEX.md` — *entries for IDRiD (#06/#10), RFMiD (#49), DDR (#50), ODIR-5K (#51)* — dataset descriptors
+- `thesis/experiments/experimental-protocol.md` — *Section 1: "Datasets" table (lines 24–31)* — role assignments
+- `experiments/configs/default.yaml` — *"paths" section (lines 10–19) + "subset" section (lines 6–8)* — actual dataset paths and 40% subset config
+- `thesis/governance/INVARIANTS.md` — *DGL-1 (lines ~299–300)* — dataset-bound generalization constraint
+- `experiments/src/data/label_harmonization.py` — *get_dataset_camera_groups() function (lines 96–114)* — camera-to-dataset mapping
+- `thesis/literature/LITERATURE_INDEX.md` — *entries for IDRiD (#06/#10), RFMiD (#49), DDR (#50), ODIR-5K (#51)* — dataset descriptors
 
 **Instructions to Claude:** Create a tiered table: Tier 1 (Training) = EyePACS 14,050 images; Tier 2 (Validation) = IDRiD 516 images; Tier 3 (Generalization) = Messidor/Messidor-2; Tier 4 (Device Shift) = RFMiD/DDR/ODIR-5K. Add camera hardware column: Canon (EyePACS, DDR, ODIR), Topcon (Messidor, RFMiD, DDR), Kowa (IDRiD, RFMiD), Zeiss (ODIR).
 
@@ -205,9 +205,9 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Map of all active experiments linked to hypotheses.
 
 **Files to load:**
-- `dissertation/experiments/experimental-protocol.md` — *Experiment-to-Argument Mapping table (lines 417–427)* — the definitive experiment-hypothesis linkage
-- `dissertation/governance/HYPOTHESIS.md` — *H-1 through H-6 one-line summaries* — for the hypothesis labels
-- `dissertation/governance/ARGUMENT_MAP.md` — *first 100 lines* — for the PC-1 through PC-9 claim structure (trim to fit)
+- `thesis/experiments/experimental-protocol.md` — *Experiment-to-Argument Mapping table (lines 417–427)* — the definitive experiment-hypothesis linkage
+- `thesis/governance/HYPOTHESIS.md` — *H-1 through H-6 one-line summaries* — for the hypothesis labels
+- `thesis/governance/ARGUMENT_MAP.md` — *first 100 lines* — for the PC-1 through PC-9 claim structure (trim to fit)
 
 **Instructions to Claude:** Create a visual map: 5 active experiments (Exp 1, 2, 4, 5, 6) each linked by arrows to their hypotheses (H-1 through H-6) and primary claims (PC-1 through PC-9). Mark Exp 3 as DROPPED. Show the causal chain: Problem → Solution → Evidence.
 
@@ -218,10 +218,10 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** 6-configuration table, dominance criterion, CV protocol.
 
 **Files to load:**
-- `dissertation/experiments/experimental-protocol.md` — *Section 4: "Experiment 1" (lines 123–158)* — factorial design specification
-- `dr-classifier/src/experiments/exp1_factorial.py` — *_CONFIGS dict (lines 42–49) + dominance test logic (lines 519–529)* — implementation-level config definitions
-- `dr-classifier/src/evaluation/metrics.py` — *check_dominance() function (lines 135–172)* — the EH-3 criterion implementation
-- `dissertation/governance/INVARIANTS.md` — *EH-3 and EH-4 (lines ~203–221)* — the dominance and sufficient validation criteria
+- `thesis/experiments/experimental-protocol.md` — *Section 4: "Experiment 1" (lines 123–158)* — factorial design specification
+- `experiments/src/experiments/exp1_factorial.py` — *_CONFIGS dict (lines 42–49) + dominance test logic (lines 519–529)* — implementation-level config definitions
+- `experiments/src/evaluation/metrics.py` — *check_dominance() function (lines 135–172)* — the EH-3 criterion implementation
+- `thesis/governance/INVARIANTS.md` — *EH-3 and EH-4 (lines ~203–221)* — the dominance and sufficient validation criteria
 
 **Instructions to Claude:** Present the 6-config table (A–F). Highlight the EH-3 dominance criterion (all three must hold: ΔF1 ≥ 5pp, ΔAUC ≥ 0.02, Δκ ≥ 0). Note: 3-fold patient-level CV, seed=42, no patient leakage. Configs E–F are optional extensions.
 
@@ -232,9 +232,9 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** V4 ablation levels, image quality metrics, CLAHE sweep design.
 
 **Files to load:**
-- `dissertation/experiments/experimental-protocol.md` — *Section 5: "Experiment 2" (lines 161–194) + Section 11: "Image Quality" (lines 391–401)* — ablation design and IQ metrics
-- `dissertation/governance/HYPOTHESIS.md` — *H-2 definition (lines ~15–16)* — CLAHE sensitivity hypothesis
-- `dissertation/governance/CONTRIBUTIONS.md` — *SC-A and SC-B entries (lines 44–58)* — the contributions this experiment supports
+- `thesis/experiments/experimental-protocol.md` — *Section 5: "Experiment 2" (lines 161–194) + Section 11: "Image Quality" (lines 391–401)* — ablation design and IQ metrics
+- `thesis/governance/HYPOTHESIS.md` — *H-2 definition (lines ~15–16)* — CLAHE sensitivity hypothesis
+- `thesis/governance/CONTRIBUTIONS.md` — *SC-A and SC-B entries (lines 44–58)* — the contributions this experiment supports
 
 **Instructions to Claude:** Show the 7-row V4 ablation table (baseline → +flip → +flip+rotation → +flat-field → +CLAHE → +augmentation → full). List the 4 image quality metrics (CNR, VVI, Entropy, SSIM). Show the CLAHE parameter sweep grid on IDRiD.
 
@@ -245,10 +245,10 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Grad-CAM protocol, ALO/IoU definitions, lesion types.
 
 **Files to load:**
-- `dissertation/experiments/experimental-protocol.md` — *Section 7: "V4 Experiment 4" (lines 242–303)* — full explainability protocol
-- `dissertation/methods/implementation.md` — *Section 7: "Grad-CAM Explainability" (lines 117–137)* — ALO and IoU formulas
-- `dr-classifier/src/explainability/iou.py` — *compute_alo() and compute_iou() functions (lines 23–81)* — implementation
-- `dissertation/governance/INVARIANTS.md` — *NC-14 (line ~248)* — the critical non-claim (Grad-CAM ≠ clinical localization)
+- `thesis/experiments/experimental-protocol.md` — *Section 7: "V4 Experiment 4" (lines 242–303)* — full explainability protocol
+- `thesis/methods/implementation.md` — *Section 7: "Grad-CAM Explainability" (lines 117–137)* — ALO and IoU formulas
+- `experiments/src/explainability/iou.py` — *compute_alo() and compute_iou() functions (lines 23–81)* — implementation
+- `thesis/governance/INVARIANTS.md` — *NC-14 (line ~248)* — the critical non-claim (Grad-CAM ≠ clinical localization)
 
 **Instructions to Claude:** Present ALO formula prominently: `ALO = area(GradCAM ∩ lesion) / area(lesion)`. Show the comparison protocol: baseline vs. preprocessed models on IDRiD, 10 images × 5 classes × 4 lesion types. State NC-14 explicitly as a boundary.
 
@@ -259,10 +259,10 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Zero-shot transfer protocol, G ≥ 0.85 criterion, camera mapping.
 
 **Files to load:**
-- `dissertation/experiments/experimental-protocol.md` — *Section 8: "V4 Experiment 5" (lines 308–335) + Section 8b: "V4 Experiment 6" (lines 337–361)* — both protocols
-- `dissertation/governance/HYPOTHESIS.md` — *H-4 and H-6 definitions (lines ~25–29)* — the two generalization hypotheses
-- `dr-classifier/src/data/label_harmonization.py` — *get_dataset_camera_groups() (lines 96–114)* — camera → dataset mapping
-- `dissertation/governance/INVARIANTS.md` — *NC-16 (line ~250)* — device results ≠ device certification
+- `thesis/experiments/experimental-protocol.md` — *Section 8: "V4 Experiment 5" (lines 308–335) + Section 8b: "V4 Experiment 6" (lines 337–361)* — both protocols
+- `thesis/governance/HYPOTHESIS.md` — *H-4 and H-6 definitions (lines ~25–29)* — the two generalization hypotheses
+- `experiments/src/data/label_harmonization.py` — *get_dataset_camera_groups() (lines 96–114)* — camera → dataset mapping
+- `thesis/governance/INVARIANTS.md` — *NC-16 (line ~250)* — device results ≠ device certification
 
 **Instructions to Claude:** Present Exp 5 (H-4: G = F1_ext / F1_EyePACS ≥ 0.85 on Messidor-2 and IDRiD) and Exp 6 (H-6: cross-device variance on RFMiD/DDR/ODIR across Canon/Topcon/Kowa/Zeiss) as linked but distinct experiments. Emphasize: zero-shot transfer, no retraining.
 
@@ -273,10 +273,10 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Complete metric hierarchy across all experiments.
 
 **Files to load:**
-- `dissertation/experiments/experimental-protocol.md` — *Sections 3.1–3.6 (lines 56–120)* — all metric categories
-- `dr-classifier/src/evaluation/metrics.py` — *full file* — primary, secondary, clinical metric implementations
-- `dr-classifier/src/evaluation/calibration.py` — *full file* — ECE and Brier score
-- `dr-classifier/src/evaluation/statistical_tests.py` — *lines 1–12 (docstring listing all tests)* — test inventory
+- `thesis/experiments/experimental-protocol.md` — *Sections 3.1–3.6 (lines 56–120)* — all metric categories
+- `experiments/src/evaluation/metrics.py` — *full file* — primary, secondary, clinical metric implementations
+- `experiments/src/evaluation/calibration.py` — *full file* — ECE and Brier score
+- `experiments/src/evaluation/statistical_tests.py` — *lines 1–12 (docstring listing all tests)* — test inventory
 
 **Instructions to Claude:** Present as a 5-layer hierarchy: (1) Primary: Weighted F1, ROC-AUC, Cohen's κ, Accuracy; (2) Clinical: Sensitivity, Specificity, PPV, NPV for referable DR ≥ 2; (3) Calibration: ECE, Brier Score; (4) Explainability: ALO (primary), IoU (secondary); (5) Statistical: McNemar, DeLong, bootstrap CI, Holm-Bonferroni.
 
@@ -289,13 +289,13 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Per-configuration metrics for A–D (and D pending folds).
 
 **Files to load:**
-- `dr-classifier/backup_exp1_abc_40pct_20260324/metrics.csv` — *full file* — all training logs for configs A, B, C, D
-- `dr-classifier/logs/exp1_configD_40pct.log` — *full file* — Config D fold 0 + fold 1 start (best metrics visible)
-- `dr-classifier/logs/exp1_D_fold2.log` — *full file* — Config D fold 2 complete
-- `dr-classifier/logs/exp1_remaining.log` — *full file* — Configs A/B/C fold 2 results
-- `dr-classifier/logs/exp1_folds_1_2.log` — *full file* — additional fold logs
-- `dr-classifier/src/evaluation/metrics.py` — *check_dominance() (lines 135–172)* — to verify dominance calculations
-- `dissertation/governance/INVARIANTS.md` — *EH-3 criterion (lines ~203–209)* — the dominance thresholds
+- `experiments/outputs/backup_exp1_abc_40pct_20260324/metrics.csv` — *full file* — all training logs for configs A, B, C, D
+- `experiments/logs/exp1_configD_40pct.log` — *full file* — Config D fold 0 + fold 1 start (best metrics visible)
+- `experiments/logs/exp1_D_fold2.log` — *full file* — Config D fold 2 complete
+- `experiments/logs/exp1_remaining.log` — *full file* — Configs A/B/C fold 2 results
+- `experiments/logs/exp1_folds_1_2.log` — *full file* — additional fold logs
+- `experiments/src/evaluation/metrics.py` — *check_dominance() (lines 135–172)* — to verify dominance calculations
+- `thesis/governance/INVARIANTS.md` — *EH-3 criterion (lines ~203–209)* — the dominance thresholds
 
 **Instructions to Claude:** Compile the best-fold metrics into a summary table for configs A–D across 3 folds. Compute mean ± std for each config. Run the EH-3 dominance check (B vs A, D vs C). NOTE: Config C fold 2 and Config D fold 1 are missing — mark as "pending" and present partial results with appropriate caveats. Flag the EfficientNet overfitting pattern (train loss ~0.14, val loss ~2.6).
 
@@ -309,8 +309,8 @@ These slides draw heavily from the governance constraint system and require a co
 
 **Files to load:**
 - *No experimental result files exist yet for Experiments 2, 4, 5, 6 — these experiments have not been run.*
-- `dissertation/experiments/experimental-protocol.md` — *Sections 5, 7, 8, 8b* — experiment designs (for placeholder structure)
-- `dissertation/governance/HYPOTHESIS.md` — *H-2, H-4, H-5, H-6 definitions* — success criteria
+- `thesis/experiments/experimental-protocol.md` — *Sections 5, 7, 8, 8b* — experiment designs (for placeholder structure)
+- `thesis/governance/HYPOTHESIS.md` — *H-2, H-4, H-5, H-6 definitions* — success criteria
 
 **Instructions to Claude:** Create placeholder result tables with column headers and success criteria thresholds. Mark all cells as "[PENDING — experiment not yet run]". Structure: (a) V4 ablation table with 7 rows; (b) CLAHE sensitivity curve placeholder; (c) ALO/IoU comparison table (4 lesion types × baseline/preprocessed); (d) Generalization ratio table (Messidor-2, IDRiD, DDR) and cross-device matrix.
 
@@ -321,10 +321,10 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Interpretation of findings, causal chain evaluation, benchmark comparison.
 
 **Files to load:**
-- `dissertation/governance/HYPOTHESIS.md` — *Argument Structure section (lines ~33–45)* — the causal chain to evaluate
-- `dissertation/governance/INVARIANTS.md` — *CFC-1: Permissible Claim Types (lines ~227–233) + CFC-2: Forbidden Claims (lines ~236–243)* — what the discussion CAN and CANNOT say
-- `dissertation/literature/LITERATURE_INDEX.md` — *entries for Gulshan (#12), Ting (#11), Saxena (#02), Liu (#15)* — benchmark comparison references
-- `dissertation/governance/CONTRIBUTIONS.md` — *Relationship to Primary Claims table (lines 91–100)* — contribution → evidence mapping
+- `thesis/governance/HYPOTHESIS.md` — *Argument Structure section (lines ~33–45)* — the causal chain to evaluate
+- `thesis/governance/INVARIANTS.md` — *CFC-1: Permissible Claim Types (lines ~227–233) + CFC-2: Forbidden Claims (lines ~236–243)* — what the discussion CAN and CANNOT say
+- `thesis/literature/LITERATURE_INDEX.md` — *entries for Gulshan (#12), Ting (#11), Saxena (#02), Liu (#15)* — benchmark comparison references
+- `thesis/governance/CONTRIBUTIONS.md` — *Relationship to Primary Claims table (lines 91–100)* — contribution → evidence mapping
 
 **Instructions to Claude:** Structure the discussion around three questions: (1) Is preprocessing dominance (H-1) supported? (2) Which pipeline stages contribute most? (3) Does the causal chain (preprocessing → feature visibility → classification) hold? Compare to published benchmarks (Gulshan AUC 0.991, Ting AUC 0.936) with appropriate caveats per CFC-2.2 (no superiority claims without direct comparison). If results are pending, state what WOULD be concluded under each outcome.
 
@@ -337,8 +337,8 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** 3 primary + 4 supporting contributions mapped to evidence.
 
 **Files to load:**
-- `dissertation/governance/CONTRIBUTIONS.md` — *full file* — the authoritative contributions register
-- `dissertation/governance/ARGUMENT_MAP.md` — *first 150 lines* — PC-1 through PC-9 claim structure (trim for token budget)
+- `thesis/governance/CONTRIBUTIONS.md` — *full file* — the authoritative contributions register
+- `thesis/governance/ARGUMENT_MAP.md` — *first 150 lines* — PC-1 through PC-9 claim structure (trim for token budget)
 
 **Instructions to Claude:** Present the 3 primary contributions (C-1: pipeline, C-2: cross-dataset, C-3: lesion attention via ALO) and the supporting contributions (SC-A: adaptive CLAHE, SC-B: CLAHE sensitivity, SC-C: cross-device robustness, SC-D: flat-field, SC-E: binocular fusion, SC-F: OD-fovea rotation). Map each to its experimental evidence and primary claims.
 
@@ -349,11 +349,11 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Theoretical formalization + practical deployment context.
 
 **Files to load:**
-- `dissertation/governance/CONTRIBUTIONS.md` — *Novelty paragraphs under C-1, C-2, C-3* — for theoretical significance
-- `dissertation/governance/CORE_OBJECTIVE.md` — *full file* — for the "constrained computational conditions" framing
-- `dr-classifier/CLAUDE.md` — *"Hardware Constraints" section (lines 117–128)* — RTX 3060 12GB as representative of resource-limited hardware
-- `dissertation/literature/self/yesmukhamedov-nan-rk.md` — *Section 12 (Relevance)* — Kazakhstan healthcare infrastructure relevance
-- `dissertation/governance/INVARIANTS.md` — *DGL-4 (lines ~308–309)* — deployment constraints boundary
+- `thesis/governance/CONTRIBUTIONS.md` — *Novelty paragraphs under C-1, C-2, C-3* — for theoretical significance
+- `thesis/governance/CORE_OBJECTIVE.md` — *full file* — for the "constrained computational conditions" framing
+- `experiments/CLAUDE.md` — *"Hardware Constraints" section (lines 117–128)* — RTX 3060 12GB as representative of resource-limited hardware
+- `thesis/literature/self/yesmukhamedov-nan-rk.md` — *Section 12 (Relevance)* — Kazakhstan healthcare infrastructure relevance
+- `thesis/governance/INVARIANTS.md` — *DGL-4 (lines ~308–309)* — deployment constraints boundary
 
 **Instructions to Claude:** Split into Theoretical (formalization of preprocessing dominance, ALO metric, dual-constraint CLAHE) and Practical (deployable on <16GB RAM, applicable to Kazakhstan's rural screening infrastructure). Caveat per DGL-4: system architecture is design specification, not field-tested.
 
@@ -364,8 +364,8 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Comprehensive non-claims and scope boundaries.
 
 **Files to load:**
-- `dissertation/governance/INVARIANTS.md` — *Section IV: Scope Boundaries (if present, else Section VI: CFC-2 Forbidden Claims, lines ~236–251 + Section IX: DGL-1 through DGL-6, lines ~299–316)* — the full limitations framework
-- `dissertation/governance/CONTRIBUTIONS.md` — *"Boundary Conditions" section (lines 114–120)* — contribution-level boundaries
+- `thesis/governance/INVARIANTS.md` — *Section IV: Scope Boundaries (if present, else Section VI: CFC-2 Forbidden Claims, lines ~236–251 + Section IX: DGL-1 through DGL-6, lines ~299–316)* — the full limitations framework
+- `thesis/governance/CONTRIBUTIONS.md` — *"Boundary Conditions" section (lines 114–120)* — contribution-level boundaries
 
 **Instructions to Claude:** Present 7–8 key limitations: (1) no SOTA claim (CFC-2.2), (2) no clinical certification (NC-16), (3) bounded to tested architectures and datasets (DGL-1), (4) calibration ≠ clinical reliability, (5) Grad-CAM is post-hoc interpretability not mechanistic explanation (NC-14), (6) no Kazakhstan field testing (DGL-4), (7) hardware-specific reproducibility (DGL-2), (8) CLAHE parameters not universally portable (DGL-5).
 
@@ -376,10 +376,10 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** Kazakh clinical data, ViT architectures, OCT, deployment.
 
 **Files to load:**
-- `dissertation/experiments/experimental-protocol.md` — *Section 10: "FUTURE WORK" (lines 366–389)* — Kazakh clinical validation protocol
-- `dissertation/governance/INVARIANTS.md` — *VCR-4 (line ~291)* — extended contributions labeling rule
-- `dissertation/literature/external/goh-2024-vit-vs-cnn.md` — *Section 4 (Key Findings)* — ViT as future architecture direction
-- `dissertation/literature/external/ryu-2021-octa.md` — *Section 4* — OCT modality extension precedent
+- `thesis/experiments/experimental-protocol.md` — *Section 10: "FUTURE WORK" (lines 366–389)* — Kazakh clinical validation protocol
+- `thesis/governance/INVARIANTS.md` — *VCR-4 (line ~291)* — extended contributions labeling rule
+- `thesis/literature/external/goh-2024-vit-vs-cnn.md` — *Section 4 (Key Findings)* — ViT as future architecture direction
+- `thesis/literature/external/ryu-2021-octa.md` — *Section 4* — OCT modality extension precedent
 
 **Instructions to Claude:** Present 5 future directions: (1) Kazakh clinical validation with real-world data per Exp 7 protocol, (2) ViT architectures, (3) OCT modality, (4) clinical deployment prototype, (5) national eHealth platform integration. Frame each as an "extended contribution" per VCR-4.
 
@@ -390,14 +390,14 @@ These slides draw heavily from the governance constraint system and require a co
 **Content:** 6 self-publications with key results.
 
 **Files to load:**
-- `dissertation/literature/LITERATURE_INDEX.md` — *Self-Publication Registry table (lines 259–268)* — the publication list with DOIs
-- `dissertation/literature/self/yesmukhamedov-conf.md` — *Sections 1, 4, 12* — conference proceedings
-- `dissertation/literature/self/yesmukhamedov-kazutb.md` — *Sections 1, 4, 12* — KazUTB journal (laser-tissue)
-- `dissertation/literature/self/yesmukhamedov-kbtu.md` — *Sections 1, 4, 12* — KBTU journal
-- `dissertation/literature/self/yesmukhamedov-nan-rk.md` — *Sections 1, 4, 12* — NAS RK journal (system architecture)
-- `dissertation/literature/self/yesmukhamedov-scopus-q2.md` — *Sections 1, 4, 12* — Scopus Q2
-- `dissertation/literature/self/yesmukhamedov-scopus-q3.md` — *Sections 1, 4, 12* — Scopus Q3
-- `dissertation/governance/INVARIANTS.md` — *SIR-4 and SIR-5 (lines ~266–270)* — self-citation transparency and non-aggregation rules
+- `thesis/literature/LITERATURE_INDEX.md` — *Self-Publication Registry table (lines 259–268)* — the publication list with DOIs
+- `thesis/literature/self/yesmukhamedov-conf.md` — *Sections 1, 4, 12* — conference proceedings
+- `thesis/literature/self/yesmukhamedov-kazutb.md` — *Sections 1, 4, 12* — KazUTB journal (laser-tissue)
+- `thesis/literature/self/yesmukhamedov-kbtu.md` — *Sections 1, 4, 12* — KBTU journal
+- `thesis/literature/self/yesmukhamedov-nan-rk.md` — *Sections 1, 4, 12* — NAS RK journal (system architecture)
+- `thesis/literature/self/yesmukhamedov-scopus-q2.md` — *Sections 1, 4, 12* — Scopus Q2
+- `thesis/literature/self/yesmukhamedov-scopus-q3.md` — *Sections 1, 4, 12* — Scopus Q3
+- `thesis/governance/INVARIANTS.md` — *SIR-4 and SIR-5 (lines ~266–270)* — self-citation transparency and non-aggregation rules
 
 **Instructions to Claude:** Present as a numbered publication list: venue, year, DOI, key result, and which dissertation claim each supports. Flag #23/#24 as the same article (duplicate DOI). Note CONF and KBTU share the same experiment per SIR-5 (not independent confirmation). Identify 2 Scopus-indexed + 1 conference + 3 other.
 
@@ -418,17 +418,17 @@ These slides draw heavily from the governance constraint system and require a co
 
 | File | Slides Used In |
 |------|---------------|
-| `dissertation/governance/INVARIANTS.md` | 2, 3, 5, 7, 11, 13, 15, 17, 18, 20, 22, 24, 25, 26, 27 |
-| `dissertation/governance/HYPOTHESIS.md` | 3, 7, 14, 16, 17, 18, 21 |
-| `dissertation/governance/CONTRIBUTIONS.md` | 4, 6, 16, 23, 25 |
-| `dissertation/governance/CENTRAL_THESIS.md` | 1, 5, 9 |
-| `dissertation/governance/CORE_OBJECTIVE.md` | 1, 4, 24 |
-| `dissertation/experiments/experimental-protocol.md` | 4, 13, 14, 15, 16, 17, 18, 19, 21, 26 |
-| `dissertation/methods/preprocessing-pipeline.md` | 3, 6, 9, 10, 11 |
-| `dissertation/methods/implementation.md` | 11, 12, 17 |
-| `dr-classifier/CLAUDE.md` | 10, 12, 24 |
-| `dissertation/literature/LITERATURE_INDEX.md` | 8, 13, 27 |
-| `dr-classifier/backup_exp1_abc_40pct_20260324/metrics.csv` | 20 |
+| `thesis/governance/INVARIANTS.md` | 2, 3, 5, 7, 11, 13, 15, 17, 18, 20, 22, 24, 25, 26, 27 |
+| `thesis/governance/HYPOTHESIS.md` | 3, 7, 14, 16, 17, 18, 21 |
+| `thesis/governance/CONTRIBUTIONS.md` | 4, 6, 16, 23, 25 |
+| `thesis/governance/CENTRAL_THESIS.md` | 1, 5, 9 |
+| `thesis/governance/CORE_OBJECTIVE.md` | 1, 4, 24 |
+| `thesis/experiments/experimental-protocol.md` | 4, 13, 14, 15, 16, 17, 18, 19, 21, 26 |
+| `thesis/methods/preprocessing-pipeline.md` | 3, 6, 9, 10, 11 |
+| `thesis/methods/implementation.md` | 11, 12, 17 |
+| `experiments/CLAUDE.md` | 10, 12, 24 |
+| `thesis/literature/LITERATURE_INDEX.md` | 8, 13, 27 |
+| `experiments/outputs/backup_exp1_abc_40pct_20260324/metrics.csv` | 20 |
 
 ---
 

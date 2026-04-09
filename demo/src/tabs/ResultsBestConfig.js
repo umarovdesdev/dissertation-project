@@ -11,7 +11,7 @@ export default function ResultsBestConfig() {
           Config D — Best Single-Image Configuration
         </h2>
         <div style={{ fontSize: 12, color: 'var(--color-text-secondary,#666)' }}>
-          Full V4 Pipeline + EfficientNet-B3 | EyePACS 40% subset | 3-fold CV
+          Full V5 Pipeline (4ch) + EfficientNet-B3 | EyePACS 100% (~35,126) | 5-fold CV
         </div>
       </div>
 

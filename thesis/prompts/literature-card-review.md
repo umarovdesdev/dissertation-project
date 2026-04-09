@@ -256,3 +256,13 @@ Strictly analytical. No filler language.
 End of Literature Card.
 
 ---
+
+### V5-Era Evaluation Axes
+
+When evaluating articles, additionally assess relevance along these axes:
+- **Device domain shift:** Does the paper address cross-device generalization or camera-specific artifacts?
+- **ALO metric or attention-lesion analysis:** Does the paper use quantitative explainability metrics for lesion coverage?
+- **FOV mask / isotropic resize:** Does the paper address fundus image geometry preservation during preprocessing?
+- **Adaptive preprocessing parameters:** Does the paper use image-specific (not global fixed) preprocessing parameters?
+- **Clinical degradation:** Does the paper measure cross-dataset performance drop and compare preprocessing effects on it?
+- **Dataset-specific normalization:** Does the paper compute normalization statistics from the training set rather than using ImageNet defaults?

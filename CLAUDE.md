@@ -7,7 +7,7 @@ Candidate: Yesmukhamedov N.S., IITU (Almaty, Kazakhstan)
 
 ```
 dissertation-project/
-├── experiments/   Python/PyTorch — ML pipeline, training, 6 experiments
+├── experiments/   Python/PyTorch — ML pipeline, training, 7 experiments
 ├── thesis/        Dissertation text, governance docs, literature cards
 ├── demo/          React dashboard for defense presentation
 ├── defense/       Slides (pptx/docx) and presentation materials
@@ -19,13 +19,13 @@ Each sub-directory has its own CLAUDE.md with detailed context.
 
 ## Central Thesis
 
-model = preprocessing + CNN. The 6-stage V4 preprocessing pipeline is an integral model component, not ancillary data preparation. It defines the feature space available to the CNN.
+model = preprocessing + CNN. The 8-stage V5 preprocessing pipeline is an integral model component, not ancillary data preparation. It defines the feature space available to the CNN.
 
 ## Governance — Single Source of Truth
 
-All governance documents live in `thesis/governance/` (v4.1). These are the authoritative versions:
+All governance documents live in `thesis/governance/` (v5.0). These are the authoritative versions:
 - INVARIANTS.md — scope boundaries, forbidden claims, binding constraints
-- HYPOTHESIS.md — H-1 through H-6 formal definitions
+- HYPOTHESIS.md — H-1 through H-7 formal definitions
 - ARGUMENT_MAP.md — claim-evidence dependency structure
 - CENTRAL_THESIS.md — one-paragraph thesis statement
 - CONTRIBUTIONS.md — 4 primary + supporting contributions
@@ -34,38 +34,41 @@ All governance documents live in `thesis/governance/` (v4.1). These are the auth
 
 `experiments/docs/` contains only `experimental_protocol.md` (quick-start guide for running experiments). All other governance references point to `thesis/governance/`.
 
-## V4 Preprocessing Pipeline (6 stages)
+## V5 Preprocessing Pipeline (8 stages)
 
-Stage 0a: Canonical flip (left→right eye) — toggleable
-Stage 0b: OD-fovea rotation normalization — toggleable
-Stage 1:  FOV crop + isotropic resize to 512×512 — always on
-Stage 2:  Flat-field correction (Gaussian σ=45) — toggleable
-Stage 3:  Upgraded CLAHE (dual-constraint, LAB L-channel, stochastic at train) — toggleable
-Stage 5:  Augmentation (unified affine + PCA color + brightness/contrast) — train only
-Stage 4:  ImageNet normalize → tensor — always last
+Stage 0: Canonical flip (left→right eye) — always on
+Stage 1: OD-fovea rotation normalization — always on
+Stage 2: FOV crop + isotropic resize to 512×512 — always on
+Stage 3: FOV mask generation (binary mask → 4th channel) — always on
+Stage 4: Flat-field correction (adaptive σ=0.07·D) — always on
+Stage 5: CLAHE (dual-constraint, LAB L-channel, stochastic at train) — always on
+Stage 6: Augmentation (unified affine + PCA color + brightness/contrast) — train only
+Stage 7: Dataset-specific normalize → tensor — always last
 
-Baseline = Stages 1 + 4 only (crop + resize + ImageNet normalize).
+Baseline (Exp 1 A/C) = stretch-resize 512×512 + ImageNet normalize (3 channels).
+Full V5 (Exp 1 B/D) = all 8 stages (4 channels: RGB + FOV mask).
 
 ## Experiments
 
 | Exp | Hypothesis | Dataset | What |
 |-----|-----------|---------|------|
-| 1   | H-1       | EyePACS (40% subset, ~14,050) | 2×2 factorial: ResNet-50 vs EfficientNet-B3 × baseline vs full V4. Configs A–F. |
-| 2   | H-2       | EyePACS + IDRiD | Component ablation (V4 levels 0–4) + CLAHE sweep |
-| 3   | —         | DROPPED (APTOS robustness removed in V3) |
-| 4   | H-5       | IDRiD | Grad-CAM explainability (ALO primary, IoU secondary) |
-| 5   | H-4       | Messidor/Messidor-2/IDRiD | Cross-dataset generalization (G ≥ 0.85) |
-| 6   | H-6       | RFMiD/DDR/ODIR-5K | Device domain shift (Canon, Topcon, Kowa, Zeiss) |
-
-Experiment 1 is COMPLETED. Config D (EfficientNet-B3 + full V4) achieved best results (F1=0.780, AUC=0.865, κ=0.700).
+| 1   | H-1       | EyePACS (100%, ~35,126) | 2×2 factorial: ResNet-50 vs EfficientNet-B3 × baseline(3ch) vs V5(4ch). Configs A–D. |
+| 2   | H-2       | EyePACS | V5 stage ablation (7 levels) + CLAHE sweep + flat-field σ sweep |
+| 3   | H-4       | EyePACS → APTOS 2019 | Cross-dataset transfer (G ≥ 0.85) |
+| 4   | H-5       | EyePACS → IDRiD + Clinical | Explainability: IDRiD quantitative (ALO/IoU), Clinical qualitative (Grad-CAM) |
+| 5   | H-7       | EyePACS → IDRiD + Messidor-2 | Clinical degradation resistance |
+| 6   | H-6       | EyePACS → DDR + ODIR-5K + RFMiD | Device domain shift (DR labels only) |
+| 7   | —         | IDRiD → Clinical | Small data training (5-fold CV on IDRiD) |
 
 ## Hardware
 
 - GPU: NVIDIA RTX 3060 12GB VRAM
 - OS: WSL2 Ubuntu on Windows
 - Conda env: `dr-classifier`
-- Datasets: `/mnt/d/datasets/` (external, not in git)
+- Datasets: `E:/datasets/` (external, not in git)
 - batch_size=16, image_size=512×512, input_channels=4 (RGB + FOV mask)
+- Cross-validation: 5-fold patient-level stratified
+- Loss: Focal Loss (γ=2, α=inverse-frequency)
 - Mixed precision: enabled for ResNet-50, DISABLED for EfficientNet (fp16 overflow)
 
 ## Working Conventions
@@ -82,9 +85,7 @@ Experiment 1 is COMPLETED. Config D (EfficientNet-B3 + full V4) achieved best re
 cd experiments
 conda activate dr-classifier
 python run_experiment.py exp1 --config configs/default.yaml
-python run_experiment.py exp1 --config configs/default.yaml --configs D
 python run_experiment.py exp2 --config configs/default.yaml
-python run_experiment.py exp1 --config configs/smoke_test_1pct.yaml  # 1% smoke test
 ```
 
 ```bash

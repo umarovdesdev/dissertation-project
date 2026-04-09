@@ -20,7 +20,7 @@ export default function ExpH2() {
           items={ABL.map((d, i) => ({ label: d.n, v: d.f1, color: i === 0 ? C.gray : i === ABL.length - 1 ? C.teal : C.blue }))}
           maxV={0.82}
         />
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/04_exp2_ablation.png'} caption="Cumulative ablation: each row adds one pipeline stage. Starting from baseline (F1=0.727), each component adds incremental improvement, reaching F1=0.780 at full V4." figNum={4} tooltip="tooltip.fig04" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/04_exp2_ablation.png'} caption="Cumulative ablation: each row adds one pipeline stage. Starting from baseline (F1=0.727), each component adds incremental improvement, reaching F1=0.780 at full V5." figNum={4} tooltip="tooltip.fig04" />
         <DataTable
           headers={['Pipeline State', 'F1', 'AUC', 'ΔF1 vs Prev']}
           rows={ABL.map((d, i) => [

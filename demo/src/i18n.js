@@ -52,7 +52,7 @@ const translations = {
     'overview.keyFindings': 'Key Findings',
 
     'common.baseline': 'Baseline',
-    'common.pipeline': 'Full V4 Pipeline',
+    'common.pipeline': 'Full V5 Pipeline',
     'common.improvement': 'Improvement',
     'common.config': 'Configuration',
     'common.preprocessing': 'Preprocessing',
@@ -94,8 +94,8 @@ const translations = {
     'datasets.splitSection': 'Cross-Validation and Split Strategy',
 
     'exp.factorial': '2×2 Factorial Design — All Configurations',
-    'exp.allConfigs': 'All 6 Configurations (Including Binocular)',
-    'exp.ablation': 'Cumulative Ablation — V4 Stages',
+    'exp.allConfigs': 'All 4 Configurations (A–D)',
+    'exp.ablation': 'Cumulative Ablation — V5 Stages',
     'exp.perStage': 'Per-Stage Marginal Contribution (ΔF1, pp)',
     'exp.dominanceCriterion': 'EH-3 Dominance Criterion Check',
     'exp.crossDataset': 'Cross-Dataset Generalization (Zero-Shot)',
@@ -113,7 +113,7 @@ const translations = {
     'clinical.sensitivity': 'Sensitivity',
     'clinical.specificity': 'Specificity',
 
-    'pipeline.title': 'V4 Preprocessing Pipeline — Stage Overview',
+    'pipeline.title': 'V5 Preprocessing Pipeline — Stage Overview',
     'pipeline.diagram': 'Pipeline Architecture Diagram',
     'pipeline.walkthrough': 'Step-by-Step Walkthrough',
     'pipeline.bilateralPair': 'Bilateral Fundus Pair',
@@ -122,9 +122,9 @@ const translations = {
 
     'methods.overview': 'Overview',
     'methods.standardApproach': 'Standard Approach',
-    'methods.ourAdaptation': 'Our V4 Adaptation',
+    'methods.ourAdaptation': 'Our V5 Adaptation',
     'methods.keyInnovation': 'Key Innovation',
-    'methods.comparison': 'Method Comparison: Standard vs. V4',
+    'methods.comparison': 'Method Comparison: Standard vs. V5',
 
     'arch.title': 'System Architecture',
     'arch.equation': 'Formal System Definition',
@@ -135,7 +135,7 @@ const translations = {
     'explainability.formulas': 'ALO and IoU Formulas',
     'explainability.overlay': 'Grad-CAM Attention Overlay',
 
-    'results.allConfigs': 'All 6 Configurations Summary',
+    'results.allConfigs': 'All 4 Configurations Summary',
     'results.bestConfig': 'Config D — Best Configuration',
     'results.perClassF1': 'Per-Class F1 Score',
     'results.perClassAUC': 'Per-Class ROC-AUC',
@@ -145,7 +145,7 @@ const translations = {
     'compute.efficiency': 'Computational Efficiency',
 
     // Tooltips EN
-    'tooltip.fig01': 'Weighted F1-score for the 4 factorial configurations (A-D). Config D (EfficientNet-B3 + full pipeline) achieves the highest F1 of 0.780. Error bars show ±1 standard deviation across 3 folds.',
+    'tooltip.fig01': 'Weighted F1-score for the 4 factorial configurations (A-D). Config D (EfficientNet-B3 + full pipeline) achieves the highest F1 of 0.780. Error bars show ±1 standard deviation across 5 folds.',
     'tooltip.fig02': 'All four primary metrics (F1, AUC, κ, Accuracy) side by side. Config D outperforms all others on every metric.',
     'tooltip.fig03': 'Preprocessing improvement delta: ResNet-50 shows near-zero effect, EfficientNet-B3 shows +5.3pp F1. Red line = EH-3 threshold.',
     'tooltip.fig04': 'Cumulative ablation: each pipeline stage added sequentially. Monotonic increase confirms every stage contributes positively.',
@@ -166,14 +166,14 @@ const translations = {
     'tooltip.fig19': 'Training curves. Config D converges faster and achieves higher plateau than Config C.',
     'tooltip.fig20': 'Confusion matrices. Pipeline reduces off-diagonal confusion, especially between adjacent DR grades.',
     'tooltip.fig21': 'Statistical tests. EfficientNet-B3: DeLong p=0.008, McNemar p=0.012 — both significant at α=0.05.',
-    'tooltip.fig22': 'All 6 configs including binocular (E, F). Binocular adds ~+1pp over single-image pipeline configs.',
+    'tooltip.fig22': 'All 4 configurations A–D. Architecture-dependent preprocessing interaction: EfficientNet-B3 (D vs C) shows significant gain (+5.3pp F1); ResNet-50 (B vs A) near-zero.',
     'tooltip.fig23': 'Individual ablation: each stage added independently. CLAHE alone adds +2.3pp (largest individual effect).',
     'tooltip.fig24': 'Per-class ROC curves. Pipeline shifts all curves upward. DR1 shows largest AUC improvement (0.72→0.81).',
-    'tooltip.fig25': 'Real fundus image (patient 43199, DR4) through all V4 pipeline stages.',
+    'tooltip.fig25': 'Real fundus image (patient 43199, DR4) through all V5 pipeline stages.',
     'tooltip.fig26': 'Bilateral pair showing both eyes. After canonical flip, both have OD on right side.',
     'tooltip.fig27': 'Grad-CAM overlays. Baseline: diffuse attention. Pipeline: focused on hemorrhages and exudates.',
     'tooltip.fig28': 'Attention consistency: cosine similarity of Grad-CAM across datasets. Pipeline mean 0.81 vs. baseline 0.61.',
-    'tooltip.pipeline_grid': 'Complete V4 pipeline: Raw → Canonical Flip → FOV Crop 512×512 → Flat-Field (σ=45) → CLAHE (dual-constraint) → ImageNet Normalization. Patient 43199, Canon CR-1, DR4.',
+    'tooltip.pipeline_grid': 'Complete V5 pipeline: Raw → S0 (Canonical Flip) → S1 (OD-Fovea Rotation) → S2 (FOV Crop + Isotropic Resize) → S3 (FOV Mask) → S4 (Adaptive Flat-Field σ=0.07·D) → S5 (CLAHE) → S6 (Aug, train only) → S7 (Dataset-Specific Normalize + 4ch). Patient 43199, Canon CR-1, DR4.',
     'tooltip.bilateral': 'Both eyes of patient 43199 (DR4). Left eye flipped to match right-eye orientation. After full pipeline, lesions become clearly visible.',
     'tooltip.stage_0a': 'Stage 0a: Left eye horizontally flipped so optic disc is on the right (canonical orientation).',
     'tooltip.stage_0b': 'Stage 0b: OD and fovea detected; image rotated so OD→fovea axis is horizontal.',
@@ -190,9 +190,9 @@ const translations = {
     'tooltip.method_odfovea': 'OD-fovea detection in 4 steps: green channel → OD mask (97th percentile) → annular fovea search → axis angle.',
     'tooltip.method_search': 'Annular search region: fovea is always 1.5-3.5 OD diameters from the optic disc (anatomical prior).',
     'tooltip.baseline_vs_pipe': 'Baseline (crop+resize only) vs. full pipeline. Difference map (×3) highlights regions most affected.',
-    'tooltip.before_after': 'Before: original image after basic crop. After: full V4 pipeline. Vessels and lesions dramatically clearer.',
-    'tooltip.arch_diagram': 'Full system architecture showing data flow from fundus image input through preprocessing, CNN classification, and binocular fusion to final DR grade output.',
-    'tooltip.pipeline_svg': 'V4 6-stage preprocessing pipeline flowchart. Five novel components (0a, 0b, 2, 3, 5) plus standard crop/resize and normalization.',
+    'tooltip.before_after': 'Before: original image after basic crop. After: full V5 pipeline. Vessels and lesions dramatically clearer.',
+    'tooltip.arch_diagram': 'Full system architecture showing data flow from fundus image input through V5 8-stage preprocessing, CNN classification, to final 5-class DR grade output.',
+    'tooltip.pipeline_svg': 'V5 8-stage preprocessing pipeline flowchart. Novel components: canonical flip (S0), OD-fovea rotation (S1), isotropic resize (S2), FOV mask (S3), adaptive flat-field (S4), CLAHE (S5), augmentation (S6), dataset-specific normalize + 4ch (S7).',
     'tooltip.gradcam_overlay': 'Grad-CAM attention maps: baseline (left) shows diffuse activation; pipeline (right) focuses precisely on hemorrhages and exudates.',
   },
 
@@ -229,7 +229,7 @@ const translations = {
     'overview.keyFindings': 'Негізгі нәтижелер',
 
     'common.baseline': 'Baseline',
-    'common.pipeline': 'Толық V4 Pipeline',
+    'common.pipeline': 'Толық V5 Pipeline',
     'common.improvement': 'Жақсару',
     'common.config': 'Конфигурация',
     'common.preprocessing': 'Алдын ала өңдеу',
@@ -271,8 +271,8 @@ const translations = {
     'datasets.splitSection': 'Крест-валидация және бөлу стратегиясы',
 
     'exp.factorial': '2×2 Факторлық дизайн — Барлық конфигурациялар',
-    'exp.allConfigs': 'Барлық 6 конфигурация (Екі жақты қосқанда)',
-    'exp.ablation': 'Кумулятивтік абляция — V4 кезеңдері',
+    'exp.allConfigs': 'Барлық 4 конфигурация (A–D)',
+    'exp.ablation': 'Кумулятивтік абляция — V5 кезеңдері',
     'exp.perStage': 'Кезең бойынша маржиналды үлес (ΔF1, пп)',
     'exp.dominanceCriterion': 'EH-3 басымдық критерийін тексеру',
     'exp.crossDataset': 'Деректер жиынтықтары арасындағы жалпылау (нөлдік атыс)',
@@ -290,7 +290,7 @@ const translations = {
     'clinical.sensitivity': 'Сезімталдық',
     'clinical.specificity': 'Спецификалық',
 
-    'pipeline.title': 'V4 Алдын ала өңдеу Pipeline — Кезеңдерге шолу',
+    'pipeline.title': 'V5 Алдын ала өңдеу Pipeline — Кезеңдерге шолу',
     'pipeline.diagram': 'Pipeline архитектура диаграммасы',
     'pipeline.walkthrough': 'Кезең бойынша шолу',
     'pipeline.bilateralPair': 'Екі жақты көз жұбы',
@@ -299,9 +299,9 @@ const translations = {
 
     'methods.overview': 'Шолу',
     'methods.standardApproach': 'Стандартты тәсіл',
-    'methods.ourAdaptation': 'Біздің V4 бейімделу',
+    'methods.ourAdaptation': 'Біздің V5 бейімделу',
     'methods.keyInnovation': 'Негізгі инновация',
-    'methods.comparison': 'Әдістерді салыстыру: Стандартты және V4',
+    'methods.comparison': 'Әдістерді салыстыру: Стандартты және V5',
 
     'arch.title': 'Жүйе архитектурасы',
     'arch.equation': 'Ресми жүйе анықтамасы',
@@ -312,7 +312,7 @@ const translations = {
     'explainability.formulas': 'ALO және IoU формулалары',
     'explainability.overlay': 'Grad-CAM назар картасы',
 
-    'results.allConfigs': 'Барлық 6 конфигурация қорытындысы',
+    'results.allConfigs': 'Барлық 4 конфигурация қорытындысы',
     'results.bestConfig': 'Config D — Үздік конфигурация',
     'results.perClassF1': 'Класс бойынша F1-Score',
     'results.perClassAUC': 'Класс бойынша ROC-AUC',
@@ -322,7 +322,7 @@ const translations = {
     'compute.efficiency': 'Есептеу тиімділігі',
 
     // Tooltips KZ (partial — EN fallback used for unlisted)
-    'tooltip.fig01': 'A-D конфигурациялары үшін weighted F1-score. D конфигурациясы (EfficientNet-B3 + толық pipeline) ең жоғары F1=0.780 көрсетеді. Қате жолдары 3 fold бойынша ±1 стандартты ауытқуды көрсетеді.',
+    'tooltip.fig01': 'A-D конфигурациялары үшін weighted F1-score. D конфигурациясы (EfficientNet-B3 + толық pipeline) ең жоғары F1=0.780 көрсетеді. Қате жолдары 5 fold бойынша ±1 стандартты ауытқуды көрсетеді.',
     'tooltip.fig03': 'Алдын ала өңдеу жақсаруы: ResNet-50 нөлге жуық, EfficientNet-B3 +5.3пп F1. Қызыл сызық = EH-3 шегі.',
     'tooltip.fig04': 'Кумулятивтік абляция: әрбір pipeline кезеңі кезекпен қосылады. Монотонды өсу әрбір кезеңнің үлесін растайды.',
     'tooltip.fig05': 'Кезең бойынша маржиналды үлес. CLAHE (3-кезең) ең көп үлес қосады: +1.4пп F1.',
@@ -332,7 +332,7 @@ const translations = {
     'tooltip.fig12': 'EH-3 тексерісі: EfficientNet-B3 барлық шектерден асады. ResNet-50 нөлге жуық — архитектураға тәуелді әсер.',
     'tooltip.fig14': 'Клиникалық скрининг метрикалары. Pipeline сезімталдықты 0.82-ден 0.90-ға жақсартады (+8пп).',
     'tooltip.fig18': 'Класс бойынша F1-Score. Ең үлкен жақсару азшылық кластарда: DR1 +12пп, DR3 +12пп.',
-    'tooltip.pipeline_grid': 'Толық V4 pipeline: Raw → Canonical Flip → FOV Crop 512×512 → Flat-Field (σ=45) → CLAHE → ImageNet Normalization. Науқас 43199, Canon CR-1, DR4.',
+    'tooltip.pipeline_grid': 'Толық V5 pipeline: Raw → S0 (Canonical Flip) → S1 (OD-Fovea) → S2 (FOV Crop + Isotropic Resize) → S3 (FOV Mask) → S4 (Adaptive Flat-Field) → S5 (CLAHE) → S6 (Aug) → S7 (Dataset-Specific Normalize + 4ch). Науқас 43199, Canon CR-1, DR4.',
     'tooltip.bilateral': 'Науқас 43199 (DR4) екі көзі. Сол көз оң көз бағдарына айналдырылған. Толық pipeline кейін зақымданулар анық көрінеді.',
     'tooltip.stage_3': '3-кезең: Қос шектеулі CLAHE тамыр мен зақымдану контрастын күрт жақсартады.',
   },

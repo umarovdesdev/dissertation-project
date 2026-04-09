@@ -38,7 +38,7 @@ export default function ResultsStatistical() {
           <p style={{ margin: '10px 0 0 0' }}>
             The significant interaction confirms that preprocessing benefit is not uniform across architectures.
             EfficientNet-B3's compound scaling (depth × width × resolution) creates a larger feature space that
-            benefits more from normalized, high-contrast inputs produced by the V4 pipeline.
+            benefits more from normalized, high-contrast inputs produced by the V5 pipeline.
           </p>
         </div>
       </Sec>

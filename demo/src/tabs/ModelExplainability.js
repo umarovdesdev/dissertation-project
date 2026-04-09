@@ -46,7 +46,7 @@ export default function ModelExplainability() {
       <Sec title={t('explainability.overlay')}>
         <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/27_gradcam_overlay.png'}
-          caption="Grad-CAM saliency overlaid on fundus images. Left: baseline preprocessing — diffuse, unfocused activation. Right: V4 pipeline — concentrated activation on lesion regions (hemorrhages and hard exudates highlighted). ALO improvement: +61% for hard exudates, +31% for microaneurysms."
+          caption="Grad-CAM saliency overlaid on fundus images. Left: baseline preprocessing — diffuse, unfocused activation. Right: V5 pipeline — concentrated activation on lesion regions (hemorrhages and hard exudates highlighted). ALO improvement: +61% for hard exudates, +31% for microaneurysms."
           figNum={27}
           tooltip="tooltip.fig27"
         />
@@ -58,9 +58,9 @@ export default function ModelExplainability() {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {[
-            { stage: 'CLAHE (Stage 3)', effect: 'Increases lesion-background contrast → sharper filter responses at lesion edges', color: C.teal },
-            { stage: 'Flat-field (Stage 2)', effect: 'Removes low-frequency illumination → prevents activation at image periphery', color: C.blue },
-            { stage: 'Canonical orientation (0a/0b)', effect: 'Consistent anatomical layout → spatially stable feature learning', color: C.purple },
+            { stage: 'CLAHE (Stage 5)', effect: 'Increases lesion-background contrast → sharper filter responses at lesion edges', color: C.teal },
+            { stage: 'Flat-field (Stage 4)', effect: 'Removes low-frequency illumination → prevents activation at image periphery', color: C.blue },
+            { stage: 'Canonical orientation (S0/S1)', effect: 'Consistent anatomical layout → spatially stable feature learning', color: C.purple },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: 10, padding: '8px 12px', background: 'var(--color-background-secondary,#f7f7f5)', borderRadius: 6 }}>
               <div style={{ minWidth: 160, fontWeight: 600, fontSize: 11, color: item.color }}>{item.stage}</div>

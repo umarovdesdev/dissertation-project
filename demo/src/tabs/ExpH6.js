@@ -47,7 +47,7 @@ export default function ExpH6() {
           <Card label="Variance (Pipeline)" value="0.0028" color="green" delta="−46% ✓" sub="σ² across camera groups" />
         </div>
         <Note>
-          H-6 confirmation: the V4 preprocessing pipeline reduces cross-device F1 variance by 46% (0.0052 → 0.0028).
+          H-6 confirmation: the V5 preprocessing pipeline reduces cross-device F1 variance by 46% (0.0052 → 0.0028).
           Variance computed across 5 external camera groups (excluding EyePACS training domain).
           Smaller variance indicates more consistent diagnostic performance regardless of imaging device —
           a critical requirement for real-world deployment in diverse clinical settings.

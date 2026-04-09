@@ -69,7 +69,7 @@ function TierOverview() {
         })}
       </div>
       <Note>
-        6 active datasets across 4 tiers. APTOS 2019 is retained for reference only — it had no active role after Experiment 3 was removed from scope in V3. Total labeled images across active datasets: ~59,867.
+        8 active datasets across 5 tiers. APTOS 2019 is reinstated as the primary transfer target for Experiment 3 (H-4). Total labeled images across active datasets: ~63,529.
       </Note>
     </Sec>
   );
@@ -558,19 +558,19 @@ function SplitStrategy() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {[
           {
-            title: 'Patient-level stratified 3-fold CV',
+            title: 'Patient-level stratified 5-fold CV',
             color: 'blue',
             content: 'Both eyes of the same patient are always assigned to the same fold. Patient ID is extracted from the filename prefix (e.g., "1234_left.jpeg" → patient 1234). This prevents data leakage through bilateral correlation — a key requirement for valid performance estimation.',
           },
           {
-            title: 'Why 3-fold (not 5-fold)',
+            title: 'Why 5-fold CV',
             color: 'teal',
-            content: 'Computational constraint: RTX 3060 (12 GB VRAM) with batch size 16. Each fold requires ~12 minutes per epoch for EfficientNet-B3. 3-fold CV balances variance estimation quality with feasible total training time.',
+            content: 'V5 uses full EyePACS (100%, ~35,126 images) with 5-fold CV. 5-fold provides lower variance in performance estimates than 3-fold and is the standard for large-scale DR benchmarks. RTX 3060 (12 GB VRAM) with batch size 16, mixed precision disabled for EfficientNet.',
           },
           {
-            title: 'Why 40% EyePACS subset (~14,050 images)',
+            title: 'Full EyePACS (100%, ~35,126 images)',
             color: 'amber',
-            content: 'Full EyePACS (35,126 images) requires ~30 min/epoch on available hardware. 40% stratified random sample reduces training time 2.5× while maintaining class proportions. Statistical power analysis confirmed 14,050 images is sufficient for detecting ΔF1 ≥ 5pp at 80% power.',
+            content: 'V5 uses the complete EyePACS labeled set (~35,126 images). Using the full dataset increases statistical power for detecting preprocessing effects and provides more robust 5-class performance estimates across 5-fold CV.',
           },
           {
             title: 'External datasets — zero-shot evaluation',

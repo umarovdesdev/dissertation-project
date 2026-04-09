@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm \"E:/dissertation-project/experiments/configs/smoke_test_1pct.yaml\")",
+      "Bash(rm \"E:/dissertation-project/experiments/outputs/exp1_baseline.md\")",
+      "Bash(rm \"E:/dissertation-project/thesis/prompts/DEPRECATED-chapter-writing-v1.md\")",
+      "Bash(rm \"E:/dissertation-project/thesis/prompts/DEPRECATED-review-mode-v1.md\")",
+      "Bash(rm \"E:/dissertation-project/thesis/prompts/literature-card-generation.md\")",
+      "Bash(grep -c \"<!--\" thesis/governance/*.md)",
+      "Bash(grep -v \":0$\")",
+      "Bash(sed -n '530,545p' thesis/governance/RESEARCH_ARCHITECTURE.md)",
+      "Bash(sed -n '108,115p' thesis/governance/RESEARCH_ARCHITECTURE.md)",
+      "Bash(echo \"exit: $?\")",
+      "Read(//mnt/e/**)",
+      "Bash(rm experiments/src/experiments/exp3_robustness.py)",
+      "Bash(mv experiments/src/preprocessing/pipeline_v4.py experiments/src/preprocessing/pipeline_v5.py)",
+      "Bash(mkdir -p experiments/scripts)",
+      "Bash(rm \"E:/dissertation-project/experiments/src/experiments/exp3_robustness.py\")",
+      "Bash(mv \"E:/dissertation-project/experiments/src/preprocessing/pipeline_v4.py\" \"E:/dissertation-project/experiments/src/preprocessing/pipeline_v5.py\")",
+      "Bash(python -c ':*)",
+      "Bash(conda run -n dr-classifier python -c ':*)",
+      "Bash(python3 -c \"import yaml\")",
+      "Read(//c/Users/yesmu/miniconda3/envs/dr-classifier/**)",
+      "Read(//c/Users/yesmu/anaconda3/envs/dr-classifier/**)",
+      "Read(//c/Users/yesmu/**)",
+      "Bash(/c/Python312/python.exe:*)",
+      "Bash(find /c -maxdepth 6 -name \"dr-classifier\" -type d)",
+      "Bash(find /d -maxdepth 4 -name \"dr-classifier\" -type d)",
+      "Bash(find /c -maxdepth 8 -path \"*/envs/dr-classifier/python.exe\")",
+      "Bash(find /c -maxdepth 8 -name \"Miniconda3*\" -o -name \"miniconda3\" -o -name \"miniforge\")",
+      "Bash(wsl which:*)",
+      "Bash(wsl conda:*)",
+      "Bash(wsl bash:*)",
+      "Bash(wsl.exe echo:*)",
+      "Bash(wsl.exe -l -v)",
+      "Bash(wsl.exe -d Ubuntu bash -c \"conda run -n dr-classifier python --version 2>/dev/null || echo 'conda not found'; which python\")",
+      "Bash(wsl.exe:*)"
+    ]
+  }
+}

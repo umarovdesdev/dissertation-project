@@ -2,8 +2,7 @@
 ## PhD Dissertation: Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Formal Claim-Evidence-Dependency Structure
-**Binding Reference:** DISSERTATION_INVARIANTS.md v4.0
-**Document Version:** 4.1. Supersedes V3/v2.2. V4.0 changes: pipeline upgraded from 5-component to 6-stage V4 system; green channel and HSV enhancement removed; baseline redefined as crop+resize+ImageNet normalize; Experiment 1 expanded to 6 configurations (A–F) with optional binocular blending; PC-8 ablation updated to V4 stages (Levels 0–4); SC-2.1 updated to dual-constraint CLAHE parameterization with T/80 as historical context; 'dynamic clip limit' → 'dual-constraint clip limit'. V4.1 changes (2026-03-26): IT-1 updated with Stage 0a/0b expansion and APTOS DROPPED annotation; PC-1 updated with Stage 0a/0b and 3-fold CV; PC-1 promotion criteria 5-fold → 3-fold; EyePACS scope boundary updated with 40% subset.
+**Version:** 5.0 | **Date:** 2026-04-XX | **Binding Reference:** INVARIANTS.md v5.0
 
 ---
 
@@ -11,17 +10,13 @@
 
 **IT-1 (Verbatim from Invariants, Section I):**
 
-> An integrated preprocessing-CNN pipeline — comprising canonical orientation (Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization), PIL-based FOV crop and resize to 512×512 (Stage 1, always on), flat-field correction via Gaussian blur subtraction σ=45 (Stage 2), dual-constraint stochastic CLAHE on LAB L-channel (Stage 3), ImageNet channel-wise normalization to tensor (Stage 4, always on), and integrated augmentation at train time (Stage 5) — applied to fundus images sourced from EyePACS (primary training), APTOS 2019 (robustness — DROPPED, Experiment 3 not conducted; dataset retained in architecture but not used in active experiments), IDRiD (clinical validation and lesion localization), Messidor/Messidor-2 (external generalization), and RFMiD/DDR/ODIR-5K (device domain shift), produces statistically measurable improvement in five-class diabetic retinopathy classification performance relative to a baseline CNN trained without preprocessing (crop + resize + ImageNet normalize only), under constrained computational conditions defined by hardware limitations operative during experimental execution.
-
-<!-- IT-1 updated 2026-03-26: aligned with dr-classifier/docs/INVARIANTS.md v4.0; Stage 0 expanded to 0a (canonical flip) + 0b (OD-fovea rotation normalization); APTOS 2019 DROPPED annotation added. -->
-
-*[V3 Historical IT-1: "comprising FOV standardization, CLAHE enhancement (LAB color space, dynamic clip limit), HSV contrast enhancement, green channel imaging, and pixel normalization … relative to a baseline CNN trained without preprocessing"]*
+> An integrated preprocessing-CNN pipeline — comprising the 8-stage V5 preprocessing system: canonical flip (Stage 0), OD-fovea rotation normalization (Stage 1), FOV crop + isotropic resize to 512×512 with centered zero-padding (Stage 2), FOV mask generation as 4th input channel (Stage 3), adaptive flat-field correction with σ = 0.07 × FOV diameter applied inside mask only (Stage 4), dual-constraint stochastic CLAHE on LAB L-channel (Stage 5), integrated augmentation at train time (Stage 6), and dataset-specific channel-wise normalization (Stage 7) — applied to fundus images sourced from EyePACS (primary training, ~35,126 images), APTOS 2019 (cross-dataset transferability, Experiment 3), IDRiD (explainability and clinical validation), Messidor-2 (clinical degradation evaluation), DDR/ODIR-5K/RFMiD (device domain shift), and a Kazakh clinical dataset (clinical validation), produces statistically measurable improvement in five-class diabetic retinopathy classification performance relative to a baseline CNN trained on images processed with stretch-resize to 512×512 + ImageNet normalize only (3 channels, no FOV mask), under constrained computational conditions defined by hardware limitations operative during experimental execution.
 
 **Scope boundary:**
 - Five-stage DR classification (DR 0–4 per standard clinical grading).
-- Dataset architecture: EyePACS (~35,126 labeled images, 40% subset of full EyePACS, ~14,050 used for experiments, primary training), APTOS 2019 (robustness — DROPPED, Experiment 3 not conducted; dataset retained in architecture but not used in active experiments), IDRiD (clinical validation with pixel-level lesion annotations), Messidor/Messidor-2 (external generalization), RFMiD/DDR/ODIR-5K (device domain shift evaluation across Topcon, Kowa, Canon, Zeiss camera hardware).
+- Dataset architecture: EyePACS (~35,126 labeled images, primary training), APTOS 2019 (cross-dataset transferability, Experiment 3), IDRiD (clinical validation with pixel-level lesion annotations), Messidor-2 (clinical degradation evaluation), Clinical (Kazakh medical center validation), RFMiD/DDR/ODIR-5K (device domain shift evaluation across Topcon, Kowa, Canon, Zeiss camera hardware).
 - "Improvement" = measurable difference in primary metrics (weighted F1-score, ROC-AUC, Cohen's Kappa, Accuracy) under matched experimental conditions.
-- Scope extends to cross-database transferability evaluation (Messidor/Messidor-2, IDRiD), explainability via Grad-CAM with ALO/IoU against lesion masks (IDRiD), and device domain shift across camera hardware (RFMiD, DDR, ODIR-5K).
+- Scope extends to cross-dataset transferability evaluation (APTOS 2019), explainability via Grad-CAM with ALO/IoU against lesion masks (IDRiD) and qualitative overlays (Clinical), clinical degradation resistance (IDRiD, Messidor-2), and device domain shift across camera hardware (RFMiD, DDR, ODIR-5K).
 - Does not extend to: general retinal disease classification, other ophthalmological imaging modalities, imaging contexts not representable by the dataset architecture specified above.
 
 ---
@@ -32,9 +27,9 @@
 
 ### PC-1
 **Claim ID:** PC-1
-**Formal Statement:** The integrated V4 6-stage preprocessing pipeline (canonical orientation [Stage 0a: canonical flip; Stage 0b: OD-fovea rotation normalization] → FOV crop+resize (PIL-based, Stage 1) → flat-field correction (Stage 2) → upgraded CLAHE (dual-constraint clip limit, LAB L-channel, stochastic at train time, Stage 3) → ImageNet normalization (Stage 4) [+ integrated augmentation Stage 5 train only]) produces statistically measurable improvement in five-class DR classification performance relative to a baseline CNN trained on images processed with crop + resize + ImageNet normalize only (Stages 1+4) from EyePACS, independently for both ResNet-50 and EfficientNet-B3, on the metrics: weighted F1-score, ROC-AUC, Cohen's Kappa, and Accuracy.
+**Formal Statement:** The integrated V5 8-stage preprocessing pipeline (canonical flip [Stage 0] → OD-fovea rotation normalization [Stage 1] → FOV crop + isotropic resize with zero-padding [Stage 2] → FOV mask generation as 4th channel [Stage 3] → adaptive flat-field correction σ = 0.07·D [Stage 4] → dual-constraint stochastic CLAHE on LAB L-channel [Stage 5] → augmentation at train time [Stage 6] → dataset-specific normalization [Stage 7]) produces statistically measurable improvement in five-class DR classification performance relative to a baseline CNN trained on images processed with stretch-resize to 512×512 + ImageNet normalize only (3 channels, no FOV mask) from EyePACS, independently for both ResNet-50 and EfficientNet-B3, on the metrics: weighted F1-score, ROC-AUC, Cohen's Kappa, and Accuracy.
 **Claim Type:** Empirical
-**Required Evidence Type:** Factorial ablation on EyePACS (Experiment 1); six configurations — (A) baseline + ResNet-50, (B) full V4 pipeline + ResNet-50, (C) baseline + EfficientNet-B3, (D) full V4 pipeline + EfficientNet-B3, (E) full V4 pipeline + ResNet-50 + binocular blending (optional), (F) full V4 pipeline + EfficientNet-B3 + binocular blending (optional); 3-fold cross-validation with patient-level stratified split; mixed-effects model. Preprocessing dominance validated if Performance(B) > Performance(A) AND Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures. Configs E and F test per-patient binocular blending as optional extensions beyond the core 2×2 factorial.
+**Required Evidence Type:** 2×2 factorial ablation on EyePACS (Experiment 1); four configurations — (A) baseline + ResNet-50 (3ch), (B) full V5 pipeline + ResNet-50 (4ch), (C) baseline + EfficientNet-B3 (3ch), (D) full V5 pipeline + EfficientNet-B3 (4ch); 5-fold cross-validation with patient-level stratified split; mixed-effects model. Preprocessing dominance validated if Performance(B) > Performance(A) AND Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures.
 **Dependency:** None (foundational claim; corresponds to H-1)
 **Tests whether:** Preprocessing improves CNN performance independently of architecture.
 
@@ -42,37 +37,21 @@
 
 ### PC-2
 **Claim ID:** PC-2
-**Formal Statement:** The CLAHE dual-constraint clip limit parameters (clip_factor and global_threshold), varied across controlled values within the tested range on IDRiD, produce a parameter-dependent sensitivity profile in downstream CNN classification performance, with at least one identifiable local optimum within the tested range, particularly in per-class F1-score for DR 1 and DR 2 (microaneurysm and small vessel features). CLAHE is applied in LAB color space with dual-constraint clip limit.
+**Formal Statement:** The CLAHE dual-constraint clip limit parameters (clip_factor and global_threshold), varied across controlled values within the tested range on EyePACS, produce a parameter-dependent sensitivity profile in downstream CNN classification performance, with at least one identifiable local optimum within the tested range, particularly in per-class F1-score for DR 1 and DR 2 (microaneurysm and small vessel features). CLAHE is applied in LAB color space with dual-constraint clip limit. Additionally, flat-field σ factor is swept from 0.05·D to 0.10·D on EyePACS to characterize illumination normalization sensitivity.
 **Claim Type:** Empirical
-**Required Evidence Type:** Parameter sweep experiment; per-class F1-score across clip limit values; IDRiD as the CLAHE threshold sensitivity test dataset.
+**Required Evidence Type:** Parameter sweep experiment; per-class F1-score across clip limit values; EyePACS as the CLAHE threshold sensitivity and flat-field σ sweep test dataset.
 **Dependency:** Depends on PC-1 (CLAHE is a component of the pipeline validated in PC-1)
 **Tests whether:** CLAHE clip limit exhibits a parameter-dependent sensitivity profile with an identifiable optimum.
 
 ---
 
-### PC-3 [DEMOTED — V3]
-
-<!-- DROPPED V3: PC-3 (Two-Stage Fine-Tuning) is demoted from primary claim status. The two-stage fine-tuning protocol is used as a training strategy but is not independently tested in V3. H-3 is dropped. Historical content preserved below. -->
-
-> **V3 Status:** DEMOTED. PC-3 is not a primary claim in V3. The two-stage fine-tuning protocol operates as a training strategy, not an independently hypothesized improvement. Historical empirical baseline from LC-SAPAKOVA-2025 / LC-Yesmukhamedov-2025-SELF is cited as prior work but not re-validated.
-
-**Claim ID:** PC-3
-**Formal Statement [DEMOTED]:** A two-stage fine-tuning protocol — (1) frozen EfficientNetB0 base with classification head training, followed by (2) progressive unfreezing of upper layers — applied under the preprocessing regime of PC-1, yields higher test-set Precision, Recall, F1-score, and Cohen's Kappa than the frozen-only strategy (Stage 1 alone), under the same dataset and hardware conditions.
-**Claim Type:** Empirical [DEMOTED — training strategy only in V3]
-**Required Evidence Type:** Prior self-publication empirical baseline (LC-SAPAKOVA-2025 / LC-Yesmukhamedov-2025-SELF); not independently re-tested in V3.
-**Dependency:** Depends on PC-1 (preprocessing regime must be active for this comparison)
-**Tests whether [V3: not independently tested]:** Progressive fine-tuning outperforms frozen-only transfer learning under the preprocessing regime.
-
-<!-- END DROPPED V3: PC-3 -->
-
----
 
 ### PC-4
 **Claim ID:** PC-4
 **Formal Statement:** A coupled thermal-optical mathematical model of laser-fundus tissue interaction — comprising Beer's law for radiation attenuation, an energy balance equation, and the general heat conduction equation solved by finite difference methods — provides a theoretical computational grounding for the thermal effects of laser coagulation on retinal tissue layers (cornea, choroid, retina). This model provides qualitative support for diagnostic image feature interpretation in the context of laser-treated retinopathy. The model does not constitute an experimentally validated clinical model.
 **Claim Type:** Theoretical
 **Required Evidence Type:** Mathematical derivation; computational simulation results; qualitative heat map outputs for three tissue layers.
-**Dependency:** None (independent theoretical contribution; does not condition PC-1, PC-2, or PC-3)
+**Dependency:** None (independent theoretical contribution; does not condition PC-1 or PC-2)
 
 ---
 
@@ -87,48 +66,61 @@
 
 ### PC-6
 **Claim ID:** PC-6
-**Formal Statement:** Models trained on EyePACS with the full V4 preprocessing pipeline generalize to Messidor, Messidor-2, and IDRiD without retraining, achieving generalization ratio G ≥ 0.85 per OD-4 (G = F1_external / F1_EyePACS).
+**Formal Statement:** Models trained on EyePACS with the full V5 preprocessing pipeline generalize to APTOS 2019 without retraining, achieving generalization ratio G = F1_APTOS / F1_EyePACS ≥ 0.85 per OD-4.
 **Claim Type:** Empirical
-**Required Evidence Type:** Experiment 5 — cross-dataset generalization evaluation. Trained models (ResNet-50, EfficientNet-B3) applied to Messidor, Messidor-2, and IDRiD without retraining; generalization ratio G computed per external dataset.
+**Required Evidence Type:** Experiment 3 — cross-dataset transferability evaluation. Best model from Experiment 1 (config B or D) applied to APTOS 2019 without retraining; generalization ratio G computed.
 **Dependency:** Depends on PC-1 (pipeline must be validated before transferability is tested)
-**Tests whether:** The preprocessing pipeline enables cross-database generalization without retraining.
+**Tests whether:** The preprocessing pipeline enables cross-dataset generalization without retraining.
 
 ---
 
 ### PC-7
 **Claim ID:** PC-7
-**Formal Statement:** Grad-CAM analysis on EfficientNet-B4 demonstrates that models trained with the V4 preprocessing pipeline exhibit higher Attention–Lesion Overlap (ALO) and higher IoU between activation regions and IDRiD pixel-level lesion masks (microaneurysms, hemorrhages, hard exudates, soft exudates) than models trained with crop+resize+ImageNet normalize baseline. ALO = area(GradCAM ∩ lesion_mask) / area(lesion_mask) is the **primary** explainability metric (measures lesion coverage by attention); IoU = area(GradCAM ∩ lesion_mask) / area(GradCAM ∪ lesion_mask) is the **secondary** metric (measures symmetric spatial precision). Hypothesis: ALO_preprocessing > ALO_baseline (primary), IoU_preprocessing > IoU_baseline (secondary).
+**Formal Statement:** Grad-CAM analysis on EfficientNet-B4 demonstrates that models trained with the V5 preprocessing pipeline exhibit higher Attention–Lesion Overlap (ALO) and higher IoU between activation regions and IDRiD pixel-level lesion masks (microaneurysms, hemorrhages, hard exudates, soft exudates) than models trained with stretch-resize + ImageNet normalize baseline (3ch). ALO = area(GradCAM ∩ lesion_mask) / area(lesion_mask) is the **primary** explainability metric (measures lesion coverage by attention); IoU = area(GradCAM ∩ lesion_mask) / area(GradCAM ∪ lesion_mask) is the **secondary** metric (measures symmetric spatial precision). Hypothesis: ALO_preprocessing > ALO_baseline (primary), IoU_preprocessing > IoU_baseline (secondary). Qualitative Grad-CAM overlays additionally generated on the Kazakh clinical dataset.
 **Claim Type:** Empirical
-**Required Evidence Type:** Experiment 4 — Grad-CAM explainability analysis. ALO (primary) and IoU (secondary) between Grad-CAM activation maps and IDRiD lesion masks computed per lesion type for preprocessing vs. baseline conditions on EfficientNet-B4.
-**Dependency:** Depends on PC-1 (preprocessing pipeline validity) and PC-6 (cross-database generalization to IDRiD)
+**Required Evidence Type:** Experiment 4 — Grad-CAM explainability analysis. ALO (primary) and IoU (secondary) between Grad-CAM activation maps and IDRiD lesion masks computed per lesion type for preprocessing vs. baseline conditions on EfficientNet-B4. Qualitative overlays on Clinical dataset.
+**Dependency:** Depends on PC-1 (preprocessing pipeline validity)
 **Tests whether:** Preprocessing directs CNN attention toward clinically relevant lesion regions.
 
 ---
 
 ### PC-8
 **Claim ID:** PC-8
-**Formal Statement:** Component-level ablation of the V4 pipeline identifies a ranked contribution hierarchy among the V4 toggleable stages (canonical flip, flat-field correction, upgraded CLAHE), measured by incremental weighted F1 improvement on EyePACS. Green channel extraction and HSV contrast enhancement are not V4 pipeline components and are not part of the V4 ablation. The ablation proceeds through five levels:
-- Level 0: crop + resize + ImageNet normalize (V4 baseline, Stages 1+4 only)
+**Formal Statement:** Component-level ablation of the V5 pipeline identifies a ranked contribution hierarchy among the V5 stages, measured by incremental weighted F1 improvement on EyePACS. The ablation proceeds through seven levels:
+- Level 0: baseline — stretch-resize + ImageNet normalize (3ch, no FOV mask)
 - Level 1: baseline + canonical flip (Stage 0)
-- Level 2: baseline + flat-field correction (Stage 2)
-- Level 3: baseline + upgraded CLAHE (Stage 3)
-- Level 4: full V4 pipeline (all stages)
+- Level 2: +OD-fovea rotation normalization (Stage 1)
+- Level 3: +isotropic resize + FOV mask (Stages 2–3, 4ch)
+- Level 4: +flat-field correction (Stage 4)
+- Level 5: +CLAHE (Stage 5)
+- Level 6: full V5 pipeline (all Stages 0–7)
 
-*[V3 Historical: V3 ablation studied 5 components — FOV standardization → CLAHE → HSV enhancement → green channel → normalization. Retained for historical component-level comparison.]*
 **Claim Type:** Empirical
-**Required Evidence Type:** Experiment 2 — component-level ablation. Sequential addition of individual V4 pipeline stages; weighted F1 measured at each ablation level (Levels 0–4) on EyePACS. Image quality metrics (CNR, VVI, Entropy, SSIM) also measured at each level.
+**Required Evidence Type:** Experiment 2 — component-level ablation. Sequential addition of individual V5 pipeline stages; weighted F1 measured at each ablation level (Levels 0–6) on EyePACS. Image quality metrics (CNR, VVI, Entropy, SSIM) also measured at each level.
 **Dependency:** Depends on PC-1 (full pipeline must be established before component-level ablation is meaningful)
-**Tests whether:** Individual V4 preprocessing stages contribute differentially to classification performance.
+**Tests whether:** Individual V5 preprocessing stages contribute differentially to classification performance.
 
 ---
 
 ### PC-9
 **Claim ID:** PC-9
-**Formal Statement:** Models trained on EyePACS with the V4 preprocessing pipeline maintain classification performance across images from different fundus camera manufacturers (Canon, Topcon, Kowa, Zeiss), as evaluated on RFMiD, DDR, ODIR-5K, IDRiD, and Messidor subsets grouped by camera model. Preprocessing standardizes retinal image appearance and reduces inter-device distribution shift, thereby improving cross-device generalization.
+**Formal Statement:** Models trained on EyePACS with the V5 preprocessing pipeline maintain classification performance across images from different fundus camera manufacturers (Canon, Topcon, Kowa, Zeiss), as evaluated on DDR, ODIR-5K, and RFMiD subsets grouped by camera model. DR labels only; non-DR disease labels are ignored or mapped to non-DR. Preprocessing standardizes retinal image appearance and reduces inter-device distribution shift, thereby improving cross-device generalization.
 **Claim Type:** Empirical
-**Required Evidence Type:** Experiment 6 — device domain shift evaluation. F1-score and ROC-AUC computed per camera group across RFMiD, DDR, ODIR-5K, IDRiD, and Messidor subsets.
+**Required Evidence Type:** Experiment 6 — device domain shift evaluation. F1-score and ROC-AUC computed per camera group across DDR (Canon, Topcon), ODIR-5K (Canon, Zeiss), and RFMiD (Topcon, Kowa).
 **Dependency:** Depends on PC-1 (pipeline validity) and PC-6 (cross-database generalization established)
 **Tests whether:** Preprocessing standardizes retinal image appearance and reduces device-induced distribution shift across camera manufacturers.
+
+---
+
+---
+
+### PC-10
+**Claim ID:** PC-10
+**Formal Statement:** Performance degradation Δ = F1_EyePACS_val − F1_external is statistically smaller when models are trained with the V5 preprocessing pipeline than with the baseline (stretch-resize + ImageNet normalize), evaluated on IDRiD and Messidor-2 without retraining.
+**Claim Type:** Empirical
+**Required Evidence Type:** Experiment 5 — clinical degradation comparison. Δ computed for baseline and V5 conditions; paired statistical test across folds.
+**Dependency:** Depends on PC-1 (pipeline validity)
+**Tests whether:** Preprocessing reduces cross-dataset performance loss (H-7).
 
 ---
 
@@ -172,8 +164,6 @@
 - Training accuracy significantly exceeds test accuracy on Method 1 in parallel EfficientNetB0 experiment; overfitting remains a documented risk (LC-SAPAKOVA-2025, p. 499; LC-Yesmukhamedov-2025-SELF, p. 119).
 
 ---
-
-<!-- SC-1.3 REMOVED V3: SC-1.3 (processing time / 8× speedup claim) has been deleted. The claim "preprocessing with CLAHE reduces per-step processing time (1s 108ms/step vs. 8s 986ms/step)" is implausible and unverifiable. SC-1.3 is not a V3 claim. -->
 
 ---
 
@@ -227,43 +217,6 @@
 **Boundary Conditions:**
 - Claim is bounded strictly to the parameter range tested experimentally (Invariants H-2).
 - Extrapolation to clip limit values outside the tested range is forbidden (CFC-1.2).
-
----
-
-### SC-3.1
-**Parent Claim:** PC-3
-**Sub-Claim ID:** SC-3.1
-**Formal Statement:** EfficientNetB0 two-stage fine-tuning (Method 2: progressive unfreezing of upper layers) achieves test-set Precision = 0.75, Recall = 0.74, F1 = 0.74, Macro Average = 0.77, Weighted Average = 0.81, compared to frozen-only strategy (Method 1) achieving Precision = 0.65, Recall = 0.60, F1 = 0.62, Macro Average = 0.72, Weighted Average = 0.74, with Accuracy = 0.80 for both methods on the APTOS 2019 + supplementary clinical test partition.
-
-**Evidence Reference:**
-- Literature Card: LC-SAPAKOVA-2025, §II.5, p. 499, Table 3 (prior self-publication — must be cited as previously published results per SIR-4)
-- Literature Card: LC-Yesmukhamedov-2025-SELF, §II.5 (identical experimental configuration — may not be cited as independent confirmation per SIR-5)
-- Dissertation Section: §4.4.1 (EfficientNetB0: Frozen versus Progressive Fine-Tuning); §4.4.3
-- Dataset: APTOS 2019 + supplementary clinical images (training: 35,126; test: 3,662)
-- Metrics: Precision, Recall, F1-Score, Macro Average, Weighted Average (Test partition)
-
-**Boundary Conditions:**
-- These values are the published empirical baseline from prior self-publications (LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF). Dissertation must replicate and extend, not simply reproduce.
-- LC-SAPAKOVA-2025 and LC-Yesmukhamedov-2025-SELF share identical experimental data; they cannot be cited as independent confirmatory sources (SIR-5).
-- Alternative architectures (ResNet, VGG, DenseNet) were not evaluated; results cannot be generalized to the class of efficient CNN architectures (SIR-7; SB-1.7).
-- Method 1 (Frozen) exhibits overfitting: training F1 = 0.87 vs. test F1 = 0.62 (LC-SAPAKOVA-2025, p. 499, Tables 1–2).
-
----
-
-### SC-3.2
-**Parent Claim:** PC-3
-**Sub-Claim ID:** SC-3.2
-**Formal Statement:** ResNet50, under feature extraction strategy versus end-to-end fine-tuning, produces a performance differential on the APTOS 2019 test partition, evaluated on the same primary metric set (Accuracy, weighted F1, ROC-AUC, Cohen's Kappa).
-
-**Evidence Reference:**
-- Literature Card: LC-AlTimemy-2021, §3 (ResNet50 as transfer learning base on STARE; training parameters: 100 epochs, lr=0.0003, 262 min elapsed)
-- Dissertation Section: §4.4.2 (ResNet50: Feature Extraction versus End-to-End Fine-Tuning)
-- Dataset: APTOS 2019 (dissertation); STARE (LC-AlTimemy-2021 context — different taxonomy)
-- Metric: Accuracy, weighted F1, ROC-AUC, Cohen's Kappa
-
-**Boundary Conditions:**
-- LC-AlTimemy-2021 results are on STARE with different five-class taxonomy; they cannot be directly compared to APTOS 2019 results without explicit acknowledgment of taxonomic non-equivalence (SB-2.3).
-- ResNet50 results from dissertation experiments (§4.4.2) constitute the primary evidence; LC-AlTimemy-2021 provides only methodological precedent for ResNet50 use.
 
 ---
 
@@ -326,17 +279,16 @@
 ### SC-6.1
 **Parent Claim:** PC-6
 **Sub-Claim ID:** SC-6.1
-**Formal Statement:** Generalization ratio G = F1_external / F1_EyePACS is computed for models trained on EyePACS with the V4 preprocessing pipeline and evaluated without retraining on Messidor, Messidor-2, and IDRiD. Specific G values on each external dataset constitute the primary evidence for PC-6.
+**Formal Statement:** Generalization ratio G = F1_APTOS / F1_EyePACS is computed for models trained on EyePACS with the V5 preprocessing pipeline and evaluated without retraining on APTOS 2019. Specific G value constitutes the primary evidence for PC-6.
 
 **Evidence Reference:**
-- Dissertation Section: Experiment 5 (Cross-Dataset Generalization)
-- Dataset: EyePACS (training), Messidor, Messidor-2, IDRiD (external evaluation)
-- Metrics: Weighted F1-score, ROC-AUC, generalization ratio G per external dataset
+- Dissertation Section: Experiment 3 (Cross-Dataset Transferability)
+- Dataset: EyePACS (training), APTOS 2019 (external evaluation)
+- Metrics: Weighted F1-score, ROC-AUC, generalization ratio G
 - Comparison benchmarks: Gulshan et al. 2016 AUC 0.990 (EyePACS/Messidor-2); Rakhlin 2018 AUC 0.967 (Kaggle DR); Saxena et al. AUC 0.92; Ting et al. 2017 AUC 0.936 (multi-ethnic)
 
 **Boundary Conditions:**
-- No retraining is performed on external datasets; results are bounded to the tested preprocessing configuration and trained model weights.
-- Messidor uses a different grading scale (binary referable/non-referable); label harmonization methodology must be documented.
+- No retraining is performed on APTOS 2019; results are bounded to the tested preprocessing configuration and trained model weights.
 - G ≥ 0.85 is a pre-registered success criterion, not a guaranteed outcome (Invariants H-4).
 
 ---
@@ -344,12 +296,12 @@
 ### SC-7.1
 **Parent Claim:** PC-7
 **Sub-Claim ID:** SC-7.1
-**Formal Statement:** ALO (primary) and IoU (secondary) between Grad-CAM activation regions and IDRiD pixel-level lesion masks are computed per lesion type (microaneurysms, hemorrhages, hard exudates, soft exudates) for EfficientNet-B4 models trained with V4 preprocessing vs. crop+resize+ImageNet normalize baseline. ALO(preprocessing) > ALO(baseline) constitutes the primary quantitative evidence for PC-7; IoU(preprocessing) > IoU(baseline) constitutes secondary evidence.
+**Formal Statement:** ALO (primary) and IoU (secondary) between Grad-CAM activation regions and IDRiD pixel-level lesion masks are computed per lesion type (microaneurysms, hemorrhages, hard exudates, soft exudates) for EfficientNet-B4 models trained with V5 preprocessing vs. stretch-resize + ImageNet normalize baseline (3ch). ALO(preprocessing) > ALO(baseline) constitutes the primary quantitative evidence for PC-7; IoU(preprocessing) > IoU(baseline) constitutes secondary evidence. Additionally, qualitative Grad-CAM overlays are generated on the Kazakh Clinical dataset for visual validation.
 
 **Evidence Reference:**
 - Dissertation Section: Experiment 4 (Grad-CAM Explainability Analysis)
-- Dataset: IDRiD (pixel-level lesion annotations)
-- Metrics: ALO per lesion type (primary — measures lesion coverage by attention); IoU per lesion type (secondary — measures symmetric spatial precision); attention consistency score
+- Dataset: IDRiD (pixel-level lesion annotations, quantitative); Clinical dataset (Grad-CAM overlays, qualitative)
+- Metrics: ALO per lesion type (primary — measures lesion coverage by attention); IoU per lesion type (secondary — measures symmetric spatial precision); qualitative Grad-CAM overlays on Clinical
 
 **Boundary Conditions:**
 - IoU is an interpretability metric, not clinical localization — Grad-CAM activation does not constitute diagnostic delineation of lesion boundaries (NC-14).
@@ -360,8 +312,7 @@
 ### SC-8.1
 **Parent Claim:** PC-8
 **Sub-Claim ID:** SC-8.1
-**Formal Statement:** Component-level ablation produces weighted F1 measurements at each of five ablation levels on EyePACS: Level 0 (baseline: crop+resize+ImageNet normalize) → Level 1 (+canonical flip) → Level 2 (+flat-field correction) → Level 3 (+upgraded CLAHE) → Level 4 (full V4 pipeline). This identifies a ranked contribution hierarchy among the V4 toggleable preprocessing stages. Note: green channel extraction and HSV contrast enhancement are not V4 pipeline components; they are not ablation levels. V3 ablation sequence (resize only → FOV standardization → +CLAHE → +HSV contrast enhancement → +green channel → +normalization = full V3 pipeline) is retained for historical component-level comparison only.
-
+**Formal Statement:** Component-level ablation produces weighted F1 measurements at each of seven ablation levels on EyePACS: Level 0 (baseline: stretch-resize + ImageNet normalize, 3ch) → Level 1 (+canonical flip) → Level 2 (+OD-fovea rotation) → Level 3 (+isotropic resize + FOV mask, 4ch) → Level 4 (+flat-field correction) → Level 5 (+CLAHE) → Level 6 (full V5 pipeline). This identifies a ranked contribution hierarchy among the V5 pipeline stages.
 **Evidence Reference:**
 - Dissertation Section: Experiment 2 (Component-Level Ablation)
 - Dataset: EyePACS
@@ -376,17 +327,35 @@
 ### SC-9.1
 **Parent Claim:** PC-9
 **Sub-Claim ID:** SC-9.1
-**Formal Statement:** Cross-camera performance is evaluated via F1-score and ROC-AUC per camera group (Canon, Topcon, Kowa, Zeiss) across RFMiD, DDR, ODIR-5K, IDRiD, and Messidor subsets, producing a cross-device performance matrix for models trained on EyePACS with the V4 preprocessing pipeline.
+**Formal Statement:** Cross-camera performance is evaluated via F1-score and ROC-AUC per camera group (Canon, Topcon, Kowa, Zeiss) across DDR, ODIR-5K, and RFMiD subsets, producing a cross-device performance matrix for models trained on EyePACS with the V5 preprocessing pipeline. DR labels only; non-DR disease labels are excluded or mapped to non-DR.
 
 **Evidence Reference:**
 - Dissertation Section: Experiment 6 (Device Domain Shift)
-- Dataset: RFMiD (Topcon/Kowa), DDR (Canon/Topcon), ODIR-5K (Canon/Zeiss), IDRiD, Messidor — subsets grouped by camera model
+- Dataset: DDR (Canon/Topcon), ODIR-5K (Canon/Zeiss), RFMiD (Topcon/Kowa) — subsets grouped by camera model
 - Metrics: F1-score, ROC-AUC per camera group; cross-device performance variance
 
 **Boundary Conditions:**
 - Device domain shift results do not constitute device certification or regulatory compliance (NC-16).
 - Results are bounded to the specific camera models represented in the tested datasets (Invariants H-6).
 - Camera-specific image characteristics beyond preprocessing scope (e.g., sensor noise profiles, optical characteristics) may remain unaddressed.
+
+---
+
+---
+
+### SC-10.1
+**Parent Claim:** PC-10
+**Sub-Claim ID:** SC-10.1
+**Formal Statement:** For each architecture (ResNet-50, EfficientNet-B3) × preprocessing condition (baseline vs V5), Δ = F1_EyePACS_val − F1_external is computed on both IDRiD and Messidor-2. Δ_V5 < Δ_baseline on both external datasets demonstrates clinical degradation resistance.
+
+**Evidence Reference:**
+- Dissertation Section: Experiment 5 (Clinical Degradation Resistance)
+- Dataset: EyePACS (training/validation), IDRiD and Messidor-2 (external evaluation)
+- Metrics: Δ per dataset per architecture; paired test across 5-fold CV results
+
+**Boundary Conditions:**
+- Claim is bounded to the tested datasets (IDRiD, Messidor-2) and architectures (ResNet-50, EfficientNet-B3).
+- Does not claim zero degradation — only reduced degradation with V5 preprocessing.
 
 ---
 
@@ -427,29 +396,6 @@ Condition of Failure: If the 100% accuracy claim is methodologically flawed due 
 
 ---
 
-<!-- DROPPED V3: PC-3 Counter-Arguments section — H-3 is DROPPED in V3; this section is historical reference only. -->
-
-### PC-3: Counter-Arguments and Limitations [DROPPED V3 — H-3 not tested]
-
-> **V3 NOTE:** PC-3 is DEMOTED; H-3 is DROPPED in V3. The counter-arguments below are preserved for historical reference.
-
-**Counter-Argument CA-3.1:**
-Claim: LC-SAPAKOVA-2025 and LC-Yesmukhamedov-2025-SELF share identical experimental data (same training set 35,126; same test set 3,662; same APTOS 2019 + supplementary clinical data). They cannot serve as independent confirmatory sources for H-3 [DROPPED V3]. Independent replication is not conducted in V3.
-Source: SIR-5; Invariants §V (EH-4).
-Condition of Failure: Not applicable in V3 — H-3 is not tested.
-
-**Counter-Argument CA-3.2:**
-Claim: EfficientNetB0 results cannot be generalized to the class of efficient CNN architectures; alternative architectures (ResNet, VGG, DenseNet) were not evaluated in the referenced publications.
-Source: SIR-7; LC-SAPAKOVA-2025, §II.6; SB-1.7.
-Condition of Failure: Claim fails as a general statement; it holds only as architecture-specific and is so bounded.
-
-**Counter-Argument CA-3.3:**
-Claim: Observed overfitting in Method 1 (Frozen) — training F1 = 0.87 vs. test F1 = 0.62 — exceeds the 15 pp overfitting threshold defined in OD-4. This indicates the frozen strategy is inadequate for this task but does not independently establish that progressive fine-tuning fully resolves the generalization deficit.
-Source: LC-SAPAKOVA-2025, p. 499; Invariants OD-4.
-Condition of Failure: If fine-tuning (Method 2) also exhibits training-test gap exceeding 15 pp on any primary metric, overfitting concern extends to Method 2.
-
----
-
 ### PC-4: Counter-Arguments and Limitations
 
 **Counter-Argument CA-4.1:**
@@ -481,14 +427,14 @@ Condition of Failure: Attribution of these figures to dissertation findings cons
 ### PC-6: Counter-Arguments and Limitations
 
 **Counter-Argument CA-6.1:**
-Claim: Distribution shift between EyePACS and external datasets (Messidor, Messidor-2, IDRiD) — arising from differences in imaging equipment, patient demographics, grading protocols, and image quality — may degrade performance beyond the G ≥ 0.85 threshold.
+Claim: Distribution shift between EyePACS and APTOS 2019 — arising from differences in imaging equipment, patient demographics, grading protocols, and image quality — may degrade performance beyond the G ≥ 0.85 threshold.
 Source: SB-2.3; Invariants H-4.
-Condition of Failure: If G < 0.85 on any external dataset, the transferability claim for that dataset is not supported. If G < 0.85 on all external datasets, PC-6 fails.
+Condition of Failure: If G < 0.85 on APTOS 2019, PC-6 fails.
 
 **Counter-Argument CA-6.2:**
-Claim: Messidor uses a different grading scale — binary referable/non-referable — requiring label harmonization. The harmonization procedure introduces methodological complexity and potential label mapping errors that may affect generalization ratio computation.
-Source: Messidor dataset documentation; Invariants H-4 scope.
-Condition of Failure: If label harmonization methodology is not transparently documented and justified, generalization ratio on Messidor is not interpretable.
+Claim: APTOS 2019 uses mixed camera hardware; domain shift may vary by camera subgroup within the dataset, making the aggregate G metric sensitive to dataset composition.
+Source: APTOS 2019 dataset documentation; Invariants H-4 scope.
+Condition of Failure: If the G ≥ 0.85 threshold cannot be attributed to preprocessing rather than confounds (e.g., overlap in image characteristics), the generalization claim is weakened.
 
 ---
 
@@ -518,7 +464,7 @@ Condition of Failure: If component ordering significantly affects the measured h
 ### PC-9: Counter-Arguments and Limitations
 
 **Counter-Argument CA-9.1:**
-Claim: Camera-specific image characteristics beyond preprocessing scope — such as sensor noise profiles, optical characteristics, dynamic range, and color response — may remain unaddressed by the V4 preprocessing pipeline. Performance variability across camera groups may reflect residual device-specific artifacts not corrected by preprocessing.
+Claim: Camera-specific image characteristics beyond preprocessing scope — such as sensor noise profiles, optical characteristics, dynamic range, and color response — may remain unaddressed by the V5 preprocessing pipeline. Performance variability across camera groups may reflect residual device-specific artifacts not corrected by preprocessing.
 Source: Invariants H-6 scope; SB-1.8.
 Condition of Failure: If performance variance across camera groups exceeds acceptable bounds despite preprocessing, the pipeline's device-domain robustness claim is weakened.
 
@@ -531,16 +477,11 @@ IT-1 (Main Thesis)
 ├── PC-1 [Empirical — Preprocessing Dominance]          ← No upstream dependency
 │   ├── SC-1.1 [Accuracy and F1 improvement evidence]
 │   ├── SC-1.2 [Convergence and loss dynamics]
-│   ├── ~~SC-1.3~~ [REMOVED V3 — implausible processing time claim]
 │   └── SC-1.4 [Class imbalance — interpretive framing]
 │
 ├── PC-2 [Empirical — CLAHE Threshold Sensitivity]      ← Depends on PC-1
 │   ├── SC-2.1 [T/80 formulation — theoretical adaptation]
 │   └── SC-2.2 [Sensitivity profile — experimental result]
-│
-├── PC-3 [Empirical — Two-Stage Fine-Tuning]            ← Depends on PC-1
-│   ├── SC-3.1 [EfficientNetB0 Frozen vs. Fine-Tuned metrics]
-│   └── SC-3.2 [ResNet50 comparison — additional architecture]
 │
 ├── PC-4 [Theoretical — Laser-Tissue Model]             ← Independent (no empirical dependency)
 │   └── SC-4.1 [Thermal-optical equations; simulation results]
@@ -549,29 +490,32 @@ IT-1 (Main Thesis)
 │   ├── SC-5.1 [Architecture specification and UML diagrams]
 │   └── SC-5.2 [Comparative analysis of existing systems]
 │
-├── PC-6 [Empirical — Cross-Database Transferability]   ← Depends on PC-1
-│   └── SC-6.1 [Generalization ratio evidence on Messidor, Messidor-2, IDRiD]
+├── PC-6 [Empirical — Cross-Dataset Transferability]    ← Depends on PC-1
+│   └── SC-6.1 [Generalization ratio G on APTOS 2019]
 │
-├── PC-7 [Empirical — Explainability via Grad-CAM]      ← Depends on PC-1, PC-6
-│   └── SC-7.1 [IoU quantitative evidence per lesion type on IDRiD]
+├── PC-7 [Empirical — Explainability via Grad-CAM]      ← Depends on PC-1
+│   └── SC-7.1 [ALO/IoU on IDRiD; qualitative Grad-CAM on Clinical]
 │
 ├── PC-8 [Empirical — Preprocessing Component Hierarchy] ← Depends on PC-1
-│   └── SC-8.1 [V4 ablation: Levels 0–4 (baseline→+flip→+flat-field→+CLAHE→full V4)]
+│   └── SC-8.1 [V5 ablation: Levels 0–6 (baseline→+flip→+rotation→+isotropic+mask→+flat-field→+CLAHE→full V5)]
 │
-└── PC-9 [Empirical — Device Domain Shift Robustness]   ← Depends on PC-1, PC-6
-    └── SC-9.1 [Cross-camera performance matrix per camera group]
+├── PC-9 [Empirical — Device Domain Shift Robustness]   ← Depends on PC-1
+│   └── SC-9.1 [Cross-camera performance matrix: DDR, ODIR-5K, RFMiD]
+│
+└── PC-10 [Empirical — Clinical Degradation Resistance] ← Depends on PC-1
+    └── SC-10.1 [Δ comparison on IDRiD and Messidor-2]
 ```
 
 **Dependency Rules:**
-- PC-3 requires PC-1 to be validated: the two-stage fine-tuning protocol operates under the preprocessing regime established in PC-1. If PC-1 fails, PC-3 cannot be evaluated under the same conditions.
 - PC-2 requires PC-1 to be validated: CLAHE is embedded in the pipeline of PC-1; parameter sensitivity testing presupposes the pipeline's demonstrated effectiveness.
 - PC-5 requires PC-1 for its AI processing module justification. If PC-1 fails, the architecture's core preprocessing-CNN module lacks experimental grounding.
-- PC-4 is independent of PC-1, PC-2, PC-3, PC-5. Its failure or success does not condition any other primary claim.
-- PC-6 requires PC-1: cross-database transferability is only meaningful if the pipeline has been validated on the primary dataset (EyePACS).
-- PC-7 requires PC-1 (pipeline validity) and PC-6 (cross-database generalization to IDRiD, which supplies the lesion masks for IoU computation).
+- PC-4 is independent of PC-1, PC-2, PC-5. Its failure or success does not condition any other primary claim.
+- PC-6 requires PC-1: cross-dataset transferability is only meaningful if the pipeline has been validated on the primary dataset (EyePACS).
+- PC-7 requires PC-1 (pipeline validity). IDRiD supplies lesion masks; Clinical supplies qualitative context.
 - PC-8 requires PC-1: component-level ablation presupposes an established full pipeline whose components can be systematically removed.
-- PC-9 requires PC-1 (pipeline validity) and PC-6 (cross-database generalization framework for evaluation on external datasets grouped by camera model).
-- EH-4 (Sufficient Validation Criterion) requires PC-1 to be satisfied on EyePACS AND confirmed in direction of effect on at least one external dataset (Messidor-2 or IDRiD) AND replicated across both architectures in the factorial design (ResNet-50 and EfficientNet-B3). PC-3 contributes additional architecture replication evidence. PC-6 contributes the cross-database confirmation required by EH-4.
+- PC-9 requires PC-1 (pipeline validity); evaluation on DDR, ODIR-5K, RFMiD grouped by camera.
+- PC-10 requires PC-1 (pipeline validity); clinical degradation resistance is only meaningful after pipeline dominance is established.
+- EH-4 (Sufficient Validation Criterion) requires PC-1 to be satisfied on EyePACS AND confirmed in direction of effect on at least one external dataset (APTOS 2019, IDRiD, or Messidor-2) AND replicated across both architectures in the factorial design (ResNet-50 and EfficientNet-B3). PC-6 contributes the cross-dataset confirmation required by EH-4.
 
 ---
 
@@ -585,7 +529,7 @@ IT-1 (Main Thesis)
 - Direct experimental evidence exists (LC-SAPAKOVA-2025-01): validation accuracy 71% → 86%; classification accuracy 88% → 91%; ROC-AUC = 0.9638; Weighted F1 = 0.91.
 - Evidence satisfies EH-3 criteria direction (weighted F1 Δ ≥ 5 pp; ROC-AUC ≥ 0.9638) on the dataset tested.
 - Strength is MODERATE rather than STRONG because: (a) preprocessing and architectural complexity change are confounded in the existing source (SC-1.1 boundary); (b) supplementary clinical dataset is non-public (SB-2.2); (c) ablation study isolating preprocessing from architectural change is required for Strong classification and is not yet documented in a separate independent source; (d) binary vs. five-class classification ambiguity exists in LC-SAPAKOVA-2025-01 reporting (SC-1.1 boundary).
-- Promotion to STRONG requires: Experiment 1 ablation on EyePACS with 2×2 factorial design (ResNet-50 + EfficientNet-B3), satisfying EH-3 independently for both architectures, with 3-fold cross-validation and mixed-effects model.
+- Promotion to STRONG requires: Experiment 1 ablation on EyePACS with 2×2 factorial design (ResNet-50 + EfficientNet-B3), satisfying EH-3 independently for both architectures, with 5-fold cross-validation and mixed-effects model.
 
 ---
 
@@ -596,15 +540,6 @@ IT-1 (Main Thesis)
 - CLAHE parameters (clip limit 2.0, grid 8×8) are documented in LC-SAPAKOVA-2025-01 as producing improved classification, but no explicit parameter sweep across clip limit values is documented in the available literature cards.
 - Dissertation §4.3 is the primary evidence source for SC-2.2. Until those experimental results are produced and validated within the dissertation, claim strength is CONDITIONAL on experimental execution.
 - Claim fails if no identifiable optimum is found within the tested range, per H-2 falsification requirement (Invariants VCR-3).
-
----
-
-### PC-3 — Two-Stage Fine-Tuning
-**Strength: MODERATE**
-**Justification:**
-- Direct empirical evidence exists in prior self-publications (LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF): Method 2 Precision = 0.75, Recall = 0.74, F1 = 0.74 vs. Method 1 Precision = 0.65, Recall = 0.60, F1 = 0.62. Differential is substantial (+10 pp Precision, +14 pp Recall, +12 pp F1).
-- Strength is MODERATE rather than STRONG because: (a) the two sources are not independent (identical experimental data; SIR-5); (b) independent replication within the dissertation's own experiments has not been documented in a separate literature card; (c) the claim is architecture-specific (EfficientNetB0 only; SIR-7); (d) supplementary clinical data non-reproducibility (SB-2.2).
-- Promotion to STRONG requires: independent replication in dissertation §4.4 experiments on APTOS 2019 public partition, with explicit extension beyond prior self-publication results.
 
 ---
 
@@ -627,12 +562,12 @@ IT-1 (Main Thesis)
 
 ---
 
-### PC-6 — Cross-Database Transferability
+### PC-6 — Cross-Dataset Transferability
 **Strength: CONDITIONAL**
 **Justification:**
-- No experimental results yet available; claim is pending V3 Experiment 3 execution.
-- CONDITIONAL: promotion to MODERATE requires G ≥ 0.85 on at least 2 of 3 external datasets (Messidor, Messidor-2, IDRiD) with documented label harmonization methodology for Messidor.
-- Claim fails if G < 0.85 on all tested external datasets (Invariants VCR-3 applied to H-4).
+- No experimental results yet available; claim is pending Experiment 3 execution.
+- CONDITIONAL: promotion to MODERATE requires G = F1_APTOS / F1_EyePACS ≥ 0.85 on APTOS 2019 zero-shot transfer.
+- Claim fails if G < 0.85 on APTOS 2019 (Invariants VCR-3 applied to H-4).
 
 ---
 
@@ -657,9 +592,18 @@ IT-1 (Main Thesis)
 ### PC-9 — Device Domain Shift Robustness
 **Strength: CONDITIONAL**
 **Justification:**
-- No experimental results yet available; claim is pending V3 Experiment 3 execution.
-- CONDITIONAL: promotion to MODERATE requires performance variance across camera groups below a defined threshold (to be specified in V3 Experiment 3 protocol).
+- No experimental results yet available; claim is pending Experiment 6 execution.
+- CONDITIONAL: promotion to MODERATE requires performance variance across camera groups below a defined threshold (to be specified in Experiment 6 protocol).
 - Device domain shift results do not constitute device certification (NC-16); camera-specific characteristics beyond preprocessing scope may remain unaddressed (CA-9.1).
+
+---
+
+### PC-10 — Clinical Degradation Resistance
+**Strength: CONDITIONAL**
+**Justification:**
+- No experimental results yet available; claim is pending Experiment 5 execution.
+- CONDITIONAL: promotion to MODERATE requires Δ_V5 < Δ_baseline with statistical significance (paired test across 5-fold CV folds) on at least one of IDRiD and Messidor-2.
+- Claim fails if Δ_V5 ≥ Δ_baseline on both tested external datasets.
 
 ---
 
@@ -712,7 +656,7 @@ The following propositions are intentionally excluded from the dissertation's ar
 **NC-15.** The dirty data pipeline (External Image Ingestion Protocol) is not validated for arbitrary clinical data sources — validation is bounded to specific Kazakh medical center data processed. Generalization of the ingestion protocol to other clinical data sources requires independent validation.
 *(Forbidden per Invariants scope boundaries)*
 
-**NC-16.** Device domain shift results do not constitute device certification or regulatory compliance — they are empirical observations of cross-device performance variability. No claim of device-agnostic deployment readiness is permissible based on V3 Experiment 3 (device domain shift component) alone.
+**NC-16.** Device domain shift results do not constitute device certification or regulatory compliance — they are empirical observations of cross-device performance variability. No claim of device-agnostic deployment readiness is permissible based on Experiment 6 alone.
 *(Forbidden per SB-1.8; Invariants H-6 scope)*
 
 **NC-17.** The preprocessing component ablation does not identify a universally optimal preprocessing configuration — the component hierarchy is bounded to the tested architectures (ResNet-50, EfficientNet-B3) and datasets (EyePACS). Extension to other architectures or datasets requires independent experimental validation.
@@ -720,23 +664,5 @@ The following propositions are intentionally excluded from the dissertation's ar
 
 ---
 
-## VIII. EXPERIMENT 7 REFERENCE — CLINICAL VALIDATION (DIRTY DATA PIPELINE) [FUTURE WORK — V3]
-
-<!-- V3: Experiment 7 (Kazakh clinical validation) is NOT an active V3 experiment. No data available. Retained as future work. -->
-
-**V3 Status:** Future work only. Not an active V3 experiment.
-
-**Context:** Old Experiment 7 was intended to test the preprocessing pipeline on clinical fundus images from Kazakh medical centers (dirty data — variable quality, non-standardized acquisition). No data is currently available under institutional agreements.
-
-**Linkage:** If executed in the future, results would supplement PC-1 under NC-15 constraints. Results are bounded to the specific clinical data source tested and do not generalize to arbitrary clinical data.
-
-**Formal Claim Scope:** Experiment 7 does not introduce a new primary claim and is not part of V3 experimental scope.
-
----
-
 *End of Argument_Map*
-*Document version: 4.0. Supersedes v3.0/v2.2.*
-*Document bound to: DISSERTATION_INVARIANTS.md v4.0*
-*V3 changes from v2.2: SC-1.3 removed (implausible processing time claim); H-3 marked DROPPED; old Exp 3/5/6/7 renumbered to V3 Exp 1–4; "optimized clip limit" throughout; EyePACS size corrected to ~35,126 labeled; APTOS 2019 robustness role removed.*
-*V4 changes from v3.0: pipeline upgraded from 5-component to 6-stage V4 system; green channel and HSV enhancement removed from active pipeline; baseline redefined as crop+resize+ImageNet normalize; Experiment 1 expanded to 6 configs (A–F); PC-8 ablation updated to Levels 0–4; SC-2.1 updated with dual-constraint CLAHE parameterization (T/80 now historical context); IT-1 wording updated to match INVARIANTS v4.0.*
-*All claims traceable to: LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01, LC-2025-Yesmukhamedov-01, and V4 Experiments 1–6 as specified in the v4.0 Dissertation Project.*
+*Version: 5.0 | Bound to: INVARIANTS.md v5.0*

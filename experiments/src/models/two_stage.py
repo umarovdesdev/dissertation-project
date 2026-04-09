@@ -1,4 +1,9 @@
-"""Two-stage fine-tuning protocol for EfficientNet-B0 (H-3)."""
+"""Two-stage fine-tuning protocol for EfficientNet-B0.
+
+Note: H-3 (Two-Stage Fine-Tuning hypothesis) was removed in V5.
+These utilities remain available as training strategies but are not
+tested as an independent hypothesis.
+"""
 
 import torch.nn as nn
 

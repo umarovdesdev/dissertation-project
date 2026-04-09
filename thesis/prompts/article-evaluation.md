@@ -250,3 +250,16 @@ Provide a 5–8 sentence analytical judgment:
 No stylistic commentary.
 
 Strictly analytical.
+
+---
+
+### V5 Relevance Dimensions
+
+Assess article relevance to V5 dissertation scope:
+1. Preprocessing pipeline comparison (especially multi-stage pipelines)
+2. Device domain shift across camera manufacturers
+3. FOV mask or geometry-preserving resize approaches
+4. Dataset-specific normalization vs ImageNet transfer
+5. Clinical degradation metrics (cross-dataset performance drops)
+6. Grad-CAM or attention-based explainability with quantitative lesion overlap
+7. Flat-field or illumination correction for fundus images

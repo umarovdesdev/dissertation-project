@@ -5,7 +5,7 @@ import { useLang } from '../i18n';
 export default function ExpH1() {
   const { t } = useLang();
   const factorial = ['A', 'B', 'C', 'D'];
-  const all6 = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const all4 = ['A', 'B', 'C', 'D'];
 
   const deltaF1 = ((CONFIGS.D.f1 - CONFIGS.C.f1) * 100).toFixed(1);
   const deltaAUC = ((CONFIGS.D.auc - CONFIGS.C.auc) * 100).toFixed(1);
@@ -17,7 +17,7 @@ export default function ExpH1() {
           H-1: Preprocessing Dominance Hypothesis
         </h2>
         <div style={{ fontSize: 12, color: 'var(--color-text-secondary,#666)' }}>
-          Experiment 1 — 2×2 Factorial Design on EyePACS (40% subset, ~14,050 images, 3-fold CV)
+          Experiment 1 — 2×2 Factorial Design on EyePACS (100%, ~35,126 images, 5-fold CV)
         </div>
       </div>
 
@@ -38,7 +38,7 @@ export default function ExpH1() {
           highlightRow={(row, i) => i === 3}
         />
         <Note>
-          Config D (Full V4 pipeline + EfficientNet-B3) is the best single-image configuration.
+          Config D (Full V5 pipeline + EfficientNet-B3) is the best single-image configuration.
           ΔF1(D−C) = +{deltaF1}pp, ΔAUC(D−C) = +{deltaAUC}pp. Statistically significant (DeLong p=0.008, McNemar p=0.012).
         </Note>
       </Sec>
@@ -53,10 +53,10 @@ export default function ExpH1() {
       <Sec title={t('exp.allConfigs')}>
         <DataTable
           headers={['Config', 'Preprocessing', 'CNN', 'W.F1 ± σ', 'ROC-AUC ± σ', 'κ ± σ', 'Acc']}
-          rows={all6.map(k => {
+          rows={all4.map(k => {
             const v = CONFIGS[k];
             return [
-              <span key={k} style={{ fontWeight: 700, color: (k === 'D' || k === 'F') ? C.teal : 'inherit' }}>{k}</span>,
+              <span key={k} style={{ fontWeight: 700, color: k === 'D' ? C.teal : 'inherit' }}>{k}</span>,
               v.preprocessing, v.cnn,
               `${v.f1.toFixed(3)} ± ${v.f1s.toFixed(3)}`,
               `${v.auc.toFixed(3)} ± ${v.aucs.toFixed(3)}`,
@@ -67,13 +67,12 @@ export default function ExpH1() {
           highlightRow={(row, i) => i === 5}
         />
         <Note>
-          Configs E and F extend the factorial design with binocular (bilateral) patient-level processing.
-          Config F achieves the highest overall F1=0.790 and AUC=0.872, demonstrating additive benefit of binocular fusion.
+          V5 uses 4 configurations (A–D) only. Baseline configs (A, C) use 3-channel stretch-resize + ImageNet normalize. Full V5 configs (B, D) use 8-stage pipeline with 4-channel input (RGB + FOV mask).
         </Note>
       </Sec>
 
       <Sec title="Factorial F1 Chart">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/01_exp1_factorial_f1.png'} caption="Weighted F1 comparison for 2×2 factorial design (Configs A–D). Bars show mean ± std across 3 folds." figNum={1} tooltip="tooltip.fig01" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/01_exp1_factorial_f1.png'} caption="Weighted F1 comparison for 2×2 factorial design (Configs A–D). Bars show mean ± std across 5 folds." figNum={1} tooltip="tooltip.fig01" />
       </Sec>
 
       <Sec title="All Metrics Comparison">
@@ -84,8 +83,8 @@ export default function ExpH1() {
         <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/03_exp1_delta.png'} caption="Preprocessing improvement (Δ) relative to baseline. EfficientNet-B3 (D−C) shows significantly larger gain than ResNet-50 (B−A), confirming architecture × preprocessing interaction." figNum={3} tooltip="tooltip.fig03" />
       </Sec>
 
-      <Sec title="All 6 Configurations Chart">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/22_exp1_all_6_configs.png'} caption="Extended comparison including binocular configurations E and F. Binocular mode provides consistent +1pp improvement over single-image baseline." figNum={22} tooltip="tooltip.fig22" />
+      <Sec title="All 4 Configurations Chart">
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/22_exp1_all_6_configs.png'} caption="All 4 configurations A–D. Architecture-dependent preprocessing interaction: EfficientNet-B3 (D vs C) shows significant gain; ResNet-50 (B vs A) near-zero." figNum={22} tooltip="tooltip.fig22" />
       </Sec>
 
       <Sec title="Per-Class F1 (EfficientNet-B3)">

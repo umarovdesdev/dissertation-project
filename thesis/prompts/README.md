@@ -1,6 +1,6 @@
 # Prompts Directory
 
-## Active Pipeline Templates (V3.0)
+## Active Pipeline Templates (V5.0)
 
 | Template | Purpose | Used In |
 |----------|---------|---------|
@@ -19,19 +19,11 @@ D. Text Generation (fresh session) → Section draft + Continuity Note
 E. Translation (separate session)  → Kazakh draft
 F. Translation Review (Claude Opus) → Verified Kazakh text
 
-## Deprecated (V1.0 Pipeline)
-
-| File | Status |
-|------|--------|
-| `DEPRECATED-chapter-writing-v1.md` | Replaced by section-level pipeline |
-| `DEPRECATED-review-mode-v1.md` | Review mode logic incorporated into verification protocol |
-
-## Still Active (Version-Independent)
+## Utility Prompts
 
 | Template | Purpose |
 |----------|---------|
 | `glossary-update.md` | Controlled glossary expansion protocol |
-| `literature-card-generation.md` | Meta-prompt for creating new literature cards |
 | `literature-card-review.md` | Direct literature card creation from articles |
 | `literature-index-update.md` | Literature index regeneration protocol |
 | `article-evaluation.md` | Structured article evaluation protocol |

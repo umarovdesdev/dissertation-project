@@ -3,7 +3,7 @@
 **Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification**
 
 Candidate: Yesmukhamedov N.S. | IITU Doctoral Programme  
-Version: 1.0 | Binding Reference: INVARIANTS.md v4.1, CENTRAL_THESIS.md v4.0
+Version: 5.0 | Binding Reference: INVARIANTS.md v5.0, CENTRAL_THESIS.md v5.0
 
 ---
 
@@ -17,7 +17,7 @@ $$
 \hat{y} = \mathcal{S}(I_L, I_R) = g\bigl(\Phi\bigl(\text{CNN}(\mathcal{P}(I_L)),\; \text{CNN}(\mathcal{P}(I_R))\bigr)\bigr)
 $$
 
-where $\mathcal{P}$ is the V4 preprocessing pipeline, $\text{CNN}$ is the shared feature extractor, $\Phi$ is the patient-level aggregation operator, and $g$ is the classification head.
+where $\mathcal{P}$ is the V5 preprocessing pipeline, $\text{CNN}$ is the shared feature extractor, $\Phi$ is the patient-level aggregation operator, and $g$ is the classification head.
 
 This specification is written at a higher level of abstraction than the V4 preprocessing pipeline specification. Preprocessing internals are not re-derived here; the pipeline is treated as a module $\mathcal{P}$ with defined input-output contracts. The focus is on inter-module data flow, tensor transformations, patient-level reasoning, and clinical interpretability.
 

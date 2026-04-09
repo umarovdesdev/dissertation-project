@@ -56,9 +56,13 @@ Produce a single Markdown file with the following structure:
 | §3.3   | Transfer Learning Methodology Using EfficientNetB0 and ResNet50 |
 | §3.4   | Evaluation Framework and Performance Metrics |
 | §4.1   | Datasets and Experimental Configuration |
-| §4.2   | Experiment 1: Baseline vs Enhanced CNN |
-| §4.3   | Experiment 2: CLAHE Threshold Optimization |
-| §4.4   | Experiment 3: Transfer Learning Strategy Comparison |
+| §4.2   | Experiment 1: Preprocessing Dominance (H-1) |
+| §4.3   | Experiment 2: Component Ablation + CLAHE/σ sweeps (H-2) |
+| §4.4   | Experiment 3: Cross-Dataset Transferability on APTOS 2019 (H-4) |
+| §4.5   | Experiment 4: Grad-CAM Explainability on IDRiD + Clinical (H-5) |
+| §4.6   | Experiment 5: Clinical Degradation Resistance on IDRiD + Messidor-2 (H-7) |
+| §4.7   | Experiment 6: Device Domain Shift on DDR + ODIR-5K + RFMiD (H-6) |
+| §4.8   | Experiment 7: Small Data Training on IDRiD → Clinical |
 | §5.1   | Cross-Database Generalization Testing |
 | §5.2   | Statistical Validation of Preprocessing Dominance |
 | §5.3   | Comparative Analysis with Existing DR Systems |

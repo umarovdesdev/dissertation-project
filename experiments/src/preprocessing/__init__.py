@@ -1,4 +1,4 @@
-# V3 exports (kept for backward compatibility — exp2–exp6 still use these)
+# V3 exports (kept for backward compatibility — legacy ablation experiments)
 from .pipeline import PreprocessingPipeline
 from .fov import standardize_fov
 from .green_channel import extract_green_channel
@@ -6,14 +6,14 @@ from .normalization import normalize_pixels
 from .clahe import apply_clahe, apply_clahe_sweep
 from .hsv_enhancement import enhance_hsv
 
-# V4 exports
-from .pipeline_v4 import PreprocessingPipelineV4
-from .config import PreprocessingV4Config, PIPELINE_PRESETS
+# V5 exports
+from .pipeline_v5 import PreprocessingPipelineV5
+from .config import PreprocessingV5Config, PIPELINE_PRESETS
 from .canonical_orientation import detect_eye_side, canonical_flip, canonical_orientation
 from .crop_resize import crop_and_resize
 from .flat_field import apply_flat_field
 from .upgraded_clahe import apply_upgraded_clahe, maybe_apply_clahe, ClaheParams
-from .imagenet_normalize import imagenet_normalize
+from .imagenet_normalize import imagenet_normalize, normalize_to_tensor
 from .od_fovea_detect import ODFoveaResult, detect_od_fovea, rotate_to_horizontal
 
 __all__ = [
@@ -25,9 +25,9 @@ __all__ = [
     "apply_clahe",
     "apply_clahe_sweep",
     "enhance_hsv",
-    # V4
-    "PreprocessingPipelineV4",
-    "PreprocessingV4Config",
+    # V5
+    "PreprocessingPipelineV5",
+    "PreprocessingV5Config",
     "PIPELINE_PRESETS",
     "detect_eye_side",
     "canonical_flip",
@@ -41,4 +41,5 @@ __all__ = [
     "maybe_apply_clahe",
     "ClaheParams",
     "imagenet_normalize",
+    "normalize_to_tensor",
 ]
