@@ -187,7 +187,7 @@
 ### SC-2.1
 **Parent Claim:** PC-2
 **Sub-Claim ID:** SC-2.1
-**Formal Statement:** The V4 upgraded CLAHE uses a dual-constraint clip limit formulation: clip_limit = min(clip_factor × tile_area / 256, global_threshold × tile_area), applied stochastically at train time (80% probability) on the L-channel of LAB color space. This formulation provides controllable adaptive contrast enhancement that addresses excessive enhancement artifacts and poor manifestation of small vessels and microaneurysm-like features in fundus images. The T/80 formulation from LC-AlTimemy-2021 (proposed as an upgrade to conventional CLAHE: CLIP LIMIT = ⌈L/T⌉ + β·(φ−⌈L/T⌉)) serves as historical theoretical context; V4 uses the independent dual-constraint parameterization (clip_factor and global_threshold) validated within the dissertation's own experimental framework.
+**Formal Statement:** The V5 upgraded CLAHE uses a dual-constraint clip limit formulation: clip_limit = min(clip_factor × tile_area / 256, global_threshold × tile_area), applied stochastically at train time (80% probability) on the L-channel of LAB color space. This formulation provides controllable adaptive contrast enhancement that addresses excessive enhancement artifacts and poor manifestation of small vessels and microaneurysm-like features in fundus images. The T/80 formulation from LC-AlTimemy-2021 (proposed as an upgrade to conventional CLAHE: CLIP LIMIT = ⌈L/T⌉ + β·(φ−⌈L/T⌉)) serves as historical theoretical context; V5 uses the independent dual-constraint parameterization (clip_factor and global_threshold) validated within the dissertation's own experimental framework.
 
 **Evidence Reference:**
 - Literature Card: LC-AlTimemy-2021, §3 (Equation 2, p. 5); §4 (Conceptual Contributions)
@@ -206,7 +206,7 @@
 ### SC-2.2
 **Parent Claim:** PC-2
 **Sub-Claim ID:** SC-2.2
-**Formal Statement:** Within the CLAHE clip limit range tested experimentally on the small fundus image dataset, downstream CNN classification performance on per-class F1-score for DR 1 and DR 2 exhibits a parameter-dependent sensitivity profile. The profile has at least one local optimum identifiable within the tested range. No extrapolation to untested parameter values is permissible.
+**Formal Statement:** Within the CLAHE clip limit range tested experimentally on EyePACS, downstream CNN classification performance on per-class F1-score for DR 1 and DR 2 exhibits a parameter-dependent sensitivity profile. The profile has at least one local optimum identifiable within the tested range. No extrapolation to untested parameter values is permissible.
 
 **Evidence Reference:**
 - Literature Card: LC-SAPAKOVA-2025-01, §II.3 (CLAHE parameters: clip limit 2.0, grid 8×8); LC-AlTimemy-2021, §3

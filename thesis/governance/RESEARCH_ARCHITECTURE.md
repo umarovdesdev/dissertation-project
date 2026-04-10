@@ -262,6 +262,10 @@ All experiments use 5-fold cross-validation with patient-level stratified split.
 
 **Dominance validation:** Preprocessing Dominance validated if Performance(B) > Performance(A) AND Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures.
 
+**Config N (normalization control):** Baseline preprocessing + dataset-specific normalization (no V5 pipeline stages). Isolates the normalization statistics effect from the pipeline preprocessing effect. If Config N ≈ Configs A/C, normalization alone does not explain the V5 pipeline improvement. If Config N > A/C but < B/D, both normalization and preprocessing contribute independently.
+
+**Known limitation:** Configs A/C (baseline) use ImageNet normalization statistics while Configs B/D (full V5) use dataset-specific statistics. The measured pipeline effect in H-1 therefore conflates the preprocessing stages with the normalization statistics change. Config N is designed to disambiguate this confound.
+
 **Statistical analysis:** Mixed-effects model across folds (fold as random effect). McNemar test for paired classification comparison. DeLong test for ROC-AUC comparison. Bonferroni/Holm correction for multiple comparisons.
 
 ---
@@ -271,6 +275,8 @@ All experiments use 5-fold cross-validation with patient-level stratified split.
 **Purpose:** Quantify the contribution of each preprocessing component to classification performance. Identifies which pipeline stages drive improvement.
 
 **Dataset:** EyePACS
+
+**Architecture:** Best-performing from Experiment 1 (EfficientNet-B3 per preliminary results). Single architecture is sufficient — ablation quantifies stage contributions rather than architecture sensitivity.
 
 **V5 Ablation configurations (7 levels):**
 
@@ -377,6 +383,8 @@ All experiments use 5-fold cross-validation with patient-level stratified split.
 **Training:** IDRiD (516 images), 5-fold cross-validation. Clinical dataset (60 images) held out as test.
 
 **Protocol:** Train on IDRiD folds, evaluate on Clinical held-out. Report mean ± std across 5 folds. Both baseline and V5 preprocessing tested.
+
+**Bootstrap requirement:** Bootstrap CI (≥ 1000 resamples) required given small dataset sizes (IDRiD=516, Clinical=60). See §6.8.
 
 ---
 

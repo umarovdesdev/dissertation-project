@@ -118,6 +118,8 @@ The V5 preprocessing pipeline is the ordered sequence of 8 stages applied to fun
 
 Pipeline **ACTIVE** (full V5): All 8 stages applied. Stage 6 active during training only. Output: 4-channel tensor (3 RGB + 1 FOV mask). Pipeline **ABSENT** (V5 baseline): Stretch-resize to 512×512 + ImageNet normalize (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]). Output: 3-channel tensor. No FOV mask. No preprocessing stages.
 
+**Ablation exception:** Ablation configurations in Experiment 2 are experimental variants for analysis purposes only; they do not constitute valid production pipeline instances. The 8-stage pipeline remains mandatory for all operational deployment.
+
 **OD-4: Generalization**  
 Generalization is operationally defined as the difference between training-set performance and held-out test-set performance on the same evaluation metric. Overfitting is the condition wherein training precision exceeds test precision by more than 15 percentage points on any primary metric. Cross-database generalization is defined as the ratio of test-set F1-score on a secondary dataset (e.g., Messidor-2, IDRiD) to test-set F1-score on the primary dataset (EyePACS) under the same trained model, without retraining: G = F1_external / F1_EyePACS.
 
@@ -225,7 +227,7 @@ The preprocessing dominance hypothesis (H-1) is considered sufficiently validate
 - NC-1 through NC-13: Retained from v1.0 (as specified in prior Argument Map and claim structure documents).
 - NC-14: Grad-CAM activation does not constitute clinical localization of pathology — it is an interpretability tool, not a diagnostic output. Grad-CAM overlays indicate regions of high gradient-weighted activation in the final convolutional layer and do not represent pixel-level diagnostic delineation of lesion boundaries.
 - NC-15: The dirty data pipeline (External Image Ingestion Protocol) is not validated for arbitrary clinical data sources — validation is bounded to specific Kazakh medical center data. Generalization of the ingestion protocol to other clinical data sources requires independent validation.
-- NC-16: Device domain shift results do not constitute device certification or regulatory compliance — they are empirical observations of cross-device performance variability. No claim of device-agnostic deployment readiness is permissible based on V3 Experiment 3 alone.
+- NC-16: Device domain shift results do not constitute device certification or regulatory compliance — they are empirical observations of cross-device performance variability. No claim of device-agnostic deployment readiness is permissible based on Experiment 6 alone.
 - NC-17: The preprocessing component ablation does not identify a universally optimal preprocessing configuration — the component hierarchy is bounded to the tested architectures (ResNet-50, EfficientNet-B3) and datasets (EyePACS). Extension to other architectures or datasets requires independent experimental validation.
 
 ---

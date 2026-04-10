@@ -34,7 +34,17 @@
       "Bash(wsl.exe echo:*)",
       "Bash(wsl.exe -l -v)",
       "Bash(wsl.exe -d Ubuntu bash -c \"conda run -n dr-classifier python --version 2>/dev/null || echo 'conda not found'; which python\")",
-      "Bash(wsl.exe:*)"
+      "Bash(wsl.exe:*)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(python3 -)",
+      "Bash(ls /mnt/)",
+      "Bash(wslpath -u \"E:\\\\\\\\dissertation-project\")",
+      "Read(//e//**)",
+      "Bash(where python:*)",
+      "Bash(where python3:*)",
+      "Bash(py --version)",
+      "Bash(python:*)",
+      "Bash(echo \"Exit: $?\")"
     ]
   }
 }

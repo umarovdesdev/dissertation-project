@@ -19,7 +19,7 @@ $$
 
 where $\mathcal{P}$ is the V5 preprocessing pipeline, $\text{CNN}$ is the shared feature extractor, $\Phi$ is the patient-level aggregation operator, and $g$ is the classification head.
 
-This specification is written at a higher level of abstraction than the V4 preprocessing pipeline specification. Preprocessing internals are not re-derived here; the pipeline is treated as a module $\mathcal{P}$ with defined input-output contracts. The focus is on inter-module data flow, tensor transformations, patient-level reasoning, and clinical interpretability.
+This specification is written at a higher level of abstraction than the V5 preprocessing pipeline specification. Preprocessing internals are not re-derived here; the pipeline is treated as a module $\mathcal{P}$ with defined input-output contracts. The focus is on inter-module data flow, tensor transformations, patient-level reasoning, and clinical interpretability.
 
 ### 1.1 Scope
 
@@ -102,7 +102,7 @@ $$
 | $s_L$, $s_R$ | `str` | — | Eye laterality: `"left"`, `"right"`, or `"unknown"` |
 | Patient ID | `str` | — | Unique patient identifier for bilateral grouping |
 
-The raw spatial dimensions $(H_0, W_0)$ vary across imaging devices (e.g., EyePACS: $3168 \times 4752$; IDRiD: $2848 \times 4288$). The preprocessing module normalizes all images to a uniform $512 \times 512$ spatial resolution and produces a 4-channel tensor: 3 RGB channels (ImageNet-normalized) plus a binary FOV mask channel indicating real pixel data (1.0) vs. padding (0.0).
+The raw spatial dimensions $(H_0, W_0)$ vary across imaging devices (e.g., EyePACS: $3168 \times 4752$; IDRiD: $2848 \times 4288$). The preprocessing module normalizes all images to a uniform $512 \times 512$ spatial resolution and produces a 4-channel tensor: 3 RGB channels (dataset-specific normalized RGB, mean/std computed after deterministic Stages 0–4) plus a binary FOV mask channel indicating real pixel data (1.0) vs. padding (0.0).
 
 ### 3.2 Missing Eye Handling
 
@@ -128,17 +128,18 @@ $$
 \mathcal{P}: \bigl(\mathbb{R}^{H_0 \times W_0 \times 3}_{\text{uint8}},\; s\bigr) \;\longrightarrow\; \mathbb{R}^{4 \times 512 \times 512}_{\text{float32}}
 $$
 
-The preprocessing module $\mathcal{P}$ transforms a raw BGR fundus image and its eye laterality label into a normalized float32 tensor suitable for CNN input. The output has 4 channels: channels 0–2 are ImageNet-normalized RGB, and channel 3 is a binary FOV mask (1.0 = real pixel data, 0.0 = padding from isotropic resize). It is defined by the V4 6-stage pipeline specification (see *V4 Data Processing Pipeline — Comprehensive Specification*) and comprises the following stages executed in strict order:
+The preprocessing module $\mathcal{P}$ transforms a raw BGR fundus image and its eye laterality label into a normalized float32 tensor suitable for CNN input. The output has 4 channels: channels 0–2 are dataset-specific normalized RGB (mean/std computed after deterministic Stages 0–4), and channel 3 is a binary FOV mask (1.0 = real pixel data, 0.0 = padding from isotropic resize). It is defined by the V5 8-stage pipeline specification (see *V5 Data Processing Pipeline — Comprehensive Specification*) and comprises the following stages executed in strict order:
 
 | Stage | Operation | Deterministic? |
 |-------|-----------|---------------|
-| 0a | Canonical flip (left → right eye orientation) | Yes |
-| 0b | OD-fovea rotation normalization | Yes (conditional) |
-| 1 | FOV crop + isotropic resize + padding + FOV mask generation | Yes |
-| 2 | Flat-field illumination correction ($\sigma = 45$) | Yes |
-| 3 | Dual-constraint CLAHE (LAB L-channel, stochastic at train) | Stochastic (train) |
-| 5 | Integrated augmentation (affine + color, train only) | Stochastic (train) |
-| 4 | ImageNet normalization $\rightarrow$ tensor | Yes |
+| 0 | Canonical flip (left → right eye orientation) | Yes |
+| 1 | OD-fovea rotation normalization | Yes (conditional) |
+| 2 | FOV crop + isotropic resize to 512×512 + centered zero-padding | Yes |
+| 3 | FOV mask generation (binary mask → 4th channel) | Yes |
+| 4 | Flat-field illumination correction (adaptive σ = 0.07·D) | Yes |
+| 5 | Dual-constraint CLAHE (LAB L-channel, stochastic at train) | Stochastic (train) |
+| 6 | Integrated augmentation (affine + color, train only) | Stochastic (train only) |
+| 7 | Dataset-specific normalization → tensor | Yes |
 
 ### 4.2 Pipeline Configurations
 
@@ -147,7 +148,7 @@ Two configurations are evaluated in the factorial design (Experiment 1):
 | Name | Stages Active | Notation |
 |------|---------------|----------|
 | **Baseline (ABSENT)** | 1, 4 | $\mathcal{P}_{\emptyset}$ |
-| **Full V4 (ACTIVE)** | 0a, 0b, 1, 2, 3, 5, 4 | $\mathcal{P}$ |
+| **Full V5 (ACTIVE)** | 0, 1, 2, 3, 4, 5, 6 (train), 7 | $\mathcal{P}$ |
 
 The preprocessing module is applied **identically and independently** to each eye:
 
@@ -376,7 +377,7 @@ For EfficientNet-B3 ($d = 1536$): input dimension $3 \times 1536 = 4608$; total 
 - Requires canonical orientation (Stage 0a) as a prerequisite — without consistent left/right alignment, the difference term is semantically undefined
 - Two-stage training adds complexity (backbone pretraining then head fine-tuning)
 
-**Implementation.** This is the strategy used in Experiment 1 configurations E and F. The backbone is shared (single `Backbone` instance processes both eyes with the same weights). Missing eyes are handled via the zero-tensor substitution described in Section 3.2.
+**Implementation.** This formulation is retained for theoretical completeness. **Note: PatientHead configurations (formerly E/F) were removed from the V5 experimental design. The formulation is retained for completeness and potential future work.** The backbone is shared (single `Backbone` instance processes both eyes with the same weights). Missing eyes are handled via the zero-tensor substitution described in Section 3.2.
 
 ### 7.5 Strategy Comparison Summary
 
@@ -386,7 +387,7 @@ For EfficientNet-B3 ($d = 1536$): input dimension $3 \times 1536 = 4608$; total 
 | Concatenation | Yes | $2d$ | Implicit | Stage 0a |
 | Symmetry-Aware (PatientHead) | Yes | $3d$ | Explicit | Stage 0a |
 
-The max-grade strategy is evaluated for all Experiment 1 configurations (A–F). The symmetry-aware PatientHead is an additional architectural component evaluated only for configurations E and F as an optional extension.
+Max-grade is the only patient-level strategy evaluated in V5 (configurations A–D + N). PatientHead fusion is described for theoretical completeness; configurations E and F were removed from the V5 experimental design.
 
 ---
 
@@ -451,6 +452,8 @@ with $N$ the total sample count, $K = 5$ the class count, and $n_k$ the count of
 | Mixed precision | Enabled (ResNet-50); disabled (EfficientNet, fp16 overflow) | Memory/speed optimization |
 
 ### 8.6 Two-Stage Training Protocol (PatientHead Configurations E, F)
+
+**Note:** This protocol is retained for reference. PatientHead configurations E/F were removed from the V5 experimental design. Active V5 configurations are A–D plus Config N (normalization control).
 
 For configurations with patient-level aggregation, training proceeds in two stages:
 
@@ -523,7 +526,7 @@ Two models are trained on EyePACS under identical conditions except for preproce
 | Model | Preprocessing | Notation |
 |-------|---------------|----------|
 | Baseline | $\mathcal{P}_\emptyset$ (crop + resize + normalize) | $\text{CNN}_{\theta_A}$ |
-| Preprocessed | $\mathcal{P}$ (full V4 pipeline) | $\text{CNN}_{\theta_B}$ |
+| Preprocessed | $\mathcal{P}$ (full V5 pipeline) | $\text{CNN}_{\theta_B}$ |
 
 For each of $N = 50$ IDRiD images (10 per DR class):
 
@@ -584,7 +587,7 @@ Patient Record
 ┌──────────────────┐                  ┌──────────────────┐
 │  Preprocessing   │                  │  Preprocessing   │
 │  𝒫(I_L, s_L)    │                  │  𝒫(I_R, s_R)    │
-│  (V4 pipeline)   │                  │  (V4 pipeline)   │
+│  (V5 pipeline)   │                  │  (V5 pipeline)   │
 └────────┬─────────┘                  └────────┬─────────┘
          │                                     │
     I'_L ∈ ℝ^{4×512×512}                 I'_R ∈ ℝ^{4×512×512}
@@ -713,8 +716,8 @@ Total learnable parameters (approximate):
 |---------------|----------|------|-------|
 | A/B (ResNet-50, image-level) | 23.5M | 10K | 23.5M |
 | C/D (EfficientNet-B3, image-level) | 10.7M | 7.7K | 10.7M |
-| E (ResNet-50, PatientHead) | 23.5M | 1.6M | 25.1M |
-| F (EfficientNet-B3, PatientHead) | 10.7M | 1.2M | 11.9M |
+| E (ResNet-50, PatientHead) (theoretical — not active in V5) | 23.5M | 1.6M | 25.1M |
+| F (EfficientNet-B3, PatientHead) (theoretical — not active in V5) | 10.7M | 1.2M | 11.9M |
 
 ---
 
@@ -783,7 +786,7 @@ ALO $\geq$ IoU always holds. The gap between them indicates the degree of "atten
 
 The dissertation's central causal chain predicts that preprocessing improves explainability metrics through two mechanisms:
 
-1. **Feature visibility.** Flat-field correction (Stage 2) and CLAHE (Stage 3) enhance the contrast of small lesion structures (particularly microaneurysms), making them more salient to the CNN's learned filters. This should increase the gradient signal $\partial z_c / \partial A^k_{ij}$ at lesion locations, producing higher Grad-CAM activation over lesions.
+1. **Feature visibility.** Flat-field correction (Stage 4) and CLAHE (Stage 5) enhance the contrast of small lesion structures (particularly microaneurysms), making them more salient to the CNN's learned filters. This should increase the gradient signal $\partial z_c / \partial A^k_{ij}$ at lesion locations, producing higher Grad-CAM activation over lesions.
 
 2. **Attention concentration.** By reducing device-specific illumination artifacts and normalizing orientation (Stage 0), preprocessing removes spurious high-gradient regions (e.g., bright reflections, dark vignetting borders) that would otherwise compete for Grad-CAM attention. This should reduce attention spillover and improve both ALO and IoU.
 
@@ -829,14 +832,18 @@ $$
 
 ### 14.4 Configuration Management
 
-All hyperparameters, dataset paths, and pipeline toggles are centralized in `configs/default.yaml`. Model-specific augmentation presets are defined in `PreprocessingV4Config.from_preset()`. No hyperparameters are hardcoded in source modules; all are injected via the configuration system.
+All hyperparameters, dataset paths, and pipeline toggles are centralized in `configs/default.yaml`. Model-specific augmentation presets are defined in `PreprocessingV5Config.from_preset()`. No hyperparameters are hardcoded in source modules; all are injected via the configuration system.
 
 ### 14.5 Experimental Design Traceability
 
 | Experiment | Configs | Hypothesis | Modules Exercised |
 |------------|---------|------------|-------------------|
-| Exp 1 (Factorial) | A–F | H-1 | $\mathcal{P}$, CNN, $h_\theta$, $\Phi$ (E/F) |
-| Exp 2 (Ablation) | V4 levels | H-1, H-2 | $\mathcal{P}$ (incremental), CNN, $h_\theta$ |
+| Exp 1 (Factorial) | A–D, N | H-1 | $\mathcal{P}$, CNN, $h_\theta$ |
+| Exp 2 (Ablation) | V5 7 levels | H-1, H-2 | $\mathcal{P}$ (incremental), CNN, $h_\theta$ |
+| Exp 3 (Transferability) | full V5 | H-4 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot on APTOS) |
 | Exp 4 (Explainability) | baseline vs. full | H-5 | $\mathcal{P}$, CNN, GradCAM, ALO/IoU |
-| Exp 5 (Generalization) | full V4 | H-4 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot) |
-| Exp 6 (Device Shift) | full V4 | H-6 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot) |
+| Exp 5 (Clinical Degradation) | full V5 | H-7 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot on IDRiD, Messidor-2) |
+| Exp 6 (Device Shift) | full V5 | H-6 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot on DDR, ODIR-5K, RFMiD) |
+| Exp 7 (Small Data) | baseline vs. full | — | $\mathcal{P}$, CNN (train on IDRiD, test on Clinical) |
+
+**Experiments not detailed in this architecture specification:** Experiments 3 (APTOS Transferability, H-4), 5 (Clinical Degradation Resistance, H-7), and 7 (Small Data Training) are zero-shot evaluation or small-data training experiments that exercise the same $\mathcal{P}$ → CNN → $h_\theta$ pipeline on different datasets. Their protocols are fully specified in RESEARCH_ARCHITECTURE.md §5.3, §5.5, and §5.7 respectively. No architectural changes are required — only the evaluation dataset and metrics differ.

@@ -303,11 +303,8 @@ def run(
         in_channels  = cfg_spec.get("in_channels", 4)
         model_cfg    = {**config["models"][model_name], "in_channels": in_channels}
 
-        # Mixed precision: disable for EfficientNet
-        use_amp = config.get("training", {}).get("mixed_precision", True)
-        if "efficientnet" in model_name:
-            use_amp = False
-            print(f"  [INFO] Mixed precision DISABLED for {model_name}")
+        # Mixed precision: read from per-model config (D-6 design decision)
+        use_amp = config.get("models", {}).get(model_name, {}).get("mixed_precision", True)
         trainer.mixed_precision         = use_amp
         patient_trainer.mixed_precision = use_amp
 

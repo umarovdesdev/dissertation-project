@@ -78,7 +78,7 @@ Stage 6 (augmentation) is inserted **before** Stage 7 (normalization) because au
 **Purpose:** Align the optic disc–fovea axis to horizontal, removing rotational variation between acquisitions.
 
 **Operation:**
-- Detect optic disc (OD) center via classical CV (Hough circle or bright-region detection)
+- Detect optic disc (OD) center via classical CV (bright-region percentile thresholding (top percentile of green-channel intensity))
 - Detect fovea center (darkest region in the macula zone)
 - Compute angle θ between OD-fovea vector and horizontal axis
 - Rotate image by −θ to align axis to horizontal
@@ -92,7 +92,7 @@ Stage 6 (augmentation) is inserted **before** Stage 7 (normalization) because au
 **Purpose:** Remove non-retinal border artifacts, standardize to 512×512 while preserving fundus circle geometry via isotropic scaling and zero-padding.
 
 **Operation:**
-1. Detect FOV circle radius R and center (cx, cy) using Hough circle transform
+1. Detect FOV region using PIL-based foreground detection (brightness threshold above background)
 2. Crop to bounding box with margin: [cy−R−m : cy+R+m, cx−R−m : cx+R+m]
 3. Scale isotropically so that 2R maps to 512 pixels (preserving aspect ratio)
 4. Zero-pad to exactly 512×512 (centered)
@@ -121,7 +121,7 @@ Stage 6 (augmentation) is inserted **before** Stage 7 (normalization) because au
 
 **Operation:**
 - Estimate low-frequency illumination field: $B = \text{GaussianBlur}(I, \sigma=0.07 \cdot D)$
-- Subtract background: $I' = I - B + \text{mean}(B)$
+- Subtract background: $I' = I - B + 128$
 - Clip to valid range [0, 255]
 
 **Key parameter:** σ = 0.07·D, where D is the FOV diameter. Adaptive to image geometry — larger FOV images use a wider blur kernel, smaller FOV images use a narrower kernel. This is the primary V5 improvement over V4 (which used fixed σ=45).
@@ -138,7 +138,7 @@ Stage 6 (augmentation) is inserted **before** Stage 7 (normalization) because au
 1. Convert RGB → LAB color space
 2. Apply dual-constraint CLAHE to L-channel only:
    - $\text{CL\_tile} = \min(\text{clip\_factor} \times \text{tile\_area}/256,\; \text{global\_threshold} \times \text{tile\_area})$
-   - Default: clip_factor=2.0, global_threshold=0.03, tile_grid=(8,8)
+   - Default: clip_factor=2.0, global_threshold=0.01, tile_grid=(8,8)
 3. At training time: apply stochastically (p=0.8); at inference: always apply
 4. Convert LAB → RGB
 
@@ -151,11 +151,10 @@ Stage 6 (augmentation) is inserted **before** Stage 7 (normalization) because au
 **Purpose:** Increase training data variability, reduce overfitting, mitigate class imbalance effects.
 
 **Operation (unified affine + color):**
-- Horizontal/vertical flip (p=0.5 each)
-- Random rotation ±15°
-- Random zoom ±10% (scale 0.9–1.1)
-- Brightness/contrast jitter (±20%)
-- PCA color augmentation (α~N(0,0.1) along principal color axes)
+- Unified affine transform: rotation (σ adaptive from Stage 1 OD-fovea confidence, fallback σ=13.0°, clipped ±40°), zoom [0.9, 1.1], optional shear (±2°, p=0.3), optional stretch ([1/1.05, 1.05])
+- Brightness/contrast jitter (α ∈ [0.9, 1.1], β ∈ [−10, 10], p=0.5)
+- PCA color jitter (Krizhevsky-style, σ=0.1, p=0.5)
+- Horizontal re-flip for augmentation diversity (no vertical flip)
 
 Applied only during training. At inference: no augmentation (deterministic pipeline).
 
@@ -187,7 +186,7 @@ Experiment 2 performs a systematic sweep over CLAHE parameters to validate H-2 (
 | clip_factor | 1.0 – 4.0 | 0.5 |
 | global_threshold | 0.01 – 0.05 | 0.01 |
 
-Sweep is performed on IDRiD per-class F1 (DR Grades 1 and 2 as primary targets). Results reported as 2D sensitivity surface heatmap.
+Sweep is performed on EyePACS per-class F1 (DR Grades 1 and 2 as primary targets). Results reported as 2D sensitivity surface heatmap.
 
 ---
 
@@ -213,7 +212,7 @@ Sweep over flat-field correction sigma multiplier to validate adaptive parameter
 
 | Parameter | Range | Step |
 |-----------|-------|------|
-| σ multiplier (× D) | 0.03 – 0.15 | 0.02 |
+| σ multiplier (× D) | 0.05 – 0.10 | 0.01 |
 
 Fixed at σ=0.07·D for the canonical V5 pipeline.
 

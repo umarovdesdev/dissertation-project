@@ -504,12 +504,12 @@ def run(
     model_name = "efficientnet_b3"
     model_cfg  = config["models"][model_name]
 
-    # EfficientNet-B3 must run with mixed_precision=False (fp16 overflow fix)
-    config = dict(config)
-    config["training"] = dict(config["training"])
-    config["training"]["mixed_precision"] = False
+    # Architecture: EfficientNet-B3 (Exp 1 winner per RESEARCH_ARCHITECTURE §5.2)
+    # Mixed precision: read from per-model config (D-6 design decision)
+    use_amp = config.get("models", {}).get(model_name, {}).get("mixed_precision", False)
 
     trainer = Trainer(config, device="auto")
+    trainer.mixed_precision = use_amp
 
     # ── Load EyePACS index ────────────────────────────────────────────────────
     eyepacs_root = config["paths"]["eyepacs"]

@@ -86,18 +86,21 @@ cross_validation:
 
 models:
   resnet50:
-    pretrained:   true
-    num_classes:  5
-    dropout:      0.4
+    pretrained:      true
+    num_classes:     5
+    dropout:         0.4
+    mixed_precision: true
     # in_channels set per-experiment: 3 (baseline) or 4 (full V5)
   efficientnet_b3:
-    pretrained:   true
-    num_classes:  5
-    dropout:      0.4
+    pretrained:      true
+    num_classes:     5
+    dropout:         0.4
+    mixed_precision: false   # fp16 overflow — must stay disabled
   efficientnet_b4:
-    pretrained:   true
-    num_classes:  5
-    dropout:      0.4
+    pretrained:      true
+    num_classes:     5
+    dropout:         0.4
+    mixed_precision: false   # fp16 overflow — must stay disabled
 
 training:
   optimizer:          adam
@@ -105,7 +108,7 @@ training:
   weight_decay:       0.0001
   batch_size:         16
   max_epochs:         20
-  mixed_precision:    true
+  mixed_precision:    true   # DEPRECATED — per-model setting in models.*.mixed_precision is authoritative
   num_workers:        4
   class_weights:      inverse_frequency
   loss_type:          focal               # Focal Loss only
