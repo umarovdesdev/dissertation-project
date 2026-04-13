@@ -15,7 +15,7 @@
 | 3 | Cohen κ (quadratic) | Реттелген класстар арасындағы келісім | DR 0↔4 қатесін DR 0↔1-ден ауыр бағалайды |
 | 4 | Accuracy | Жалпы дұрыс жіктеу | Қосымша көрсеткіш |
 
-**Доминанттылық критерийі (EH-3) — V5 vs Baseline:**
+**Доминанттылық критерийі (EH-3) — Full line vs Baseline:**
 
 $$\Delta F1 \geq 5\text{pp} \quad \land \quad \Delta AUC \geq 0.02 \quad \land \quad \Delta\kappa \geq 0$$
 
