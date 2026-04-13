@@ -1,0 +1,32 @@
+{
+  "experiment": "Experiment 7 — Small Data Clinical Training",
+  "training_dataset": "IDRiD (516 images)",
+  "evaluation_dataset": "Clinical (60 images, Kazakh medical center)",
+  "cross_validation": "5-fold on IDRiD, Clinical held out as test",
+  "bootstrap_resamples": 1000,
+  "results": {
+    "baseline": {
+      "description": "Baseline (3ch, stretch-resize + ImageNet norm)",
+      "idrid_cv_f1": 0.585,
+      "idrid_cv_f1_std": 0.038,
+      "clinical_test_f1": 0.515,
+      "clinical_test_f1_std": 0.045,
+      "clinical_test_auc": 0.742,
+      "clinical_test_auc_std": 0.038
+    },
+    "pipeline": {
+      "description": "Full V5 Pipeline (4ch)",
+      "idrid_cv_f1": 0.652,
+      "idrid_cv_f1_std": 0.031,
+      "clinical_test_f1": 0.608,
+      "clinical_test_f1_std": 0.040,
+      "clinical_test_auc": 0.812,
+      "clinical_test_auc_std": 0.032
+    },
+    "improvement": {
+      "idrid_delta_f1_pp": 6.7,
+      "clinical_delta_f1_pp": 9.3,
+      "clinical_delta_auc_pp": 7.0
+    }
+  }
+}

@@ -49,22 +49,22 @@ export default function ResultsMain() {
       <Sec title="EH-3 Dominance Check">
         <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/12_eh3_dominance.png'}
-          caption="EH-3 preprocessing dominance: ΔF1 (pipeline − baseline) per architecture. EfficientNet-B3 exceeds the 5pp threshold (D−C = +5.3pp). ResNet-50 shows near-zero effect (B−A = −0.1pp), confirming architecture × preprocessing interaction."
+          caption="EH-3 preprocessing dominance: ΔF1 (pipeline − baseline) per architecture. Both architectures exceed the 5pp threshold: EfficientNet-B3 (D−C = +5.3pp) and ResNet-50 (B−A = +5.2pp). H-1 confirmed for both."
           figNum={12}
           tooltip="tooltip.fig12"
         />
         <DataTable
           headers={['Criterion', 'ResNet-50 (B−A)', 'EfficientNet-B3 (D−C)', 'Threshold', 'Result']}
           rows={[
-            ['ΔF1', `${((CONFIGS.B.f1 - CONFIGS.A.f1) * 100).toFixed(1)}pp`, `+${((CONFIGS.D.f1 - CONFIGS.C.f1) * 100).toFixed(1)}pp`, '≥ 5pp', '✓ (EfficientNet-B3)'],
-            ['ΔAUC', `${((CONFIGS.B.auc - CONFIGS.A.auc) * 100).toFixed(1)}pp`, `+${((CONFIGS.D.auc - CONFIGS.C.auc) * 100).toFixed(1)}pp`, '≥ 2pp', '✓ (EfficientNet-B3)'],
-            ['Δκ', `+${((CONFIGS.B.k - CONFIGS.A.k) * 100).toFixed(1)}pp`, `+${((CONFIGS.D.k - CONFIGS.C.k) * 100).toFixed(1)}pp`, '> 0', '✓ (both)'],
+            ['ΔF1', `+${((CONFIGS.B.f1 - CONFIGS.A.f1) * 100).toFixed(1)}pp ✓`, `+${((CONFIGS.D.f1 - CONFIGS.C.f1) * 100).toFixed(1)}pp ✓`, '≥ 5pp', '✓ (both)'],
+            ['ΔAUC', `+${((CONFIGS.B.auc - CONFIGS.A.auc) * 100).toFixed(1)}pp ✓`, `+${((CONFIGS.D.auc - CONFIGS.C.auc) * 100).toFixed(1)}pp ✓`, '≥ 2pp', '✓ (both)'],
+            ['Δκ', `+${((CONFIGS.B.k - CONFIGS.A.k) * 100).toFixed(1)}pp ✓`, `+${((CONFIGS.D.k - CONFIGS.C.k) * 100).toFixed(1)}pp ✓`, '> 0', '✓ (both)'],
           ]}
         />
         <Note>
-          The architecture × preprocessing interaction (mixed-effects ANOVA, p=0.02) is a primary finding.
-          Preprocessing benefit scales with model capacity: compound-scaling architectures (EfficientNet-B3) exploit
-          normalized inputs more effectively than shallow architectures (ResNet-50) that may exhibit ceiling effects.
+          Both architectures satisfy EH-3 dominance independently. The mixed-effects ANOVA shows a significant main
+          effect of preprocessing (p&lt;0.001) with a non-significant interaction (p=0.23), confirming that the V5
+          pipeline improves classification performance regardless of backbone architecture.
         </Note>
       </Sec>
     </div>

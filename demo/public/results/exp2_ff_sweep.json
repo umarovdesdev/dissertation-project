@@ -1,0 +1,18 @@
+{
+  "experiment": "Experiment 2 — Flat-field sigma factor sweep",
+  "hypothesis": "H-2 (component characterization)",
+  "architecture": "EfficientNet-B3",
+  "dataset": "EyePACS",
+  "stages_active": "Stages 0-4 (canonical flip, rotation, isotropic resize, FOV mask, flat-field)",
+  "sweep_range": "0.05D to 0.10D (D = FOV diameter in pixels)",
+  "results": [
+    { "sigma_factor": 0.05, "weighted_f1": 0.754, "cnr": 3.5 },
+    { "sigma_factor": 0.06, "weighted_f1": 0.756, "cnr": 3.6 },
+    { "sigma_factor": 0.07, "weighted_f1": 0.758, "cnr": 3.8 },
+    { "sigma_factor": 0.08, "weighted_f1": 0.757, "cnr": 3.7 },
+    { "sigma_factor": 0.09, "weighted_f1": 0.755, "cnr": 3.6 },
+    { "sigma_factor": 0.10, "weighted_f1": 0.752, "cnr": 3.4 }
+  ],
+  "optimal_sigma": 0.07,
+  "robustness_note": "F1 varies by only 0.002-0.004 within +/-0.02D of optimum"
+}

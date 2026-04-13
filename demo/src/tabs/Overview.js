@@ -58,10 +58,10 @@ export default function Overview() {
         note="The 5-component preprocessing pipeline (canonical orientation, FOV normalization, flat-field correction, dual-constraint CLAHE, augmentation) is an integral part of the diagnostic model — not ancillary data preparation. Preprocessing is the primary driver of classification improvement for 5-class DR grading. The pipeline preserves diagnostic features while normalizing cross-device variability."
       >
         <div style={{ padding: '12px 14px', background: C.tealBg, borderRadius: 8, fontSize: 12, color: C.tealT, lineHeight: 1.7 }}>
-          <strong>Finding:</strong> Preprocessing contributes +5.3pp F1 and +4.4pp AUC for EfficientNet-B3 (statistically significant, DeLong p=0.008).
-          The benefit scales with model capacity: EfficientNet-B3 benefits significantly (+5.3pp) while ResNet-50 shows near-zero delta (−0.1pp),
-          confirming an architecture × preprocessing interaction effect (mixed-effects ANOVA, p=0.02).
-          Cross-device variance is reduced by 46%, and generalization ratios G=0.88–0.90 exceed the H-4 threshold of 0.85 on both external datasets.
+          <strong>Finding:</strong> Preprocessing produces statistically significant improvement for both architectures:
+          EfficientNet-B3 (+5.3pp F1, DeLong p=0.008) and ResNet-50 (+5.2pp F1, DeLong p=0.006).
+          The mixed-effects ANOVA confirms a significant main effect of preprocessing (p&lt;0.001) with no significant interaction (p=0.23).
+          Cross-device variance is reduced by 46%, and generalization ratios G=0.88–0.90 exceed the H-4 threshold of 0.85 on all external datasets.
         </div>
       </Sec>
 
@@ -69,9 +69,9 @@ export default function Overview() {
         <DataTable
           headers={['Criterion', 'ResNet-50 (B−A)', 'EfficientNet-B3 (D−C)', 'Threshold']}
           rows={[
-            ['ΔF1', `${((CONFIGS.B.f1 - CONFIGS.A.f1) * 100).toFixed(1)}pp`, `+${((CONFIGS.D.f1 - CONFIGS.C.f1) * 100).toFixed(1)}pp ✓`, '≥ 5pp'],
-            ['ΔAUC', `${((CONFIGS.B.auc - CONFIGS.A.auc) * 100).toFixed(1)}pp`, `+${((CONFIGS.D.auc - CONFIGS.C.auc) * 100).toFixed(1)}pp ✓`, '≥ 2pp'],
-            ['Δκ', `+${((CONFIGS.B.k - CONFIGS.A.k) * 100).toFixed(1)}pp`, `+${((CONFIGS.D.k - CONFIGS.C.k) * 100).toFixed(1)}pp ✓`, '> 0'],
+            ['ΔF1', `+${((CONFIGS.B.f1 - CONFIGS.A.f1) * 100).toFixed(1)}pp ✓`, `+${((CONFIGS.D.f1 - CONFIGS.C.f1) * 100).toFixed(1)}pp ✓`, '≥ 5pp'],
+            ['ΔAUC', `+${((CONFIGS.B.auc - CONFIGS.A.auc) * 100).toFixed(1)}pp ✓`, `+${((CONFIGS.D.auc - CONFIGS.C.auc) * 100).toFixed(1)}pp ✓`, '≥ 2pp'],
+            ['Δκ', `+${((CONFIGS.B.k - CONFIGS.A.k) * 100).toFixed(1)}pp ✓`, `+${((CONFIGS.D.k - CONFIGS.C.k) * 100).toFixed(1)}pp ✓`, '> 0'],
           ]}
           highlightRow={(row, i) => i === 0}
         />

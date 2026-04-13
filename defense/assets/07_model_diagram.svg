@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#555"/>
+    </marker>
+    <marker id="arrow-white" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#fff"/>
+    </marker>
+    <linearGradient id="modelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a5276;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#2471a3;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="540" fill="#fafbfc" rx="8"/>
+
+  <!-- Title -->
+  <text x="480" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="#1a1a2e">Ұсынылған біріктірілген модель</text>
+  <text x="480" y="58" text-anchor="middle" font-size="13" fill="#666">Proposed Integrated Model</text>
+
+  <!-- ==================== LEFT: Conventional ==================== -->
+  <text x="240" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#888">Қолданыстағы тәсіл</text>
+  <text x="240" y="108" text-anchor="middle" font-size="11" fill="#aaa">Conventional Approach</text>
+
+  <!-- Preprocessing box (outside model) -->
+  <rect x="60" y="125" width="160" height="50" rx="6" fill="#e8e8e8" stroke="#bbb" stroke-width="1.5"/>
+  <text x="140" y="146" text-anchor="middle" font-size="12" fill="#666">Preprocessing</text>
+  <text x="140" y="162" text-anchor="middle" font-size="10" fill="#999">(сыртқы саты)</text>
+
+  <!-- Arrow -->
+  <line x1="220" y1="150" x2="258" y2="150" stroke="#bbb" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="240" y="142" text-anchor="middle" font-size="9" fill="#aaa">data</text>
+
+  <!-- CNN box (the "model") -->
+  <rect x="262" y="120" width="160" height="60" rx="6" fill="#d5d8dc" stroke="#999" stroke-width="1.5"/>
+  <text x="342" y="147" text-anchor="middle" font-size="12" font-weight="600" fill="#555">CNN</text>
+  <text x="342" y="163" text-anchor="middle" font-size="10" fill="#888">(model)</text>
+
+  <!-- Output arrow -->
+  <line x1="342" y1="180" x2="342" y2="206" stroke="#bbb" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="342" y="222" text-anchor="middle" font-size="11" fill="#888">ŷ</text>
+
+  <!-- X mark — limitations -->
+  <text x="100" y="248" font-size="11" fill="#c0392b">&#x2717; Preprocessing модельден тыс</text>
+  <text x="100" y="266" font-size="11" fill="#c0392b">&#x2717; Feature space бақылаусыз</text>
+  <text x="100" y="284" font-size="11" fill="#c0392b">&#x2717; Domain shift-ке тұрақсыз</text>
+
+  <!-- ==================== RIGHT: Proposed ==================== -->
+  <text x="710" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#1a5276">Ұсынылған тәсіл</text>
+  <text x="710" y="108" text-anchor="middle" font-size="11" fill="#2471a3">Proposed Approach</text>
+
+  <!-- MODEL boundary -->
+  <rect x="520" y="118" width="380" height="116" rx="10" fill="none" stroke="#1a5276" stroke-width="2.5" stroke-dasharray="none"/>
+  <rect x="520" y="118" width="380" height="116" rx="10" fill="#1a5276" fill-opacity="0.04"/>
+  <text x="900" y="136" text-anchor="end" font-size="12" font-weight="700" fill="#1a5276">MODEL</text>
+
+  <!-- V5 Pipeline block -->
+  <rect x="542" y="140" width="165" height="72" rx="8" fill="#2471a3" stroke="#1a5276" stroke-width="1.5"/>
+  <text x="624" y="163" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">V5 Pipeline (P)</text>
+  <text x="624" y="181" text-anchor="middle" font-size="10" fill="#d4e6f1">8 stage, 4ch output</text>
+  <text x="624" y="197" text-anchor="middle" font-size="10" fill="#d4e6f1">512 x 512 x 4</text>
+
+  <!-- Arrow between P and CNN -->
+  <line x1="707" y1="176" x2="742" y2="176" stroke="#1a5276" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- CNN block -->
+  <rect x="746" y="140" width="132" height="72" rx="8" fill="#1a5276"/>
+  <text x="812" y="163" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">CNN (&#952;)</text>
+  <text x="812" y="181" text-anchor="middle" font-size="10" fill="#aed6f1">ResNet-50</text>
+  <text x="812" y="197" text-anchor="middle" font-size="10" fill="#aed6f1">EfficientNet-B3</text>
+
+  <!-- Output arrow from proposed -->
+  <line x1="710" y1="234" x2="710" y2="260" stroke="#1a5276" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Output label -->
+  <rect x="670" y="262" width="80" height="28" rx="14" fill="#1a5276"/>
+  <text x="710" y="281" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">ŷ (DR 0-4)</text>
+
+  <!-- Check marks -->
+  <text x="560" y="312" font-size="11" fill="#1a7a4d">&#x2713; Preprocessing = модельдің компоненті</text>
+  <text x="560" y="330" font-size="11" fill="#1a7a4d">&#x2713; Feature space анықталған</text>
+  <text x="560" y="348" font-size="11" fill="#1a7a4d">&#x2713; Domain shift-ке төзімді</text>
+
+  <!-- ==================== BOTTOM: Formalization + Factorial ==================== -->
+  <!-- Divider -->
+  <line x1="40" y1="370" x2="920" y2="370" stroke="#ddd" stroke-width="1"/>
+
+  <!-- Formalization -->
+  <text x="60" y="400" font-size="14" font-weight="700" fill="#1a1a2e">Формализация:</text>
+  <text x="60" y="425" font-size="15" fill="#1a5276" font-style="italic">&#x177; = CNN&#x3b8;( P(I, s) )</text>
+  <text x="60" y="448" font-size="11" fill="#888">I = raw fundus, s = laterality, P = V5 pipeline</text>
+  <text x="60" y="468" font-size="11" fill="#888">&#x3b8; = learnable CNN parameters</text>
+
+  <!-- Factorial design table -->
+  <text x="480" y="400" font-size="14" font-weight="700" fill="#1a1a2e">2 x 2 факторлық эксперимент:</text>
+
+  <!-- Table grid -->
+  <rect x="480" y="412" width="120" height="30" rx="0" fill="#f0f0f0" stroke="#ddd"/>
+  <rect x="600" y="412" width="140" height="30" rx="0" fill="#e8e8e8" stroke="#ddd"/>
+  <rect x="740" y="412" width="140" height="30" rx="0" fill="#e8e8e8" stroke="#ddd"/>
+
+  <text x="540" y="432" text-anchor="middle" font-size="11" fill="#666"></text>
+  <text x="670" y="432" text-anchor="middle" font-size="11" font-weight="600" fill="#555">Baseline (3ch)</text>
+  <text x="810" y="432" text-anchor="middle" font-size="11" font-weight="600" fill="#1a5276">Full V5 (4ch)</text>
+
+  <!-- Row 1: ResNet-50 -->
+  <rect x="480" y="442" width="120" height="30" rx="0" fill="#f8f8f8" stroke="#ddd"/>
+  <rect x="600" y="442" width="140" height="30" rx="0" fill="#fff" stroke="#ddd"/>
+  <rect x="740" y="442" width="140" height="30" rx="0" fill="#e8f4fd" stroke="#ddd"/>
+
+  <text x="540" y="462" text-anchor="middle" font-size="11" font-weight="600" fill="#555">ResNet-50</text>
+  <text x="670" y="462" text-anchor="middle" font-size="12" fill="#888">A</text>
+  <text x="810" y="462" text-anchor="middle" font-size="12" font-weight="600" fill="#1a5276">B</text>
+
+  <!-- Row 2: EfficientNet-B3 -->
+  <rect x="480" y="472" width="120" height="30" rx="0" fill="#f8f8f8" stroke="#ddd"/>
+  <rect x="600" y="472" width="140" height="30" rx="0" fill="#fff" stroke="#ddd"/>
+  <rect x="740" y="472" width="140" height="30" rx="0" fill="#e8f4fd" stroke="#ddd"/>
+
+  <text x="540" y="492" text-anchor="middle" font-size="11" font-weight="600" fill="#555">EfficientNet-B3</text>
+  <text x="670" y="492" text-anchor="middle" font-size="12" fill="#888">C</text>
+  <text x="810" y="492" text-anchor="middle" font-size="12" font-weight="600" fill="#1a5276">D</text>
+
+  <!-- Dominance arrow -->
+  <text x="480" y="524" font-size="11" fill="#666">Доминанттылық критерийі (EH-3): &#916;F1 &#x2265; 5pp, &#916;AUC &#x2265; 0.02, &#954; &#x2265; 0</text>
+
+</svg>

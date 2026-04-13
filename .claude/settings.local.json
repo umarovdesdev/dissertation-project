@@ -44,7 +44,20 @@
       "Bash(where python3:*)",
       "Bash(py --version)",
       "Bash(python:*)",
-      "Bash(echo \"Exit: $?\")"
+      "Bash(echo \"Exit: $?\")",
+      "Bash(claude config:*)",
+      "Bash(conda env:*)",
+      "Bash(where conda:*)",
+      "Bash(wc -l \"E:/dissertation-project/experiments/logs\"/*.log)",
+      "Bash(node:*)",
+      "Bash(npx react-scripts:*)",
+      "Bash(conda run:*)",
+      "Bash(pip install:*)",
+      "Bash(ls \"E:/dissertation-project/demo/public/results/\"*.png)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -E \"\\\\.\\(py|ipynb\\)$\")"
     ]
   }
 }

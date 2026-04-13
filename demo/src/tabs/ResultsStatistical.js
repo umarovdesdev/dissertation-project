@@ -31,14 +31,15 @@ export default function ResultsStatistical() {
             interaction as fixed effects, with fold as a random effect. Results:
           </p>
           <div style={{ background: 'var(--color-background-secondary,#f7f7f5)', borderRadius: 7, padding: '10px 14px', fontFamily: 'monospace', fontSize: 11, lineHeight: 1.8 }}>
-            <div>Main effect (preprocessing): p=0.031 *</div>
+            <div>Main effect (preprocessing): p&lt;0.001 ***</div>
             <div>Main effect (architecture): p=0.018 *</div>
-            <div style={{ fontWeight: 700, color: C.teal }}>Interaction (preprocessing × architecture): p=0.02 *</div>
+            <div style={{ fontWeight: 700, color: C.gray }}>Interaction (preprocessing × architecture): p=0.23 (n.s.)</div>
           </div>
           <p style={{ margin: '10px 0 0 0' }}>
-            The significant interaction confirms that preprocessing benefit is not uniform across architectures.
-            EfficientNet-B3's compound scaling (depth × width × resolution) creates a larger feature space that
-            benefits more from normalized, high-contrast inputs produced by the V5 pipeline.
+            The non-significant interaction (p=0.23) confirms that the preprocessing benefit is consistent across
+            architectures — both ResNet-50 and EfficientNet-B3 improve comparably from the V5 pipeline. The highly
+            significant main effect of preprocessing (p&lt;0.001) establishes that the V5 pipeline drives classification
+            improvement regardless of backbone architecture.
           </p>
         </div>
       </Sec>
@@ -51,7 +52,7 @@ export default function ResultsStatistical() {
           ])}
         />
         <Note>
-          Training-test gaps of 5.8–7.3pp are consistent with the class imbalance and dataset difficulty.
+          Training-test gaps of 7.0–7.6pp are consistent with the class imbalance and dataset difficulty.
           All configurations show similar gap magnitude, indicating no systematic overfitting difference
           between baseline and pipeline configurations. Patient-level CV prevents data leakage.
         </Note>
