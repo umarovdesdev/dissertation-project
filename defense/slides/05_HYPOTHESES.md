@@ -10,12 +10,12 @@
 |---|----------|--------------------------|-------|
 | H-1 | Preprocessing доминанттылығы | ΔF1 >= 5pp, ΔAUC >= 0.02, Δκ >= 0 (EH-3) | 1 |
 | H-2 | Компонент sensitivity | CLAHE + flat-field параметр-тәуелді оптимумдар | 2 |
-| H-4 | Cross-dataset тасымалдаушылық | G = F1_ext / F1_train >= 0.85 | 3 |
+| H-4 | Cross-dataset жалпыланғыштық | G = F1_ext / F1_train >= 0.85 | 3 |
 | H-5 | Explainability | ALO_V5 > ALO_baseline (4 зақым типі) | 4 |
 | H-7 | Клиникалық деградация төзімділігі | Δ_V5 < Δ_baseline (IDRiD, Messidor-2) | 5 |
 | H-6 | Құрылғы domain shift | F1 stable: Canon, Topcon, Kowa, Zeiss | 6 |
 
-**6 гипотеза, 7 эксперимент, 8 датасет**
+**6 гипотеза, 7 эксперимент, 8 деректер жиыны**
 
 ---
 
