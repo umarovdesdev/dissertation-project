@@ -39,8 +39,8 @@ function StageImage({ stepIndex }) {
           Train only — not applied at inference
         </div>
         <div style={{ fontSize: 11, color: C.purpleT, lineHeight: 1.6 }}>
-          Stage 5 augmentation is applied stochastically during training.<br />
-          At inference, the image passes through Stages 0a–4 only.
+          Stage 6 augmentation is applied stochastically during training.<br />
+          At inference, the image passes through Stages 0–5 only.
         </div>
       </div>
     );

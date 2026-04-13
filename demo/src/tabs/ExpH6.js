@@ -11,7 +11,7 @@ export default function ExpH6() {
           H-6: Device Robustness Hypothesis
         </h2>
         <div style={{ fontSize: 12, color: 'var(--color-text-secondary,#666)' }}>
-          Experiment 6 — Cross-device evaluation on 5 external camera systems
+          Experiment 6 — Cross-device evaluation on external camera systems
         </div>
       </div>
 
@@ -48,7 +48,7 @@ export default function ExpH6() {
         </div>
         <Note>
           H-6 confirmation: the V5 preprocessing pipeline reduces cross-device F1 variance by 46% (0.0052 → 0.0028).
-          Variance computed across 5 external camera groups (excluding EyePACS training domain).
+          Variance computed across 3 external device-shift datasets (DDR, ODIR-5K, RFMiD), excluding EyePACS training domain.
           Smaller variance indicates more consistent diagnostic performance regardless of imaging device —
           a critical requirement for real-world deployment in diverse clinical settings.
         </Note>

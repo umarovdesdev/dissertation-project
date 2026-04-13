@@ -71,12 +71,12 @@ function Overview() {
   );
 }
 
-// ── Section 2: Stage 0a — Canonical Flip ────────────────────────────────────
+// ── Section 2: Stage 0 — Canonical Flip ─────────────────────────────────────
 function Stage0a() {
   return (
-    <Sec title="Stage 0a — Canonical Orientation Flip">
+    <Sec title="Stage 0 — Canonical Orientation Flip">
       <div style={{ marginBottom: 10 }}>
-        <StageTag label="Stage 0a" /><StageTag label="Novel" color="green" />
+        <StageTag label="Stage 0" /><StageTag label="Novel" color="green" />
       </div>
       <p style={{ fontSize: 12, lineHeight: 1.7, margin: '0 0 10px 0' }}>
         Left-eye (OS) images are horizontally flipped to right-eye (OD) orientation so the optic disc
@@ -114,12 +114,12 @@ function Stage0a() {
   );
 }
 
-// ── Section 3: Stage 0b — OD-Fovea Rotation ─────────────────────────────────
+// ── Section 3: Stage 1 — OD-Fovea Rotation ──────────────────────────────────
 function Stage0b() {
   return (
-    <Sec title="Stage 0b — OD-Fovea Rotation Normalization">
+    <Sec title="Stage 1 — OD-Fovea Rotation Normalization">
       <div style={{ marginBottom: 10 }}>
-        <StageTag label="Stage 0b" /><StageTag label="Novel" color="green" />
+        <StageTag label="Stage 1" /><StageTag label="Novel" color="green" />
       </div>
       <p style={{ fontSize: 12, lineHeight: 1.7, margin: '0 0 10px 0' }}>
         Detects the optic disc (brightest region) and fovea (darkest region within annular search zone),
@@ -150,7 +150,7 @@ function Stage0b() {
         <li><strong>Fovea detection:</strong> Gaussian blur (σ=25) → search in annular region 1.5–3.5 OD diameters from OD → darkest point</li>
         <li><strong>Rotation:</strong> <code>cv2.warpAffine</code> with <code>BORDER_REFLECT</code> to align OD→fovea axis horizontally</li>
         <li><strong>Confidence check:</strong> skip rotation if OD radius &lt; 10px or OD–fovea distance ratio outside [1.0, 5.0]; fall back to identity transform</li>
-        <li><strong>Adaptive σ output:</strong> passes rotation uncertainty σ<sub>θ</sub> to Stage 5 augmentation</li>
+        <li><strong>Adaptive σ output:</strong> passes rotation uncertainty σ<sub>θ</sub> to Stage 6 augmentation</li>
       </ol>
 
       <code style={formulaStyle}>
@@ -171,12 +171,12 @@ function Stage0b() {
   );
 }
 
-// ── Section 4: Stage 1 — FOV Crop + Resize ───────────────────────────────────
+// ── Section 4: Stages 2–3 — FOV Crop + Isotropic Resize + FOV Mask ──────────
 function Stage1() {
   return (
-    <Sec title="Stage 1 — FOV Crop + Resize">
+    <Sec title="Stages 2–3 — FOV Crop + Isotropic Resize + FOV Mask">
       <div style={{ marginBottom: 10 }}>
-        <StageTag label="Stage 1" color="gray" /><StageTag label="Standard (in both configs)" color="gray" />
+        <StageTag label="Stages 2–3" /><StageTag label="Novel" color="green" />
       </div>
       <p style={{ fontSize: 12, lineHeight: 1.7, margin: '0 0 10px 0' }}>
         Detects the circular FOV boundary, removes black border regions, and resizes to 512×512. Eliminates
@@ -205,12 +205,12 @@ function Stage1() {
   );
 }
 
-// ── Section 5: Stage 2 — Flat-Field Correction ───────────────────────────────
+// ── Section 5: Stage 4 — Flat-Field Correction ──────────────────────────────
 function Stage2() {
   return (
-    <Sec title="Stage 2 — Flat-Field Correction">
+    <Sec title="Stage 4 — Flat-Field Correction">
       <div style={{ marginBottom: 10 }}>
-        <StageTag label="Stage 2" /><StageTag label="Novel" color="green" />
+        <StageTag label="Stage 4" /><StageTag label="Novel" color="green" />
       </div>
       <p style={{ fontSize: 12, lineHeight: 1.7, margin: '0 0 10px 0' }}>
         Removes low-frequency illumination gradients (brighter centre, darker periphery) introduced by the
@@ -243,12 +243,12 @@ function Stage2() {
   );
 }
 
-// ── Section 6: Stage 3 — Upgraded CLAHE ─────────────────────────────────────
+// ── Section 6: Stage 5 — Upgraded CLAHE ─────────────────────────────────────
 function Stage3() {
   return (
-    <Sec title="Stage 3 — Upgraded CLAHE (Dual-Constraint)">
+    <Sec title="Stage 5 — Upgraded CLAHE (Dual-Constraint)">
       <div style={{ marginBottom: 10 }}>
-        <StageTag label="Stage 3" /><StageTag label="Novel" color="green" />
+        <StageTag label="Stage 5" /><StageTag label="Novel" color="green" />
       </div>
       <p style={{ fontSize: 12, lineHeight: 1.7, margin: '0 0 10px 0' }}>
         Adaptive histogram equalisation on the LAB L-channel with a dual-constraint clip limit and
@@ -319,7 +319,7 @@ function Stage3() {
   );
 }
 
-// ── Section 7: Stage 4 — ImageNet Normalization ──────────────────────────────
+// ── Section 7: Stage 7 — Dataset-Specific Normalization ─────────────────────
 function Stage7() {
   return (
     <Sec title="Stage 7 — Dataset-Specific Normalization → 4ch Tensor">
@@ -344,12 +344,12 @@ function Stage7() {
   );
 }
 
-// ── Section 8: Stage 5 — Augmentation ────────────────────────────────────────
+// ── Section 8: Stage 6 — Augmentation ────────────────────────────────────────
 function Stage5() {
   return (
-    <Sec title="Stage 5 — Integrated Augmentation (Train Only)">
+    <Sec title="Stage 6 — Integrated Augmentation (Train Only)">
       <div style={{ marginBottom: 10 }}>
-        <StageTag label="Stage 5" /><StageTag label="Novel" color="green" />
+        <StageTag label="Stage 6" /><StageTag label="Novel" color="green" />
       </div>
       <p style={{ fontSize: 12, lineHeight: 1.7, margin: '0 0 10px 0' }}>
         Applied only during training — never at inference. Key differences from standard augmentation
@@ -363,7 +363,7 @@ function Stage5() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
         {[
           { aspect: '360° rotation', standard: '±15° (avoids black corners)', ours: 'Full 360° — circular FOV means any rotation is valid. No black corners appear.' },
-          { aspect: 'Rotation magnitude', standard: 'Fixed ±15°', ours: 'Adaptive: σ_θ from Stage 0b confidence. Higher OD/fovea detection uncertainty → larger rotation range.' },
+          { aspect: 'Rotation magnitude', standard: 'Fixed ±15°', ours: 'Adaptive: σ_θ from Stage 1 confidence. Higher OD/fovea detection uncertainty → larger rotation range.' },
           { aspect: 'Colour jitter', standard: 'Random brightness/contrast/saturation', ours: 'PCA colour jitter (à la AlexNet): perturbation along principal colour axes preserves colour correlations.' },
           { aspect: 'Transform pipeline', standard: 'Sequential (multiple interpolations)', ours: 'Composed into single affine matrix — single bilinear interpolation pass. Reduces cumulative resampling artefacts.' },
         ].map((r, i) => (

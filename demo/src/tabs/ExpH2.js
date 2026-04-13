@@ -32,9 +32,9 @@ export default function ExpH2() {
           highlightRow={(row, i) => i === ABL.length - 1}
         />
         <Note>
-          CLAHE (Stage 3) is the largest single-stage contributor (+1.4pp). Consistent with literature:
+          CLAHE (Stage 5) is the largest single-stage contributor (+1.4pp). Consistent with literature:
           contrast enhancement is critical for DR feature visibility in fundus images.
-          Flat-field (Stage 2) and canonical orientation (Stages 0a/0b) each contribute ~1.0pp cumulatively.
+          Flat-field (Stage 4) and canonical orientation (Stages 0/1) each contribute ~1.0pp cumulatively.
           Augmentation shows diminishing returns (+0.6pp) as earlier stages already normalize variability.
         </Note>
       </Sec>

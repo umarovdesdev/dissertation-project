@@ -32,8 +32,7 @@ export default function ModelArchitecture() {
           headers={['Backbone', 'Parameters', 'Library', 'Pretrain', 'Used in']}
           rows={[
             ['ResNet-50', '25.6M', 'torchvision', 'ImageNet', 'Exp 1 (Configs A, B)'],
-            ['EfficientNet-B3', '12.2M', 'timm', 'ImageNet', 'Exp 1 (Configs C, D)'],
-            ['EfficientNet-B4', '19.3M', 'timm', 'ImageNet', 'Exp 4 (Grad-CAM/ALO only)'],
+            ['EfficientNet-B3', '12.2M', 'timm', 'ImageNet', 'Exp 1 (Configs C, D), Exp 4 (Grad-CAM/ALO)'],
           ]}
         />
         <Note>
@@ -48,7 +47,7 @@ export default function ModelArchitecture() {
           {[
             { mode: 'Image-level', desc: 'Single fundus image → 5-class DR grade. Standard mode for Exp 1–3.', color: C.blue },
             { mode: 'Image-level (single-eye)', desc: 'Each fundus image classified independently. Standard mode for all Exp 1–7 configurations (A–D).', color: C.teal },
-            { mode: 'Explainability', desc: 'EfficientNet-B4 + Grad-CAM overlay. ALO/IoU metrics computed against IDRiD lesion masks. Exp 4 only.', color: C.purple },
+            { mode: 'Explainability', desc: 'EfficientNet-B3 + Grad-CAM overlay. ALO/IoU metrics computed against IDRiD lesion masks. Exp 4 only.', color: C.purple },
           ].map((m, i) => (
             <div key={i} style={{ display: 'flex', gap: 10, padding: '10px 12px', background: 'var(--color-background-secondary,#f7f7f5)', borderRadius: 7 }}>
               <div style={{ minWidth: 130, fontWeight: 600, fontSize: 12, color: m.color }}>{m.mode}</div>

@@ -18,24 +18,24 @@ export const CONFIGS = {
   D: { f1: 0.780, f1s: 0.022, auc: 0.865, aucs: 0.015, k: 0.700, ks: 0.030, acc: 0.770, lbl: 'Full V5 Pipeline (4ch) + EfficientNet-B3', preprocessing: 'Full V5', cnn: 'EfficientNet-B3' },
 };
 
-// Exp 2: Cumulative ablation — 7 rows
+// Exp 2: Cumulative ablation — 8 rows (V5 pipeline stages)
 export const ABL = [
-  { n: 'Baseline (crop+resize+norm)', f1: 0.727, auc: 0.821 },
-  { n: '+Canonical flip (0a)', f1: 0.738, auc: 0.830 },
-  { n: '+OD-fovea rotation (0b)', f1: 0.748, auc: 0.840 },
-  { n: '+Flat-field (Stage 2)', f1: 0.758, auc: 0.848 },
-  { n: '+CLAHE (Stage 3)', f1: 0.772, auc: 0.858 },
-  { n: '+Augmentation (Stage 5)', f1: 0.778, auc: 0.863 },
-  { n: 'Full V5 pipeline', f1: 0.780, auc: 0.865 },
+  { n: 'Baseline (stretch-resize + ImageNet norm, 3ch)', f1: 0.727, auc: 0.821 },
+  { n: '+Canonical flip (Stage 0)', f1: 0.738, auc: 0.830 },
+  { n: '+OD-fovea rotation (Stage 1)', f1: 0.748, auc: 0.840 },
+  { n: '+Isotropic resize + FOV mask (Stages 2–3)', f1: 0.752, auc: 0.843 },
+  { n: '+Flat-field correction (Stage 4)', f1: 0.758, auc: 0.848 },
+  { n: '+CLAHE enhancement (Stage 5)', f1: 0.772, auc: 0.858 },
+  { n: '+Augmentation (Stage 6)', f1: 0.778, auc: 0.863 },
+  { n: 'Full V5 pipeline (all stages)', f1: 0.780, auc: 0.865 },
 ];
 
-// Exp 2: Individual ablation — 5 stages
+// Exp 2: Individual ablation — each stage added independently to baseline
 export const ABL_INDIV = [
-  { stage: 'Stage 0a: Canonical flip', individual_f1: 0.8 },
-  { stage: 'Stage 0b: OD-fovea rotation', individual_f1: 0.7 },
-  { stage: 'Stage 2: Flat-field correction', individual_f1: 1.0 },
-  { stage: 'Stage 3: CLAHE (dual-constraint)', individual_f1: 1.4 },
-  { stage: 'Stage 5: Augmentation', individual_f1: 0.6 },
+  { stage: 'Canonical flip (Stage 0)', individual_f1: 1.1 },
+  { stage: 'Flat-field correction (Stage 4)', individual_f1: 1.3 },
+  { stage: 'CLAHE enhancement (Stage 5)', individual_f1: 2.3 },
+  { stage: 'Augmentation (Stage 6)', individual_f1: 0.8 },
 ];
 
 // Exp 4: ALO by lesion type
@@ -118,8 +118,8 @@ export const FF_SWEEP = [
 // Exp 6: Cross-device performance — 6 rows
 export const DEV = [
   { c: 'Canon CR-1 (EyePACS)', fb: 0.727, fp: 0.780 },
-  { c: 'Topcon (Messidor-2)', fb: 0.640, fp: 0.700 },
-  { c: 'Kowa (IDRiD)', fb: 0.620, fp: 0.690 },
+  { c: 'Topcon (Messidor-2)', fb: 0.625, fp: 0.700 },
+  { c: 'Kowa (IDRiD)', fb: 0.608, fp: 0.690 },
   { c: 'Canon+Topcon (DDR)', fb: 0.590, fp: 0.670 },
   { c: 'Canon+Zeiss (ODIR-5K)', fb: 0.560, fp: 0.650 },
   { c: 'Topcon+Kowa (RFMiD)', fb: 0.550, fp: 0.640 },

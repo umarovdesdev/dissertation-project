@@ -48,7 +48,7 @@ export default function ValComputational() {
           V5 pipeline processes one 3888×2592 fundus image in ~27ms (RTX 3060, batch mode).
           Sequential stages: canonical flip (1ms), OD-fovea detection/rotation (12ms), FOV crop + resize (5ms),
           flat-field Gaussian filter (4ms), CLAHE (3ms), normalization (2ms).
-          The OD-fovea rotation step (Stage 0b) dominates preprocessing time due to optic disc detection.
+          The OD-fovea rotation step (Stage 1) dominates preprocessing time due to optic disc detection.
         </Note>
       </Sec>
     </div>

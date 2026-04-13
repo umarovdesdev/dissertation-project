@@ -21,8 +21,8 @@ export default function ModelExplainability() {
           </p>
         </div>
         <Note>
-          EfficientNet-B4 is used exclusively for Exp 4 (explainability). The larger receptive field relative
-          to B3 produces more spatially precise Grad-CAM activations, enabling more accurate ALO/IoU computation.
+          EfficientNet-B3 is used for Exp 4 (explainability), consistent with Exp 1 Config D.
+          Grad-CAM applied to the final convolutional layer on IDRiD images with pixel-level lesion masks.
         </Note>
       </Sec>
 

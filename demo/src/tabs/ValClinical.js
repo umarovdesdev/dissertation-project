@@ -67,7 +67,7 @@ export default function ValClinical() {
           ])}
         />
         <Note>
-          Gaps of 5.8–7.3pp are consistent across configurations, indicating no systematic overfitting.
+          Gaps of 7.0–7.6pp are consistent across configurations, indicating no systematic overfitting.
           Patient-level 5-fold CV prevents data leakage through bilateral correlation.
         </Note>
       </Sec>

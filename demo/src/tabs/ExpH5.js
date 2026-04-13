@@ -11,7 +11,7 @@ export default function ExpH5() {
           H-5: Explainability (ALO) Hypothesis
         </h2>
         <div style={{ fontSize: 12, color: 'var(--color-text-secondary,#666)' }}>
-          Experiment 4 — Grad-CAM attention analysis with EfficientNet-B4 on IDRiD lesion masks
+          Experiment 4 — Grad-CAM attention analysis with EfficientNet-B3 on IDRiD lesion masks
         </div>
       </div>
 

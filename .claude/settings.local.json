@@ -57,7 +57,10 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(xargs grep:*)",
-      "Bash(grep -E \"\\\\.\\(py|ipynb\\)$\")"
+      "Bash(grep -E \"\\\\.\\(py|ipynb\\)$\")",
+      "Bash(git -C \"E:/dissertation-project\" log --oneline --all -- demo/)",
+      "Bash(git -C \"E:/dissertation-project\" log --format=\"%h %ad %s\" --date=short -- demo/)",
+      "Bash(git:*)"
     ]
   }
 }

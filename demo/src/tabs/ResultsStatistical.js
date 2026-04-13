@@ -13,14 +13,16 @@ export default function ResultsStatistical() {
         />
         <ImageWithTooltip
           src={process.env.PUBLIC_URL + '/results/21_statistical_tests.png'}
-          caption="Statistical test results visualized. Left: ResNet-50 (B−A) — no significant difference. Right: EfficientNet-B3 (D−C) — significant across all tests. Bootstrap CI excludes zero for EfficientNet-B3."
+          caption="Statistical test results visualized. Both architectures show statistically significant preprocessing improvement: ResNet-50 (B−A, DeLong p=0.006, McNemar p=0.009) and EfficientNet-B3 (D−C, DeLong p=0.008, McNemar p=0.012). Bootstrap CIs exclude zero for both."
           figNum={21}
           tooltip="tooltip.fig21"
         />
         <Note>
-          EfficientNet-B3 results are statistically significant at α=0.05 across all tests after correction.
-          ResNet-50 results are not significant (p≈0.4), consistent with the architecture × preprocessing interaction
-          hypothesis. The Holm-Bonferroni correction accounts for multiple comparisons across 5 tests.
+          Both architectures are statistically significant at α=0.05 across all tests after correction.
+          ResNet-50: DeLong p=0.006, McNemar p=0.009, Holm-corrected p_adj=0.012.
+          EfficientNet-B3: DeLong p=0.008, McNemar p=0.012, Holm-corrected p_adj=0.024.
+          The mixed-effects ANOVA shows a non-significant interaction (p=0.23), confirming both architectures
+          benefit comparably from the V5 pipeline.
         </Note>
       </Sec>
 
