@@ -6,7 +6,7 @@
 **Date:** 2026-04-12  
 **Version:** 5.0  
 **Governance:** INVARIANTS v5.0 | HYPOTHESIS v5.0 | RESEARCH_ARCHITECTURE v5.0  
-**Pipeline:** V5 8-stage preprocessing (isotropic resize + FOV mask + adaptive flat-field + dataset-specific normalization)
+**Pipeline:** 8-stage preprocessing (isotropic resize + FOV mask + adaptive flat-field + dataset-specific normalization)
 
 ---
 
@@ -14,7 +14,7 @@
 
 This document is the **single canonical numerical reference** for all experimental results. All deliverables (chapters, presentations, dashboards, demo repositories) must cite these exact numbers. Any deviation requires updating this document first.
 
-This document records the results for all active dissertation experiments (V5 Experiments 1–7). It serves two purposes: (a) providing presentation-ready charts and numerical values for the committee defense, and (b) establishing a single canonical set of numerical values that all future deliverables must reference to prevent numerical inconsistencies.
+This document records the results for all active dissertation experiments (Experiments 1–7). It serves two purposes: (a) providing presentation-ready charts and numerical values for the committee defense, and (b) establishing a single canonical set of numerical values that all future deliverables must reference to prevent numerical inconsistencies.
 
 ---
 
@@ -29,7 +29,7 @@ This stage produced 28 presentation-quality PNG charts (200 DPI) and one interac
 | 01 | `01_exp1_factorial_f1.png` | Exp 1 | 2×2 factorial weighted F1 with error bars |
 | 02 | `02_exp1_all_metrics.png` | Exp 1 | All 4 primary metrics (F1, AUC, κ, Acc) by configuration |
 | 03 | `03_exp1_delta.png` | Exp 1 | Preprocessing improvement Δ, ResNet-50 vs EfficientNet-B3 |
-| 04 | `04_exp2_ablation.png` | Exp 2 | Cumulative ablation — V5 pipeline stages |
+| 04 | `04_exp2_ablation.png` | Exp 2 | Cumulative ablation — pipeline stages |
 | 05 | `05_exp2_per_stage.png` | Exp 2 | Per-stage marginal contribution to F1 |
 | 06 | `06_exp4_alo.png` | Exp 4 | ALO by lesion type, baseline vs preprocessed |
 | 07 | `07_exp4_iou.png` | Exp 4 | IoU by lesion type, baseline vs preprocessed |
@@ -77,9 +77,9 @@ All values below constitute the binding numerical reference for this dissertatio
 | Config | Preprocessing | CNN | W. F1 | ROC-AUC | Cohen κ | Accuracy |
 |--------|--------------|-----|-------|---------|---------|----------|
 | A | Baseline (3ch, stretch-resize + ImageNet norm) | ResNet-50 | 0.724 ± 0.011 | 0.830 ± 0.014 | 0.618 ± 0.035 | 0.717 |
-| B | Full V5 pipeline (4ch) | ResNet-50 | 0.776 ± 0.009 | 0.863 ± 0.011 | 0.698 ± 0.026 | 0.768 |
+| B | Full pipeline (4ch) | ResNet-50 | 0.776 ± 0.009 | 0.863 ± 0.011 | 0.698 ± 0.026 | 0.768 |
 | C | Baseline (3ch, stretch-resize + ImageNet norm) | EfficientNet-B3 | 0.727 ± 0.033 | 0.821 ± 0.019 | 0.620 ± 0.067 | 0.719 |
-| D | Full V5 pipeline (4ch) | EfficientNet-B3 | 0.780 ± 0.022 | 0.865 ± 0.015 | 0.700 ± 0.030 | 0.770 |
+| D | Full pipeline (4ch) | EfficientNet-B3 | 0.780 ± 0.022 | 0.865 ± 0.015 | 0.700 ± 0.030 | 0.770 |
 
 **EH-3 Dominance Criterion (threshold: ΔF1 ≥ 5pp, ΔAUC ≥ 2pp, Δκ > 0):**
 
@@ -88,7 +88,7 @@ All values below constitute the binding numerical reference for this dissertatio
 | ResNet-50: B − A | +5.2 | +3.3 | +8.0 | **YES** |
 | EfficientNet-B3: D − C | +5.3 | +4.4 | +8.0 | **YES** |
 
-**H-1 confirmed.** EH-3 dominance is satisfied independently for both architectures: ResNet-50 (ΔF1=+5.2pp, ΔAUC=+3.3pp, Δκ=+8.0pp; DeLong p=0.006, McNemar p=0.009) and EfficientNet-B3 (ΔF1=+5.3pp, ΔAUC=+4.4pp, Δκ=+8.0pp; DeLong p=0.008, McNemar p=0.012). The preprocessing effect is robust across architectures — the mixed-effects ANOVA shows a significant main effect of preprocessing (p<0.001) with a non-significant interaction term (p=0.23), confirming that both ResNet-50 and EfficientNet-B3 benefit comparably from the V5 pipeline (see §3.13). Config D (EfficientNet-B3 + V5 pipeline) achieves the highest absolute performance (F1=0.780), while ResNet-50 shows a comparable improvement trajectory from a slightly lower baseline.
+**H-1 confirmed.** EH-3 dominance is satisfied independently for both architectures: ResNet-50 (ΔF1=+5.2pp, ΔAUC=+3.3pp, Δκ=+8.0pp; DeLong p=0.006, McNemar p=0.009) and EfficientNet-B3 (ΔF1=+5.3pp, ΔAUC=+4.4pp, Δκ=+8.0pp; DeLong p=0.008, McNemar p=0.012). The preprocessing effect is robust across architectures — the mixed-effects ANOVA shows a significant main effect of preprocessing (p<0.001) with a non-significant interaction term (p=0.23), confirming that both ResNet-50 and EfficientNet-B3 benefit comparably from the pipeline (see §3.13). Config D (EfficientNet-B3 + pipeline) achieves the highest absolute performance (F1=0.780), while ResNet-50 shows a comparable improvement trajectory from a slightly lower baseline.
 
 **Training–test gap (overfitting check, threshold 15pp per RESEARCH_ARCHITECTURE §6.2):**
 
@@ -114,7 +114,7 @@ All configurations remain well within the 15pp overfitting threshold, indicating
 | 4 | + Flat-field correction (Stage 4) | 0.758 | 0.848 | 0.665 | +0.6 |
 | 5 | + CLAHE enhancement (Stage 5) | 0.772 | 0.858 | 0.690 | +1.4 |
 | 6 | + Augmentation (Stage 6) | 0.778 | 0.863 | 0.698 | +0.6 |
-| 7 | Full V5 pipeline (all stages) | 0.780 | 0.865 | 0.700 | +0.2 |
+| 7 | Full pipeline (all stages) | 0.780 | 0.865 | 0.700 | +0.2 |
 
 **Individual ablation (each stage added to baseline independently, per RESEARCH_ARCHITECTURE §5.2):**
 
@@ -125,7 +125,7 @@ All configurations remain well within the 15pp overfitting threshold, indicating
 | Baseline + flat-field | Stage 0–1 + flat-field (Stage 4) + ImageNet norm | 0.740 | +1.3 |
 | Baseline + CLAHE | Stage 0–1 + CLAHE (Stage 5) + ImageNet norm | 0.750 | +2.3 |
 | Baseline + augmentation | Stage 0–1 + augmentation (Stage 6) + ImageNet norm | 0.735 | +0.8 |
-| Full V5 pipeline | all | 0.780 | +5.3 |
+| Full pipeline | all | 0.780 | +5.3 |
 
 The sum of individual Δ = 1.1+1.3+2.3+0.8 = 5.5pp, but the actual total Δ = 5.3pp. This indicates mild interaction between stages (components are not fully additive). CLAHE benefits more when applied to flat-field-corrected images than to raw images, and augmentation yields diminishing returns when applied to already-standardized inputs.
 
@@ -196,9 +196,9 @@ Pipeline models show 33% higher attention consistency across datasets, indicatin
 | Config | Preprocessing | CNN | EyePACS F1 | APTOS F1 | G |
 |--------|--------------|-----|------------|----------|---|
 | A | Baseline (3ch) | ResNet-50 | 0.724 | 0.588 ± 0.027 | 0.812 |
-| B | Full V5 (4ch) | ResNet-50 | 0.776 | 0.668 ± 0.022 | 0.861 |
+| B | Pipeline (4ch) | ResNet-50 | 0.776 | 0.668 ± 0.022 | 0.861 |
 | C | Baseline (3ch) | EfficientNet-B3 | 0.727 | 0.596 ± 0.028 | 0.820 |
-| D | Full V5 (4ch) | EfficientNet-B3 | 0.780 | 0.694 ± 0.024 | 0.890 |
+| D | Pipeline (4ch) | EfficientNet-B3 | 0.780 | 0.694 ± 0.024 | 0.890 |
 
 **Generalization Ratio G = F1_APTOS / F1_EyePACS (H-4 criterion: G ≥ 0.85):**
 
@@ -209,7 +209,7 @@ Pipeline models show 33% higher attention consistency across datasets, indicatin
 | C (baseline + EfficientNet-B3) | 0.820 | NO |
 | D (pipeline + EfficientNet-B3) | 0.890 | **YES** ✓ |
 
-Both pipeline configurations (B and D) achieve G ≥ 0.85, while both baseline configurations fall short. The V5 preprocessing pipeline enables cross-dataset transfer by standardizing domain-specific variability between EyePACS (single Canon camera, US population) and APTOS 2019 (mixed cameras, Indian population). EfficientNet-B3 shows a larger improvement in G (+7.0pp) compared to ResNet-50 (+4.9pp), though both pipeline configurations satisfy the H-4 criterion, consistent with the robust preprocessing benefit across architectures observed in Experiment 1.
+Both pipeline configurations (B and D) achieve G ≥ 0.85, while both baseline configurations fall short. The preprocessing pipeline enables cross-dataset transfer by standardizing domain-specific variability between EyePACS (single Canon camera, US population) and APTOS 2019 (mixed cameras, Indian population). EfficientNet-B3 shows a larger improvement in G (+7.0pp) compared to ResNet-50 (+4.9pp), though both pipeline configurations satisfy the H-4 criterion, consistent with the robust preprocessing benefit across architectures observed in Experiment 1.
 
 **Additional APTOS 2019 metrics (Config D — best model):**
 
@@ -221,7 +221,7 @@ Both pipeline configurations (B and D) achieve G ≥ 0.85, while both baseline c
 
 ### 3.5 Experiment 5 — Clinical Degradation Resistance (H-7)
 
-**Setup:** Models trained on EyePACS with full V5 pipeline (Config D) vs baseline (Config C), evaluated on IDRiD (Kowa camera, Indian population) and Messidor-2 (Topcon camera, French population) without retraining. Measures clinical degradation: Δ = F1_EyePACS_val − F1_external.
+**Setup:** Models trained on EyePACS with full pipeline (Config D) vs baseline (Config C), evaluated on IDRiD (Kowa camera, Indian population) and Messidor-2 (Topcon camera, French population) without retraining. Measures clinical degradation: Δ = F1_EyePACS_val − F1_external.
 
 **Within-architecture comparison (EfficientNet-B3, isolating preprocessing effect):**
 
@@ -238,7 +238,7 @@ Both pipeline configurations (B and D) achieve G ≥ 0.85, while both baseline c
 | IDRiD | 11.9 | 9.0 | 2.9 | 24% |
 | Messidor-2 | 10.2 | 8.0 | 2.2 | 22% |
 
-H-7 confirmed: the V5 pipeline reduces cross-dataset performance degradation on both external datasets. The preprocessing pipeline standardizes retinal image appearance, narrowing the domain gap between the training distribution (EyePACS, Canon CR-1) and external clinical datasets acquired with different cameras (IDRiD: Kowa; Messidor-2: Topcon).
+H-7 confirmed: the pipeline reduces cross-dataset performance degradation on both external datasets. The preprocessing pipeline standardizes retinal image appearance, narrowing the domain gap between the training distribution (EyePACS, Canon CR-1) and external clinical datasets acquired with different cameras (IDRiD: Kowa; Messidor-2: Topcon).
 
 **AUC on external datasets:**
 
@@ -270,15 +270,15 @@ The pipeline reduces cross-device F1 variance by 46%, demonstrating that preproc
 
 ### 3.7 Experiment 7 — Small Data Clinical Training
 
-**Setup:** Train on IDRiD (516 images), 5-fold cross-validation. Evaluate on Clinical dataset (60 images) held out entirely. Both baseline and full V5 preprocessing tested. Bootstrap CI (1,000 resamples) applied given small dataset sizes.
+**Setup:** Train on IDRiD (516 images), 5-fold cross-validation. Evaluate on Clinical dataset (60 images) held out entirely. Both baseline and full pipeline preprocessing tested. Bootstrap CI (1,000 resamples) applied given small dataset sizes.
 
 | Condition | IDRiD CV F1 (mean ± std) | Clinical Test F1 | Clinical Test AUC |
 |-----------|--------------------------|-----------------|-------------------|
 | Baseline (3ch) | 0.585 ± 0.038 | 0.515 ± 0.045 | 0.742 ± 0.038 |
-| Full V5 (4ch) | 0.652 ± 0.031 | 0.608 ± 0.040 | 0.812 ± 0.032 |
+| Pipeline (4ch) | 0.652 ± 0.031 | 0.608 ± 0.040 | 0.812 ± 0.032 |
 | Δ (Pipeline − Baseline) | +6.7pp | +9.3pp | +7.0pp |
 
-The V5 preprocessing pipeline provides a proportionally larger benefit in the small-data regime: the +9.3pp improvement on the Clinical test set exceeds the +5.3pp improvement observed on EyePACS (Experiment 1). When training data is scarce, the preprocessing pipeline's domain standardization compensates for the limited diversity in the training distribution, reducing the model's sensitivity to device-specific artifacts and illumination variability. The IDRiD-to-Clinical transfer represents a genuine cross-institutional evaluation: IDRiD (Kowa camera, Indian population) → Clinical (Kazakh population).
+The preprocessing pipeline provides a proportionally larger benefit in the small-data regime: the +9.3pp improvement on the Clinical test set exceeds the +5.3pp improvement observed on EyePACS (Experiment 1). When training data is scarce, the preprocessing pipeline's domain standardization compensates for the limited diversity in the training distribution, reducing the model's sensitivity to device-specific artifacts and illumination variability. The IDRiD-to-Clinical transfer represents a genuine cross-institutional evaluation: IDRiD (Kowa camera, Indian population) → Clinical (Kazakh population).
 
 ### 3.8 Clinical screening metrics (Referable DR, Grade ≥ 2)
 
@@ -359,7 +359,7 @@ Approximate per-fold validation set sizes from 100% EyePACS (~35,126 total, 5-fo
 | Paired t-test (Δ_pipeline < Δ_baseline, IDRiD, across folds) | p = 0.031 ✓ |
 | Paired t-test (Δ_pipeline < Δ_baseline, Messidor-2, across folds) | p = 0.044 ✓ |
 
-The mixed-effects ANOVA shows a significant main effect of preprocessing (p<0.001) but a non-significant interaction term (p=0.23), indicating that both architectures benefit comparably from the V5 pipeline. While EfficientNet-B3 shows a marginally larger improvement (+5.3pp vs +5.2pp in ΔF1), this difference is not statistically significant.
+The mixed-effects ANOVA shows a significant main effect of preprocessing (p<0.001) but a non-significant interaction term (p=0.23), indicating that both architectures benefit comparably from the pipeline. While EfficientNet-B3 shows a marginally larger improvement (+5.3pp vs +5.2pp in ΔF1), this difference is not statistically significant.
 
 ### 3.14 Per-class ROC-AUC
 
@@ -387,19 +387,19 @@ The mixed-effects ANOVA shows a significant main effect of preprocessing (p<0.00
 
 ### Figure 01: Experiment 1 — 2×2 Factorial Weighted F1
 
-Bar chart showing weighted F1-score (mean ± standard deviation) for the four factorial configurations A through D. Gray bars represent baseline preprocessing (Configs A and C), blue bar represents the full V5 pipeline with ResNet-50 (Config B), and teal bar represents the full V5 pipeline with EfficientNet-B3 (Config D). Error bars show standard deviation across 5 folds. Red dashed lines at +5pp above each baseline indicate the respective EH-3 thresholds. Both pipeline configurations (B and D) clearly exceed their architecture-specific thresholds, visually confirming that the V5 preprocessing pipeline produces statistically significant improvement regardless of backbone architecture.
+Bar chart showing weighted F1-score (mean ± standard deviation) for the four factorial configurations A through D. Gray bars represent baseline preprocessing (Configs A and C), blue bar represents the full pipeline with ResNet-50 (Config B), and teal bar represents the full pipeline with EfficientNet-B3 (Config D). Error bars show standard deviation across 5 folds. Red dashed lines at +5pp above each baseline indicate the respective EH-3 thresholds. Both pipeline configurations (B and D) clearly exceed their architecture-specific thresholds, visually confirming that the preprocessing pipeline produces statistically significant improvement regardless of backbone architecture.
 
 ### Figure 02: Experiment 1 — All Primary Metrics by Configuration
 
 Four-panel bar chart displaying all four primary metrics (Weighted F1, ROC-AUC, Cohen's kappa, Accuracy) side by side for configurations A through D. Each panel uses the same gray/blue/gray/teal color scheme to maintain visual consistency with Figure 01. Error bars represent standard deviation across 5 folds. Config D outperforms all other configurations on every metric. The ROC-AUC panel shows the widest gap between C and D (0.821 vs 0.865), while Cohen's kappa shows the most dramatic improvement (0.620 vs 0.700).
 
-### Figure 03: Experiment 1 — Preprocessing Effect (Δ V5 Pipeline vs Baseline)
+### Figure 03: Experiment 1 — Preprocessing Effect (Δ Pipeline vs Baseline)
 
 Grouped bar chart showing the preprocessing improvement in percentage points for ResNet-50 (B−A) and EfficientNet-B3 (D−C) across three metrics: ΔF1, ΔAUC, and Δκ. A red dashed line at 5pp marks the EH-3 threshold for ΔF1. Both architectures show substantial positive improvement across all metrics, with bars exceeding all EH-3 thresholds. ResNet-50 improvement (+5.2pp F1) and EfficientNet-B3 improvement (+5.3pp F1) are closely matched, confirming architecture-independent preprocessing dominance. This chart is the definitive visualization for the EH-3 dominance argument.
 
 ### Figure 04: Experiment 2 — Cumulative Ablation
 
-Ascending bar chart showing weighted F1-score as each V5 pipeline stage is cumulatively added, starting from the baseline (0.727) through the full pipeline (0.780). The baseline bar is gray, intermediate stages are blue, and the full pipeline bar is teal. Red annotations above each bar show the marginal improvement. The monotonically increasing sequence demonstrates that every pipeline stage contributes positively to classification performance, with no stage causing degradation.
+Ascending bar chart showing weighted F1-score as each pipeline stage is cumulatively added, starting from the baseline (0.727) through the full pipeline (0.780). The baseline bar is gray, intermediate stages are blue, and the full pipeline bar is teal. Red annotations above each bar show the marginal improvement. The monotonically increasing sequence demonstrates that every pipeline stage contributes positively to classification performance, with no stage causing degradation.
 
 ### Figure 05: Experiment 2 — Per-Stage Marginal Contribution
 
@@ -407,11 +407,11 @@ Horizontal bar chart showing the marginal ΔF1 contribution (in percentage point
 
 ### Figure 06: Experiment 4 — ALO by Lesion Type
 
-Grouped bar chart comparing Attention-Lesion Overlap (ALO) between baseline (gray) and full V5 pipeline (teal) across four lesion types: microaneurysms, hemorrhages, hard exudates, and soft exudates. Red annotations show relative improvement percentages (+61%, +48%, +31%, +47%). Hard exudates show the highest absolute ALO (0.72 with pipeline) while microaneurysms show the lowest (0.45). This figure is the primary evidence for H-5, demonstrating that preprocessing directs CNN attention toward clinically relevant structures.
+Grouped bar chart comparing Attention-Lesion Overlap (ALO) between baseline (gray) and full pipeline (teal) across four lesion types: microaneurysms, hemorrhages, hard exudates, and soft exudates. Red annotations show relative improvement percentages (+61%, +48%, +31%, +47%). Hard exudates show the highest absolute ALO (0.72 with pipeline) while microaneurysms show the lowest (0.45). This figure is the primary evidence for H-5, demonstrating that preprocessing directs CNN attention toward clinically relevant structures.
 
 ### Figure 07: Experiment 4 — IoU by Lesion Type
 
-Grouped bar chart comparing Intersection-over-Union (IoU) between baseline (gray) and full V5 pipeline (purple) across four lesion types. IoU values are uniformly lower than ALO values because IoU penalizes both missed lesion area and excessive activation outside lesion boundaries. The pattern mirrors ALO: hard exudates highest, microaneurysms lowest. Pipeline improves IoU by 50–83% across lesion types.
+Grouped bar chart comparing Intersection-over-Union (IoU) between baseline (gray) and full pipeline (purple) across four lesion types. IoU values are uniformly lower than ALO values because IoU penalizes both missed lesion area and excessive activation outside lesion boundaries. The pattern mirrors ALO: hard exudates highest, microaneurysms lowest. Pipeline improves IoU by 50–83% across lesion types.
 
 ### Figure 08: Cross-Dataset Generalization — F1 and AUC
 
@@ -427,7 +427,7 @@ Grouped bar chart showing weighted F1 across six camera configurations, from the
 
 ### Figure 11: Summary Radar Chart
 
-Six-axis radar chart comparing baseline (gray area) and full V5 pipeline (teal area) across six dimensions: Weighted F1, ROC-AUC, Cohen's κ, Generalization (G ratio), ALO (Explainability), and Device Robustness. The pipeline polygon uniformly encloses the baseline polygon on all axes, providing a single visual summary of the dissertation's experimental evidence.
+Six-axis radar chart comparing baseline (gray area) and full pipeline (teal area) across six dimensions: Weighted F1, ROC-AUC, Cohen's κ, Generalization (G ratio), ALO (Explainability), and Device Robustness. The pipeline polygon uniformly encloses the baseline polygon on all axes, providing a single visual summary of the dissertation's experimental evidence.
 
 ### Figure 12: EH-3 Dominance Criterion Check
 
@@ -471,7 +471,7 @@ Grouped bar chart showing p-values (DeLong test, McNemar test) and bootstrap 95%
 
 ### Figure 22: All 4 Configs A–D
 
-Bar chart showing all 4 factorial configurations A through D. Demonstrates that both architectures benefit substantially from the V5 pipeline: ResNet-50 improves from 0.724 to 0.776 (+5.2pp) and EfficientNet-B3 from 0.727 to 0.780 (+5.3pp). Config D (EfficientNet-B3 + V5) achieves the highest absolute F1.
+Bar chart showing all 4 factorial configurations A through D. Demonstrates that both architectures benefit substantially from the pipeline: ResNet-50 improves from 0.724 to 0.776 (+5.2pp) and EfficientNet-B3 from 0.727 to 0.780 (+5.3pp). Config D (EfficientNet-B3 + Pipeline) achieves the highest absolute F1.
 
 ### Figure 23: Individual Ablation
 
@@ -483,11 +483,11 @@ Dual-panel per-class ROC curves for Config C (baseline) and Config D (pipeline).
 
 ### Figure 25: Pipeline Stages — Real Image
 
-Grid showing actual EyePACS fundus photograph (patient 43199, right eye, DR Grade 4) processed through each V5 pipeline stage: Raw input → Stage 0 (canonical flip) → Stage 2 (FOV crop + isotropic resize to 512×512 with centered zero-padding) → Stage 4 (adaptive flat-field correction, σ=0.07·D) → Stage 5 (CLAHE — dramatic contrast enhancement, hemorrhages and exudates become clearly visible) → Stage 7 (dataset-specific normalization + FOV mask append as channel 4).
+Grid showing actual EyePACS fundus photograph (patient 43199, right eye, DR Grade 4) processed through each pipeline stage: Raw input → Stage 0 (canonical flip) → Stage 2 (FOV crop + isotropic resize to 512×512 with centered zero-padding) → Stage 4 (adaptive flat-field correction, σ=0.07·D) → Stage 5 (CLAHE — dramatic contrast enhancement, hemorrhages and exudates become clearly visible) → Stage 7 (dataset-specific normalization + FOV mask append as channel 4).
 
 ### Figure 26: Bilateral Pair
 
-2×3 grid showing both eyes of patient 43199 (DR4). Top row: right eye (OD) — raw, cropped, full V5 pipeline. Bottom row: left eye (OS) — raw, flipped to OD orientation + cropped, full V5 pipeline. After canonical flip (Stage 0), both eyes have optic disc on the right side.
+2×3 grid showing both eyes of patient 43199 (DR4). Top row: right eye (OD) — raw, cropped, full pipeline. Bottom row: left eye (OS) — raw, flipped to OD orientation + cropped, full pipeline. After canonical flip (Stage 0), both eyes have optic disc on the right side.
 
 ### Figure 27: Grad-CAM Overlay
 

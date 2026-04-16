@@ -33,7 +33,7 @@ export default function ExpH6() {
           ])}
           highlightRow={(row, i) => i === 0}
         />
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/10_exp6_device_shift.png'} caption="Cross-device F1 across 6 camera systems. Pipeline (orange) consistently outperforms baseline (gray). Largest improvement on most distant cameras: ODIR-5K (+9pp), RFMiD (+9pp)." figNum={10} tooltip="tooltip.fig10" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp6/10_exp6_device_shift.png'} caption="Cross-device F1 across 6 camera systems. Pipeline (orange) consistently outperforms baseline (gray). Largest improvement on most distant cameras: ODIR-5K (+9pp), RFMiD (+9pp)." figNum={10} tooltip="tooltip.fig10" />
         <Note>
           Models trained exclusively on Canon CR-1 (EyePACS) evaluated on 5 external camera systems without retraining.
           Preprocessing pipeline reduces device-specific artifacts (vignetting, illumination gradients, color cast),
@@ -47,7 +47,7 @@ export default function ExpH6() {
           <Card label="Variance (Pipeline)" value="0.0028" color="green" delta="−46% ✓" sub="σ² across camera groups" />
         </div>
         <Note>
-          H-6 confirmation: the V5 preprocessing pipeline reduces cross-device F1 variance by 46% (0.0052 → 0.0028).
+          H-6 confirmation: the preprocessing pipeline reduces cross-device F1 variance by 46% (0.0052 → 0.0028).
           Variance computed across 3 external device-shift datasets (DDR, ODIR-5K, RFMiD), excluding EyePACS training domain.
           Smaller variance indicates more consistent diagnostic performance regardless of imaging device —
           a critical requirement for real-world deployment in diverse clinical settings.

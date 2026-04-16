@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <rect width="640" height="320" fill="white" rx="6"/>
+  <rect x="0" y="0" width="6" height="320" fill="#7F77DD" rx="3 0 0 3"/>
+
+  <!-- Header -->
+  <text x="24" y="30" font-size="18" font-weight="700" fill="#1a1a2e">Messidor-2</text>
+  <rect x="130" y="16" width="82" height="20" rx="4" fill="#EEEDFE"/>
+  <text x="171" y="30" text-anchor="middle" font-size="10" font-weight="600" fill="#3C3489">Degradation</text>
+  <text x="24" y="48" font-size="11" fill="#888">1,748 images · Clinical degradation resistance evaluation</text>
+  <line x1="24" y1="58" x2="616" y2="58" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Metadata grid -->
+  <text x="24" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">CAMERA</text>
+  <text x="24" y="94" font-size="11" fill="#333" font-weight="500">Topcon TRC NW6 (non-mydriatic)</text>
+
+  <text x="260" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FOV</text>
+  <text x="260" y="94" font-size="11" fill="#333" font-weight="500">45°</text>
+
+  <text x="340" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FORMAT</text>
+  <text x="340" y="94" font-size="11" fill="#333" font-weight="500">TIFF</text>
+
+  <text x="440" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">SOURCE</text>
+  <text x="440" y="94" font-size="11" fill="#333" font-weight="500">ADCIS (registration req.)</text>
+
+  <text x="24" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">RESOLUTION</text>
+  <text x="24" y="132" font-size="11" fill="#333" font-weight="500">1440&#215;960 to 2240&#215;1488</text>
+
+  <text x="260" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">TAXONOMY</text>
+  <text x="260" y="132" font-size="11" fill="#333" font-weight="500">Referable / Non-referable DR</text>
+
+  <text x="500" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">POPULATION</text>
+  <text x="500" y="132" font-size="11" fill="#333" font-weight="500">French</text>
+
+  <line x1="24" y1="146" x2="616" y2="146" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Taxonomy mapping warning -->
+  <rect x="24" y="154" width="592" height="32" rx="5" fill="#FAECE7"/>
+  <text x="32" y="170" font-size="9" fill="#712B13" font-weight="700" letter-spacing="0.5">TAXONOMY MAPPING REQUIRED</text>
+  <text x="32" y="182" font-size="10" fill="#712B13">Grade 0&#8594;DR 0, grade 1&#8594;DR 1, grade 2&#8594;DR 2. No DR 3/4 available — binary referable/non-referable used.</text>
+
+  <!-- Role -->
+  <text x="24" y="208" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">ROLE IN DISSERTATION</text>
+  <text x="24" y="224" font-size="11" fill="#444">External generalization target for Experiment 5 (H-4). Model trained on EyePACS is</text>
+  <text x="24" y="238" font-size="11" fill="#444">evaluated on Messidor-2 without retraining to compute generalization ratio G.</text>
+
+  <!-- Evaluation -->
+  <text x="24" y="262" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EVALUATION</text>
+  <text x="24" y="278" font-size="11" fill="#444">Used entirely as external test set (no training on this data).</text>
+
+  <line x1="24" y1="290" x2="616" y2="290" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Experiments -->
+  <text x="24" y="310" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EXPERIMENTS</text>
+  <rect x="110" y="298" width="152" height="18" rx="4" fill="#EEEDFE"/>
+  <text x="186" y="311" text-anchor="middle" font-size="9" font-weight="500" fill="#3C3489">Exp 5 (H-4): Transfer target</text>
+</svg>

@@ -52,7 +52,7 @@ const translations = {
     'overview.keyFindings': 'Key Findings',
 
     'common.baseline': 'Baseline',
-    'common.pipeline': 'Full V5 Pipeline',
+    'common.pipeline': 'Pipeline',
     'common.improvement': 'Improvement',
     'common.config': 'Configuration',
     'common.preprocessing': 'Preprocessing',
@@ -95,7 +95,7 @@ const translations = {
 
     'exp.factorial': '2×2 Factorial Design — All Configurations',
     'exp.allConfigs': 'All 4 Configurations (A–D)',
-    'exp.ablation': 'Cumulative Ablation — V5 Stages',
+    'exp.ablation': 'Cumulative Ablation — Pipeline Stages',
     'exp.perStage': 'Per-Stage Marginal Contribution (ΔF1, pp)',
     'exp.dominanceCriterion': 'EH-3 Dominance Criterion Check',
     'exp.crossDataset': 'Cross-Dataset Generalization (Zero-Shot)',
@@ -113,7 +113,7 @@ const translations = {
     'clinical.sensitivity': 'Sensitivity',
     'clinical.specificity': 'Specificity',
 
-    'pipeline.title': 'V5 Preprocessing Pipeline — Stage Overview',
+    'pipeline.title': 'Preprocessing Pipeline — Stage Overview',
     'pipeline.diagram': 'Pipeline Architecture Diagram',
     'pipeline.walkthrough': 'Step-by-Step Walkthrough',
     'pipeline.bilateralPair': 'Bilateral Fundus Pair',
@@ -122,9 +122,9 @@ const translations = {
 
     'methods.overview': 'Overview',
     'methods.standardApproach': 'Standard Approach',
-    'methods.ourAdaptation': 'Our V5 Adaptation',
+    'methods.ourAdaptation': 'Our Adaptation',
     'methods.keyInnovation': 'Key Innovation',
-    'methods.comparison': 'Method Comparison: Standard vs. V5',
+    'methods.comparison': 'Method Comparison: Standard vs. Ours',
 
     'arch.title': 'System Architecture',
     'arch.equation': 'Formal System Definition',
@@ -169,11 +169,11 @@ const translations = {
     'tooltip.fig22': 'All 4 configurations A–D. Both architectures benefit: ResNet-50 (B vs A) +5.2pp F1, EfficientNet-B3 (D vs C) +5.3pp F1. Config D achieves highest absolute F1.',
     'tooltip.fig23': 'Individual ablation: each stage added independently. CLAHE alone adds +2.3pp (largest individual effect).',
     'tooltip.fig24': 'Per-class ROC curves. Pipeline shifts all curves upward. DR1 shows largest AUC improvement (0.72→0.81).',
-    'tooltip.fig25': 'Real fundus image (patient 43199, DR4) through all V5 pipeline stages.',
+    'tooltip.fig25': 'Real fundus image (patient 43199, DR4) through all pipeline stages.',
     'tooltip.fig26': 'Bilateral pair showing both eyes. After canonical flip, both have OD on right side.',
     'tooltip.fig27': 'Grad-CAM overlays. Baseline: diffuse attention. Pipeline: focused on hemorrhages and exudates.',
     'tooltip.fig28': 'Attention consistency: cosine similarity of Grad-CAM across datasets. Pipeline mean 0.81 vs. baseline 0.61.',
-    'tooltip.pipeline_grid': 'Complete V5 pipeline: Raw → S0 (Canonical Flip) → S1 (OD-Fovea Rotation) → S2 (FOV Crop + Isotropic Resize) → S3 (FOV Mask) → S4 (Adaptive Flat-Field σ=0.07·D) → S5 (CLAHE) → S6 (Aug, train only) → S7 (Dataset-Specific Normalize + 4ch). Patient 43199, Canon CR-1, DR4.',
+    'tooltip.pipeline_grid': 'Complete pipeline: Raw → S0 (Canonical Flip) → S1 (OD-Fovea Rotation) → S2 (FOV Crop + Isotropic Resize) → S3 (FOV Mask) → S4 (Adaptive Flat-Field σ=0.07·D) → S5 (CLAHE) → S6 (Aug, train only) → S7 (Dataset-Specific Normalize + 4ch). Patient 43199, Canon CR-1, DR4.',
     'tooltip.bilateral': 'Both eyes of patient 43199 (DR4). Left eye flipped to match right-eye orientation. After full pipeline, lesions become clearly visible.',
     'tooltip.stage_0': 'Stage 0: Left eye horizontally flipped so optic disc is on the right (canonical orientation).',
     'tooltip.stage_1': 'Stage 1: OD and fovea detected; image rotated so OD→fovea axis is horizontal.',
@@ -192,9 +192,9 @@ const translations = {
     'tooltip.method_odfovea': 'OD-fovea detection in 4 steps: green channel → OD mask (97th percentile) → annular fovea search → axis angle.',
     'tooltip.method_search': 'Annular search region: fovea is always 1.5-3.5 OD diameters from the optic disc (anatomical prior).',
     'tooltip.baseline_vs_pipe': 'Baseline (crop+resize only) vs. full pipeline. Difference map (×3) highlights regions most affected.',
-    'tooltip.before_after': 'Before: original image after basic crop. After: full V5 pipeline. Vessels and lesions dramatically clearer.',
-    'tooltip.arch_diagram': 'Full system architecture showing data flow from fundus image input through V5 8-stage preprocessing, CNN classification, to final 5-class DR grade output.',
-    'tooltip.pipeline_svg': 'V5 8-stage preprocessing pipeline flowchart. Novel components: canonical flip (S0), OD-fovea rotation (S1), isotropic resize (S2), FOV mask (S3), adaptive flat-field (S4), CLAHE (S5), augmentation (S6), dataset-specific normalize + 4ch (S7).',
+    'tooltip.before_after': 'Before: original image after basic crop. After: full pipeline. Vessels and lesions dramatically clearer.',
+    'tooltip.arch_diagram': 'Full system architecture showing data flow from fundus image input through 8-stage preprocessing, CNN classification, to final 5-class DR grade output.',
+    'tooltip.pipeline_svg': '8-stage preprocessing pipeline flowchart. Novel components: canonical flip (S0), OD-fovea rotation (S1), isotropic resize (S2), FOV mask (S3), adaptive flat-field (S4), CLAHE (S5), augmentation (S6), dataset-specific normalize + 4ch (S7).',
     'tooltip.gradcam_overlay': 'Grad-CAM attention maps: baseline (left) shows diffuse activation; pipeline (right) focuses precisely on hemorrhages and exudates.',
   },
 
@@ -231,7 +231,7 @@ const translations = {
     'overview.keyFindings': 'Негізгі нәтижелер',
 
     'common.baseline': 'Baseline',
-    'common.pipeline': 'Толық V5 Pipeline',
+    'common.pipeline': 'Pipeline',
     'common.improvement': 'Жақсару',
     'common.config': 'Конфигурация',
     'common.preprocessing': 'Алдын ала өңдеу',
@@ -274,7 +274,7 @@ const translations = {
 
     'exp.factorial': '2×2 Факторлық дизайн — Барлық конфигурациялар',
     'exp.allConfigs': 'Барлық 4 конфигурация (A–D)',
-    'exp.ablation': 'Кумулятивтік абляция — V5 кезеңдері',
+    'exp.ablation': 'Кумулятивтік абляция — Pipeline кезеңдері',
     'exp.perStage': 'Кезең бойынша маржиналды үлес (ΔF1, пп)',
     'exp.dominanceCriterion': 'EH-3 басымдық критерийін тексеру',
     'exp.crossDataset': 'Деректер жиынтықтары арасындағы жалпылау (нөлдік атыс)',
@@ -292,7 +292,7 @@ const translations = {
     'clinical.sensitivity': 'Сезімталдық',
     'clinical.specificity': 'Спецификалық',
 
-    'pipeline.title': 'V5 Алдын ала өңдеу Pipeline — Кезеңдерге шолу',
+    'pipeline.title': 'Алдын ала өңдеу Pipeline — Кезеңдерге шолу',
     'pipeline.diagram': 'Pipeline архитектура диаграммасы',
     'pipeline.walkthrough': 'Кезең бойынша шолу',
     'pipeline.bilateralPair': 'Екі жақты көз жұбы',
@@ -301,9 +301,9 @@ const translations = {
 
     'methods.overview': 'Шолу',
     'methods.standardApproach': 'Стандартты тәсіл',
-    'methods.ourAdaptation': 'Біздің V5 бейімделу',
+    'methods.ourAdaptation': 'Біздің бейімделу',
     'methods.keyInnovation': 'Негізгі инновация',
-    'methods.comparison': 'Әдістерді салыстыру: Стандартты және V5',
+    'methods.comparison': 'Әдістерді салыстыру: Стандартты және біздікі',
 
     'arch.title': 'Жүйе архитектурасы',
     'arch.equation': 'Ресми жүйе анықтамасы',
@@ -334,7 +334,7 @@ const translations = {
     'tooltip.fig12': 'EH-3 тексерісі: EfficientNet-B3 барлық шектерден асады. ResNet-50 нөлге жуық — архитектураға тәуелді әсер.',
     'tooltip.fig14': 'Клиникалық скрининг метрикалары. Pipeline сезімталдықты 0.82-ден 0.90-ға жақсартады (+8пп).',
     'tooltip.fig18': 'Класс бойынша F1-Score. Ең үлкен жақсару азшылық кластарда: DR1 +12пп, DR3 +12пп.',
-    'tooltip.pipeline_grid': 'Толық V5 pipeline: Raw → S0 (Canonical Flip) → S1 (OD-Fovea) → S2 (FOV Crop + Isotropic Resize) → S3 (FOV Mask) → S4 (Adaptive Flat-Field) → S5 (CLAHE) → S6 (Aug) → S7 (Dataset-Specific Normalize + 4ch). Науқас 43199, Canon CR-1, DR4.',
+    'tooltip.pipeline_grid': 'Толық pipeline: Raw → S0 (Canonical Flip) → S1 (OD-Fovea) → S2 (FOV Crop + Isotropic Resize) → S3 (FOV Mask) → S4 (Adaptive Flat-Field) → S5 (CLAHE) → S6 (Aug) → S7 (Dataset-Specific Normalize + 4ch). Науқас 43199, Canon CR-1, DR4.',
     'tooltip.bilateral': 'Науқас 43199 (DR4) екі көзі. Сол көз оң көз бағдарына айналдырылған. Толық pipeline кейін зақымданулар анық көрінеді.',
     'tooltip.stage_3': '3-кезең: Қос шектеулі CLAHE тамыр мен зақымдану контрастын күрт жақсартады.',
   },

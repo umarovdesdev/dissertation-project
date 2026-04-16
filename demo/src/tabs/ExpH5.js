@@ -33,7 +33,7 @@ export default function ExpH5() {
             `+${((d.ap - d.ab) / d.ab * 100).toFixed(0)}%`,
           ])}
         />
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/06_exp4_alo.png'} caption="ALO (Attention-Lesion Overlap) by lesion type. Pipeline increases ALO across all 4 lesion types. Hard exudates achieve highest absolute ALO (0.72); microaneurysms lowest (0.45) due to point-like morphology." figNum={6} tooltip="tooltip.fig06" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp4/06_exp4_alo.png'} caption="ALO (Attention-Lesion Overlap) by lesion type. Pipeline increases ALO across all 4 lesion types. Hard exudates achieve highest absolute ALO (0.72); microaneurysms lowest (0.45) due to point-like morphology." figNum={6} tooltip="tooltip.fig06" />
         <Note>
           ALO = area(GradCAM ∩ lesion_mask) / area(lesion_mask). Primary explainability metric.
           Preprocessing improves ALO by +31–61% across all lesion types.
@@ -59,7 +59,7 @@ export default function ExpH5() {
             `+${(d.pipeline - d.baseline).toFixed(2)}`,
           ])}
         />
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/07_exp4_iou.png'} caption="IoU (Intersection over Union) by lesion type. IoU values are lower than ALO due to stricter penalization of activation outside lesion boundaries. Pipeline consistently improves IoU across all lesion types." figNum={7} tooltip="tooltip.fig07" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp4/07_exp4_iou.png'} caption="IoU (Intersection over Union) by lesion type. IoU values are lower than ALO due to stricter penalization of activation outside lesion boundaries. Pipeline consistently improves IoU across all lesion types." figNum={7} tooltip="tooltip.fig07" />
         <Note>
           IoU = area(GradCAM ∩ lesion_mask) / area(GradCAM ∪ lesion_mask). Secondary metric — stricter than ALO
           because it penalizes excessive activation outside lesions. Lower absolute values are expected since Grad-CAM
@@ -89,7 +89,7 @@ export default function ExpH5() {
             `+${(d.pipeline - d.baseline).toFixed(2)}`,
           ])}
         />
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/28_attention_consistency.png'} caption="Attention consistency (cosine similarity of Grad-CAM maps) between dataset pairs. Pipeline increases cross-dataset attention consistency by 0.20–0.22 points, confirming more stable feature localization across cameras." figNum={28} tooltip="tooltip.fig28" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp4/28_attention_consistency.png'} caption="Attention consistency (cosine similarity of Grad-CAM maps) between dataset pairs. Pipeline increases cross-dataset attention consistency by 0.20–0.22 points, confirming more stable feature localization across cameras." figNum={28} tooltip="tooltip.fig28" />
         <Note>
           Attention consistency measures cosine similarity of Grad-CAM heatmaps (normalized) between paired images
           of the same patient across different datasets/cameras. Higher consistency indicates the model attends to

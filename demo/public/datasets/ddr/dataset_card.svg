@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <rect width="640" height="320" fill="white" rx="6"/>
+  <rect x="0" y="0" width="6" height="320" fill="#D85A30" rx="3 0 0 3"/>
+
+  <!-- Header -->
+  <text x="24" y="30" font-size="18" font-weight="700" fill="#1a1a2e">DDR</text>
+  <rect x="60" y="16" width="62" height="20" rx="4" fill="#FAECE7"/>
+  <text x="91" y="30" text-anchor="middle" font-size="10" font-weight="600" fill="#712B13">Domain</text>
+  <text x="24" y="48" font-size="11" fill="#888">13,673 images · Device domain shift evaluation (mixed Canon + Topcon)</text>
+  <line x1="24" y1="58" x2="616" y2="58" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Metadata grid -->
+  <text x="24" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">CAMERA</text>
+  <text x="24" y="94" font-size="11" fill="#333" font-weight="500">Canon, Topcon (mixed)</text>
+
+  <text x="240" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FOV</text>
+  <text x="240" y="94" font-size="11" fill="#333" font-weight="500">Various</text>
+
+  <text x="340" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FORMAT</text>
+  <text x="340" y="94" font-size="11" fill="#333" font-weight="500">JPEG</text>
+
+  <text x="440" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">SOURCE</text>
+  <text x="440" y="94" font-size="11" fill="#333" font-weight="500">GitHub (Li et al., 2019)</text>
+
+  <text x="24" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">RESOLUTION</text>
+  <text x="24" y="132" font-size="11" fill="#333" font-weight="500">Various</text>
+
+  <text x="240" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">TAXONOMY</text>
+  <text x="240" y="132" font-size="11" fill="#333" font-weight="500">6-class DR (0&#8211;5) + lesion annotations</text>
+
+  <text x="500" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">POPULATION</text>
+  <text x="500" y="132" font-size="11" fill="#333" font-weight="500">Chinese</text>
+
+  <line x1="24" y1="146" x2="616" y2="146" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Taxonomy mapping -->
+  <rect x="24" y="154" width="592" height="24" rx="5" fill="#FAECE7"/>
+  <text x="32" y="170" font-size="9" fill="#712B13" font-weight="700" letter-spacing="0.5">MAPPING: Grade 5 (ungradable) excluded. Grades 0&#8211;4 map directly to ICDR 0&#8211;4.</text>
+
+  <!-- Role -->
+  <text x="24" y="200" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">ROLE IN DISSERTATION</text>
+  <text x="24" y="216" font-size="11" fill="#444">Device domain shift evaluation for Experiment 6 (H-6). Tests cross-camera performance</text>
+  <text x="24" y="230" font-size="11" fill="#444">with mixed Canon+Topcon acquisition — training domain partially overlaps.</text>
+
+  <!-- Evaluation -->
+  <text x="24" y="254" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EVALUATION</text>
+  <text x="24" y="270" font-size="11" fill="#444">Provided train/test/valid splits used. Evaluated as external test set.</text>
+
+  <line x1="24" y1="284" x2="616" y2="284" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Experiments -->
+  <text x="24" y="304" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EXPERIMENTS</text>
+  <rect x="110" y="292" width="140" height="18" rx="4" fill="#FAECE7"/>
+  <text x="180" y="305" text-anchor="middle" font-size="9" font-weight="500" fill="#712B13">Exp 6 (H-6): Device shift</text>
+</svg>

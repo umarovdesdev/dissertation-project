@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <rect width="960" height="680" fill="white"/>
+
+  <!-- Title -->
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a2e">Class Imbalance Comparison — All Datasets</text>
+  <text x="480" y="44" text-anchor="middle" font-size="11" fill="#999">DR grade distribution (%) — stacked bars, 100% = full bar width</text>
+
+  <!-- Legend -->
+  <g transform="translate(200, 58)">
+    <rect x="0"   y="0" width="12" height="12" rx="2" fill="#2E7D32"/>
+    <text x="16"  y="10" font-size="10" fill="#444">DR 0 — No DR</text>
+    <rect x="110" y="0" width="12" height="12" rx="2" fill="#F9A825"/>
+    <text x="126" y="10" font-size="10" fill="#444">DR 1 — Mild</text>
+    <rect x="210" y="0" width="12" height="12" rx="2" fill="#EF6C00"/>
+    <text x="226" y="10" font-size="10" fill="#444">DR 2 — Moderate</text>
+    <rect x="340" y="0" width="12" height="12" rx="2" fill="#D32F2F"/>
+    <text x="356" y="10" font-size="10" fill="#444">DR 3 — Severe</text>
+    <rect x="440" y="0" width="12" height="12" rx="2" fill="#6A1B9A"/>
+    <text x="456" y="10" font-size="10" fill="#444">DR 4 — PDR</text>
+  </g>
+
+  <line x1="30" y1="80" x2="930" y2="80" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- 100% ref line -->
+  <line x1="720" y1="88" x2="720" y2="560" stroke="#E0E0E0" stroke-width="0.5" stroke-dasharray="4,3"/>
+  <!-- Scale -->
+  <text x="220" y="574" text-anchor="middle" font-size="8" fill="#CCC">0%</text>
+  <text x="345" y="574" text-anchor="middle" font-size="8" fill="#CCC">25%</text>
+  <text x="470" y="574" text-anchor="middle" font-size="8" fill="#CCC">50%</text>
+  <text x="595" y="574" text-anchor="middle" font-size="8" fill="#CCC">75%</text>
+  <text x="720" y="574" text-anchor="middle" font-size="8" fill="#CCC">100%</text>
+
+  <!-- ═══ 5-CLASS DATASETS ═══ -->
+  <text x="24" y="100" font-size="9" fill="#999" font-weight="700" letter-spacing="0.5">5-CLASS ICDR GRADING</text>
+
+  <!-- EyePACS: 73.5/6.9/15.1/2.5/2.0 → 368+35+76+13+10=502 (rounding) -->
+  <text x="210" y="128" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">EyePACS</text>
+  <text x="210" y="141" text-anchor="end" font-size="9" fill="#999">n = 35,126</text>
+  <rect x="220" y="116" width="368" height="30" fill="#2E7D32"/>
+  <text x="404" y="136" text-anchor="middle" font-size="10" fill="white" font-weight="600">73.5%</text>
+  <rect x="588" y="116" width="35" height="30" fill="#F9A825"/>
+  <rect x="623" y="116" width="76" height="30" fill="#EF6C00"/>
+  <text x="661" y="136" text-anchor="middle" font-size="9" fill="white" font-weight="600">15%</text>
+  <rect x="699" y="116" width="13" height="30" fill="#D32F2F"/>
+  <rect x="712" y="116" width="10" height="30" fill="#6A1B9A"/>
+  <text x="760" y="134" font-size="9" fill="#aaa" font-style="italic">Canon CR-1</text>
+
+  <!-- Messidor-2: 58.3/15.5/19.9/4.3/2.0 → 292+78+100+22+10=502 -->
+  <text x="210" y="178" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">Messidor-2</text>
+  <text x="210" y="191" text-anchor="end" font-size="9" fill="#999">n = 1,744</text>
+  <rect x="220" y="166" width="292" height="30" fill="#2E7D32"/>
+  <text x="366" y="186" text-anchor="middle" font-size="10" fill="white" font-weight="600">58%</text>
+  <rect x="512" y="166" width="78" height="30" fill="#F9A825"/>
+  <text x="551" y="186" text-anchor="middle" font-size="9" fill="#444" font-weight="600">16%</text>
+  <rect x="590" y="166" width="100" height="30" fill="#EF6C00"/>
+  <text x="640" y="186" text-anchor="middle" font-size="9" fill="white" font-weight="600">20%</text>
+  <rect x="690" y="166" width="22" height="30" fill="#D32F2F"/>
+  <rect x="712" y="166" width="10" height="30" fill="#6A1B9A"/>
+  <text x="760" y="184" font-size="9" fill="#aaa" font-style="italic">Topcon TRC NW6</text>
+
+  <!-- DDR: 50.0/5.0/35.8/1.9/7.3 → 250+25+179+10+37=501 -->
+  <text x="210" y="228" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">DDR</text>
+  <text x="210" y="241" text-anchor="end" font-size="9" fill="#999">n = 12,522</text>
+  <rect x="220" y="216" width="250" height="30" fill="#2E7D32"/>
+  <text x="345" y="236" text-anchor="middle" font-size="10" fill="white" font-weight="600">50%</text>
+  <rect x="470" y="216" width="25" height="30" fill="#F9A825"/>
+  <rect x="495" y="216" width="179" height="30" fill="#EF6C00"/>
+  <text x="584" y="236" text-anchor="middle" font-size="9" fill="white" font-weight="600">36%</text>
+  <rect x="674" y="216" width="10" height="30" fill="#D32F2F"/>
+  <rect x="684" y="216" width="37" height="30" fill="#6A1B9A"/>
+  <text x="702" y="236" text-anchor="middle" font-size="8" fill="white" font-weight="600">7%</text>
+  <text x="760" y="234" font-size="9" fill="#aaa" font-style="italic">Canon + Topcon</text>
+
+  <!-- APTOS: 49.3/10.1/27.3/5.3/8.1 → 247+51+137+27+41=503 -->
+  <text x="210" y="278" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">APTOS 2019</text>
+  <text x="210" y="291" text-anchor="end" font-size="9" fill="#999">n = 3,662</text>
+  <rect x="220" y="266" width="247" height="30" fill="#2E7D32"/>
+  <text x="343" y="286" text-anchor="middle" font-size="10" fill="white" font-weight="600">49%</text>
+  <rect x="467" y="266" width="51" height="30" fill="#F9A825"/>
+  <text x="492" y="286" text-anchor="middle" font-size="8" fill="#444" font-weight="600">10%</text>
+  <rect x="518" y="266" width="137" height="30" fill="#EF6C00"/>
+  <text x="586" y="286" text-anchor="middle" font-size="9" fill="white" font-weight="600">27%</text>
+  <rect x="655" y="266" width="27" height="30" fill="#D32F2F"/>
+  <rect x="682" y="266" width="41" height="30" fill="#6A1B9A"/>
+  <text x="702" y="286" text-anchor="middle" font-size="8" fill="white" font-weight="600">8%</text>
+  <text x="760" y="284" font-size="9" fill="#aaa" font-style="italic">Mixed cameras</text>
+
+  <!-- IDRiD: 32.6/4.8/32.6/18.0/12.0 → 163+24+163+90+60=500 -->
+  <text x="210" y="328" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">IDRiD</text>
+  <text x="210" y="341" text-anchor="end" font-size="9" fill="#999">n = 516</text>
+  <rect x="220" y="316" width="163" height="30" fill="#2E7D32"/>
+  <text x="301" y="336" text-anchor="middle" font-size="9" fill="white" font-weight="600">33%</text>
+  <rect x="383" y="316" width="24" height="30" fill="#F9A825"/>
+  <rect x="407" y="316" width="163" height="30" fill="#EF6C00"/>
+  <text x="488" y="336" text-anchor="middle" font-size="9" fill="white" font-weight="600">33%</text>
+  <rect x="570" y="316" width="90" height="30" fill="#D32F2F"/>
+  <text x="615" y="336" text-anchor="middle" font-size="9" fill="white" font-weight="600">18%</text>
+  <rect x="660" y="316" width="60" height="30" fill="#6A1B9A"/>
+  <text x="690" y="336" text-anchor="middle" font-size="9" fill="white" font-weight="600">12%</text>
+  <text x="760" y="334" font-size="9" fill="#aaa" font-style="italic">Kowa VX-10&#945;</text>
+
+  <!-- Clinical: 20/20/20/20/20 → 100*5=500 -->
+  <text x="210" y="378" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">Clinical (KZ)</text>
+  <text x="210" y="391" text-anchor="end" font-size="9" fill="#999">n = 60</text>
+  <rect x="220" y="366" width="100" height="30" fill="#2E7D32"/>
+  <text x="270" y="386" text-anchor="middle" font-size="9" fill="white" font-weight="600">20%</text>
+  <rect x="320" y="366" width="100" height="30" fill="#F9A825"/>
+  <text x="370" y="386" text-anchor="middle" font-size="9" fill="#444" font-weight="600">20%</text>
+  <rect x="420" y="366" width="100" height="30" fill="#EF6C00"/>
+  <text x="470" y="386" text-anchor="middle" font-size="9" fill="white" font-weight="600">20%</text>
+  <rect x="520" y="366" width="100" height="30" fill="#D32F2F"/>
+  <text x="570" y="386" text-anchor="middle" font-size="9" fill="white" font-weight="600">20%</text>
+  <rect x="620" y="366" width="100" height="30" fill="#6A1B9A"/>
+  <text x="670" y="386" text-anchor="middle" font-size="9" fill="white" font-weight="600">20%</text>
+  <text x="760" y="384" font-size="9" fill="#aaa" font-style="italic">Almaty, KZ</text>
+
+  <!-- ═══ SEPARATOR ═══ -->
+  <line x1="220" y1="410" x2="720" y2="410" stroke="#E0E0E0" stroke-width="1" stroke-dasharray="2,2"/>
+
+  <!-- ═══ NON-STANDARD TAXONOMY DATASETS ═══ -->
+  <text x="24" y="432" font-size="9" fill="#999" font-weight="700" letter-spacing="0.5">KEYWORD / BINARY GRADING</text>
+
+  <!-- ODIR-5K: DR-positive only: 30.2/58.1/8.9/2.9 → 151+291+45+15=502 (no DR 0) -->
+  <text x="210" y="460" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">ODIR-5K</text>
+  <text x="210" y="473" text-anchor="end" font-size="9" fill="#999">n = 1,818 eyes</text>
+  <!-- no DR 0 bar -->
+  <rect x="220" y="448" width="151" height="30" fill="#F9A825"/>
+  <text x="295" y="468" text-anchor="middle" font-size="9" fill="#444" font-weight="600">30%</text>
+  <rect x="371" y="448" width="291" height="30" fill="#EF6C00"/>
+  <text x="516" y="468" text-anchor="middle" font-size="10" fill="white" font-weight="600">58%</text>
+  <rect x="662" y="448" width="45" height="30" fill="#D32F2F"/>
+  <text x="684" y="468" text-anchor="middle" font-size="8" fill="white" font-weight="600">9%</text>
+  <rect x="707" y="448" width="15" height="30" fill="#6A1B9A"/>
+  <text x="760" y="466" font-size="9" fill="#aaa" font-style="italic">Canon + Zeiss</text>
+  <text x="760" y="478" font-size="8" fill="#D85A30">DR-positive only</text>
+
+  <!-- RFMiD: binary: 80.3 absent / 19.8 present → 402+99=501 -->
+  <text x="210" y="510" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">RFMiD</text>
+  <text x="210" y="523" text-anchor="end" font-size="9" fill="#999">n = 3,200</text>
+  <rect x="220" y="498" width="402" height="30" fill="#2E7D32"/>
+  <text x="421" y="518" text-anchor="middle" font-size="10" fill="white" font-weight="600">80.3% absent</text>
+  <rect x="622" y="498" width="99" height="30" fill="#D32F2F"/>
+  <text x="671" y="518" text-anchor="middle" font-size="9" fill="white" font-weight="600">19.8%</text>
+  <text x="760" y="516" font-size="9" fill="#aaa" font-style="italic">Topcon + Kowa</text>
+  <text x="760" y="528" font-size="8" fill="#D85A30">Binary only</text>
+
+  <!-- ═══ ANNOTATIONS ═══ -->
+  <line x1="30" y1="548" x2="930" y2="548" stroke="#E0E0E0" stroke-width="1"/>
+
+  <text x="40" y="572" font-size="10" fill="#D32F2F" font-weight="600">Class imbalance is universal but varies in severity</text>
+  <text x="40" y="588" font-size="10" fill="#888">EyePACS: extreme skew (73.5% DR 0) &#8594; Focal Loss essential</text>
+  <text x="40" y="604" font-size="10" fill="#888">DDR: bimodal — DR 0 (50%) + DR 2 (36%); DR 3 rarest (1.9%)</text>
+  <text x="40" y="620" font-size="10" fill="#888">IDRiD: most balanced 5-class &#8594; ideal for per-class evaluation</text>
+
+  <text x="520" y="572" font-size="10" fill="#1D9E75" font-weight="600">Clinical (KZ): perfectly balanced by design</text>
+  <text x="520" y="588" font-size="10" fill="#888">12 images per class, curated for Grad-CAM evaluation</text>
+  <text x="520" y="604" font-size="10" fill="#888">ODIR-5K: no DR 0 — keyword extraction is DR-positive only</text>
+  <text x="520" y="620" font-size="10" fill="#888">RFMiD: binary (no severity) — 4:1 ratio absent:present</text>
+
+  <text x="480" y="656" text-anchor="middle" font-size="10" fill="#888" font-style="italic">Imbalance pattern directly impacts classifier performance &#8212; minority classes (DR 1, DR 3) consistently have lowest per-class F1</text>
+</svg>

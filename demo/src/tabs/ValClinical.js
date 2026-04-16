@@ -22,7 +22,7 @@ export default function ValClinical() {
           ])}
         />
         <ImageWithTooltip
-          src={process.env.PUBLIC_URL + '/results/14_clinical_metrics.png'}
+          src={process.env.PUBLIC_URL + '/results/general/14_clinical_metrics.png'}
           caption="Clinical screening metrics for referable DR (binary: non-referable DR 0–1 vs referable DR 2–4). Pipeline improves sensitivity by +8pp (0.82→0.90), reducing missed referrals."
           figNum={14}
           tooltip="tooltip.fig14"
@@ -47,7 +47,7 @@ export default function ValClinical() {
           rows={CALIBRATION.map(d => [d.metric, d.baseline.toFixed(3), d.pipeline.toFixed(3), d.improvement])}
         />
         <ImageWithTooltip
-          src={process.env.PUBLIC_URL + '/results/15_calibration.png'}
+          src={process.env.PUBLIC_URL + '/results/general/15_calibration.png'}
           caption="Reliability diagram (calibration curves) for baseline and pipeline. Pipeline curve is closer to the diagonal (perfect calibration), particularly for high-confidence predictions."
           figNum={15}
           tooltip="tooltip.fig15"

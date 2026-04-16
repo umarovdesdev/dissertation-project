@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <rect width="640" height="380" fill="white" rx="6"/>
+  <rect x="0" y="0" width="6" height="380" fill="#D85A30" rx="3 0 0 3"/>
+
+  <!-- Header -->
+  <text x="24" y="30" font-size="18" font-weight="700" fill="#1a1a2e">RFMiD</text>
+  <rect x="80" y="16" width="62" height="20" rx="4" fill="#FAECE7"/>
+  <text x="111" y="30" text-anchor="middle" font-size="10" font-weight="600" fill="#712B13">Domain</text>
+  <text x="24" y="48" font-size="11" fill="#888">3,200 images · Device domain shift evaluation (Topcon + Kowa)</text>
+  <line x1="24" y1="58" x2="616" y2="58" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Metadata grid -->
+  <text x="24" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">CAMERA</text>
+  <text x="24" y="94" font-size="11" fill="#333" font-weight="500">Topcon, Kowa (mixed)</text>
+
+  <text x="240" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FOV</text>
+  <text x="240" y="94" font-size="11" fill="#333" font-weight="500">Various</text>
+
+  <text x="340" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FORMAT</text>
+  <text x="340" y="94" font-size="11" fill="#333" font-weight="500">PNG</text>
+
+  <text x="440" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">SOURCE</text>
+  <text x="440" y="94" font-size="11" fill="#333" font-weight="500">IEEE DataPort (Public)</text>
+
+  <text x="24" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">RESOLUTION</text>
+  <text x="24" y="132" font-size="11" fill="#333" font-weight="500">Various</text>
+
+  <text x="240" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">TAXONOMY</text>
+  <text x="240" y="132" font-size="11" fill="#333" font-weight="500">Multi-disease, binary DR (0/1)</text>
+
+  <text x="500" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">POPULATION</text>
+  <text x="500" y="132" font-size="11" fill="#333" font-weight="500">Indian (multi-centre)</text>
+
+  <line x1="24" y1="146" x2="616" y2="146" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Camera split (inferred from resolution) -->
+  <rect x="24" y="154" width="592" height="40" rx="5" fill="#E1F5EE"/>
+  <text x="32" y="170" font-size="9" fill="#085041" font-weight="700" letter-spacing="0.5">CAMERA SPLIT (inferred from resolution matching)</text>
+  <text x="32" y="182" font-size="10" fill="#085041">Topcon: 2,703 imgs (84.5%) at 2144&#215;1424 + 2048&#215;1536</text>
+  <text x="32" y="192" font-size="10" fill="#085041">Kowa VX-10&#945;: 497 imgs (15.5%) at 4288&#215;2848 — matches IDRiD resolution exactly</text>
+
+  <!-- Taxonomy note -->
+  <rect x="24" y="202" width="592" height="24" rx="5" fill="#FAECE7"/>
+  <text x="32" y="218" font-size="9" fill="#712B13" font-weight="600">Binary DR label only (0 = no DR, 1 = DR present). No 5-class severity grading.</text>
+
+  <!-- Role -->
+  <text x="24" y="246" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">ROLE IN DISSERTATION</text>
+  <text x="24" y="262" font-size="11" fill="#444">Device domain shift evaluation for Experiment 6 (H-6). Topcon+Kowa combination</text>
+  <text x="24" y="276" font-size="11" fill="#444">matches cameras from IDRiD (Kowa) and Messidor-2 (Topcon) in one dataset.</text>
+
+  <!-- Evaluation -->
+  <text x="24" y="300" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EVALUATION</text>
+  <text x="24" y="316" font-size="11" fill="#444">Provided train/validation/test splits. DR subset used as external evaluation set.</text>
+
+  <line x1="24" y1="330" x2="616" y2="330" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Experiments -->
+  <text x="24" y="350" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EXPERIMENTS</text>
+  <rect x="110" y="338" width="140" height="18" rx="4" fill="#FAECE7"/>
+  <text x="180" y="351" text-anchor="middle" font-size="9" font-weight="500" fill="#712B13">Exp 6 (H-6): Device shift</text>
+</svg>

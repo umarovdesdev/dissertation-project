@@ -9,7 +9,7 @@
 
 Generate all images for the dissertation defense dashboard. Two categories:
 
-1. **Pipeline stage images** — process real fundus photographs through the V5 8-stage preprocessing pipeline, producing per-stage output images
+1. **Pipeline stage images** — process real fundus photographs through the 8-stage preprocessing pipeline, producing per-stage output images
 2. **Result charts** — generate all 28 presentation-quality charts/graphs from canonical numerical data
 
 All pipeline images go to: `E:\dissertation-project\demo\public\pipeline\`
@@ -31,7 +31,7 @@ These are real fundus photographs. The right eye already has the optic disc (bri
 
 Read the full technical spec from: `E:\dissertation-project\demo\public\diagrams\v5_pipeline_specification.md`
 
-The V5 pipeline has **8 stages** (numbered 0–7). Execute them in order on the source images. Key parameters:
+The pipeline has **8 stages** (numbered 0–7). Execute them in order on the source images. Key parameters:
 
 | Stage | Operation | Key parameters |
 |-------|-----------|---------------|
@@ -54,7 +54,7 @@ The V5 pipeline has **8 stages** (numbered 0–7). Execute them in order on the 
 |-------|-------------------|---------|
 | 0 | *(raw input — handled by code, no file needed)* | — |
 | 1 | `method_canonical_flip.png` | **ALREADY EXISTS and is correct.** 3-panel: left eye raw → left eye flipped → right eye raw. Keep as-is |
-| 2 | `od_fovea_search_region.png` | **ALREADY EXISTS.** OD-fovea detection visualization. Keep as-is OR regenerate with V5 labels |
+| 2 | `od_fovea_search_region.png` | **ALREADY EXISTS.** OD-fovea detection visualization. Keep as-is OR regenerate with pipeline labels |
 | 3 | `stage_2_isotropic_resize.png` | **MISSING — MUST CREATE.** Show: (a) raw cropped fundus with FOV boundary circle drawn, (b) isotropic resize to 512×512 with zero-padding visible as black border. Title: "Stage 2: FOV Crop + Isotropic Resize (512×512)" |
 | 4 | *(FOV mask — handled by code, no file needed)* | — |
 | 5 | `stage_4_flatfield.png` | **NEEDS RENAME + REGENERATION.** Currently `stage_2_flatfield.png` with V4 numbering. Show before/after flat-field correction. Title must say "Stage 4" and "σ=0.07·D" |
@@ -66,10 +66,10 @@ The V5 pipeline has **8 stages** (numbered 0–7). Execute them in order on the 
 
 | Filename | Content | Notes |
 |----------|---------|-------|
-| `pipeline_stages_grid.png` | **MUST REGENERATE.** Current version says "V4 Pipeline Stages" with V4 stage numbering (0a, 1, 2, 3, 4). Regenerate as 3×3 grid (or 2×4+1) showing `right_eye.jpeg` through all V5 stages. Title: "V5 Pipeline Stages — Patient 43199 (DR4, Proliferative DR)". Use V5 stage labels: Raw Input, Stage 0, Stage 1, Stage 2, Stage 3, Stage 4, Stage 5, Stage 6, Stage 7. Colored stage badges in bottom-left corner |
-| `bilateral_pair.png` | Both eyes through pipeline. 2×3 or 3×2 grid. Top: right eye (OD) raw → cropped → full V5. Bottom: left eye (OS) raw → flipped+cropped → full V5. After Stage 0 canonical flip, both have OD on right side |
-| `before_after_pipeline.png` | Side-by-side: baseline processing (3ch stretch-resize + ImageNet norm) vs full V5 pipeline output (4ch). Caption should highlight visible differences: vessel contrast, illumination uniformity |
-| `baseline_vs_pipeline.png` | Can be same concept as `before_after_pipeline.png` or a more detailed comparison. Show that V5 isotropic resize preserves circular FOV geometry while baseline stretch-resize distorts it |
+| `pipeline_stages_grid.png` | **MUST REGENERATE.** Current version says "V4 Pipeline Stages" with V4 stage numbering (0a, 1, 2, 3, 4). Regenerate as 3×3 grid (or 2×4+1) showing `right_eye.jpeg` through all pipeline stages. Title: "Pipeline Stages — Patient 43199 (DR4, Proliferative DR)". Use pipeline stage labels: Raw Input, Stage 0, Stage 1, Stage 2, Stage 3, Stage 4, Stage 5, Stage 6, Stage 7. Colored stage badges in bottom-left corner |
+| `bilateral_pair.png` | Both eyes through pipeline. 2×3 or 3×2 grid. Top: right eye (OD) raw → cropped → full pipeline. Bottom: left eye (OS) raw → flipped+cropped → full pipeline. After Stage 0 canonical flip, both have OD on right side |
+| `before_after_pipeline.png` | Side-by-side: baseline processing (3ch stretch-resize + ImageNet norm) vs full pipeline output (4ch). Caption should highlight visible differences: vessel contrast, illumination uniformity |
+| `baseline_vs_pipeline.png` | Can be same concept as `before_after_pipeline.png` or a more detailed comparison. Show that isotropic resize preserves circular FOV geometry while baseline stretch-resize distorts it |
 
 #### Method detail images (already exist — verify and update if V4 labels remain):
 
@@ -91,7 +91,7 @@ The V5 pipeline has **8 stages** (numbered 0–7). Execute them in order on the 
 - Use Python with OpenCV, NumPy, PIL, matplotlib for processing and rendering
 - Output resolution: 200 DPI, suitable for presentation at ~800–1200px width
 - White or transparent background for composite figures
-- Stage labels must use V5 numbering (Stages 0–7), NOT V4 numbering
+- Stage labels must use pipeline numbering (Stages 0–7), NOT V4 numbering
 - All text in English
 - Clean, professional academic style consistent with the existing `method_canonical_flip.png` style
 
@@ -99,7 +99,7 @@ The V5 pipeline has **8 stages** (numbered 0–7). Execute them in order on the 
 
 The actual pipeline code patterns are documented in:
 - `E:\dissertation-project\demo\public\diagrams\v5_pipeline_specification.md` — complete algorithm specs
-- `E:\dissertation-project\demo\CLAUDE.md` — pipeline summary (§V5 Preprocessing Pipeline)
+- `E:\dissertation-project\demo\CLAUDE.md` — pipeline summary (§Preprocessing Pipeline)
 - `E:\dissertation-project\CLAUDE.md` — project-level pipeline description
 
 ---
@@ -160,8 +160,8 @@ amber=#EF9F27  gray=#888780   green=#639922   red=#E24B4A
 
 Color conventions across all charts:
 - **Gray** = baseline preprocessing (Configs A, C)
-- **Blue** = V5 pipeline + ResNet-50 (Config B)
-- **Teal** = V5 pipeline + EfficientNet-B3 (Config D) — primary/best config
+- **Blue** = pipeline + ResNet-50 (Config B)
+- **Teal** = pipeline + EfficientNet-B3 (Config D) — primary/best config
 - **Coral** = external dataset or cross-device comparison
 - **Red dashed line** = threshold (EH-3 at 5pp, H-4 at G=0.85, sensitivity at 0.80, etc.)
 
@@ -195,14 +195,14 @@ Below is a condensed specification for each chart with the key data and layout:
 - **Colors:** Blue for ResNet-50, teal for EfficientNet-B3
 - **Red dashed lines:** 5pp for ΔF1, 2pp for ΔAUC, 0pp for Δκ
 - **Annotations:** "+5.2", "+3.3", "+8.0" above ResNet bars; "+5.3", "+4.4", "+8.0" above EffNet bars
-- **Title:** "Preprocessing Effect: Δ (V5 Pipeline − Baseline)"
+- **Title:** "Preprocessing Effect: Δ (Pipeline − Baseline)"
 
 #### Chart 04: `04_exp2_ablation.png`
 - **Type:** Ascending bar chart
 - **Data:** ABL array (7 levels, baseline 0.727 → full 0.780)
 - **Colors:** First bar gray, intermediate blue, last bar teal
 - **Annotations:** Marginal Δ in red/orange above each bar (+1.1pp, +1.0pp, etc.)
-- **Title:** "Experiment 2: Cumulative Ablation — V5 Pipeline Stages" (NOT "V4")
+- **Title:** "Experiment 2: Cumulative Ablation — Pipeline Stages" (NOT "V4")
 
 #### Chart 05: `05_exp2_per_stage.png`
 - **Type:** Horizontal bar chart
@@ -250,7 +250,7 @@ Below is a condensed specification for each chart with the key data and layout:
 - **Axes:** Weighted F1, ROC-AUC, Cohen's κ, Generalization (G), ALO, Device Robustness
 - **Data:** Baseline polygon (gray) vs pipeline polygon (teal)
 - **Must show:** Pipeline polygon uniformly enclosing baseline
-- **Title:** "Overall Performance: Baseline vs Full V5 Pipeline" (NOT "V4")
+- **Title:** "Overall Performance: Baseline vs Full Pipeline" (NOT "V4")
 
 #### Chart 12: `12_eh3_dominance.png`
 - **Type:** Grouped bar chart
@@ -349,14 +349,14 @@ Below is a condensed specification for each chart with the key data and layout:
 
 #### Chart 25: `25_pipeline_stages_real.png`
 - **Type:** Grid of actual fundus images through pipeline stages
-- **Source:** Process `right_eye.jpeg` through V5 stages
+- **Source:** Process `right_eye.jpeg` through pipeline stages
 - **Show:** Raw → Stage 0 → Stage 2 → Stage 4 → Stage 5 → Stage 7 (key visual stages)
-- **Title:** "V5 Pipeline Stages — Patient 43199 (DR4)"
+- **Title:** "Pipeline Stages — Patient 43199 (DR4)"
 
 #### Chart 26: `26_bilateral_pair.png`
 - **Type:** 2×3 grid
 - **Content:** Same as `pipeline/bilateral_pair.png` — both eyes through pipeline
-- **Title:** "Bilateral Pair — Canonical Flip + Full V5 Pipeline"
+- **Title:** "Bilateral Pair — Canonical Flip + Full Pipeline"
 
 #### Chart 27: `27_gradcam_overlay.png`
 - **Type:** 2×3 grid
@@ -381,7 +381,7 @@ Below is a condensed specification for each chart with the key data and layout:
 - **Error bars:** Show ±1 standard deviation where std data is available
 - **Threshold lines:** Red dashed, with small label at right edge
 - **Annotations:** Value labels above bars (3 decimal places for metrics, 1 decimal for pp)
-- **All titles must say "V5"** where pipeline version is mentioned. No references to "V4"
+- **All titles must say "Pipeline"** where pipeline version is mentioned. No references to "V4"
 - **No legend entries saying "projected", "expected", or "estimated"** — all data is completed work
 - **Language:** All text in English
 - **H-1 status:** Both architectures confirmed. No chart should suggest partial support, failure, or near-zero effect for ResNet-50
@@ -406,8 +406,8 @@ Additionally, the dashboard references a missing SVG:
 
 **File:** `E:\dissertation-project\demo\public\diagrams\v5_preprocessing_pipeline_diagram.svg`
 **Referenced in:** `ModelPipeline.js` line 94
-**Content:** V5 8-stage preprocessing pipeline flowchart (see caption at line 96–97)
-**Existing V4 version:** `v4_pipeline_diagram.svg` — can be used as a style reference but must be updated for V5 (8 stages, correct numbering, adaptive σ=0.07·D)
+**Content:** 8-stage preprocessing pipeline flowchart (see caption at line 96–97)
+**Existing V4 version:** `v4_pipeline_diagram.svg` — can be used as a style reference but must be updated (8 stages, correct numbering, adaptive σ=0.07·D)
 
 The SVG spec is at: `E:\dissertation-project\demo\public\diagrams\v5_pipeline_specification.md`
 
@@ -418,11 +418,11 @@ The SVG spec is at: `E:\dissertation-project\demo\public\diagrams\v5_pipeline_sp
 After generating all images, verify:
 
 - [ ] All 28 result PNGs exist in `public/results/` with correct filenames (01–28)
-- [ ] `pipeline_stages_grid.png` says "V5" (not "V4") and uses V5 stage numbering (0–7)
+- [ ] `pipeline_stages_grid.png` says "Pipeline" (not "V4") and uses pipeline stage numbering (0–7)
 - [ ] `stage_2_isotropic_resize.png` exists (was previously missing)
-- [ ] `stage_4_flatfield.png` uses V5 name and labels (not `stage_2_flatfield.png`)
-- [ ] `stage_5_clahe.png` uses V5 name and labels (not `stage_3_clahe.png`)
-- [ ] `stage_7_normalized.png` uses V5 name and labels (not `stage_4_normalized.png`)
+- [ ] `stage_4_flatfield.png` uses pipeline name and labels (not `stage_2_flatfield.png`)
+- [ ] `stage_5_clahe.png` uses pipeline name and labels (not `stage_3_clahe.png`)
+- [ ] `stage_7_normalized.png` uses pipeline name and labels (not `stage_4_normalized.png`)
 - [ ] Old V4-named files (`stage_2_flatfield.png`, `stage_3_clahe.png`, `stage_4_normalized.png`) are removed or replaced
 - [ ] Chart 01 shows Config A=0.724, B=0.776 (not 0.762/0.761)
 - [ ] Chart 03 shows ResNet-50 ΔF1=+5.2pp POSITIVE (not −0.1pp)

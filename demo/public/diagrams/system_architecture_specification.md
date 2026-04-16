@@ -17,9 +17,9 @@ $$
 \hat{y} = \mathcal{S}(I_L, I_R) = g\bigl(\Phi\bigl(\text{CNN}(\mathcal{P}(I_L)),\; \text{CNN}(\mathcal{P}(I_R))\bigr)\bigr)
 $$
 
-where $\mathcal{P}$ is the V5 preprocessing pipeline, $\text{CNN}$ is the shared feature extractor, $\Phi$ is the patient-level aggregation operator, and $g$ is the classification head.
+where $\mathcal{P}$ is the preprocessing pipeline, $\text{CNN}$ is the shared feature extractor, $\Phi$ is the patient-level aggregation operator, and $g$ is the classification head.
 
-This specification is written at a higher level of abstraction than the V5 preprocessing pipeline specification. Preprocessing internals are not re-derived here; the pipeline is treated as a module $\mathcal{P}$ with defined input-output contracts. The focus is on inter-module data flow, tensor transformations, patient-level reasoning, and clinical interpretability.
+This specification is written at a higher level of abstraction than the preprocessing pipeline specification. Preprocessing internals are not re-derived here; the pipeline is treated as a module $\mathcal{P}$ with defined input-output contracts. The focus is on inter-module data flow, tensor transformations, patient-level reasoning, and clinical interpretability.
 
 ### 1.1 Scope
 
@@ -128,7 +128,7 @@ $$
 \mathcal{P}: \bigl(\mathbb{R}^{H_0 \times W_0 \times 3}_{\text{uint8}},\; s\bigr) \;\longrightarrow\; \mathbb{R}^{4 \times 512 \times 512}_{\text{float32}}
 $$
 
-The preprocessing module $\mathcal{P}$ transforms a raw BGR fundus image and its eye laterality label into a normalized float32 tensor suitable for CNN input. The output has 4 channels: channels 0–2 are dataset-specific normalized RGB (mean/std computed after deterministic Stages 0–4), and channel 3 is a binary FOV mask (1.0 = real pixel data, 0.0 = padding from isotropic resize). It is defined by the V5 8-stage pipeline specification (see *V5 Data Processing Pipeline — Comprehensive Specification*) and comprises the following stages executed in strict order:
+The preprocessing module $\mathcal{P}$ transforms a raw BGR fundus image and its eye laterality label into a normalized float32 tensor suitable for CNN input. The output has 4 channels: channels 0–2 are dataset-specific normalized RGB (mean/std computed after deterministic Stages 0–4), and channel 3 is a binary FOV mask (1.0 = real pixel data, 0.0 = padding from isotropic resize). It is defined by the 8-stage pipeline specification (see *Data Processing Pipeline — Comprehensive Specification*) and comprises the following stages executed in strict order:
 
 | Stage | Operation | Deterministic? |
 |-------|-----------|---------------|
@@ -148,7 +148,7 @@ Two configurations are evaluated in the factorial design (Experiment 1):
 | Name | Stages Active | Notation |
 |------|---------------|----------|
 | **Baseline (ABSENT)** | 1, 4 | $\mathcal{P}_{\emptyset}$ |
-| **Full V5 (ACTIVE)** | 0, 1, 2, 3, 4, 5, 6 (train), 7 | $\mathcal{P}$ |
+| **Pipeline (ACTIVE)** | 0, 1, 2, 3, 4, 5, 6 (train), 7 | $\mathcal{P}$ |
 
 The preprocessing module is applied **identically and independently** to each eye:
 
@@ -377,7 +377,7 @@ For EfficientNet-B3 ($d = 1536$): input dimension $3 \times 1536 = 4608$; total 
 - Requires canonical orientation (Stage 0a) as a prerequisite — without consistent left/right alignment, the difference term is semantically undefined
 - Two-stage training adds complexity (backbone pretraining then head fine-tuning)
 
-**Implementation.** This formulation is retained for theoretical completeness. **Note: PatientHead configurations (formerly E/F) were removed from the V5 experimental design. The formulation is retained for completeness and potential future work.** The backbone is shared (single `Backbone` instance processes both eyes with the same weights). Missing eyes are handled via the zero-tensor substitution described in Section 3.2.
+**Implementation.** This formulation is retained for theoretical completeness. **Note: PatientHead configurations (formerly E/F) were removed from the experimental design. The formulation is retained for completeness and potential future work.** The backbone is shared (single `Backbone` instance processes both eyes with the same weights). Missing eyes are handled via the zero-tensor substitution described in Section 3.2.
 
 ### 7.5 Strategy Comparison Summary
 
@@ -387,7 +387,7 @@ For EfficientNet-B3 ($d = 1536$): input dimension $3 \times 1536 = 4608$; total 
 | Concatenation | Yes | $2d$ | Implicit | Stage 0a |
 | Symmetry-Aware (PatientHead) | Yes | $3d$ | Explicit | Stage 0a |
 
-Max-grade is the only patient-level strategy evaluated in V5 (configurations A–D + N). PatientHead fusion is described for theoretical completeness; configurations E and F were removed from the V5 experimental design.
+Max-grade is the only patient-level strategy evaluated in configurations A–D + N). PatientHead fusion is described for theoretical completeness; configurations E and F were removed from the experimental design.
 
 ---
 
@@ -453,7 +453,7 @@ with $N$ the total sample count, $K = 5$ the class count, and $n_k$ the count of
 
 ### 8.6 Two-Stage Training Protocol (PatientHead Configurations E, F)
 
-**Note:** This protocol is retained for reference. PatientHead configurations E/F were removed from the V5 experimental design. Active V5 configurations are A–D plus Config N (normalization control).
+**Note:** This protocol is retained for reference. PatientHead configurations E/F were removed from the experimental design. Active configurations are A–D plus Config N (normalization control).
 
 For configurations with patient-level aggregation, training proceeds in two stages:
 
@@ -526,7 +526,7 @@ Two models are trained on EyePACS under identical conditions except for preproce
 | Model | Preprocessing | Notation |
 |-------|---------------|----------|
 | Baseline | $\mathcal{P}_\emptyset$ (crop + resize + normalize) | $\text{CNN}_{\theta_A}$ |
-| Preprocessed | $\mathcal{P}$ (full V5 pipeline) | $\text{CNN}_{\theta_B}$ |
+| Preprocessed | $\mathcal{P}$ (full pipeline) | $\text{CNN}_{\theta_B}$ |
 
 For each of $N = 50$ IDRiD images (10 per DR class):
 
@@ -587,7 +587,7 @@ Patient Record
 ┌──────────────────┐                  ┌──────────────────┐
 │  Preprocessing   │                  │  Preprocessing   │
 │  𝒫(I_L, s_L)    │                  │  𝒫(I_R, s_R)    │
-│  (V5 pipeline)   │                  │  (V5 pipeline)   │
+│  (pipeline)   │                  │  (pipeline)   │
 └────────┬─────────┘                  └────────┬─────────┘
          │                                     │
     I'_L ∈ ℝ^{4×512×512}                 I'_R ∈ ℝ^{4×512×512}
@@ -716,8 +716,8 @@ Total learnable parameters (approximate):
 |---------------|----------|------|-------|
 | A/B (ResNet-50, image-level) | 23.5M | 10K | 23.5M |
 | C/D (EfficientNet-B3, image-level) | 10.7M | 7.7K | 10.7M |
-| E (ResNet-50, PatientHead) (theoretical — not active in V5) | 23.5M | 1.6M | 25.1M |
-| F (EfficientNet-B3, PatientHead) (theoretical — not active in V5) | 10.7M | 1.2M | 11.9M |
+| E (ResNet-50, PatientHead) (theoretical — not active) | 23.5M | 1.6M | 25.1M |
+| F (EfficientNet-B3, PatientHead) (theoretical — not active) | 10.7M | 1.2M | 11.9M |
 
 ---
 
@@ -832,18 +832,18 @@ $$
 
 ### 14.4 Configuration Management
 
-All hyperparameters, dataset paths, and pipeline toggles are centralized in `configs/default.yaml`. Model-specific augmentation presets are defined in `PreprocessingV5Config.from_preset()`. No hyperparameters are hardcoded in source modules; all are injected via the configuration system.
+All hyperparameters, dataset paths, and pipeline toggles are centralized in `configs/default.yaml`. Model-specific augmentation presets are defined in `PreprocessingConfig.from_preset()`. No hyperparameters are hardcoded in source modules; all are injected via the configuration system.
 
 ### 14.5 Experimental Design Traceability
 
 | Experiment | Configs | Hypothesis | Modules Exercised |
 |------------|---------|------------|-------------------|
 | Exp 1 (Factorial) | A–D, N | H-1 | $\mathcal{P}$, CNN, $h_\theta$ |
-| Exp 2 (Ablation) | V5 7 levels | H-1, H-2 | $\mathcal{P}$ (incremental), CNN, $h_\theta$ |
-| Exp 3 (Transferability) | full V5 | H-4 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot on APTOS) |
+| Exp 2 (Ablation) | 7 levels | H-1, H-2 | $\mathcal{P}$ (incremental), CNN, $h_\theta$ |
+| Exp 3 (Transferability) | full pipeline | H-4 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot on APTOS) |
 | Exp 4 (Explainability) | baseline vs. full | H-5 | $\mathcal{P}$, CNN, GradCAM, ALO/IoU |
-| Exp 5 (Clinical Degradation) | full V5 | H-7 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot on IDRiD, Messidor-2) |
-| Exp 6 (Device Shift) | full V5 | H-6 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot on DDR, ODIR-5K, RFMiD) |
+| Exp 5 (Clinical Degradation) | full pipeline | H-7 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot on IDRiD, Messidor-2) |
+| Exp 6 (Device Shift) | full pipeline | H-6 | $\mathcal{P}$, CNN, $h_\theta$ (zero-shot on DDR, ODIR-5K, RFMiD) |
 | Exp 7 (Small Data) | baseline vs. full | — | $\mathcal{P}$, CNN (train on IDRiD, test on Clinical) |
 
 **Experiments not detailed in this architecture specification:** Experiments 3 (APTOS Transferability, H-4), 5 (Clinical Degradation Resistance, H-7), and 7 (Small Data Training) are zero-shot evaluation or small-data training experiments that exercise the same $\mathcal{P}$ → CNN → $h_\theta$ pipeline on different datasets. Their protocols are fully specified in RESEARCH_ARCHITECTURE.md §5.3, §5.5, and §5.7 respectively. No architectural changes are required — only the evaluation dataset and metrics differ.

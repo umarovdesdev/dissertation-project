@@ -45,8 +45,8 @@ export default function ModelExplainability() {
 
       <Sec title={t('explainability.overlay')}>
         <ImageWithTooltip
-          src={process.env.PUBLIC_URL + '/results/27_gradcam_overlay.png'}
-          caption="Grad-CAM saliency overlaid on fundus images. Left: baseline preprocessing — diffuse, unfocused activation. Right: V5 pipeline — concentrated activation on lesion regions (hemorrhages and hard exudates highlighted). ALO improvement: +61% for hard exudates, +31% for microaneurysms."
+          src={process.env.PUBLIC_URL + '/results/exp4/27_gradcam_overlay.png'}
+          caption="Grad-CAM saliency overlaid on fundus images. Left: baseline preprocessing — diffuse, unfocused activation. Right: pipeline — concentrated activation on lesion regions (hemorrhages and hard exudates highlighted). ALO improvement: +61% for hard exudates, +31% for microaneurysms."
           figNum={27}
           tooltip="tooltip.fig27"
         />

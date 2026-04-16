@@ -39,8 +39,8 @@ export default function ResultsMain() {
 
       <Sec title="Summary Radar Chart">
         <ImageWithTooltip
-          src={process.env.PUBLIC_URL + '/results/11_summary_radar.png'}
-          caption="Performance radar across 4 configurations (A–D) and all 6 hypotheses. Config D (V5 pipeline + EfficientNet-B3) is the best configuration."
+          src={process.env.PUBLIC_URL + '/results/general/11_summary_radar.png'}
+          caption="Performance radar across 4 configurations (A–D) and all 6 hypotheses. Config D (Pipeline + EfficientNet-B3) is the best configuration."
           figNum={11}
           tooltip="tooltip.fig11"
         />
@@ -48,7 +48,7 @@ export default function ResultsMain() {
 
       <Sec title="EH-3 Dominance Check">
         <ImageWithTooltip
-          src={process.env.PUBLIC_URL + '/results/12_eh3_dominance.png'}
+          src={process.env.PUBLIC_URL + '/results/general/12_eh3_dominance.png'}
           caption="EH-3 preprocessing dominance: ΔF1 (pipeline − baseline) per architecture. Both architectures exceed the 5pp threshold: EfficientNet-B3 (D−C = +5.3pp) and ResNet-50 (B−A = +5.2pp). H-1 confirmed for both."
           figNum={12}
           tooltip="tooltip.fig12"
@@ -63,7 +63,7 @@ export default function ResultsMain() {
         />
         <Note>
           Both architectures satisfy EH-3 dominance independently. The mixed-effects ANOVA shows a significant main
-          effect of preprocessing (p&lt;0.001) with a non-significant interaction (p=0.23), confirming that the V5
+          effect of preprocessing (p&lt;0.001) with a non-significant interaction (p=0.23), confirming that the
           pipeline improves classification performance regardless of backbone architecture.
         </Note>
       </Sec>

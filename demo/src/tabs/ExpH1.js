@@ -38,7 +38,7 @@ export default function ExpH1() {
           highlightRow={(row, i) => i === 3}
         />
         <Note>
-          Config D (Full V5 pipeline + EfficientNet-B3) is the best single-image configuration.
+          Config D (Pipeline + EfficientNet-B3) is the best single-image configuration.
           ΔF1(D−C) = +{deltaF1}pp, ΔAUC(D−C) = +{deltaAUC}pp. Statistically significant (DeLong p=0.008, McNemar p=0.012).
         </Note>
       </Sec>
@@ -67,40 +67,40 @@ export default function ExpH1() {
           highlightRow={(row, i) => i === 5}
         />
         <Note>
-          V5 uses 4 configurations (A–D) only. Baseline configs (A, C) use 3-channel stretch-resize + ImageNet normalize. Full V5 configs (B, D) use 8-stage pipeline with 4-channel input (RGB + FOV mask).
+          4 configurations (A–D). Baseline configs (A, C) use 3-channel stretch-resize + ImageNet normalize. Pipeline configs (B, D) use 8-stage pipeline with 4-channel input (RGB + FOV mask).
         </Note>
       </Sec>
 
       <Sec title="Factorial F1 Chart">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/01_exp1_factorial_f1.png'} caption="Weighted F1 comparison for 2×2 factorial design (Configs A–D). Bars show mean ± std across 5 folds." figNum={1} tooltip="tooltip.fig01" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp1/01_exp1_factorial_f1.png'} caption="Weighted F1 comparison for 2×2 factorial design (Configs A–D). Bars show mean ± std across 5 folds." figNum={1} tooltip="tooltip.fig01" />
       </Sec>
 
       <Sec title="All Metrics Comparison">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/02_exp1_all_metrics.png'} caption="F1, AUC, κ, and Accuracy for all 2×2 factorial configurations. Config D dominates on all four metrics." figNum={2} tooltip="tooltip.fig02" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp1/02_exp1_all_metrics.png'} caption="F1, AUC, κ, and Accuracy for all 2×2 factorial configurations. Config D dominates on all four metrics." figNum={2} tooltip="tooltip.fig02" />
       </Sec>
 
       <Sec title="Delta vs Baseline">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/03_exp1_delta.png'} caption="Preprocessing improvement (Δ) relative to baseline. Both architectures exceed EH-3 thresholds: ResNet-50 (B−A = +5.2pp F1) and EfficientNet-B3 (D−C = +5.3pp F1)." figNum={3} tooltip="tooltip.fig03" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp1/03_exp1_delta.png'} caption="Preprocessing improvement (Δ) relative to baseline. Both architectures exceed EH-3 thresholds: ResNet-50 (B−A = +5.2pp F1) and EfficientNet-B3 (D−C = +5.3pp F1)." figNum={3} tooltip="tooltip.fig03" />
       </Sec>
 
       <Sec title="All 4 Configurations Chart">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/22_exp1_all_6_configs.png'} caption="All 4 configurations A–D. Both architectures benefit from V5 pipeline: ResNet-50 (B vs A) +5.2pp, EfficientNet-B3 (D vs C) +5.3pp. Config D achieves highest absolute F1." figNum={22} tooltip="tooltip.fig22" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp1/22_exp1_all_6_configs.png'} caption="All 4 configurations A–D. Both architectures benefit from pipeline: ResNet-50 (B vs A) +5.2pp, EfficientNet-B3 (D vs C) +5.3pp. Config D achieves highest absolute F1." figNum={22} tooltip="tooltip.fig22" />
       </Sec>
 
       <Sec title="Per-Class F1 (EfficientNet-B3)">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/18_per_class_f1.png'} caption="Per-class weighted F1: Baseline (Config C) vs Pipeline (Config D). Largest improvement on minority classes: DR 1 (+12pp), DR 3 (+12pp). DR 0 near-saturated at baseline." figNum={18} tooltip="tooltip.fig18" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp1/18_per_class_f1.png'} caption="Per-class weighted F1: Baseline (Config C) vs Pipeline (Config D). Largest improvement on minority classes: DR 1 (+12pp), DR 3 (+12pp). DR 0 near-saturated at baseline." figNum={18} tooltip="tooltip.fig18" />
       </Sec>
 
       <Sec title="Training Curves">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/19_training_curves.png'} caption="Training and validation loss/F1 curves across 3 folds. Pipeline configuration (D) converges to lower validation loss and higher F1. Consistent across folds." figNum={19} tooltip="tooltip.fig19" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp1/19_training_curves.png'} caption="Training and validation loss/F1 curves across 3 folds. Pipeline configuration (D) converges to lower validation loss and higher F1. Consistent across folds." figNum={19} tooltip="tooltip.fig19" />
       </Sec>
 
       <Sec title="Confusion Matrix — Config D">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/20_confusion_matrix.png'} caption="Confusion matrix for Config D (best single-image configuration). Diagonal dominance confirms correct classification. Main confusions: DR 1↔DR 0, DR 2↔DR 3 (adjacent grade confusion)." figNum={20} tooltip="tooltip.fig20" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp1/20_confusion_matrix.png'} caption="Confusion matrix for Config D (best single-image configuration). Diagonal dominance confirms correct classification. Main confusions: DR 1↔DR 0, DR 2↔DR 3 (adjacent grade confusion)." figNum={20} tooltip="tooltip.fig20" />
       </Sec>
 
       <Sec title="ROC Curves — All Configs">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/24_roc_curves.png'} caption="One-vs-rest ROC curves for all 4 factorial configurations. Config D shows consistently higher AUC across all DR grades, particularly DR 1 and DR 3." figNum={24} tooltip="tooltip.fig24" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp1/24_roc_curves.png'} caption="One-vs-rest ROC curves for all 4 factorial configurations. Config D shows consistently higher AUC across all DR grades, particularly DR 1 and DR 3." figNum={24} tooltip="tooltip.fig24" />
       </Sec>
 
       <Sec title={t('exp.dominanceCriterion')}>
@@ -117,7 +117,7 @@ export default function ExpH1() {
           ResNet-50 (ΔF1=+{((CONFIGS.B.f1 - CONFIGS.A.f1) * 100).toFixed(1)}pp, DeLong p=0.006) and
           EfficientNet-B3 (ΔF1=+{deltaF1}pp, DeLong p=0.008). The mixed-effects ANOVA confirms a significant main
           effect of preprocessing (p&lt;0.001) with no significant interaction (p=0.23), indicating both architectures
-          benefit comparably from the V5 pipeline.
+          benefit comparably from the pipeline.
         </Note>
       </Sec>
     </div>

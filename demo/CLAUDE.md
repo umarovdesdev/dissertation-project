@@ -2,11 +2,11 @@
 
 ## TODO
 
-- [ ] Regenerate all pipeline demonstration images using V5 pipeline (isotropic resize + padding + adaptive flat-field). Current images show V4 stretch-resize.
+- [ ] Regenerate all pipeline demonstration images using full pipeline (isotropic resize + padding + adaptive flat-field). Current images show old stretch-resize.
 
 ---
 
-Interactive React dashboard for PhD dissertation defense. Visualises all experiment results, hypothesis status, and the V5 preprocessing pipeline walkthrough.
+Interactive React dashboard for PhD dissertation defense. Visualises all experiment results, hypothesis status, and the preprocessing pipeline walkthrough.
 
 ## Stack
 
@@ -75,7 +75,7 @@ All experiment metrics come from `src/data.js`. When experiment results update, 
 ## Governance Alignment
 
 Dashboard data must match `../thesis/governance/` invariants exactly:
-- Pipeline: 8-stage V5
+- Pipeline: 8-stage
 - EyePACS: ~35,126 labeled images; Exp 1: 100%, 5-fold CV
 - Hypotheses: H-1, H-2, H-4, H-5, H-6, H-7 (H-3 dropped)
 - ALO is primary explainability metric; IoU is secondary

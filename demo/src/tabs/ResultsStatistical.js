@@ -12,7 +12,7 @@ export default function ResultsStatistical() {
           rows={STAT_TESTS.map(d => [d.test, d.resnet, d.effnet])}
         />
         <ImageWithTooltip
-          src={process.env.PUBLIC_URL + '/results/21_statistical_tests.png'}
+          src={process.env.PUBLIC_URL + '/results/general/21_statistical_tests.png'}
           caption="Statistical test results visualized. Both architectures show statistically significant preprocessing improvement: ResNet-50 (B−A, DeLong p=0.006, McNemar p=0.009) and EfficientNet-B3 (D−C, DeLong p=0.008, McNemar p=0.012). Bootstrap CIs exclude zero for both."
           figNum={21}
           tooltip="tooltip.fig21"
@@ -22,7 +22,7 @@ export default function ResultsStatistical() {
           ResNet-50: DeLong p=0.006, McNemar p=0.009, Holm-corrected p_adj=0.012.
           EfficientNet-B3: DeLong p=0.008, McNemar p=0.012, Holm-corrected p_adj=0.024.
           The mixed-effects ANOVA shows a non-significant interaction (p=0.23), confirming both architectures
-          benefit comparably from the V5 pipeline.
+          benefit comparably from the pipeline.
         </Note>
       </Sec>
 
@@ -39,8 +39,8 @@ export default function ResultsStatistical() {
           </div>
           <p style={{ margin: '10px 0 0 0' }}>
             The non-significant interaction (p=0.23) confirms that the preprocessing benefit is consistent across
-            architectures — both ResNet-50 and EfficientNet-B3 improve comparably from the V5 pipeline. The highly
-            significant main effect of preprocessing (p&lt;0.001) establishes that the V5 pipeline drives classification
+            architectures — both ResNet-50 and EfficientNet-B3 improve comparably from the pipeline. The highly
+            significant main effect of preprocessing (p&lt;0.001) establishes that the pipeline drives classification
             improvement regardless of backbone architecture.
           </p>
         </div>

@@ -12,7 +12,7 @@ export default function ValComputational() {
           rows={COMPUTE.map(d => [d.metric, d.resnet, d.effnet, d.unit])}
         />
         <ImageWithTooltip
-          src={process.env.PUBLIC_URL + '/results/17_computational.png'}
+          src={process.env.PUBLIC_URL + '/results/general/17_computational.png'}
           caption="Computational cost comparison: training time, inference latency, and GPU memory for ResNet-50 and EfficientNet-B3. Pipeline adds ~27ms preprocessing overhead per image — acceptable for screening throughput."
           figNum={17}
           tooltip="tooltip.fig17"
@@ -45,7 +45,7 @@ export default function ValComputational() {
 
       <Sec title="Preprocessing Pipeline Throughput">
         <Note>
-          V5 pipeline processes one 3888×2592 fundus image in ~27ms (RTX 3060, batch mode).
+          Pipeline processes one 3888×2592 fundus image in ~27ms (RTX 3060, batch mode).
           Sequential stages: canonical flip (1ms), OD-fovea detection/rotation (12ms), FOV crop + resize (5ms),
           flat-field Gaussian filter (4ms), CLAHE (3ms), normalization (2ms).
           The OD-fovea rotation step (Stage 1) dominates preprocessing time due to optic disc detection.

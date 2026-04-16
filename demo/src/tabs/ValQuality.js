@@ -27,8 +27,8 @@ export default function ValQuality() {
         ))}
 
         <ImageWithTooltip
-          src={process.env.PUBLIC_URL + '/results/16_image_quality.png'}
-          caption="Image quality metrics before (baseline) and after (V5 pipeline) preprocessing. CNR and VVI show the largest improvements, directly linked to CLAHE contrast enhancement and flat-field correction."
+          src={process.env.PUBLIC_URL + '/results/general/16_image_quality.png'}
+          caption="Image quality metrics before (baseline) and after (pipeline) preprocessing. CNR and VVI show the largest improvements, directly linked to CLAHE contrast enhancement and flat-field correction."
           figNum={16}
           tooltip="tooltip.fig16"
         />

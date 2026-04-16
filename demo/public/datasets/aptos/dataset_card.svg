@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <rect width="640" height="320" fill="white" rx="6"/>
+  <rect x="0" y="0" width="6" height="320" fill="#378ADD" rx="3 0 0 3"/>
+
+  <!-- Header -->
+  <text x="24" y="30" font-size="18" font-weight="700" fill="#1a1a2e">APTOS 2019</text>
+  <rect x="138" y="16" width="62" height="20" rx="4" fill="#E6F1FB"/>
+  <text x="169" y="30" text-anchor="middle" font-size="10" font-weight="600" fill="#0C447C">Transfer</text>
+  <text x="24" y="48" font-size="11" fill="#888">3,662 images · Cross-dataset transferability target</text>
+  <line x1="24" y1="58" x2="616" y2="58" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Metadata grid -->
+  <text x="24" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">CAMERA</text>
+  <text x="24" y="94" font-size="11" fill="#333" font-weight="500">Various (unspecified, mixed)</text>
+
+  <text x="240" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FOV</text>
+  <text x="240" y="94" font-size="11" fill="#333" font-weight="500">Various</text>
+
+  <text x="340" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FORMAT</text>
+  <text x="340" y="94" font-size="11" fill="#333" font-weight="500">PNG</text>
+
+  <text x="440" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">SOURCE</text>
+  <text x="440" y="94" font-size="11" fill="#333" font-weight="500">Kaggle (Public)</text>
+
+  <text x="24" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">RESOLUTION</text>
+  <text x="24" y="132" font-size="11" fill="#333" font-weight="500">Various</text>
+
+  <text x="240" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">TAXONOMY</text>
+  <text x="240" y="132" font-size="11" fill="#333" font-weight="500">5-class ICDR (DR 0&#8211;4) — native</text>
+
+  <text x="500" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">POPULATION</text>
+  <text x="500" y="132" font-size="11" fill="#333" font-weight="500">Indian (rural)</text>
+
+  <line x1="24" y1="146" x2="616" y2="146" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Role -->
+  <text x="24" y="166" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">ROLE IN DISSERTATION</text>
+  <text x="24" y="182" font-size="11" fill="#444">Cross-dataset transferability target for Experiment 3 (H-4). Zero-shot transfer from</text>
+  <text x="24" y="196" font-size="11" fill="#444">EyePACS-trained model. Generalization ratio G = F1_APTOS / F1_EyePACS &#8805; 0.85.</text>
+
+  <!-- Split strategy -->
+  <text x="24" y="220" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EVALUATION</text>
+  <text x="24" y="236" font-size="11" fill="#444">Zero-shot transfer — no training on APTOS 2019. Evaluated directly using EyePACS-trained model.</text>
+
+  <line x1="24" y1="250" x2="616" y2="250" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Experiments -->
+  <text x="24" y="270" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EXPERIMENTS</text>
+  <rect x="24" y="278" width="200" height="20" rx="4" fill="#E6F1FB"/>
+  <text x="124" y="292" text-anchor="middle" font-size="10" font-weight="500" fill="#0C447C">Exp 3 (H-4): Cross-dataset transfer</text>
+
+  <!-- Key stat -->
+  <rect x="24" y="308" width="592" height="22" rx="4" fill="#E1F5EE"/>
+  <text x="32" y="323" font-size="10" fill="#085041" font-weight="500">Result: G = 0.890 on APTOS 2019 (threshold &#8805; 0.85) — H-4 confirmed</text>
+</svg>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { C, DATASETS, CAMERA_GROUPS, DATASET_TIERS } from '../data';
+import { C, DATASETS, CAMERA_GROUPS, DATASET_TIERS, RESOLUTION_ANALYSIS } from '../data';
 import { Sec, Note } from '../components';
 import { useLang } from '../i18n';
 
@@ -565,12 +565,12 @@ function SplitStrategy() {
           {
             title: 'Why 5-fold CV',
             color: 'teal',
-            content: 'V5 uses full EyePACS (100%, ~35,126 images) with 5-fold CV. 5-fold provides lower variance in performance estimates than 3-fold and is the standard for large-scale DR benchmarks. RTX 3060 (12 GB VRAM) with batch size 16, mixed precision disabled for EfficientNet.',
+            content: 'We use full EyePACS (100%, ~35,126 images) with 5-fold CV. 5-fold provides lower variance in performance estimates than 3-fold and is the standard for large-scale DR benchmarks. RTX 3060 (12 GB VRAM) with batch size 16, mixed precision disabled for EfficientNet.',
           },
           {
             title: 'Full EyePACS (100%, ~35,126 images)',
             color: 'amber',
-            content: 'V5 uses the complete EyePACS labeled set (~35,126 images). Using the full dataset increases statistical power for detecting preprocessing effects and provides more robust 5-class performance estimates across 5-fold CV.',
+            content: 'We use the complete EyePACS labeled set (~35,126 images). Using the full dataset increases statistical power for detecting preprocessing effects and provides more robust 5-class performance estimates across 5-fold CV.',
           },
           {
             title: 'External datasets — zero-shot evaluation',
@@ -592,6 +592,106 @@ function SplitStrategy() {
   );
 }
 
+// ── Section I: Resolution & Camera Analysis ─────────────────────────────────
+function ResolutionAnalysis() {
+  const { t } = useLang();
+  const datasets = Object.entries(RESOLUTION_ANALYSIS);
+  const maxUnique = Math.max(...datasets.map(([, d]) => d.uniqueResolutions));
+
+  return (
+    <Sec title={t('datasets.resolutionAnalysis') || 'Resolution & Camera Analysis'}
+      note="EXIF metadata stripped from all datasets. Resolution grouping is the only per-image camera proxy available. Key finding: RFMiD 4288×2848 images match IDRiD Kowa VX-10α exactly (497 of 3,200 images).">
+
+      {/* Resolution diversity bar chart */}
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-primary,#333)', marginBottom: 8 }}>
+        Resolution diversity (unique resolutions per dataset)
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 16 }}>
+        {datasets
+          .sort(([, a], [, b]) => b.uniqueResolutions - a.uniqueResolutions)
+          .map(([name, d]) => (
+            <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 10, minWidth: 90, textAlign: 'right', color: 'var(--color-text-secondary,#666)' }}>
+                {name}
+              </div>
+              <div style={{ flex: 1, height: 18, background: 'var(--color-background-secondary,#eeede9)', borderRadius: 3, position: 'relative', overflow: 'hidden' }}>
+                <div style={{
+                  width: `${(d.uniqueResolutions / maxUnique) * 100}%`,
+                  height: '100%',
+                  background: d.uniqueResolutions > 50 ? C.coral : d.uniqueResolutions > 10 ? C.amber : d.uniqueResolutions > 1 ? C.teal : C.blue,
+                  borderRadius: 3, opacity: 0.75,
+                }} />
+                <span style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', fontSize: 9, fontWeight: 600, color: d.uniqueResolutions > 20 ? '#fff' : 'var(--color-text-primary,#333)' }}>
+                  {d.uniqueResolutions}
+                </span>
+              </div>
+              <div style={{ fontSize: 9, color: 'var(--color-text-secondary,#888)', minWidth: 140 }}>
+                {d.camera}
+              </div>
+            </div>
+          ))}
+      </div>
+
+      {/* Resolution groups detail */}
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-primary,#333)', marginBottom: 8 }}>
+        Top resolution groups per dataset
+      </div>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--color-border-secondary,#ccc)', background: 'var(--color-background-secondary,#f7f7f5)' }}>
+              {['Dataset', 'Resolution', 'Count', '%', 'Note'].map(h => (
+                <th key={h} style={{ padding: '4px 8px', textAlign: 'left', fontWeight: 600 }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {datasets.map(([name, d]) =>
+              d.groups.slice(0, 3).map((g, gi) => (
+                <tr key={`${name}-${gi}`} style={{
+                  borderBottom: gi === Math.min(2, d.groups.length - 1) ? '2px solid var(--color-border-tertiary,#ddd)' : '1px solid var(--color-border-tertiary,#eee)',
+                  background: gi === 0 ? 'transparent' : 'var(--color-background-secondary,#fafafa)',
+                }}>
+                  {gi === 0 ? (
+                    <td rowSpan={Math.min(3, d.groups.length)} style={{ padding: '4px 8px', fontWeight: 600, verticalAlign: 'top', borderRight: '1px solid var(--color-border-tertiary,#eee)' }}>
+                      {name}
+                      <div style={{ fontSize: 9, fontWeight: 400, color: 'var(--color-text-secondary,#999)', marginTop: 2 }}>{d.camera}</div>
+                    </td>
+                  ) : null}
+                  <td style={{ padding: '4px 8px', fontFamily: 'monospace', fontSize: 10 }}>{g.res}</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>{g.count.toLocaleString()}</td>
+                  <td style={{ padding: '4px 8px', textAlign: 'right' }}>{(g.pct || g.pctSampled || 0).toFixed(1)}%</td>
+                  <td style={{ padding: '4px 8px', color: g.note ? C.teal : 'var(--color-text-secondary,#ccc)', fontStyle: g.note ? 'normal' : 'italic', fontSize: 9 }}>
+                    {g.note || '—'}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Key findings */}
+      <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+        {[
+          { color: 'teal', title: 'RFMiD camera split identified', text: '4288×2848 (497 imgs, 15.5%) = Kowa VX-10α (matches IDRiD). Remaining 84.5% = Topcon.' },
+          { color: 'purple', title: 'Clinical = Messidor-2 camera', text: 'Identical 3-resolution profile. Almaty clinic uses same Topcon TRC NW6 or equivalent.' },
+          { color: 'blue', title: 'DDR contains Canon CR-1', text: '677 images at 3888×2592 match EyePACS native resolution — partial training domain overlap.' },
+          { color: 'amber', title: 'ODIR-5K Zeiss indicator', text: 'Square formats (1444×1444, 2976×2976) typical of Zeiss devices — unique to this dataset.' },
+        ].map(f => (
+          <div key={f.title} style={{
+            flex: '1 1 220px', padding: '8px 10px', borderRadius: 6,
+            background: C[f.color + 'Bg'], borderLeft: `3px solid ${C[f.color]}`,
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: C[f.color + 'T'], marginBottom: 3 }}>{f.title}</div>
+            <div style={{ fontSize: 10, lineHeight: 1.5, color: C[f.color + 'T'] }}>{f.text}</div>
+          </div>
+        ))}
+      </div>
+    </Sec>
+  );
+}
+
 // ── Main export ───────────────────────────────────────────────────────────────
 export default function Datasets() {
   return (
@@ -599,6 +699,7 @@ export default function Datasets() {
       <TierOverview />
       <SummaryTable />
       <CameraMatrix />
+      <ResolutionAnalysis />
       <ClassDistribution />
       <DatasetCards />
       <TaxonomyHarmonization />

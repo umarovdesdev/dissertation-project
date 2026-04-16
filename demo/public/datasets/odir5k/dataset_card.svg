@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 340" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <rect width="640" height="340" fill="white" rx="6"/>
+  <rect x="0" y="0" width="6" height="340" fill="#D85A30" rx="3 0 0 3"/>
+
+  <!-- Header -->
+  <text x="24" y="30" font-size="18" font-weight="700" fill="#1a1a2e">ODIR-5K</text>
+  <rect x="100" y="16" width="62" height="20" rx="4" fill="#FAECE7"/>
+  <text x="131" y="30" text-anchor="middle" font-size="10" font-weight="600" fill="#712B13">Domain</text>
+  <text x="24" y="48" font-size="11" fill="#888">5,000 patients (bilateral) · Device domain shift with Canon + Zeiss</text>
+  <line x1="24" y1="58" x2="616" y2="58" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Metadata grid -->
+  <text x="24" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">CAMERA</text>
+  <text x="24" y="94" font-size="11" fill="#333" font-weight="500">Canon, Zeiss (mixed)</text>
+
+  <text x="240" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FOV</text>
+  <text x="240" y="94" font-size="11" fill="#333" font-weight="500">Various</text>
+
+  <text x="340" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FORMAT</text>
+  <text x="340" y="94" font-size="11" fill="#333" font-weight="500">JPEG</text>
+
+  <text x="440" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">SOURCE</text>
+  <text x="440" y="94" font-size="11" fill="#333" font-weight="500">Peking University</text>
+
+  <text x="24" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">RESOLUTION</text>
+  <text x="24" y="132" font-size="11" fill="#333" font-weight="500">Various</text>
+
+  <text x="240" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">TAXONOMY</text>
+  <text x="240" y="132" font-size="11" fill="#333" font-weight="500">Multi-disease diagnostic keywords</text>
+
+  <text x="500" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">POPULATION</text>
+  <text x="500" y="132" font-size="11" fill="#333" font-weight="500">Chinese (Beijing)</text>
+
+  <line x1="24" y1="146" x2="616" y2="146" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Taxonomy mapping warning -->
+  <rect x="24" y="154" width="592" height="40" rx="5" fill="#FAECE7"/>
+  <text x="32" y="170" font-size="9" fill="#712B13" font-weight="700" letter-spacing="0.5">COMPLEX TAXONOMY MAPPING REQUIRED</text>
+  <text x="32" y="186" font-size="10" fill="#712B13">Priority keyword matching: &#8220;proliferative DR&#8221;&#8594;4, &#8220;severe DR&#8221;&#8594;3, &#8220;moderate DR&#8221;&#8594;2, &#8220;mild DR&#8221;&#8594;1, unqualified&#8594;2 (conservative).</text>
+
+  <!-- Role -->
+  <text x="24" y="216" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">ROLE IN DISSERTATION</text>
+  <text x="24" y="232" font-size="11" fill="#444">Device domain shift evaluation for Experiment 6 (H-6). Only dataset with Zeiss camera</text>
+  <text x="24" y="246" font-size="11" fill="#444">images — provides maximum device diversity from training data (Canon CR-1).</text>
+
+  <!-- Evaluation -->
+  <text x="24" y="270" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EVALUATION</text>
+  <text x="24" y="286" font-size="11" fill="#444">DR subset extracted via keyword filtering. Used as external evaluation set.</text>
+
+  <line x1="24" y1="300" x2="616" y2="300" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Experiments -->
+  <text x="24" y="320" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EXPERIMENTS</text>
+  <rect x="110" y="308" width="140" height="18" rx="4" fill="#FAECE7"/>
+  <text x="180" y="321" text-anchor="middle" font-size="9" font-weight="500" fill="#712B13">Exp 6 (H-6): Device shift</text>
+
+  <!-- Unique marker -->
+  <rect x="260" y="308" width="180" height="18" rx="4" fill="#FAEEDA"/>
+  <text x="350" y="321" text-anchor="middle" font-size="9" font-weight="500" fill="#633806">Only dataset with Zeiss cameras</text>
+</svg>

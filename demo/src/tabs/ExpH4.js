@@ -53,7 +53,7 @@ export default function ExpH4() {
             d.Gp ? `${d.Gp.toFixed(2)} ✓` : '1.00',
           ])}
         />
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/08_exp5_generalization.png'} caption="Cross-dataset F1 comparison: EyePACS (train), IDRiD (transfer), Messidor-2 (transfer). Pipeline reduces performance drop during domain shift." figNum={8} tooltip="tooltip.fig08" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp5/08_exp5_generalization.png'} caption="Cross-dataset F1 comparison: EyePACS (train), IDRiD (transfer), Messidor-2 (transfer). Pipeline reduces performance drop during domain shift." figNum={8} tooltip="tooltip.fig08" />
       </Sec>
 
       <Sec title="Cross-Dataset AUC">
@@ -69,10 +69,10 @@ export default function ExpH4() {
       </Sec>
 
       <Sec title="Generalization Ratio G — Chart">
-        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/09_exp5_G_ratio.png'} caption="Generalization ratio G for IDRiD and Messidor-2. Dashed line at G=0.85 (H-4 threshold). Baseline falls below threshold on IDRiD; pipeline exceeds threshold on both datasets." figNum={9} tooltip="tooltip.fig09" />
+        <ImageWithTooltip src={process.env.PUBLIC_URL + '/results/exp5/09_exp5_G_ratio.png'} caption="Generalization ratio G for IDRiD and Messidor-2. Dashed line at G=0.85 (H-4 threshold). Baseline falls below threshold on IDRiD; pipeline exceeds threshold on both datasets." figNum={9} tooltip="tooltip.fig09" />
         <Note>
           Models trained on Canon CR-1 (EyePACS) evaluated on Kowa VX-10α (IDRiD) and Topcon TRC NW6 (Messidor-2)
-          without any retraining. The V5 preprocessing pipeline normalizes device-specific artifacts, reducing
+          without any retraining. The preprocessing pipeline normalizes device-specific artifacts, reducing
           domain shift and improving zero-shot transfer performance.
         </Note>
       </Sec>

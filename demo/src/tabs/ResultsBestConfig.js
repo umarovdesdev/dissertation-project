@@ -11,7 +11,7 @@ export default function ResultsBestConfig() {
           Config D — Best Single-Image Configuration
         </h2>
         <div style={{ fontSize: 12, color: 'var(--color-text-secondary,#666)' }}>
-          Full V5 Pipeline (4ch) + EfficientNet-B3 | EyePACS 100% (~35,126) | 5-fold CV
+          Pipeline (4ch) + EfficientNet-B3 | EyePACS 100% (~35,126) | 5-fold CV
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export default function ResultsBestConfig() {
 
       <Sec title="Confusion Matrix">
         <ImageWithTooltip
-          src={process.env.PUBLIC_URL + '/results/20_confusion_matrix.png'}
+          src={process.env.PUBLIC_URL + '/results/exp1/20_confusion_matrix.png'}
           caption="Confusion matrix for Config D. Strong diagonal dominance. Primary confusions: DR 1↔DR 0 (mild NPDR vs no DR), DR 2↔DR 3 (adjacent grades). These are clinically expected: adjacent-grade boundaries are ambiguous even for expert graders."
           figNum={20}
           tooltip="tooltip.fig20"

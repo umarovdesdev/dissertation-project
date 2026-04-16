@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <rect width="960" height="400" fill="white"/>
+
+  <!-- Title -->
+  <text x="480" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a2e">Cross-Dataset Comparison — 7 Active Datasets</text>
+  <text x="480" y="44" text-anchor="middle" font-size="11" fill="#999">All datasets used in dissertation experiments (H-1 through H-7)</text>
+
+  <!-- Table header -->
+  <rect x="20" y="56" width="920" height="26" rx="4" fill="#F1EFE8"/>
+  <text x="30"  y="74" font-size="10" font-weight="700" fill="#444">Dataset</text>
+  <text x="130" y="74" font-size="10" font-weight="700" fill="#444">Size</text>
+  <text x="245" y="74" font-size="10" font-weight="700" fill="#444">Camera</text>
+  <text x="385" y="74" font-size="10" font-weight="700" fill="#444">Resolution</text>
+  <text x="520" y="74" font-size="10" font-weight="700" fill="#444">FOV</text>
+  <text x="560" y="74" font-size="10" font-weight="700" fill="#444">Population</text>
+  <text x="660" y="74" font-size="10" font-weight="700" fill="#444">Taxonomy</text>
+  <text x="820" y="74" font-size="10" font-weight="700" fill="#444">Tier</text>
+
+  <!-- Row 1: EyePACS -->
+  <rect x="20" y="84" width="920" height="36" fill="white"/>
+  <rect x="24" y="88" width="4" height="28" rx="2" fill="#378ADD"/>
+  <text x="34"  y="107" font-size="11" font-weight="600" fill="#1a1a2e">EyePACS</text>
+  <text x="130" y="107" font-size="10" fill="#444">~35,126</text>
+  <text x="245" y="107" font-size="10" fill="#444">Canon CR-1</text>
+  <text x="385" y="107" font-size="10" fill="#444">3888&#215;2592&#8211;5184&#215;3456</text>
+  <text x="520" y="107" font-size="10" fill="#444">45°</text>
+  <text x="560" y="107" font-size="10" fill="#444">US (California)</text>
+  <text x="660" y="107" font-size="10" fill="#444">5-class ICDR</text>
+  <rect x="820" y="94" width="60" height="18" rx="3" fill="#E6F1FB"/>
+  <text x="850" y="107" text-anchor="middle" font-size="9" font-weight="600" fill="#0C447C">Training</text>
+
+  <!-- Row 2: APTOS -->
+  <rect x="20" y="120" width="920" height="36" fill="#FAFAFA"/>
+  <rect x="24" y="124" width="4" height="28" rx="2" fill="#378ADD"/>
+  <text x="34"  y="143" font-size="11" font-weight="600" fill="#1a1a2e">APTOS 2019</text>
+  <text x="130" y="143" font-size="10" fill="#444">3,662</text>
+  <text x="245" y="143" font-size="10" fill="#444">Various (mixed)</text>
+  <text x="385" y="143" font-size="10" fill="#444">Various</text>
+  <text x="520" y="143" font-size="10" fill="#444">Var.</text>
+  <text x="560" y="143" font-size="10" fill="#444">Indian (rural)</text>
+  <text x="660" y="143" font-size="10" fill="#444">5-class ICDR</text>
+  <rect x="820" y="130" width="60" height="18" rx="3" fill="#E6F1FB"/>
+  <text x="850" y="143" text-anchor="middle" font-size="9" font-weight="600" fill="#0C447C">Transfer</text>
+
+  <!-- Row 3: IDRiD -->
+  <rect x="20" y="156" width="920" height="36" fill="white"/>
+  <rect x="24" y="160" width="4" height="28" rx="2" fill="#1D9E75"/>
+  <text x="34"  y="179" font-size="11" font-weight="600" fill="#1a1a2e">IDRiD</text>
+  <text x="130" y="179" font-size="10" fill="#444">516</text>
+  <text x="245" y="179" font-size="10" fill="#444">Kowa VX-10&#945;</text>
+  <text x="385" y="179" font-size="10" fill="#444">4288&#215;2848</text>
+  <text x="520" y="179" font-size="10" fill="#444">50°</text>
+  <text x="560" y="179" font-size="10" fill="#444">Indian (Nanded)</text>
+  <text x="660" y="179" font-size="10" fill="#444">5-class + masks</text>
+  <rect x="820" y="166" width="60" height="18" rx="3" fill="#E1F5EE"/>
+  <text x="850" y="179" text-anchor="middle" font-size="9" font-weight="600" fill="#085041">Clinical</text>
+
+  <!-- Row 4: Messidor-2 -->
+  <rect x="20" y="192" width="920" height="36" fill="#FAFAFA"/>
+  <rect x="24" y="196" width="4" height="28" rx="2" fill="#7F77DD"/>
+  <text x="34"  y="215" font-size="11" font-weight="600" fill="#1a1a2e">Messidor-2</text>
+  <text x="130" y="215" font-size="10" fill="#444">1,748</text>
+  <text x="245" y="215" font-size="10" fill="#444">Topcon TRC NW6</text>
+  <text x="385" y="215" font-size="10" fill="#444">1440&#215;960&#8211;2240&#215;1488</text>
+  <text x="520" y="215" font-size="10" fill="#444">45°</text>
+  <text x="560" y="215" font-size="10" fill="#444">French</text>
+  <text x="660" y="215" font-size="10" fill="#444">Referable/Non-ref.</text>
+  <rect x="820" y="202" width="74" height="18" rx="3" fill="#EEEDFE"/>
+  <text x="857" y="215" text-anchor="middle" font-size="9" font-weight="600" fill="#3C3489">Degradation</text>
+
+  <!-- Row 5: DDR -->
+  <rect x="20" y="228" width="920" height="36" fill="white"/>
+  <rect x="24" y="232" width="4" height="28" rx="2" fill="#D85A30"/>
+  <text x="34"  y="251" font-size="11" font-weight="600" fill="#1a1a2e">DDR</text>
+  <text x="130" y="251" font-size="10" fill="#444">13,673</text>
+  <text x="245" y="251" font-size="10" fill="#444">Canon, Topcon</text>
+  <text x="385" y="251" font-size="10" fill="#444">Various</text>
+  <text x="520" y="251" font-size="10" fill="#444">Var.</text>
+  <text x="560" y="251" font-size="10" fill="#444">Chinese</text>
+  <text x="660" y="251" font-size="10" fill="#444">6-class (excl. gr. 5)</text>
+  <rect x="820" y="238" width="60" height="18" rx="3" fill="#FAECE7"/>
+  <text x="850" y="251" text-anchor="middle" font-size="9" font-weight="600" fill="#712B13">Domain</text>
+
+  <!-- Row 6: ODIR-5K -->
+  <rect x="20" y="264" width="920" height="36" fill="#FAFAFA"/>
+  <rect x="24" y="268" width="4" height="28" rx="2" fill="#D85A30"/>
+  <text x="34"  y="287" font-size="11" font-weight="600" fill="#1a1a2e">ODIR-5K</text>
+  <text x="130" y="287" font-size="10" fill="#444">5,000 pts</text>
+  <text x="245" y="287" font-size="10" fill="#444">Canon, Zeiss</text>
+  <text x="385" y="287" font-size="10" fill="#444">Various</text>
+  <text x="520" y="287" font-size="10" fill="#444">Var.</text>
+  <text x="560" y="287" font-size="10" fill="#444">Chinese (Beijing)</text>
+  <text x="660" y="287" font-size="10" fill="#444">Keyword &#8594; DR grade</text>
+  <rect x="820" y="274" width="60" height="18" rx="3" fill="#FAECE7"/>
+  <text x="850" y="287" text-anchor="middle" font-size="9" font-weight="600" fill="#712B13">Domain</text>
+
+  <!-- Row 7: RFMiD -->
+  <rect x="20" y="300" width="920" height="36" fill="white"/>
+  <rect x="24" y="304" width="4" height="28" rx="2" fill="#D85A30"/>
+  <text x="34"  y="323" font-size="11" font-weight="600" fill="#1a1a2e">RFMiD</text>
+  <text x="130" y="323" font-size="10" fill="#444">3,200</text>
+  <text x="245" y="323" font-size="10" fill="#444">Topcon, Kowa</text>
+  <text x="385" y="323" font-size="10" fill="#444">Various</text>
+  <text x="520" y="323" font-size="10" fill="#444">Var.</text>
+  <text x="560" y="323" font-size="10" fill="#444">Indian</text>
+  <text x="660" y="323" font-size="10" fill="#444">Binary DR (0/1)</text>
+  <rect x="820" y="310" width="60" height="18" rx="3" fill="#FAECE7"/>
+  <text x="850" y="323" text-anchor="middle" font-size="9" font-weight="600" fill="#712B13">Domain</text>
+
+  <!-- Bottom separator -->
+  <line x1="20" y1="344" x2="940" y2="344" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Footer: Camera coverage summary -->
+  <text x="30" y="366" font-size="10" font-weight="600" fill="#444">Camera coverage:</text>
+  <rect x="130" y="354" width="50" height="18" rx="3" fill="#E6F1FB"/>
+  <text x="155" y="367" text-anchor="middle" font-size="9" font-weight="500" fill="#0C447C">Canon</text>
+  <rect x="186" y="354" width="52" height="18" rx="3" fill="#EEEDFE"/>
+  <text x="212" y="367" text-anchor="middle" font-size="9" font-weight="500" fill="#3C3489">Topcon</text>
+  <rect x="244" y="354" width="46" height="18" rx="3" fill="#E1F5EE"/>
+  <text x="267" y="367" text-anchor="middle" font-size="9" font-weight="500" fill="#085041">Kowa</text>
+  <rect x="296" y="354" width="46" height="18" rx="3" fill="#FAECE7"/>
+  <text x="319" y="367" text-anchor="middle" font-size="9" font-weight="500" fill="#712B13">Zeiss</text>
+  <text x="354" y="367" font-size="10" fill="#888">&#8212; 4 manufacturers across 7 datasets</text>
+
+  <text x="30" y="388" font-size="10" fill="#888">Total labeled images across active datasets: ~63,529. Populations: US, Indian, French, Chinese.</text>
+</svg>

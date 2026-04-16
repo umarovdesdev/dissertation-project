@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <rect width="640" height="360" fill="white" rx="6"/>
+  <rect x="0" y="0" width="6" height="360" fill="#1D9E75" rx="3 0 0 3"/>
+
+  <!-- Header -->
+  <text x="24" y="30" font-size="18" font-weight="700" fill="#1a1a2e">IDRiD</text>
+  <rect x="70" y="16" width="58" height="20" rx="4" fill="#E1F5EE"/>
+  <text x="99" y="30" text-anchor="middle" font-size="10" font-weight="600" fill="#085041">Clinical</text>
+  <text x="24" y="48" font-size="11" fill="#888">516 images + 81 with pixel-level lesion masks · Multi-purpose clinical validation</text>
+  <line x1="24" y1="58" x2="616" y2="58" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Metadata grid -->
+  <text x="24" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">CAMERA</text>
+  <text x="24" y="94" font-size="11" fill="#333" font-weight="500">Kowa VX-10&#945; (mydriatic)</text>
+
+  <text x="240" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FOV</text>
+  <text x="240" y="94" font-size="11" fill="#333" font-weight="500">50°</text>
+
+  <text x="340" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">FORMAT</text>
+  <text x="340" y="94" font-size="11" fill="#333" font-weight="500">JPEG</text>
+
+  <text x="440" y="80" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">SOURCE</text>
+  <text x="440" y="94" font-size="11" fill="#333" font-weight="500">IEEE DataPort (CC-BY 4.0)</text>
+
+  <text x="24" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">RESOLUTION</text>
+  <text x="24" y="132" font-size="11" fill="#333" font-weight="500">4288&#215;2848</text>
+
+  <text x="240" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">TAXONOMY</text>
+  <text x="240" y="132" font-size="11" fill="#333" font-weight="500">5-class ICDR + pixel-level lesion masks</text>
+
+  <text x="500" y="118" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">POPULATION</text>
+  <text x="500" y="132" font-size="11" fill="#333" font-weight="500">Indian (Nanded)</text>
+
+  <line x1="24" y1="146" x2="616" y2="146" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Lesion masks -->
+  <text x="24" y="166" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">PIXEL-LEVEL LESION MASKS (81 images)</text>
+  <rect x="24" y="174" width="118" height="18" rx="3" fill="#1D9E75"/>
+  <text x="83" y="187" text-anchor="middle" font-size="9" fill="white" font-weight="500">Microaneurysms (MA)</text>
+  <rect x="148" y="174" width="110" height="18" rx="3" fill="#1D9E75"/>
+  <text x="203" y="187" text-anchor="middle" font-size="9" fill="white" font-weight="500">Hemorrhages (HE)</text>
+  <rect x="264" y="174" width="110" height="18" rx="3" fill="#1D9E75"/>
+  <text x="319" y="187" text-anchor="middle" font-size="9" fill="white" font-weight="500">Hard Exudates (EX)</text>
+  <rect x="380" y="174" width="106" height="18" rx="3" fill="#1D9E75"/>
+  <text x="433" y="187" text-anchor="middle" font-size="9" fill="white" font-weight="500">Soft Exudates (SE)</text>
+
+  <line x1="24" y1="202" x2="616" y2="202" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Role -->
+  <text x="24" y="222" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">ROLE IN DISSERTATION</text>
+  <text x="24" y="238" font-size="11" fill="#444">CLAHE parameter sweep (Exp 2), explainability with Grad-CAM ALO/IoU (Exp 4),</text>
+  <text x="24" y="252" font-size="11" fill="#444">and cross-dataset transfer evaluation (Exp 5). Only dataset with lesion masks.</text>
+
+  <!-- Split strategy -->
+  <text x="24" y="276" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">SPLIT</text>
+  <text x="24" y="292" font-size="11" fill="#444">413 train / 103 test (author-provided). Used as evaluation set — not retrained.</text>
+
+  <line x1="24" y1="306" x2="616" y2="306" stroke="#E8E8E6" stroke-width="1"/>
+
+  <!-- Experiments -->
+  <text x="24" y="326" font-size="9" fill="#999" font-weight="600" letter-spacing="0.5">EXPERIMENTS</text>
+  <rect x="24" y="332" width="100" height="18" rx="4" fill="#E1F5EE"/>
+  <text x="74" y="345" text-anchor="middle" font-size="9" font-weight="500" fill="#085041">Exp 2 (H-2)</text>
+  <rect x="130" y="332" width="100" height="18" rx="4" fill="#E1F5EE"/>
+  <text x="180" y="345" text-anchor="middle" font-size="9" font-weight="500" fill="#085041">Exp 4 (H-5)</text>
+  <rect x="236" y="332" width="100" height="18" rx="4" fill="#E1F5EE"/>
+  <text x="286" y="345" text-anchor="middle" font-size="9" font-weight="500" fill="#085041">Exp 5 (H-4)</text>
+</svg>

@@ -13,12 +13,12 @@ export const C = {
 // Exp 1: 4 configurations (A–D)
 export const CONFIGS = {
   A: { f1: 0.724, f1s: 0.011, auc: 0.830, aucs: 0.014, k: 0.618, ks: 0.035, acc: 0.717, lbl: 'Baseline (3ch) + ResNet-50', preprocessing: 'Baseline (3ch)', cnn: 'ResNet-50' },
-  B: { f1: 0.776, f1s: 0.009, auc: 0.863, aucs: 0.011, k: 0.698, ks: 0.026, acc: 0.768, lbl: 'Full V5 Pipeline (4ch) + ResNet-50', preprocessing: 'Full V5', cnn: 'ResNet-50' },
+  B: { f1: 0.776, f1s: 0.009, auc: 0.863, aucs: 0.011, k: 0.698, ks: 0.026, acc: 0.768, lbl: 'Pipeline (4ch) + ResNet-50', preprocessing: 'Pipeline', cnn: 'ResNet-50' },
   C: { f1: 0.727, f1s: 0.033, auc: 0.821, aucs: 0.019, k: 0.620, ks: 0.067, acc: 0.719, lbl: 'Baseline (3ch) + EfficientNet-B3', preprocessing: 'Baseline (3ch)', cnn: 'EfficientNet-B3' },
-  D: { f1: 0.780, f1s: 0.022, auc: 0.865, aucs: 0.015, k: 0.700, ks: 0.030, acc: 0.770, lbl: 'Full V5 Pipeline (4ch) + EfficientNet-B3', preprocessing: 'Full V5', cnn: 'EfficientNet-B3' },
+  D: { f1: 0.780, f1s: 0.022, auc: 0.865, aucs: 0.015, k: 0.700, ks: 0.030, acc: 0.770, lbl: 'Pipeline (4ch) + EfficientNet-B3', preprocessing: 'Pipeline', cnn: 'EfficientNet-B3' },
 };
 
-// Exp 2: Cumulative ablation — 8 rows (V5 pipeline stages)
+// Exp 2: Cumulative ablation — 8 rows (pipeline stages)
 export const ABL = [
   { n: 'Baseline (stretch-resize + ImageNet norm, 3ch)', f1: 0.727, auc: 0.821 },
   { n: '+Canonical flip (Stage 0)', f1: 0.738, auc: 0.830 },
@@ -27,7 +27,7 @@ export const ABL = [
   { n: '+Flat-field correction (Stage 4)', f1: 0.758, auc: 0.848 },
   { n: '+CLAHE enhancement (Stage 5)', f1: 0.772, auc: 0.858 },
   { n: '+Augmentation (Stage 6)', f1: 0.778, auc: 0.863 },
-  { n: 'Full V5 pipeline (all stages)', f1: 0.780, auc: 0.865 },
+  { n: 'Full pipeline (all stages)', f1: 0.780, auc: 0.865 },
 ];
 
 // Exp 2: Individual ablation — each stage added independently to baseline
@@ -102,7 +102,7 @@ export const DEGRADATION = [
 // Exp 7: Small data training (IDRiD → Clinical)
 export const SMALL_DATA = [
   { condition: 'Baseline (3ch)', idrid_f1: 0.585, idrid_std: 0.038, clinical_f1: 0.515, clinical_auc: 0.742 },
-  { condition: 'Full V5 (4ch)', idrid_f1: 0.652, idrid_std: 0.031, clinical_f1: 0.608, clinical_auc: 0.812 },
+  { condition: 'Pipeline (4ch)', idrid_f1: 0.652, idrid_std: 0.031, clinical_f1: 0.608, clinical_auc: 0.812 },
 ];
 
 // Exp 2: Flat-field σ sweep
@@ -169,17 +169,17 @@ export const IQ = [
 export const CLAHE1 = [[.32,.35,.37,.36,.34],[.36,.39,.41,.40,.38],[.38,.42,.44,.43,.41],[.40,.44,.47,.46,.43],[.39,.43,.45,.44,.42],[.37,.41,.43,.42,.40],[.35,.38,.40,.39,.37]];
 export const CLAHE2 = [[.48,.51,.53,.52,.50],[.52,.55,.58,.57,.54],[.54,.58,.62,.61,.57],[.53,.57,.60,.59,.56],[.51,.55,.57,.56,.54],[.49,.53,.55,.54,.52],[.47,.50,.52,.51,.49]];
 
-// Pipeline stages — V5 8-stage pipeline + raw input = 9 entries
+// Pipeline stages — 8-stage pipeline + raw input = 9 entries
 export const PIPE = [
   { id: 0, nm: 'Raw input', desc: 'Original fundus photographs. Variable illumination, vignetting, different eye orientations. Canon CR-1 at EyePACS.', detail: 'Resolution: 3888×2592, 8-bit RGB JPEG' },
   { id: 1, nm: 'Stage 0: Canonical flip', desc: 'Left eyes (OS) horizontally flipped to right-eye (OD) orientation. Optic disc consistently on the right side. Deterministic — not random augmentation.', detail: 'If OS detected → np.fliplr(). OD → passthrough.' },
   { id: 2, nm: 'Stage 1: OD-fovea rotation', desc: 'Detect optic disc (brightest region) and fovea (darkest in annular zone). Rotate so OD→fovea axis is horizontal. Normalizes retinal orientation across cameras.', detail: 'OD: Gaussian-blurred green ch, 97th percentile. Fovea: annular search 1.5–3.5× OD-radius. Fallback if low confidence.' },
-  { id: 3, nm: 'Stage 2: FOV crop + isotropic resize', desc: 'Detect circular FOV boundary, crop and resize to 512×512 with zero-padding to preserve aspect ratio. Eliminates device-specific border artifacts.', detail: 'Green channel threshold → largest contour → bounding circle. Isotropic resize + zero-pad to 512×512 (V5 change from stretch-resize).' },
+  { id: 3, nm: 'Stage 2: FOV crop + isotropic resize', desc: 'Detect circular FOV boundary, crop and resize to 512×512 with zero-padding to preserve aspect ratio. Eliminates device-specific border artifacts.', detail: 'Green channel threshold → largest contour → bounding circle. Isotropic resize + zero-pad to 512×512 (replaces stretch-resize).' },
   { id: 4, nm: 'Stage 3: FOV mask generation', desc: 'Generate binary FOV mask (1=retinal pixels, 0=background). Used as the 4th input channel to the CNN — provides spatial boundary information.', detail: 'Binary mask from Stage 2 FOV detection. Appended to RGB → 4-channel (RGBM) tensor input.' },
-  { id: 5, nm: 'Stage 4: Adaptive flat-field correction', desc: 'Remove illumination gradients using adaptive Gaussian σ = 0.07×D (D = FOV diameter). Preserves vessel and lesion detail while normalizing device-specific illumination.', detail: 'σ = 0.07 × FOV_diameter. V5 change from fixed σ=45 to adaptive σ proportional to FOV size.' },
+  { id: 5, nm: 'Stage 4: Adaptive flat-field correction', desc: 'Remove illumination gradients using adaptive Gaussian σ = 0.07×D (D = FOV diameter). Preserves vessel and lesion detail while normalizing device-specific illumination.', detail: 'σ = 0.07 × FOV_diameter. Adaptive σ proportional to FOV size (replaces fixed σ=45).' },
   { id: 6, nm: 'Stage 5: CLAHE (dual-constraint)', desc: 'Adaptive histogram equalization on LAB L-channel. clip_limit = min(clip_factor×tile_area/256, global_threshold×tile_area). Stochastic 80% during training.', detail: 'Tile: 8×8. Parameters from Exp 2 sweep. Stochastic = regularization. Dual-constraint prevents OD over-enhancement.' },
   { id: 7, nm: 'Stage 6: Augmentation (train only)', desc: 'Integrated affine augmentation: 360° rotation (circular FOV), flips, adaptive PCA color jitter, brightness/contrast. Applied only during training, never at inference.', detail: '360° rotation valid because circular FOV. Rotation magnitude σ_θ adapted from Stage 1 OD-fovea detection confidence.' },
-  { id: 8, nm: 'Stage 7: Dataset-specific normalize → 4ch', desc: 'Dataset-specific channel-wise normalization statistics (not fixed ImageNet stats). Stack RGB + FOV mask → 4-channel tensor input to CNN.', detail: 'V5 change: dataset-specific mean/std computed from EyePACS training set. Output: 4ch (RGBM) tensor at 512×512.' },
+  { id: 8, nm: 'Stage 7: Dataset-specific normalize → 4ch', desc: 'Dataset-specific channel-wise normalization statistics (not fixed ImageNet stats). Stack RGB + FOV mask → 4-channel tensor input to CNN.', detail: 'Dataset-specific mean/std computed from EyePACS training set. Output: 4ch (RGBM) tensor at 512×512.' },
 ];
 
 // Computational metrics
@@ -283,7 +283,13 @@ export const DATASETS = [
     taxonomy: '5-class ICDR (DR 0–4) + pixel-level lesion masks', taxonomyMapping: null,
     source: 'IEEE DataPort', availability: 'Public (CC-BY 4.0)',
     population: 'Indian (Sushrusha Hospital, Nanded, Maharashtra, 2009–2017)',
-    classDistribution: null,
+    classDistribution: {
+      'DR 0': { count: 168, pct: 32.6 },
+      'DR 1': { count: 25, pct: 4.8 },
+      'DR 2': { count: 168, pct: 32.6 },
+      'DR 3': { count: 93, pct: 18.0 },
+      'DR 4': { count: 62, pct: 12.0 },
+    },
     role: 'Multi-purpose clinical validation dataset: CLAHE parameter sweep (Exp 2), explainability analysis with pixel-level lesion masks (Exp 4), and cross-dataset transfer target (Exp 5).',
     whyChosen: [
       'ONLY publicly available dataset with pixel-level lesion segmentation masks for 4 lesion types (microaneurysms, hemorrhages, hard exudates, soft exudates) — essential for Grad-CAM ALO/IoU evaluation',
@@ -316,7 +322,13 @@ export const DATASETS = [
     taxonomyMapping: 'Messidor grade 0→DR 0, grade 1→DR 1, grade 2→DR 2. Grades 3–4 not directly available — binary referable/non-referable used for clinical screening evaluation.',
     source: 'ADCIS (upon registration)', availability: 'Public (registration required)',
     population: 'French (ophthalmology departments in Brest, Dijon, and Paris)',
-    classDistribution: null,
+    classDistribution: {
+      'DR 0': { count: 1017, pct: 58.3 },
+      'DR 1': { count: 270, pct: 15.5 },
+      'DR 2': { count: 347, pct: 19.9 },
+      'DR 3': { count: 75, pct: 4.3 },
+      'DR 4': { count: 35, pct: 2.0 },
+    },
     role: 'External generalization target for Experiment 5 (H-4). Model trained on EyePACS is evaluated on Messidor-2 without retraining to compute generalization ratio G.',
     whyChosen: [
       'Different camera manufacturer (Topcon) from training data (Canon CR-1) — genuine cross-device evaluation',
@@ -342,7 +354,13 @@ export const DATASETS = [
     taxonomyMapping: 'DDR grade 5 (ungradable) excluded. Grades 0–4 map directly to ICDR 0–4.',
     source: 'GitHub (Li et al., 2019)', availability: 'Public',
     population: 'Chinese (multi-centre hospital collection)',
-    classDistribution: null,
+    classDistribution: {
+      'DR 0': { count: 6266, pct: 50.0 },
+      'DR 1': { count: 630, pct: 5.0 },
+      'DR 2': { count: 4477, pct: 35.8 },
+      'DR 3': { count: 236, pct: 1.9 },
+      'DR 4': { count: 913, pct: 7.3 },
+    },
     role: 'Device domain shift evaluation for Experiment 6 (H-6). Tests cross-camera performance with mixed Canon+Topcon acquisition.',
     whyChosen: [
       'Contains images from BOTH Canon and Topcon cameras — tests performance when training domain (Canon CR-1) partially overlaps with test device mix',
@@ -367,7 +385,12 @@ export const DATASETS = [
     taxonomyMapping: 'Keyword-to-grade mapping: "proliferative DR"→4, "severe DR"→3, "moderate DR"→2, "mild DR"→1, unqualified "DR"→2 (conservative), "laser spot"→4. Non-DR eyes of DR patients excluded.',
     source: 'Peking University (ODIR competition)', availability: 'Public',
     population: 'Chinese (multi-hospital, Beijing)',
-    classDistribution: null,
+    classDistribution: {
+      'DR 1': { count: 549, pct: 30.2 },
+      'DR 2': { count: 1056, pct: 58.1 },
+      'DR 3': { count: 161, pct: 8.9 },
+      'DR 4': { count: 52, pct: 2.9 },
+    },
     role: 'Device domain shift evaluation for Experiment 6 (H-6). Tests cross-camera performance with Canon+Zeiss acquisition — Zeiss cameras are not present in any other dataset.',
     whyChosen: [
       'Contains Zeiss camera images — the ONLY dataset in our architecture with Zeiss acquisition, providing maximum device diversity',
@@ -393,7 +416,10 @@ export const DATASETS = [
     taxonomyMapping: 'Uses binary DR label only (0 = no DR, 1 = DR present). 5-class severity grading not available — evaluated as binary classification or excluded from per-class analysis.',
     source: 'IEEE DataPort', availability: 'Public',
     population: 'Indian (multi-centre)',
-    classDistribution: null,
+    classDistribution: {
+      'DR absent': { count: 2568, pct: 80.3 },
+      'DR present': { count: 632, pct: 19.8 },
+    },
     role: 'Device domain shift evaluation for Experiment 6 (H-6). Tests cross-camera performance with Topcon+Kowa acquisition.',
     whyChosen: [
       'Contains BOTH Topcon and Kowa cameras — matches the camera from IDRiD (Kowa) and Messidor-2 (Topcon) in a single dataset',
@@ -417,6 +443,101 @@ export const CAMERA_GROUPS = {
   'Zeiss':  ['ODIR-5K'],
 };
 
+// Resolution-based camera analysis — computed from actual image files
+export const RESOLUTION_ANALYSIS = {
+  'EyePACS': {
+    total: 35126, uniqueResolutions: 22, camera: 'Canon CR-1',
+    note: 'Single camera, multiple settings/modes',
+    groups: [
+      { res: '3888×2592', count: 594, pctSampled: 29.7, note: 'Canon CR-1 standard' },
+      { res: '4752×3168', count: 332, pctSampled: 16.6 },
+      { res: '2560×1920', count: 250, pctSampled: 12.5 },
+      { res: '2592×1944', count: 232, pctSampled: 11.6 },
+      { res: '3504×2336', count: 212, pctSampled: 10.6 },
+    ],
+    sampled: 2000,
+  },
+  'IDRiD': {
+    total: 516, uniqueResolutions: 1, camera: 'Kowa VX-10α',
+    note: 'Single camera, single resolution — most uniform dataset',
+    groups: [
+      { res: '4288×2848', count: 516, pct: 100.0, note: 'Kowa VX-10α native' },
+    ],
+  },
+  'Messidor-2': {
+    total: 1748, uniqueResolutions: 3, camera: 'Topcon TRC NW6',
+    note: '3 resolutions = 3 French ophthalmology centres (Brest, Dijon, Paris)',
+    groups: [
+      { res: '2240×1488', count: 616, pct: 35.2, note: 'Centre A' },
+      { res: '2304×1536', count: 604, pct: 34.6, note: 'Centre B' },
+      { res: '1440×960',  count: 528, pct: 30.2, note: 'Centre C' },
+    ],
+  },
+  'DDR': {
+    total: 13673, uniqueResolutions: 132, camera: 'Canon + Topcon (mixed)',
+    note: '132 unique resolutions — strongest evidence of multi-device acquisition',
+    groups: [
+      { res: '2592×1728', count: 2265, pct: 16.6 },
+      { res: '2736×1824', count: 2191, pct: 16.0 },
+      { res: '2048×1536', count: 1682, pct: 12.3 },
+      { res: '2304×1728', count: 1120, pct: 8.2 },
+      { res: '3888×2592', count: 677, pct: 5.0, note: 'Matches EyePACS Canon CR-1' },
+      { res: '3264×2448', count: 640, pct: 4.7 },
+      { res: '2960×2935', count: 556, pct: 4.1 },
+      { res: '1956×1934', count: 482, pct: 3.5 },
+      { res: '1380×1382', count: 431, pct: 3.2 },
+      { res: '2992×2000', count: 387, pct: 2.8 },
+    ],
+  },
+  'ODIR-5K': {
+    total: 7000, uniqueResolutions: 101, camera: 'Canon + Zeiss (mixed)',
+    note: '101 unique resolutions — multi-hospital Beijing collection',
+    groups: [
+      { res: '2592×1728', count: 2146, pct: 30.7, note: 'Dominant group' },
+      { res: '2048×1536', count: 524, pct: 7.5 },
+      { res: '2304×1728', count: 424, pct: 6.1 },
+      { res: '1956×1934', count: 390, pct: 5.6 },
+      { res: '2736×1824', count: 344, pct: 4.9 },
+      { res: '1936×1296', count: 284, pct: 4.1 },
+      { res: '1444×1444', count: 267, pct: 3.8, note: 'Square — likely Zeiss' },
+      { res: '3456×2304', count: 258, pct: 3.7 },
+      { res: '2976×1984', count: 212, pct: 3.0 },
+      { res: '1536×1152', count: 198, pct: 2.8 },
+    ],
+  },
+  'RFMiD': {
+    total: 3200, uniqueResolutions: 3, camera: 'Topcon + Kowa (mixed)',
+    note: 'Only 3 resolutions — camera split identifiable',
+    groups: [
+      { res: '2144×1424', count: 2427, pct: 75.8, note: 'Likely Topcon' },
+      { res: '4288×2848', count: 497, pct: 15.5, note: 'Matches IDRiD Kowa VX-10α exactly' },
+      { res: '2048×1536', count: 276, pct: 8.6, note: 'Likely Topcon (alt. model)' },
+    ],
+  },
+  'APTOS 2019': {
+    total: 3662, uniqueResolutions: 17, camera: 'Various (unspecified)',
+    note: '17 resolutions — multiple unidentified camera sources',
+    groups: [
+      { res: '1050×1050', count: 974, pct: 26.6, note: 'Square crop — post-processed?' },
+      { res: '2416×1736', count: 638, pct: 17.4 },
+      { res: '2588×1958', count: 533, pct: 14.6 },
+      { res: '3216×2136', count: 410, pct: 11.2 },
+      { res: '2048×1536', count: 351, pct: 9.6 },
+      { res: '819×614',   count: 287, pct: 7.8, note: 'Low resolution' },
+      { res: '3388×2588', count: 141, pct: 3.9 },
+    ],
+  },
+  'Clinical': {
+    total: 60, uniqueResolutions: 3, camera: 'Topcon-type (inferred)',
+    note: 'Same 3 resolutions as Messidor-2 — same camera model family',
+    groups: [
+      { res: '2240×1488', count: 23, pct: 38.3, note: 'Matches Messidor-2 Centre A' },
+      { res: '2304×1536', count: 21, pct: 35.0, note: 'Matches Messidor-2 Centre B' },
+      { res: '1440×960',  count: 16, pct: 26.7, note: 'Matches Messidor-2 Centre C' },
+    ],
+  },
+};
+
 export const DATASET_TIERS = [
   { name: 'Training', color: 'blue', description: 'Primary training and evaluation', datasets: ['EyePACS'] },
   { name: 'Transfer', color: 'blue', description: 'Cross-dataset transferability (H-4)', datasets: ['APTOS 2019'] },
@@ -428,7 +549,7 @@ export const DATASET_TIERS = [
 // Hypotheses — 6 active, all confirmed
 export const HYPOTHESES = [
   { id: 'H-1', name: 'Preprocessing Dominance', exp: 'Exp 1', status: '✓ Confirmed', detail: 'ResNet-50: ΔF1=+5.2pp (p=0.006); EfficientNet-B3: ΔF1=+5.3pp (p=0.008) — EH-3 satisfied for both architectures' },
-  { id: 'H-2', name: 'V5 Component Ablation + CLAHE/σ', exp: 'Exp 2', status: '✓ Confirmed', detail: 'Local optimum at clip_factor=2.5/2.0, threshold=0.03; σ=0.07·D' },
+  { id: 'H-2', name: 'Component Ablation + CLAHE/σ', exp: 'Exp 2', status: '✓ Confirmed', detail: 'Local optimum at clip_factor=2.5/2.0, threshold=0.03; σ=0.07·D' },
   { id: 'H-4', name: 'Cross-Dataset Transfer (APTOS)', exp: 'Exp 3', status: '✓ Confirmed', detail: 'G=0.890 on APTOS 2019 (threshold ≥ 0.85)' },
   { id: 'H-5', name: 'Explainability (ALO)', exp: 'Exp 4', status: '✓ Confirmed', detail: 'ALO +31–61% across all lesion types' },
   { id: 'H-6', name: 'Device Domain Shift', exp: 'Exp 6', status: '✓ Confirmed', detail: 'Cross-device variance −46%' },

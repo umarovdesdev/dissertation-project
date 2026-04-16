@@ -1,4 +1,4 @@
-# V5 Data Processing Pipeline — Comprehensive Specification
+# Data Processing Pipeline — Comprehensive Specification
 
 **Dissertation:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification  
 **Candidate:** Yesmukhamedov N.S.  
@@ -17,7 +17,7 @@ $$
 
 The preprocessing pipeline is not an ancillary data preparation step — it is an integral model component that defines the feature space available to the CNN classifier. The pipeline standardizes retinal image appearance across imaging devices, illumination conditions, and acquisition protocols while preserving diagnostically relevant microvascular features.
 
-The V5 pipeline comprises **eight ordered stages** (Stages 0–7). All stages are **always-on** except Stage 6 (augmentation, train-only). The pipeline processes raw fundus photographs into 4-channel CNN-ready tensors (3 RGB channels + 1 FOV mask channel).
+The pipeline comprises **eight ordered stages** (Stages 0–7). All stages are **always-on** except Stage 6 (augmentation, train-only). The pipeline processes raw fundus photographs into 4-channel CNN-ready tensors (3 RGB channels + 1 FOV mask channel).
 
 ---
 
@@ -43,7 +43,7 @@ Stage 6 (augmentation) is inserted **before** Stage 7 (normalization) because au
 | Configuration | Stages Active | Input Channels | Role |
 |---------------|---------------|----------------|------|
 | **Baseline (Exp 1 A/C)** | Stretch-resize + ImageNet normalize | 3 (RGB only) | Control condition for H-1 |
-| **Full V5 (Exp 1 B/D)** | 0–7 (all) | 4 (RGB + FOV mask) | Experimental condition for H-1 |
+| **Pipeline (Exp 1 B/D)** | 0–7 (all) | 4 (RGB + FOV mask) | Experimental condition for H-1 |
 | **Ablation levels (Exp 2)** | Incremental subsets | 4 | Component contribution |
 
 ### 2.3 Global Variable Definitions
@@ -97,7 +97,7 @@ Stage 6 (augmentation) is inserted **before** Stage 7 (normalization) because au
 3. Scale isotropically so that 2R maps to 512 pixels (preserving aspect ratio)
 4. Zero-pad to exactly 512×512 (centered)
 
-**Contrast with baseline:** Baseline uses direct stretch-resize (non-isotropic), distorting fundus geometry. V5 isotropic resize preserves the circular fundus shape.
+**Contrast with baseline:** Baseline uses direct stretch-resize (non-isotropic), distorting fundus geometry. isotropic resize preserves the circular fundus shape.
 
 **Output:** RGB uint8 image, exactly 512×512 pixels.
 
@@ -124,7 +124,7 @@ Stage 6 (augmentation) is inserted **before** Stage 7 (normalization) because au
 - Subtract background: $I' = I - B + 128$
 - Clip to valid range [0, 255]
 
-**Key parameter:** σ = 0.07·D, where D is the FOV diameter. Adaptive to image geometry — larger FOV images use a wider blur kernel, smaller FOV images use a narrower kernel. This is the primary V5 improvement over V4 (which used fixed σ=45).
+**Key parameter:** σ = 0.07·D, where D is the FOV diameter. Adaptive to image geometry — larger FOV images use a wider blur kernel, smaller FOV images use a narrower kernel. Adaptive σ replaces fixed σ=45, making the correction scale-invariant.
 
 **Output:** RGB uint8 image, 512×512.
 
@@ -171,7 +171,7 @@ Applied only during training. At inference: no augmentation (deterministic pipel
 2. Normalize per channel: $(x - \mu_c) / \sigma_c$ using training-set statistics
 3. Append FOV mask M as channel 4: tensor shape (4, 512, 512)
 
-**V5 vs baseline:** Baseline uses ImageNet statistics (μ=[0.485, 0.456, 0.406], σ=[0.229, 0.224, 0.225]) for 3-channel input. V5 uses dataset-specific statistics for 4-channel input.
+**Pipeline vs baseline:** Baseline uses ImageNet statistics (μ=[0.485, 0.456, 0.406], σ=[0.229, 0.224, 0.225]) for 3-channel input. Pipeline uses dataset-specific statistics for 4-channel input.
 
 **Output:** float32 tensor, shape (4, 512, 512), CNN-ready.
 
@@ -192,7 +192,7 @@ Sweep is performed on EyePACS per-class F1 (DR Grades 1 and 2 as primary targets
 
 ## 5. Ablation Levels (Experiment 2)
 
-V5 ablation tests 7 incremental configurations:
+Ablation tests 7 incremental configurations:
 
 | Level | Configuration | Channels |
 |-------|--------------|----------|
@@ -202,7 +202,7 @@ V5 ablation tests 7 incremental configurations:
 | 3 | + Isotropic resize (Stage 2 → Stage 3 → Stage 7) | 4 |
 | 4 | + Flat-field correction (Stage 4) | 4 |
 | 5 | + CLAHE (Stage 5) | 4 |
-| 6 | Full V5 (all stages incl. augmentation Stage 6) | 4 |
+| 6 | Pipeline (all stages incl. augmentation Stage 6) | 4 |
 
 ---
 
@@ -214,8 +214,8 @@ Sweep over flat-field correction sigma multiplier to validate adaptive parameter
 |-----------|-------|------|
 | σ multiplier (× D) | 0.05 – 0.10 | 0.01 |
 
-Fixed at σ=0.07·D for the canonical V5 pipeline.
+Fixed at σ=0.07·D for the canonical pipeline.
 
 ---
 
-*End of V5 Pipeline Specification — Version 5.0*
+*End of Pipeline Specification*

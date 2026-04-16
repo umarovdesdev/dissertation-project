@@ -10,7 +10,7 @@ export default function ModelArchitecture() {
         <DiagramViewer
           src={process.env.PUBLIC_URL + '/diagrams/dr_diagnosis_system_architecture.svg'}
           alt="DR Diagnosis System Architecture"
-          caption="Full system architecture: fundus image input → V5 8-stage preprocessing pipeline → CNN backbone → 5-class DR grade output."
+          caption="Full system architecture: fundus image input → 8-stage preprocessing pipeline → CNN backbone → 5-class DR grade output."
           tooltip="tooltip.arch_diagram"
         />
       </Sec>
@@ -21,7 +21,7 @@ export default function ModelArchitecture() {
           <div><strong>Batch:</strong> ŷ<sub>i</sub> = f(CNN(P(I<sub>i</sub>))) for each image I<sub>i</sub> independently</div>
         </div>
         <Note>
-          P(·) — V5 8-stage preprocessing pipeline. CNN — backbone (ResNet-50 or EfficientNet-B3).
+          P(·) — 8-stage preprocessing pipeline. CNN — backbone (ResNet-50 or EfficientNet-B3).
           g — classification head (FC + softmax).
           The pipeline P is an integral component of the model, not a data preparation step.
         </Note>
