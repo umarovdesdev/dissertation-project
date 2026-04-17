@@ -108,7 +108,13 @@
       "Bash(wsl -e bash -c \"ls ~/miniconda3/bin/conda 2>/dev/null || ls ~/anaconda3/bin/conda 2>/dev/null || ls ~/miniforge3/bin/conda 2>/dev/null || find /home -name 'conda' -type f 2>/dev/null | head -3 || echo 'not found'\")",
       "Bash(python3 *)",
       "Bash(du *)",
-      "Bash(wc *)"
+      "Bash(wc *)",
+      "Bash(where inkscape *)",
+      "Bash(where chrome *)",
+      "Bash(where wkhtmltopdf *)",
+      "Bash(where rsvg-convert *)",
+      "Bash(where \"C:/Program Files/Google/Chrome/Application/chrome.exe\")",
+      "Bash(/c/Program Files/Google/Chrome/Application/chrome.exe *)"
     ]
   }
 }
