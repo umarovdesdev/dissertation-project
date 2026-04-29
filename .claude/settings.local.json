@@ -114,7 +114,19 @@
       "Bash(where wkhtmltopdf *)",
       "Bash(where rsvg-convert *)",
       "Bash(where \"C:/Program Files/Google/Chrome/Application/chrome.exe\")",
-      "Bash(/c/Program Files/Google/Chrome/Application/chrome.exe *)"
+      "Bash(/c/Program Files/Google/Chrome/Application/chrome.exe *)",
+      "Bash(grep -E \"\\\\.\\(py|yaml|json\\)$\")",
+      "Read(//e/datasets//**)",
+      "Read(//e/datasets/**)",
+      "PowerShell($train = \\(Get-ChildItem \"E:\\\\datasets\\\\IDRiD\\\\C. Localization\\\\1. Original Images\\\\a. Training Set\" -File\\).Count; $test = \\(Get-ChildItem \"E:\\\\datasets\\\\IDRiD\\\\C. Localization\\\\1. Original Images\\\\b. Testing Set\" -File\\).Count; \"Localization - Train: $train, Test: $test\")",
+      "PowerShell(Test-Path *)",
+      "PowerShell(Get-ChildItem \"E:\\\\datasets\\\\DDR\\\\DDR_dataset\\\\DDR-dataset\" -Force | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem \"E:\\\\datasets\\\\downloaded\" -Force -Recurse -Depth 2 | Where-Object { $_.Name -match \"fovea|optic|disc|OD_|localiz\" -or $_.Name -match \"Fovea|Optic|Disc|Localiz\" } | Select-Object FullName)",
+      "PowerShell(Get-ChildItem \"E:\\\\datasets\\\\downloaded\" -Force | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem \"E:\\\\datasets\" -Force -Recurse -Depth 4 | Where-Object { $_.Name -match \"\\(?i\\)fovea|optic|OD_Center|localiz\" } | Select-Object FullName)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(python E:\\\\dissertation-project\\\\demo\\\\generate_charts_29_30.py)",
+      "Bash(CI=true npx --no-install eslint src --no-eslintrc --parser-options=ecmaVersion:2022,sourceType:module,ecmaFeatures:{jsx:true} --plugin react --rule '{\"no-undef\": \"off\"}')"
     ]
   }
 }

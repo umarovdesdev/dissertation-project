@@ -1,0 +1,23 @@
+{
+  "description": "OD and Fovea centers detected from user Paint annotations (black=OD, purple=Fovea). Image center and midpoint computed automatically.",
+  "dr00": {
+    "left":  { "od": [1073, 587],  "fovea": [631, 633],   "image": [640, 640],   "midpoint": [852, 610],   "size": [1280, 1280], "angle_deg": -5.94 },
+    "right": { "od": [1053, 629],  "fovea": [648, 638],   "image": [640, 640],   "midpoint": [850, 633],   "size": [1280, 1280], "angle_deg": -1.27 }
+  },
+  "dr01": {
+    "left":  { "od": [1055, 739],  "fovea": [558, 767],   "image": [727, 727],   "midpoint": [806, 753],   "size": [1455, 1455], "angle_deg": -3.22 },
+    "right": { "od": [1023, 635],  "fovea": [540, 764],   "image": [727, 727],   "midpoint": [781, 699],   "size": [1455, 1455], "angle_deg": -14.95 }
+  },
+  "dr02": {
+    "left":  { "od": [1715, 1112], "fovea": [878, 1124],  "image": [1156, 1156], "midpoint": [1296, 1118], "size": [2313, 2313], "angle_deg": -0.82 },
+    "right": { "od": [1715, 1044], "fovea": [892, 1102],  "image": [1156, 1156], "midpoint": [1303, 1073], "size": [2312, 2312], "angle_deg": -4.03 }
+  },
+  "dr03": {
+    "left":  { "od": [1027, 665],  "fovea": [509, 740],   "image": [690, 690],   "midpoint": [768, 702],   "size": [1381, 1381], "angle_deg": -8.24 },
+    "right": { "od": [1156, 647],  "fovea": [680, 700],   "image": [690, 690],   "midpoint": [918, 673],   "size": [1381, 1381], "angle_deg": -6.35 }
+  },
+  "dr04": {
+    "left":  { "od": [2640, 1661], "fovea": [1660, 1791], "image": [1709, 1709], "midpoint": [2150, 1726], "size": [3419, 3419], "angle_deg": -7.56 },
+    "right": { "od": [2844, 1575], "fovea": [1853, 1640], "image": [1719, 1719], "midpoint": [2348, 1607], "size": [3439, 3439], "angle_deg": -3.75 }
+  }
+}

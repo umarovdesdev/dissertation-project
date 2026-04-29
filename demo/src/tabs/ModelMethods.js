@@ -83,8 +83,8 @@ function Stage0a() {
         is consistently positioned on the right side of every image in the dataset.
       </p>
       <ImageWithTooltip
-        src="/pipeline/method_canonical_flip.png"
-        caption="Left: raw left-eye image (OD on left). Centre: after canonical flip (OD on right). Right: raw right-eye image (OD on right, no flip needed). All training images are normalised to this orientation."
+        src="/pipeline/dr04/preprocessing/stage_0_canonical_flip/left.png"
+        caption="Left-eye image after canonical flip — optic disc now positioned on the right side, matching right-eye orientation. All training images are normalised to this canonical layout. (DR Grade 4 example)"
         tooltip="tooltip.method_flip"
       />
       <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
@@ -130,15 +130,15 @@ function Stage0b() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
         <div style={{ flex: 1 }}>
           <ImageWithTooltip
-            src="/pipeline/od_fovea_detection_steps.png"
-            caption="4-step algorithm: (1) green channel → (2) OD localisation → (3) annular fovea search region → (4) rotation result with landmarks."
+            src="/pipeline/dr04/preprocessing/stage_1_od_fovea_rotation/od/left.png"
+            caption="Optic disc detection: green-channel Gaussian blur (σ=15) → 97th percentile threshold → morphological cleanup → centroid of largest component."
             tooltip="tooltip.method_odfovea"
           />
         </div>
         <div style={{ flex: 1 }}>
           <ImageWithTooltip
-            src="/pipeline/od_fovea_search_region.png"
-            caption="Annular search region (1.5–3.5 OD diameters from OD centroid). Fovea = darkest point within this region."
+            src="/pipeline/dr04/preprocessing/stage_1_od_fovea_rotation/fovea/left.png"
+            caption="Fovea detection within annular search region (1.5–3.5 OD diameters from OD centroid). Fovea = darkest point within this region."
             tooltip="tooltip.method_search"
           />
         </div>
@@ -183,8 +183,8 @@ function Stage1() {
         device-specific border artifacts that vary substantially between camera models.
       </p>
       <ImageWithTooltip
-        src="/pipeline/method_fov_crop.png"
-        caption="Left: raw image with black border region. Centre: FOV boundary detection (green channel threshold → largest contour). Right: 512×512 crop — border pixels no longer consume CNN receptive field."
+        src="/pipeline/dr04/preprocessing/stage_2_fov_crop_resize/left.png"
+        caption="After FOV detection, isotropic resize to 512×512, and centred zero-padding. Black border regions removed; aspect ratio preserved so border pixels no longer consume the CNN receptive field."
         tooltip="tooltip.method_fov"
       />
       <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
@@ -217,8 +217,8 @@ function Stage2() {
         fundus camera optics. Preserves all vessel and lesion detail.
       </p>
       <ImageWithTooltip
-        src="/pipeline/method_flat_field.png"
-        caption="Left: original image with radial illumination gradient. Centre: Gaussian blur estimate (σ=45) — the illumination envelope. Right: corrected image with uniform illumination. Lesion structures preserved."
+        src="/pipeline/dr04/preprocessing/stage_4_flatfield/left.png"
+        caption="After flat-field correction (adaptive σ = 0.07·D). Radial illumination gradient removed; vessel and lesion structures preserved with uniform illumination across the field."
         tooltip="tooltip.method_flatfield"
       />
       <code style={formulaStyle}>
@@ -258,14 +258,14 @@ function Stage3() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
         <div style={{ flex: 1 }}>
           <ImageWithTooltip
-            src="/pipeline/method_clahe_comparison.png"
-            caption="Left: input. Centre: standard cv2.createCLAHE (over-enhancement near optic disc). Right: upgraded CLAHE (green border) — controlled enhancement, no OD halo artifact."
+            src="/pipeline/dr04/preprocessing/stage_5_clahe/left.png"
+            caption="After dual-constraint CLAHE on the LAB L-channel. Local contrast enhanced uniformly without over-enhancement near the optic disc."
             tooltip="tooltip.method_clahe_cmp"
           />
         </div>
         <div style={{ flex: 1 }}>
           <ImageWithTooltip
-            src="/pipeline/method_clahe_sensitivity.png"
+            src={process.env.PUBLIC_URL + '/results/exp2/13_exp2_clahe_sensitivity.png'}
             caption="CLAHE parameter sensitivity on IDRiD. X-axis: global threshold. Y-axis: clip factor. ★ marks optimal parameter pair for DR grade 1 (clip_factor=2.5, gt=0.03)."
             tooltip="tooltip.method_clahe_sens"
           />
@@ -356,8 +356,8 @@ function Stage5() {
         pipelines for natural images.
       </p>
       <ImageWithTooltip
-        src="/pipeline/method_augmentation.png"
-        caption="Original (top-left) + 7 augmentation examples. Clockwise: 360° rotation, horizontal flip, zoom-in crop, brightness shift, PCA colour jitter, contrast adjustment, combined affine."
+        src="/pipeline/dr04/preprocessing/stage_6_augmentation/1_rotation/left_variant_A.png"
+        caption="Augmentation example — 360° rotation applied (only valid because circular FOV has no black corners). Stage 6 also applies scale, shear, PCA colour jitter, and brightness/contrast — all composed into a single affine pass."
         tooltip="tooltip.method_augment"
       />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>

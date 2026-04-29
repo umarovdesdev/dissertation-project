@@ -8,7 +8,7 @@ export default function ModelArchitecture() {
     <div>
       <Sec title={t('arch.title')}>
         <DiagramViewer
-          src={process.env.PUBLIC_URL + '/diagrams/dr_diagnosis_system_architecture.svg'}
+          src={process.env.PUBLIC_URL + '/diagrams/02_system_architecture.svg'}
           alt="DR Diagnosis System Architecture"
           caption="Full system architecture: fundus image input → 8-stage preprocessing pipeline → CNN backbone → 5-class DR grade output."
           tooltip="tooltip.arch_diagram"

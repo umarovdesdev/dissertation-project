@@ -10,9 +10,11 @@ import ModelExplainability from './tabs/ModelExplainability';
 import Datasets from './tabs/Datasets';
 import ExpH1 from './tabs/ExpH1';
 import ExpH2 from './tabs/ExpH2';
+import ExpH3 from './tabs/ExpH3';
 import ExpH4 from './tabs/ExpH4';
 import ExpH5 from './tabs/ExpH5';
 import ExpH6 from './tabs/ExpH6';
+import ExpH7 from './tabs/ExpH7';
 import ResultsMain from './tabs/ResultsMain';
 import ResultsBestConfig from './tabs/ResultsBestConfig';
 import ResultsStatistical from './tabs/ResultsStatistical';
@@ -33,9 +35,11 @@ function getNav(t) {
     { type: 'group', label: t('nav.experiments') },
     { id: 'exph1', label: t('nav.experiments.h1'), indent: true },
     { id: 'exph2', label: t('nav.experiments.h2'), indent: true },
+    { id: 'exph3', label: t('nav.experiments.h3'), indent: true },
     { id: 'exph4', label: t('nav.experiments.h4'), indent: true },
     { id: 'exph5', label: t('nav.experiments.h5'), indent: true },
     { id: 'exph6', label: t('nav.experiments.h6'), indent: true },
+    { id: 'exph7', label: t('nav.experiments.h7'), indent: true },
     { type: 'group', label: t('nav.results') },
     { id: 'results-main', label: t('nav.results.main'), indent: true },
     { id: 'results-best', label: t('nav.results.bestConfig'), indent: true },
@@ -56,9 +60,11 @@ const COMPONENTS = {
   datasets: Datasets,
   exph1: ExpH1,
   exph2: ExpH2,
+  exph3: ExpH3,
   exph4: ExpH4,
   exph5: ExpH5,
   exph6: ExpH6,
+  exph7: ExpH7,
   'results-main': ResultsMain,
   'results-best': ResultsBestConfig,
   'results-stat': ResultsStatistical,

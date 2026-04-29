@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1280" width="1240" height="1280">
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000000"/>
+    </marker>
+    <marker id="arrowhead-grey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/>
+    </marker>
+    <style>
+      .ttl   { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 600; fill: #111827; }
+      .sub   { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 400; fill: #374151; }
+      .tag   { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 500; fill: #4b5563; }
+      .mono  { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-weight: 500; fill: #111827; }
+      .edge  { fill: none; stroke: #000000; stroke-width: 1.8; }
+      .edge-shared { fill: none; stroke: #6b7280; stroke-width: 1.4; stroke-dasharray: 4 3; }
+    </style>
+  </defs>
+
+  <rect width="1240" height="1280" fill="#ffffff"/>
+
+  <!-- ===================== Top: Single Fundus Photograph ===================== -->
+  <g>
+    <rect x="440" y="60" width="360" height="80" rx="4" fill="#1f2937" fill-opacity="0.10" stroke="#1f2937" stroke-width="2"/>
+    <text x="620" y="98"  text-anchor="middle" class="ttl"  font-size="22">Fundus photograph</text>
+    <text x="620" y="122" text-anchor="middle" class="mono" font-size="13">BGR uint8  ·  H₀ × W₀ × 3</text>
+  </g>
+
+  <!-- Splitter: top fundus → L/R eye boxes (right-angle tree) -->
+  <polyline points="620,140 620,160 250,160 250,178" fill="none" stroke="#000000" stroke-width="1.8" marker-end="url(#arrowhead)"/>
+  <polyline points="620,140 620,160 990,160 990,178" fill="none" stroke="#000000" stroke-width="1.8" marker-end="url(#arrowhead)"/>
+
+  <!-- ===================== Bilateral Split: Left / Right eye ===================== -->
+  <g>
+    <rect x="130" y="180" width="240" height="80" rx="4" fill="#1f2937" fill-opacity="0.10" stroke="#1f2937" stroke-width="2"/>
+    <text x="250" y="215" text-anchor="middle" class="ttl"  font-size="19">Left eye</text>
+    <text x="250" y="244" text-anchor="middle" class="mono" font-size="13">I_L  ·  s_L = left</text>
+  </g>
+  <g>
+    <rect x="870" y="180" width="240" height="80" rx="4" fill="#1f2937" fill-opacity="0.10" stroke="#1f2937" stroke-width="2"/>
+    <text x="990" y="215" text-anchor="middle" class="ttl"  font-size="19">Right eye</text>
+    <text x="990" y="244" text-anchor="middle" class="mono" font-size="13">I_R  ·  s_R = right</text>
+  </g>
+
+  <!-- Arrows: L/R eye → Preprocessing -->
+  <line x1="250" y1="260" x2="250" y2="318" class="edge" marker-end="url(#arrowhead)"/>
+  <line x1="990" y1="260" x2="990" y2="318" class="edge" marker-end="url(#arrowhead)"/>
+
+  <!-- ===================== Preprocessing 𝒫 (single block per eye) ===================== -->
+  <g>
+    <rect x="100" y="320" width="300" height="120" rx="4" fill="#166534" fill-opacity="0.14" stroke="#166534" stroke-width="2"/>
+    <text x="250" y="358" text-anchor="middle" class="ttl" font-size="20">Preprocessing 𝒫</text>
+    <text x="250" y="384" text-anchor="middle" class="sub" font-size="13">8 stages (see Diagram 3)</text>
+    <text x="250" y="404" text-anchor="middle" class="sub" font-size="13">deterministic at inference</text>
+    <text x="250" y="424" text-anchor="middle" class="sub" font-size="13">stochastic at train (Stages 5, 6)</text>
+  </g>
+  <g>
+    <rect x="840" y="320" width="300" height="120" rx="4" fill="#166534" fill-opacity="0.14" stroke="#166534" stroke-width="2"/>
+    <text x="990" y="358" text-anchor="middle" class="ttl" font-size="20">Preprocessing 𝒫</text>
+    <text x="990" y="384" text-anchor="middle" class="sub" font-size="13">8 stages (see Diagram 3)</text>
+    <text x="990" y="404" text-anchor="middle" class="sub" font-size="13">deterministic at inference</text>
+    <text x="990" y="424" text-anchor="middle" class="sub" font-size="13">stochastic at train (Stages 5, 6)</text>
+  </g>
+
+  <!-- Arrows: Preprocessing → CNN, with tensor labels (processed image + FOV mask) -->
+  <line x1="250" y1="440" x2="250" y2="538" class="edge" marker-end="url(#arrowhead)"/>
+  <line x1="990" y1="440" x2="990" y2="538" class="edge" marker-end="url(#arrowhead)"/>
+  <g>
+    <rect x="140" y="468" width="220" height="42" rx="3" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+    <text x="250" y="485" text-anchor="middle" class="tag"  font-size="12">processed RGB + FOV mask</text>
+    <text x="250" y="502" text-anchor="middle" class="mono" font-size="12">tensor (4, 512, 512) · float32</text>
+  </g>
+  <g>
+    <rect x="880" y="468" width="220" height="42" rx="3" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+    <text x="990" y="485" text-anchor="middle" class="tag"  font-size="12">processed RGB + FOV mask</text>
+    <text x="990" y="502" text-anchor="middle" class="mono" font-size="12">tensor (4, 512, 512) · float32</text>
+  </g>
+
+  <!-- ===================== CNN Backbones ===================== -->
+  <g>
+    <rect x="100" y="540" width="300" height="120" rx="4" fill="#1e3a8a" fill-opacity="0.10" stroke="#1e3a8a" stroke-width="2"/>
+    <text x="250" y="578" text-anchor="middle" class="ttl" font-size="20">CNN backbone</text>
+    <text x="250" y="604" text-anchor="middle" class="sub" font-size="13">ResNet-50  or  EfficientNet-B3</text>
+    <text x="250" y="624" text-anchor="middle" class="sub" font-size="13">4-channel conv1 (RGB + mask)</text>
+    <text x="250" y="644" text-anchor="middle" class="sub" font-size="13">→ feature maps + GAP</text>
+  </g>
+  <g>
+    <rect x="840" y="540" width="300" height="120" rx="4" fill="#1e3a8a" fill-opacity="0.10" stroke="#1e3a8a" stroke-width="2"/>
+    <text x="990" y="578" text-anchor="middle" class="ttl" font-size="20">CNN backbone</text>
+    <text x="990" y="604" text-anchor="middle" class="sub" font-size="13">ResNet-50  or  EfficientNet-B3</text>
+    <text x="990" y="624" text-anchor="middle" class="sub" font-size="13">4-channel conv1 (RGB + mask)</text>
+    <text x="990" y="644" text-anchor="middle" class="sub" font-size="13">→ feature maps + GAP</text>
+  </g>
+
+  <!-- Shared weights tie -->
+  <g>
+    <line x1="400" y1="600" x2="840" y2="600" class="edge-shared" marker-start="url(#arrowhead-grey)" marker-end="url(#arrowhead-grey)"/>
+    <rect x="560" y="586" width="120" height="22" rx="3" fill="#ffffff" stroke="#6b7280" stroke-width="1"/>
+    <text x="620" y="602" text-anchor="middle" class="tag" font-size="12">shared weights</text>
+  </g>
+
+  <!-- Arrows: CNN → Aggregation, with feature labels -->
+  <line x1="250" y1="660" x2="520" y2="778" class="edge" marker-end="url(#arrowhead)"/>
+  <line x1="990" y1="660" x2="720" y2="778" class="edge" marker-end="url(#arrowhead)"/>
+  <g>
+    <rect x="300" y="700" width="120" height="26" rx="3" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+    <text x="360" y="718" text-anchor="middle" class="mono" font-size="13">f_L ∈ ℝᵈ</text>
+  </g>
+  <g>
+    <rect x="820" y="700" width="120" height="26" rx="3" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+    <text x="880" y="718" text-anchor="middle" class="mono" font-size="13">f_R ∈ ℝᵈ</text>
+  </g>
+
+  <!-- ===================== Patient-Level Aggregation Φ ===================== -->
+  <g>
+    <rect x="370" y="780" width="500" height="110" rx="4" fill="#b45309" fill-opacity="0.13" stroke="#b45309" stroke-width="2"/>
+    <text x="620" y="818" text-anchor="middle" class="ttl"  font-size="20">Patient-Level Aggregation  Φ</text>
+    <text x="620" y="845" text-anchor="middle" class="sub"  font-size="13">max-grade strategy (active in Configs A–D)</text>
+    <text x="620" y="867" text-anchor="middle" class="mono" font-size="13">ŷ_patient = max(ŷ_L, ŷ_R)</text>
+  </g>
+
+  <!-- Arrow: Aggregation → Prediction -->
+  <line x1="620" y1="890" x2="620" y2="928" class="edge" marker-end="url(#arrowhead)"/>
+
+  <!-- ===================== Prediction Layer g ===================== -->
+  <g>
+    <rect x="370" y="930" width="500" height="110" rx="4" fill="#9f1239" fill-opacity="0.11" stroke="#9f1239" stroke-width="2"/>
+    <text x="620" y="968" text-anchor="middle" class="ttl"  font-size="20">Prediction Layer  g</text>
+    <text x="620" y="995" text-anchor="middle" class="sub"  font-size="13">softmax over K = 5 classes</text>
+    <text x="620" y="1017" text-anchor="middle" class="mono" font-size="13">p̂ ∈ Δ⁴   ·   ŷ = argmax p̂</text>
+  </g>
+
+  <!-- Arrows: Prediction → Diagnosis (solid) and Grad-CAM (now solid) -->
+  <line x1="560" y1="1040" x2="290" y2="1098" class="edge" marker-end="url(#arrowhead)"/>
+  <line x1="680" y1="1040" x2="950" y2="1098" class="edge" marker-end="url(#arrowhead)"/>
+
+  <!-- ===================== Outputs ===================== -->
+  <g>
+    <rect x="140" y="1100" width="300" height="120" rx="4" fill="#9f1239" fill-opacity="0.11" stroke="#9f1239" stroke-width="2"/>
+    <text x="290" y="1138" text-anchor="middle" class="ttl" font-size="20">Diagnosis</text>
+    <text x="290" y="1164" text-anchor="middle" class="sub" font-size="13">DR grade  ŷ ∈ {0, 1, 2, 3, 4}</text>
+    <text x="290" y="1184" text-anchor="middle" class="sub" font-size="13">referral  ŷ_ref = 𝟙[ŷ ≥ 2]</text>
+    <text x="290" y="1204" text-anchor="middle" class="sub" font-size="13">probabilities  p̂ ∈ Δ⁴</text>
+  </g>
+  <g>
+    <rect x="800" y="1100" width="300" height="120" rx="4" fill="#475569" fill-opacity="0.13" stroke="#475569" stroke-width="2"/>
+    <text x="950" y="1138" text-anchor="middle" class="ttl"  font-size="20">Grad-CAM Explainability</text>
+    <text x="950" y="1162" text-anchor="middle" class="sub"  font-size="13">post-hoc  ·  uses CNN feature maps + ∂z_c/∂A</text>
+    <text x="950" y="1182" text-anchor="middle" class="mono" font-size="13">heatmap L^c  (512 × 512)</text>
+    <text x="950" y="1202" text-anchor="middle" class="sub"  font-size="13">metrics: ALO  (primary),  IoU</text>
+  </g>
+
+  <!-- ===================== Legend ===================== -->
+  <g transform="translate(40, 1245)">
+    <line x1="0" y1="6" x2="40" y2="6" class="edge" marker-end="url(#arrowhead)"/>
+    <text x="48" y="11" class="sub" font-size="12">inference data flow</text>
+    <line x1="220" y1="6" x2="260" y2="6" class="edge-shared" marker-start="url(#arrowhead-grey)" marker-end="url(#arrowhead-grey)"/>
+    <text x="268" y="11" class="sub" font-size="12">shared weights</text>
+  </g>
+</svg>
