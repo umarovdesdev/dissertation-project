@@ -126,7 +126,13 @@
       "PowerShell(Get-ChildItem \"E:\\\\datasets\" -Force -Recurse -Depth 4 | Where-Object { $_.Name -match \"\\(?i\\)fovea|optic|OD_Center|localiz\" } | Select-Object FullName)",
       "PowerShell(Get-Command *)",
       "PowerShell(python E:\\\\dissertation-project\\\\demo\\\\generate_charts_29_30.py)",
-      "Bash(CI=true npx --no-install eslint src --no-eslintrc --parser-options=ecmaVersion:2022,sourceType:module,ecmaFeatures:{jsx:true} --plugin react --rule '{\"no-undef\": \"off\"}')"
+      "Bash(CI=true npx --no-install eslint src --no-eslintrc --parser-options=ecmaVersion:2022,sourceType:module,ecmaFeatures:{jsx:true} --plugin react --rule '{\"no-undef\": \"off\"}')",
+      "PowerShell(python -c \"import fitz; print\\('pymupdf ok'\\)\")",
+      "PowerShell(python -c \"import pdfplumber; print\\('pdfplumber ok'\\)\" 2>&1; python -c \"from pptx import Presentation; print\\('pptx ok'\\)\" 2>&1)",
+      "PowerShell(pip install *)",
+      "PowerShell(python \"E:\\\\dissertation-project\\\\defense\\\\_inspect_pptx.py\")",
+      "Bash(where magick *)",
+      "Bash(where convert *)"
     ]
   }
 }

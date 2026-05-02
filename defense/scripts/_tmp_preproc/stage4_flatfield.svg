@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 588" width="488" height="588">
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000000"/>
+    </marker>
+    <style>
+      .doc-ttl    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 700; fill: #111827; font-size: 22px; }
+      .doc-sub    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 400; fill: #4b5563; font-size: 13px; }
+      .pnl-ttl    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 700; fill: #111827; font-size: 17px; }
+      .pnl-mode   { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 600; fill: #ffffff; font-size: 11px; letter-spacing: 0.6px; }
+      .sec-hdr    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 700; fill: #6b7280; font-size: 11px; letter-spacing: 1.4px; }
+      .body       { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 400; fill: #111827; font-size: 13px; }
+      .body-em    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 600; fill: #111827; font-size: 13px; }
+      .mono       { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-weight: 500; fill: #111827; font-size: 12.5px; }
+      .mono-dim   { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-weight: 400; fill: #374151; font-size: 12px; }
+      .arrow-num  { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 700; fill: #6b7280; font-size: 13px; }
+      .legend-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 400; fill: #374151; font-size: 12px; }
+      .edge       { fill: none; stroke: #6b7280; stroke-width: 1.6; }
+    </style>
+  </defs>
+  <rect width="488" height="588" fill="#ffffff"/>
+  <g transform="translate(24, 24)">
+    <rect width="440" height="500" rx="6" fill="#c2410c" fill-opacity="0.07" stroke="#c2410c" stroke-width="2"/>
+    <text x="20" y="32" class="pnl-ttl">Stage 4 — Adaptive Flat-Field</text>
+    <rect x="330" y="14" width="92" height="22" rx="3" fill="#c2410c"/>
+    <text x="376" y="29" text-anchor="middle" class="pnl-mode">ALWAYS ON</text>
+    <line x1="20" y1="50" x2="420" y2="50" stroke="#c2410c" stroke-width="1" stroke-opacity="0.4"/>
+
+    <text x="20" y="76" class="sec-hdr">INPUT</text>
+    <text x="20" y="98" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+
+    <text x="20" y="138" class="sec-hdr">OPERATIONS</text>
+    <text x="20" y="162" class="body">1.  Estimate background illumination</text>
+    <text x="20" y="180" class="mono-dim">     B = GaussianBlur(I, σ)</text>
+    <text x="20" y="202" class="body">2.  Subtract:  I′ = I − B + 128</text>
+    <text x="20" y="224" class="body">3.  Clip to valid range  [0, 255]</text>
+    <text x="20" y="252" class="body-em">σ is adaptive to FOV geometry — replaces</text>
+    <text x="20" y="270" class="body-em">the fixed σ = 45 from V4.</text>
+
+    <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
+    <text x="20" y="342" class="mono">σ = 0.07 · D    (D = FOV diameter)</text>
+    <text x="20" y="362" class="body">sweep range in Exp 2:  σ ∈ [0.05, 0.10] · D</text>
+
+    <text x="20" y="402" class="sec-hdr">OUTPUT</text>
+    <text x="20" y="424" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+    <text x="20" y="444" class="body">uniform illumination, vignetting removed</text>
+  </g>
+</svg>
