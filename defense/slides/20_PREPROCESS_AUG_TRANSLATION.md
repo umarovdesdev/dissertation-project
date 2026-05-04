@@ -6,6 +6,13 @@
 
 ## 2. Слайд мазмұны
 
+![Stage 6: Аугментация — жылжыту (translation)](../assets/preprocessing/20_aug_translation/stage6_augmentation.png)
+
+![Min амплитудасы](../assets/preprocessing/20_aug_translation/left_min.png)
+![Max амплитудасы](../assets/preprocessing/20_aug_translation/left_max.png)
+
+![Жылжыту таралымы](../assets/preprocessing/20_aug_translation/distribution.png)
+
 ---
 
 ## 3. Баяндаушы сөзі

@@ -6,6 +6,14 @@
 
 ## 2. Слайд мазмұны
 
+![Жарияланымдар жинағы](../assets/publications/PUBLICATIONS.png)
+
+![Scopus Q3 журналы](../assets/publications/SCOPUS.png)
+![Scopus конференция (Procedia CS)](../assets/publications/SCOPUS_CONF.png)
+![Herald of KBTU](../assets/publications/KBTU.png)
+![News of NAN RK](../assets/publications/AKADEMY.png)
+![Вестник КазУТБ](../assets/publications/KAZTBU.png)
+
 **Жалпы жарияланымдар саны: 5**
 
 **Scopus (Q3) журналы — 1:**

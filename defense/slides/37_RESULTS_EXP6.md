@@ -6,6 +6,8 @@
 
 ## 2. Слайд мазмұны
 
+![Exp 6: Камера өндірушілері бойынша F1 (Canon, Topcon, Kowa, Zeiss)](../assets/results/exp6/10_exp6_device_shift.png)
+
 ---
 
 ## 3. Баяндаушы сөзі

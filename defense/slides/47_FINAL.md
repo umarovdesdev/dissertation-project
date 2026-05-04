@@ -6,6 +6,8 @@
 
 ## 2. Слайд мазмұны
 
+![IITU logo](../assets/LOGO.png)
+
 **International University of Information Technology**
 Department of Computer Engineering
 

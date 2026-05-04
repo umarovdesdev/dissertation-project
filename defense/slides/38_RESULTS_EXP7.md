@@ -6,6 +6,8 @@
 
 ## 2. Слайд мазмұны
 
+![Exp 7: Кіші деректермен оқыту (IDRiD → Clinical, 5-fold CV)](../assets/results/exp7/30_exp7_small_data.png)
+
 ---
 
 ## 3. Баяндаушы сөзі

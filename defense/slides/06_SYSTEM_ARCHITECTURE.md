@@ -6,6 +6,8 @@
 
 ## 2. Слайд мазмұны
 
+![Жүйенің жалпы архитектурасы](../assets/architecture/06_system/02_system_architecture.png)
+
 ---
 
 ## 3. Баяндаушы сөзі
