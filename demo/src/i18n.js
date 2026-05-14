@@ -43,6 +43,12 @@ const translations = {
     'nav.validation.clinical': 'Clinical',
     'nav.validation.quality': 'Image Quality',
     'nav.validation.compute': 'Computational',
+    'nav.publications': 'Publications',
+
+    'publications.title': 'Publications',
+    'publications.subtitle': 'Dissertation results published in 5 venues — 1 Scopus Q3 journal, 1 Scopus-indexed conference, 3 KZ VAK journals.',
+    'publications.summary': 'Publication Tier Summary',
+    'publications.note': 'Total: 5 publications. Two indexed by Scopus (one Q3 journal, one conference proceedings); three in journals recommended by the Committee for Quality Assurance in the Sphere of Education and Science of the Republic of Kazakhstan (KZ VAK).',
 
     'overview.title': 'Dissertation Dashboard',
     'overview.subtitle': 'Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification',
@@ -223,6 +229,12 @@ const translations = {
     'nav.validation.clinical': 'Клиникалық',
     'nav.validation.quality': 'Кескін сапасы',
     'nav.validation.compute': 'Есептеу',
+    'nav.publications': 'Жарияланымдар',
+
+    'publications.title': 'Жарияланымдар',
+    'publications.subtitle': 'Зерттеу нәтижелері 5 жарияланымда апробацияланды — 1 Scopus Q3 журналы, 1 Scopus конференциясы, 3 ҚР БҒСБК журналы.',
+    'publications.summary': 'Жарияланым деңгейлерінің қорытындысы',
+    'publications.note': 'Барлығы: 5 жарияланым. Екеуі Scopus-те индексталған (бір Q3 журналы, бір конференция); үшеуі ҚР Білім және ғылым саласындағы сапаны қамтамасыз ету комитеті ұсынған журналдарда.',
 
     'overview.title': 'Диссертация Dashboard',
     'overview.subtitle': 'Көз түбі кескінін жақсарту және CNN жіктеу арқылы диабеттік ретинопатияны автоматтандырылған диагностикалау',
@@ -327,13 +339,13 @@ const translations = {
 
     // Tooltips KZ (partial — EN fallback used for unlisted)
     'tooltip.fig01': 'A-D конфигурациялары үшін weighted F1-score. D конфигурациясы (EfficientNet-B3 + толық pipeline) ең жоғары F1=0.780 көрсетеді. Қате жолдары 5 fold бойынша ±1 стандартты ауытқуды көрсетеді.',
-    'tooltip.fig03': 'Алдын ала өңдеу жақсаруы: ResNet-50 нөлге жуық, EfficientNet-B3 +5.3пп F1. Қызыл сызық = EH-3 шегі.',
+    'tooltip.fig03': 'Алдын ала өңдеу жақсаруы: ResNet-50 +5.2пп F1, EfficientNet-B3 +5.3пп F1. Екеуі де EH-3 шегінен (қызыл сызық) асады.',
     'tooltip.fig04': 'Кумулятивтік абляция: әрбір pipeline кезеңі кезекпен қосылады. Монотонды өсу әрбір кезеңнің үлесін растайды.',
     'tooltip.fig05': 'Кезең бойынша маржиналды үлес. CLAHE (3-кезең) ең көп үлес қосады: +1.4пп F1.',
     'tooltip.fig06': 'Зақымдану түрі бойынша ALO. Pipeline барлық зақымдану түрлеріне назарды 31-61% жақсартады.',
     'tooltip.fig09': 'Жалпылау коэффициенті G = F1_external / F1_EyePACS. Pipeline екі деректер жиынтығында G ≥ 0.85 (H-4 шегі).',
     'tooltip.fig11': 'Радар диаграммасы: pipeline (көк-жасыл) барлық 6 өлшемде baseline-ді (сұр) қамтиды.',
-    'tooltip.fig12': 'EH-3 тексерісі: EfficientNet-B3 барлық шектерден асады. ResNet-50 нөлге жуық — архитектураға тәуелді әсер.',
+    'tooltip.fig12': 'EH-3 тексерісі: екі архитектура да барлық шектерден асады. ResNet-50 +5.2/+3.3/+8.0пп, EfficientNet-B3 +5.3/+4.4/+8.0пп.',
     'tooltip.fig14': 'Клиникалық скрининг метрикалары. Pipeline сезімталдықты 0.82-ден 0.90-ға жақсартады (+8пп).',
     'tooltip.fig18': 'Класс бойынша F1-Score. Ең үлкен жақсару азшылық кластарда: DR1 +12пп, DR3 +12пп.',
     'tooltip.pipeline_grid': 'Толық pipeline: Raw → S0 (Canonical Flip) → S1 (OD-Fovea) → S2 (FOV Crop + Isotropic Resize) → S3 (FOV Mask) → S4 (Adaptive Flat-Field) → S5 (CLAHE) → S6 (Aug) → S7 (Dataset-Specific Normalize + 4ch). Науқас 43199, Canon CR-1, DR4.',

@@ -5,7 +5,9 @@
 **Candidate:** Yesmukhamedov N.S.
 **Status:** Binding Methodological Blueprint
 **Function:** Experimental, statistical, and architectural formalization of the dissertation research
-**Version:** 5.0 | **Date:** 2026-04-XX | **Binding Reference:** INVARIANTS.md v5.0
+**Version:** 5.1 | **Date:** 2026-05-13 | **Binding Reference:** INVARIANTS.md v5.1
+
+**v5.1 Amendment:** The Experiment 1 factorial is amended so that the V5 arm uses RETFound (in-domain retinal pretrain) and the baseline arm retains ImageNet (cross-domain pretrain). Section 4 (Model Architecture Layer) and Section 5.1 (Experiment 1) reflect the amendment. The operational specifications listed under AOQ-1 through AOQ-4 (INVARIANTS v5.1, Section X) are open and must be resolved before experimental execution; cells marked "TBD per AOQ-x" in this document refer to those open questions.
 
 ---
 
@@ -185,23 +187,39 @@ See `methods/implementation.md` for full implementation details.
 
 ---
 
-## 4.1 ResNet-50 (Architecture A in Factorial Design)
+## 4.1 ResNet-50 — Baseline Arm (v5.1)
 
-* Pre-trained on ImageNet
+* Pre-trained on **ImageNet** (IMAGENET1K_V2 weights via torchvision)
 * Adapted via fine-tuning for 5-class DR classification
-* Serves as one architecture arm of the 2×2 factorial design (A–D) in Experiment 1
+* Serves as a baseline-arm backbone in the v5.1 Experiment 1 factorial
 * Represents the residual-connection architecture family
+* Input: 3 channels (baseline configurations only)
 
 ---
 
-## 4.2 EfficientNet-B3 (Architecture B in Factorial Design)
+## 4.2 EfficientNet-B3 — Baseline Arm (v5.1)
 
-* Pre-trained on ImageNet
+* Pre-trained on **ImageNet** (timm weights)
 * Adapted via fine-tuning for 5-class DR classification
-* Serves as the second architecture arm of the 2×2 factorial design (A–D) in Experiment 1
+* Serves as a baseline-arm backbone in the v5.1 Experiment 1 factorial
 * Represents the compound-scaling architecture family (EfficientNet)
+* Input: 3 channels (baseline configurations only)
 
-The use of two established pretrained backbone families (ResNet, EfficientNet) provides a replication test across architecture families and satisfies the EH-4 replication requirement.
+---
+
+## 4.2bis RETFound — V5 Arm Pretraining Source (v5.1) [NEW]
+
+* Source: Zhou, Y., et al. (2023). *A foundation model for generalizable disease detection from retinal images.* Nature. Repository: `rmaphoh/RETFound_MAE`.
+* Pretraining method: Masked Autoencoder (MAE) self-supervised learning on ~1.6M color fundus photographs (CFP). MAE masks 75% of input patches and reconstructs pixel content; the encoder learns retina-aware representations without supervision.
+* Published architecture: ViT-Large (≈300M parameters), 16×16 patch size, 224×224 input resolution as released.
+* Role in v5.1: Initialization source for the V5 arm of Experiment 1, paired with the full V5 preprocessing pipeline (4 channels, 512×512).
+* Open operational questions (binding, must be resolved before Experiment 1 execution):
+  - **AOQ-1 (backbone choice):** Whether the V5 arm uses (a) RETFound ViT-Large directly, (b) a CNN-compatible domain-adaptive pretraining protocol (SparK-style MIM or SimCLR/MoCo on EyePACS) labeled "RETFound-style," or (c) both V5+RETFound and V5+ImageNet runs for partial factor decomposition. See INVARIANTS v5.1 Section X.
+  - **AOQ-2 (4-channel adaptation):** Whether the FOV mask channel is (a) added at the input via patch-embed/conv-stem extension with mean-init of channel 3, (b) dropped from the V5-arm input, or (c) injected at an intermediate layer as a gating mask.
+  - **AOQ-3 (license):** Verification that RETFound weights' license terms (CC BY-NC 4.0 at last check) permit the intended downstream use.
+  - **AOQ-4 (factorial symmetry):** Whether the baseline arm retains both ResNet-50 and EfficientNet-B3 (asymmetric 2×1 vs 1×1 factorial) or is reduced to a single backbone matched to the V5-arm backbone family for symmetric comparison.
+
+The replication test across architecture families that v5.0 established via ResNet-50 + EfficientNet-B3 under fixed ImageNet pretrain is **suspended** under v5.1. EH-4 replication satisfaction in v5.1 must be re-derived after AOQ-1 and AOQ-4 are resolved.
 
 ---
 
@@ -247,24 +265,27 @@ All experiments use 5-fold cross-validation with patient-level stratified split.
 
 ## 5.1 Experiment 1 — Causal Improvement (Preprocessing vs. Architecture)
 
-**Purpose:** Determine whether preprocessing improves classification independently of CNN architecture. This is the primary experiment validating H-1 and promoting PC-1.
+**Purpose [v5.1 amended]:** Determine whether the integrated configuration (V5 preprocessing + RETFound in-domain pretrain) outperforms the baseline configuration (stretch-resize + ImageNet pretrain) as a unitary system. This is the primary experiment validating H-1 v5.1 and promoting PC-1.
 
 **Dataset:** EyePACS
 
-**Design:** 2×2 factorial using ResNet-50 and EfficientNet-B3, 4 configurations.
+**Design (v5.1):** Configurations are indexed by *(preprocessing, pretraining source)* pairs. The architecture used in each cell is bound by AOQ-1 and AOQ-4 (INVARIANTS v5.1 Section X) and is not yet finalized.
 
-| Config | Preprocessing | Architecture | Input channels |
-| --- | --- | --- | --- |
-| A | baseline (stretch-resize + ImageNet norm) | ResNet-50 | 3 |
-| B | full V5 pipeline | ResNet-50 | 4 |
-| C | baseline (stretch-resize + ImageNet norm) | EfficientNet-B3 | 3 |
-| D | full V5 pipeline | EfficientNet-B3 | 4 |
+| Config | Preprocessing | Pretraining source | Backbone | Input channels |
+| --- | --- | --- | --- | --- |
+| A | baseline (stretch-resize + ImageNet norm) | ImageNet | ResNet-50 | 3 |
+| C | baseline (stretch-resize + ImageNet norm) | ImageNet | EfficientNet-B3 | 3 |
+| B' | full V5 pipeline | **RETFound** | TBD per AOQ-1 (ViT-Large or CNN-compatible RETFound-style) | 4 (subject to AOQ-2) |
 
-**Dominance validation:** Preprocessing Dominance validated if Performance(B) > Performance(A) AND Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures.
+The v5.0 designations B (V5 + ResNet-50 + ImageNet) and D (V5 + EfficientNet-B3 + ImageNet) are **retired** under v5.1. Config B' replaces both. If AOQ-1 resolves to option (c) (run both V5 + RETFound and V5 + ImageNet), the v5.0 B and D configurations are reinstated as auxiliary cells for factor decomposition.
 
-**Config N (normalization control):** Baseline preprocessing + dataset-specific normalization (no V5 pipeline stages). Isolates the normalization statistics effect from the pipeline preprocessing effect. If Config N ≈ Configs A/C, normalization alone does not explain the V5 pipeline improvement. If Config N > A/C but < B/D, both normalization and preprocessing contribute independently.
+**Dominance validation (v5.1):** Integrated Pipeline Dominance is validated if Performance(B') > max(Performance(A), Performance(C)) with EH-3 criteria satisfied. Attribution of the observed effect to preprocessing alone, pretraining alone, or their interaction is forbidden under CFC-2.8 (INVARIANTS v5.1).
 
-**Known limitation:** Configs A/C (baseline) use ImageNet normalization statistics while Configs B/D (full V5) use dataset-specific statistics. The measured pipeline effect in H-1 therefore conflates the preprocessing stages with the normalization statistics change. Config N is designed to disambiguate this confound.
+**Config N (normalization control) — retained from v5.0:** Baseline preprocessing + dataset-specific normalization (no V5 pipeline stages). Continues to isolate the normalization statistics effect from other pipeline contributions, with the understanding that under v5.1 the V5 arm now also differs in pretrain source.
+
+**Known limitations (v5.1):**
+- The measured H-1 effect conflates (i) preprocessing pipeline stages, (ii) normalization statistics change, and (iii) pretraining source change. No single-factor attribution is recoverable from Config A/C vs Config B' alone.
+- If AOQ-1 resolves to option (a) (ViT-Large) and AOQ-4 retains both ResNet-50 and EfficientNet-B3 in the baseline, the comparison further confounds architecture family. A symmetric design requires either reducing the baseline to one architecture or resolving AOQ-1 to option (c).
 
 **Statistical analysis:** Mixed-effects model across folds (fold as random effect). McNemar test for paired classification comparison. DeLong test for ROC-AUC comparison. Bonferroni/Holm correction for multiple comparisons.
 
@@ -473,23 +494,21 @@ Mandatory:
 
 ---
 
-# 7. ABLATION PROTOCOL
+# 7. ABLATION PROTOCOL [v5.1 amended]
 
-To isolate driver of improvement (V5 Experiment 1 design):
+Integrated Pipeline Dominance (Experiment 1 v5.1 design):
 
-| Config | Preprocessing | Architecture | Input channels |
-| --- | --- | --- | --- |
-| A | baseline (stretch-resize + ImageNet norm) | ResNet-50 | 3 |
-| B | full V5 pipeline | ResNet-50 | 4 |
-| C | baseline (stretch-resize + ImageNet norm) | EfficientNet-B3 | 3 |
-| D | full V5 pipeline | EfficientNet-B3 | 4 |
+| Config | Preprocessing | Pretraining source | Backbone | Input channels |
+| --- | --- | --- | --- | --- |
+| A | baseline (stretch-resize + ImageNet norm) | ImageNet | ResNet-50 | 3 |
+| C | baseline (stretch-resize + ImageNet norm) | ImageNet | EfficientNet-B3 | 3 |
+| B' | full V5 pipeline | RETFound (resolution per AOQ-1) | TBD per AOQ-1 | 4 (per AOQ-2) |
 
-**Dominance validation criterion (V5):** Preprocessing Dominance validated if:
+**Dominance validation criterion (v5.1):** Integrated Pipeline Dominance is validated if:
 
-* Performance(B) > Performance(A) — independently for ResNet-50, AND
-* Performance(D) > Performance(C) — independently for EfficientNet-B3
+* Performance(B') > max(Performance(A), Performance(C))
 
-with EH-3 criteria (Δ weighted F1 ≥ 5 pp; Δ ROC-AUC ≥ 0.02; no Cohen's Kappa degradation) satisfied for both comparisons.
+with EH-3 criteria (Δ weighted F1 ≥ 5 pp; Δ ROC-AUC ≥ 0.02; no Cohen's Kappa degradation) satisfied. Per CFC-2.8 (INVARIANTS v5.1), the attribution of the difference to preprocessing alone is forbidden — the dominance claim is over the integrated *(preprocessing, pretrain)* pair only.
 
 ---
 

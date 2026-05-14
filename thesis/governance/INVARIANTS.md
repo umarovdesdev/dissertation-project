@@ -3,7 +3,9 @@
 **Research Domain:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification  
 **Candidate:** Yesmukhamedov N.S.  
 **Document Status:** Binding constraint system — supersedes informal claim formulations across all dissertation chapters.  
-**Version:** 5.0 | **Date:** 2026-04-XX
+**Version:** 5.1 | **Date:** 2026-05-13
+
+**v5.1 Amendment Summary (vs v5.0):** Pretraining source is no longer fixed at ImageNet for both arms of the Experiment 1 factorial design. The V5 (full pipeline) arm is amended to use **RETFound** (Zhou et al., 2023; retinal foundation model, MAE-pretrained on ~1.6M fundus images) as the source of initialization weights. The baseline arm retains ImageNet pretraining. This amendment is recorded under VCR-1 (which requires a new versioned Invariants for hypothesis modification) and is reflected in H-1 below. Two open technical questions remain (see Section X — Amendment Open Questions) and bind future operational specifications.
 
 ---
 
@@ -26,16 +28,16 @@ The proposed preprocessing pipeline reduces domain variability across fundus ima
 
 ---
 
-**H-1 (Primary — Preprocessing Dominance):**
+**H-1 (Primary — Integrated Pipeline Dominance) [v5.1 amended]:**
 
-*If* fundus images from EyePACS are processed through the 8-stage V5 preprocessing pipeline comprising canonical flip (Stage 0), OD-fovea rotation normalization (Stage 1), FOV crop + isotropic resize to 512×512 with centered zero-padding (Stage 2), FOV mask generation as 4th input channel (Stage 3), adaptive flat-field correction with σ = 0.07 × FOV diameter (Stage 4), dual-constraint CLAHE on LAB L-channel with stochastic application at train time (Stage 5), integrated augmentation at train time (Stage 6), and dataset-specific channel-wise normalization (Stage 7),
-*and* a CNN classifier (ResNet-50 or EfficientNet-B3, pre-trained on ImageNet, adapted via fine-tuning) is trained on the processed images under a 2×2 factorial design (4 configurations A–D),
-*then* classification accuracy, F1-score, and ROC-AUC will exceed those of the same architecture trained on baseline images (stretch-resize to 512×512 + ImageNet normalize, 3 channels, no FOV mask) of equivalent source distribution, independently for both ResNet-50 and EfficientNet-B3.
+*If* fundus images from EyePACS are processed through the 8-stage V5 preprocessing pipeline comprising canonical flip (Stage 0), OD-fovea rotation normalization (Stage 1), FOV crop + isotropic resize to 512×512 with centered zero-padding (Stage 2), FOV mask generation as 4th input channel (Stage 3), adaptive flat-field correction with σ = 0.07 × FOV diameter (Stage 4), dual-constraint CLAHE on LAB L-channel with stochastic application at train time (Stage 5), integrated augmentation at train time (Stage 6), and dataset-specific channel-wise normalization (Stage 7), and a CNN classifier initialized with **RETFound pretrained weights** (Zhou et al., 2023; retinal foundation model, MAE-pretrained on ~1.6M fundus images) is fine-tuned on the processed images,
+*then* classification accuracy, F1-score, ROC-AUC, and Cohen's Kappa will exceed those of the same downstream task trained on baseline images (stretch-resize to 512×512 + ImageNet normalize, 3 channels, no FOV mask) with a CNN classifier initialized with **ImageNet pretrained weights** (ResNet-50 / EfficientNet-B3), of equivalent source distribution.
 
-- **Independent variable:** Presence vs. absence of the preprocessing pipeline (stretch-resize + ImageNet normalize baseline vs. full V5 pipeline).
+- **Independent variable (composite, v5.1 amended):** The combined factor *(preprocessing × pretraining source)*. The baseline arm and the V5 arm differ jointly along the preprocessing axis (stretch-resize + ImageNet normalize vs. full V5 pipeline) **and** along the pretraining axis (ImageNet vs. RETFound). Single-factor isolation along preprocessing alone — the form of H-1 in v5.0 — is no longer obtained under v5.1 and is explicitly relinquished by this amendment.
 - **Dependent variables:** Accuracy, F1-score (macro and weighted), ROC-AUC, Cohen's Kappa (quadratic weights), precision, recall — computed on the held-out test partition.
 - **Control conditions:** Same dataset, same data partition strategy (5-fold cross-validation with patient-level stratified split), same computational hardware, same training epoch budget.
-- **Factorial design:** Four configurations — (A) baseline + ResNet-50 (3ch), (B) full V5 pipeline + ResNet-50 (4ch), (C) baseline + EfficientNet-B3 (3ch), (D) full V5 pipeline + EfficientNet-B3 (4ch). Preprocessing Dominance validated if Performance(B) > Performance(A) and Performance(D) > Performance(C) with EH-3 criteria satisfied independently for both architectures.
+- **Factorial design (amended):** Configurations are now indexed by *(preprocessing, pretrain)* pairs rather than by *(preprocessing, architecture)* pairs. The architecture used in each arm is specified in Amendment Open Question AOQ-1 (Section X) and is binding only once resolved.
+- **Validation criterion:** Integrated Pipeline Dominance is validated if Performance(V5 + RETFound) > Performance(baseline + ImageNet) with EH-3 criteria satisfied. The attribution of the observed effect to preprocessing alone, pretraining alone, or their interaction is **not claimable** under H-1 v5.1 (see CFC-2.8) and must be deferred to a future ablation study not within the scope of this dissertation.
 
 ---
 
@@ -221,6 +223,7 @@ The preprocessing dominance hypothesis (H-1) is considered sufficiently validate
 - CFC-2.5 Perfect performance generalizations: "The preprocessing pipeline achieves 100% accuracy on DR classification." — Forbidden: 100% accuracy reported in LC-AlTimemy-2021 is on a different dataset, classification task, and cannot be transferred to the dissertation's experimental framework.
 - CFC-2.6 Amplified source claims: Any claim that attributes to a cited source a conclusion stronger than explicitly stated in that source. — Forbidden per Section VII rules.
 - CFC-2.7 Retroactive re-characterization of prior self-publications: Prior publications (LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-2025-Yesmukhamedov-01) must be cited as-is and may not be retroactively characterized as having claimed, proven, or demonstrated conclusions beyond what their texts state.
+- CFC-2.8 [v5.1] Attribution of the H-1 effect to preprocessing alone: Under H-1 v5.1, the baseline arm uses ImageNet pretrain while the V5 arm uses RETFound pretrain. Any observed performance difference therefore reflects the joint contribution of preprocessing and pretraining source. Claims of the form "the preprocessing pipeline produces the observed improvement" or "preprocessing dominates" are forbidden in the context of H-1 v5.1 results. Permissible claims are restricted to the integrated pipeline as a whole: "the integrated V5 + RETFound configuration outperforms the baseline + ImageNet configuration on [metric] by [δ]."
 
 **CFC-3: Non-Claims**
 
@@ -290,9 +293,43 @@ The system architecture described in Chapter 6 (LC-2025-Yesmukhamedov-01) has no
 **DGL-5: CLAHE Parameter Portability**
 CLAHE parameters validated in the dissertation context (dual-constraint clip limit on LAB L-channel per V5 pipeline: clip_factor × tile_area/256, capped by global_threshold × tile_area; applied stochastically at train time with 80% probability; selected via parameter sweep in Experiment 2; and clip limit 2.0 / grid size 8×8 per prior self-publications LC-SAPAKOVA-2025-01) were optimized for specific image distributions and CNN architectures. The T/80 threshold formulation from LC-AlTimemy-2021 was derived on the STARE dataset with different image characteristics. No parameter-level equivalence between these configurations is asserted. If the dissertation adopts modified CLAHE parameters, those parameters must be independently validated within the dissertation's experimental framework.
 
-**DGL-6: Transfer Learning Domain Gap**  
-EfficientNetB0, EfficientNet-B3, EfficientNet-B4, and ResNet-50 weights were pre-trained on ImageNet (natural images). Transfer of these weights to fundus image classification represents a domain shift. The degree to which ImageNet features transfer to retinal microvascular feature representations is not theoretically guaranteed and is evaluated empirically within the dissertation's experimental framework only. Claims about feature transferability are bounded to the architectures, fine-tuning protocols, and datasets documented in the literature cards and v2.1 experimental protocol.
+**DGL-6: Transfer Learning Domain Gap [v5.1 amended]**
+The dissertation now operates under two distinct pretraining regimes:
+- **Baseline arm (H-1 baseline configurations):** EfficientNetB0, EfficientNet-B3, EfficientNet-B4, and ResNet-50 weights were pre-trained on ImageNet (natural images). Transfer of these weights to fundus image classification represents a cross-domain shift (natural images → retinal imaging).
+- **V5 arm (H-1 V5 configurations):** Initialization derived from the RETFound retinal foundation model (Zhou et al., 2023), masked-autoencoder pretrained on ~1.6M color fundus photographs. This represents an in-domain initialization with respect to the target task.
+
+The degree to which either pretraining source transfers to the dissertation's specific dataset architecture is not theoretically guaranteed and is evaluated empirically within the experimental framework only. Claims about feature transferability are bounded to the architectures, fine-tuning protocols, and datasets documented in the literature cards and current experimental protocol.
 
 ---
 
-*Version: 5.0. Binding upon ratification. All subsequent dissertation drafts are subject to constraint verification against this document.*
+## X. AMENDMENT OPEN QUESTIONS (v5.1)
+
+The v5.1 amendment introduces operational specifications that are not yet resolved. These questions are recorded here as binding placeholders. Until resolved, the v5.1 design is incomplete and downstream files (RESEARCH_ARCHITECTURE, experimental-protocol, CONTRIBUTIONS) cannot be considered fully synced.
+
+**AOQ-1: Backbone architecture in the V5 arm.**
+RETFound is published as a ViT-Large vision transformer. The dissertation's v5.0 design used ResNet-50 and EfficientNet-B3 as the backbone families. Three resolution options are open:
+
+- (a) Replace the V5-arm backbone with RETFound's ViT-Large. This changes the architecture between baseline and V5 arms and introduces architecture as a third confound on top of preprocessing and pretrain.
+- (b) Restrict the V5 arm to a CNN-compatible domain-adaptive pretraining protocol (e.g., SparK-style masked image modeling adapted for ResNet-50, or contrastive SSL such as SimCLR/MoCo on EyePACS), rather than using RETFound weights literally. Under this option the term "RETFound" in v5.1 must be replaced with the specific protocol used.
+- (c) Run two V5 configurations: V5 + RETFound (ViT-L) and V5 + ImageNet (ResNet-50/EfficientNet-B3), allowing partial recovery of the preprocessing-vs-pretrain factor decomposition at the cost of additional compute.
+
+AOQ-1 is unresolved as of 2026-05-13. Until resolved, statements in H-1 v5.1 referencing "RETFound pretrained weights" refer to *whichever resolution of AOQ-1 is ratified*, not to a guarantee of ViT-Large adoption.
+
+**AOQ-2: Four-channel input adaptation.**
+RETFound was pretrained on 3-channel RGB fundus images. The V5 pipeline produces a 4-channel tensor (RGB + FOV mask, per Stage 3). Adapting the first patch-embedding (ViT) or first convolution (CNN under AOQ-1 option (b)) to accept 4 channels requires either:
+
+- (a) Copy pretrained weights to channels 0–2 and initialize channel 3 from the per-channel mean of pretrained weights (the protocol currently used for ImageNet weights in `experiments/src/models/resnet.py` lines 47–52). Under this option, a fraction of retina-specific pretrained representations is destroyed at channel 3.
+- (b) Drop the FOV mask from the input to preserve all pretrained weights, at the cost of reverting V5 to 3 channels (which contradicts OD-3 Stage 3, requiring an Invariants amendment of its own).
+- (c) Concatenate the FOV mask in a non-input position (e.g., as a multiplicative gating mask at an intermediate layer), preserving the 3-channel input contract while still using the mask. Requires architectural extension not specified in v5.0 or v5.1.
+
+AOQ-2 is unresolved as of 2026-05-13.
+
+**AOQ-3: License and weight provenance.**
+RETFound weights are published under a specific license (CC BY-NC 4.0 per the rmaphoh/RETFound_MAE repository at time of access). The dissertation must verify that the license terms permit the intended downstream use (including any commercial or clinical-deployment-adjacent framing). License verification is a precondition for any code-side adoption.
+
+**AOQ-4: Baseline asymmetry with v5.0 architecture comparison.**
+The v5.0 factorial isolated two architecture families (ResNet-50 vs EfficientNet-B3) under a fixed pretrain. If the v5.1 baseline arm continues to evaluate both ResNet-50 and EfficientNet-B3 under ImageNet pretrain while the V5 arm uses a single backbone under RETFound (per AOQ-1), the factorial loses its 2×2 symmetry. A symmetric design requires either two RETFound-compatible backbones (none exist as published) or a reduction of the baseline arm to a single architecture for the H-1 comparison.
+
+---
+
+*Version: 5.1. Binding upon ratification. All subsequent dissertation drafts are subject to constraint verification against this document. The v5.1 amendment supersedes v5.0 for the H-1 hypothesis, the DGL-6 constraint, and adds CFC-2.8 and Section X. All other v5.0 provisions remain in force unchanged.*

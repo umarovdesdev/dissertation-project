@@ -132,7 +132,16 @@
       "PowerShell(pip install *)",
       "PowerShell(python \"E:\\\\dissertation-project\\\\defense\\\\_inspect_pptx.py\")",
       "Bash(where magick *)",
-      "Bash(where convert *)"
+      "Bash(where convert *)",
+      "PowerShell(conda run *)",
+      "PowerShell(python --version; python -c \"import pptx; print\\(pptx.__version__\\)\" 2>&1)",
+      "PowerShell(python E:\\\\dissertation-project\\\\defense\\\\build_pptx.py 3)",
+      "PowerShell(python E:\\\\dissertation-project\\\\defense\\\\build_pptx.py)",
+      "PowerShell(python -c \"import cairosvg; print\\(cairosvg.__version__\\)\" 2>&1; python -c \"import svglib; print\\('svglib OK'\\)\" 2>&1)",
+      "PowerShell(python -c \"from svglib.svglib import svg2rlg; from reportlab.graphics import renderPM; import sys; d = svg2rlg\\(r'E:\\\\dissertation-project\\\\defense\\\\assets\\\\datasets\\\\27_overview\\\\12_dataset_class_distribution.svg'\\); renderPM.drawToFile\\(d, r'E:\\\\dissertation-project\\\\defense\\\\assets\\\\datasets\\\\27_overview\\\\test.png', fmt='PNG'\\); print\\('OK'\\)\" 2>&1 | Select-Object -First 30)",
+      "PowerShell(python -c \"from reportlab import rl_config; rl_config.renderPMBackend = '_renderPM'; from svglib.svglib import svg2rlg; from reportlab.graphics import renderPM; d = svg2rlg\\(r'E:\\\\dissertation-project\\\\defense\\\\assets\\\\datasets\\\\27_overview\\\\12_dataset_class_distribution.svg'\\); renderPM.drawToFile\\(d, r'E:\\\\dissertation-project\\\\defense\\\\assets\\\\datasets\\\\27_overview\\\\test.png', fmt='PNG'\\); print\\('OK'\\)\" 2>&1 | Select-Object -First 20)",
+      "PowerShell(python E:\\\\dissertation-project\\\\defense\\\\build_pptx.py 2>&1 | Select-Object -Last 10)",
+      "Bash(npm run *)"
     ]
   }
 }

@@ -21,6 +21,7 @@ import ResultsStatistical from './tabs/ResultsStatistical';
 import ValClinical from './tabs/ValClinical';
 import ValQuality from './tabs/ValQuality';
 import ValComputational from './tabs/ValComputational';
+import Publications from './tabs/Publications';
 
 function getNav(t) {
   return [
@@ -48,6 +49,8 @@ function getNav(t) {
     { id: 'val-clinical', label: t('nav.validation.clinical'), indent: true },
     { id: 'val-quality', label: t('nav.validation.quality'), indent: true },
     { id: 'val-compute', label: t('nav.validation.compute'), indent: true },
+    { type: 'group', label: t('nav.publications') },
+    { id: 'publications', label: t('nav.publications') },
   ];
 }
 
@@ -71,6 +74,7 @@ const COMPONENTS = {
   'val-clinical': ValClinical,
   'val-quality': ValQuality,
   'val-compute': ValComputational,
+  publications: Publications,
 };
 
 export default function App() {

@@ -53,6 +53,23 @@ export default function Overview() {
         />
       </Sec>
 
+      <Sec title="Object & Subject of Research">
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240, padding: '10px 14px', background: C.blueBg, borderLeft: `3px solid ${C.blue}`, borderRadius: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: C.blueT, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 4 }}>Object</div>
+            <div style={{ fontSize: 11, color: C.blueT, lineHeight: 1.6 }}>
+              Digital fundus images covering the five stages of diabetic retinopathy (DR 0–4) and the automated diagnostic process built upon them.
+            </div>
+          </div>
+          <div style={{ flex: 1, minWidth: 240, padding: '10px 14px', background: C.tealBg, borderLeft: `3px solid ${C.teal}`, borderRadius: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 4 }}>Subject</div>
+            <div style={{ fontSize: 11, color: C.tealT, lineHeight: 1.6 }}>
+              The effect of integrating the preprocessing pipeline and CNN classifier into a single model on diagnostic effectiveness, generalization ability, and clinical explainability.
+            </div>
+          </div>
+        </div>
+      </Sec>
+
       <Sec
         title="Central Thesis"
         note="The 5-component preprocessing pipeline (canonical orientation, FOV normalization, flat-field correction, dual-constraint CLAHE, augmentation) is an integral part of the diagnostic model — not ancillary data preparation. Preprocessing is the primary driver of classification improvement for 5-class DR grading. The pipeline preserves diagnostic features while normalizing cross-device variability."

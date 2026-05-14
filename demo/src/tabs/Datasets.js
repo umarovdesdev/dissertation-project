@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { C, DATASETS, CAMERA_GROUPS, DATASET_TIERS, RESOLUTION_ANALYSIS } from '../data';
+import { C, DATASETS, CAMERA_GROUPS, DATASET_TIERS, RESOLUTION_ANALYSIS, CAMERA_DISTRIBUTION } from '../data';
 import { Sec, Note } from '../components';
 import { useLang } from '../i18n';
 
@@ -69,7 +69,7 @@ function TierOverview() {
         })}
       </div>
       <Note>
-        8 active datasets across 5 tiers. APTOS 2019 is reinstated as the primary transfer target for Experiment 3 (H-4). Total labeled images across active datasets: ~63,529.
+        8 active datasets across 6 tiers. APTOS 2019 is the primary transfer target for Experiment 3 (H-4); Clinical KZ is the regional validation set for Experiment 7. Total labeled images across active datasets: ~63,589.
       </Note>
     </Sec>
   );
@@ -222,7 +222,7 @@ function ClassDistribution() {
         })}
       </div>
       <div style={{ fontSize: 10, color: 'var(--color-text-secondary,#888)', marginTop: 10 }}>
-        Total: ~35,126 labeled images. Exp 1 uses 40% stratified subset (~14,050 images).
+        Total: ~35,126 labeled images. Exp 1 uses 100% (full dataset, ~35,126 images) with 5-fold patient-level stratified CV.
       </div>
     </Sec>
   );
@@ -592,6 +592,62 @@ function SplitStrategy() {
   );
 }
 
+// ── Section: Camera Distribution — Central Asia vs Training ──────────────────
+const CAMERA_COLORS = { Canon: 'blue', Topcon: 'teal', Kowa: 'amber', Zeiss: 'purple', Other: 'gray' };
+
+function DistributionRow({ data }) {
+  const { label, ...shares } = data;
+  const total = Object.values(shares).reduce((a, b) => a + b, 0);
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-primary,#333)', marginBottom: 5 }}>
+        {label}
+      </div>
+      <div style={{ display: 'flex', height: 24, borderRadius: 5, overflow: 'hidden', border: '1px solid var(--color-border-tertiary,#eee)' }}>
+        {Object.entries(shares).map(([brand, pct]) => {
+          const colorKey = CAMERA_COLORS[brand] || 'gray';
+          return (
+            <div key={brand} style={{
+              width: `${(pct / total) * 100}%`,
+              background: C[colorKey] || C.gray,
+              opacity: 0.85,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 9, fontWeight: 700, color: '#fff',
+            }} title={`${brand}: ${pct}%`}>
+              {pct >= 8 ? `${brand} ${pct}%` : pct >= 4 ? `${pct}%` : ''}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CameraDistribution() {
+  return (
+    <Sec title="Camera Distribution — Central Asia vs Training Datasets"
+      note="Topcon + Canon together cover 83% of regional Central Asia clinics and 73% of the training data — the training distribution thus fully covers the dominant deployment domain (slide 14, dissertation defense).">
+      <DistributionRow data={CAMERA_DISTRIBUTION.centralAsia} />
+      <DistributionRow data={CAMERA_DISTRIBUTION.training} />
+
+      <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+        {[
+          { ...CAMERA_DISTRIBUTION.coverage.centralAsia, color: 'teal' },
+          { ...CAMERA_DISTRIBUTION.coverage.training,    color: 'blue' },
+        ].map((c, i) => (
+          <div key={i} style={{
+            flex: 1, padding: '8px 12px',
+            background: C[c.color + 'Bg'], borderLeft: `3px solid ${C[c.color]}`, borderRadius: 6,
+          }}>
+            <div style={{ fontSize: 10, color: C[c.color + 'T'], opacity: 0.8 }}>{c.label}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: C[c.color + 'T'], marginTop: 2 }}>{c.value}%</div>
+          </div>
+        ))}
+      </div>
+    </Sec>
+  );
+}
+
 // ── Section I: Resolution & Camera Analysis ─────────────────────────────────
 function ResolutionAnalysis() {
   const { t } = useLang();
@@ -699,6 +755,7 @@ export default function Datasets() {
       <TierOverview />
       <SummaryTable />
       <CameraMatrix />
+      <CameraDistribution />
       <ResolutionAnalysis />
       <ClassDistribution />
       <DatasetCards />

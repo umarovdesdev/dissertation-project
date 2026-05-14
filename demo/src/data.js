@@ -314,7 +314,7 @@ export const DATASETS = [
   },
   {
     name: 'Messidor-2',
-    tier: 'External', tierColor: 'purple', status: 'active',
+    tier: 'Degradation', tierColor: 'purple', status: 'active',
     size: '1,748 images', sizeUsed: '1,748 (full)',
     camera: 'Topcon TRC NW6', cameraType: 'Non-mydriatic', fov: '45°',
     resolution: '1440×960 to 2240×1488', format: 'TIFF',
@@ -407,6 +407,37 @@ export const DATASETS = [
     splitStrategy: 'DR subset extracted via keyword filtering. Used as external evaluation set.',
   },
   {
+    name: 'Clinical KZ',
+    tier: 'Local', tierColor: 'amber', status: 'active',
+    size: '60 images (30 patients)', sizeUsed: '60 (held-out test for Exp 7)',
+    camera: 'Topcon-class (inferred)', cameraType: 'Non-mydriatic', fov: '~45°',
+    resolution: 'Same 3-resolution profile as Messidor-2', format: 'JPEG',
+    taxonomy: '5-class ICDR (DR 0–4) — fully balanced', taxonomyMapping: null,
+    source: 'Almaty medical centre (private)', availability: 'Restricted (institutional)',
+    population: 'Kazakhstan (Almaty regional clinic)',
+    classDistribution: {
+      'DR 0': { count: 12, pct: 20.0 },
+      'DR 1': { count: 12, pct: 20.0 },
+      'DR 2': { count: 12, pct: 20.0 },
+      'DR 3': { count: 12, pct: 20.0 },
+      'DR 4': { count: 12, pct: 20.0 },
+    },
+    role: 'Local Kazakhstan clinical validation set for Experiment 7 (small-data training). Held-out test set after IDRiD 5-fold CV; 30 patients, fully balanced across DR 0–4.',
+    whyChosen: [
+      'Regional Kazakhstan acquisition — tests model performance on the target deployment population',
+      'Fully balanced 5-class distribution (12 images per grade) — controlled evaluation without imbalance confound',
+      'Same 3-resolution profile as Messidor-2 — enables Topcon-class camera inference even without EXIF',
+      'Validates the regional clinical use-case described in dissertation practical significance',
+    ],
+    experiments: ['Exp 7: Small data clinical training'],
+    limitations: [
+      'Very small sample (60 images, 30 patients) — limits statistical power for fine-grained per-class analysis',
+      'Single regional clinic — does not represent all Kazakhstan populations',
+      'No pixel-level lesion annotations',
+    ],
+    splitStrategy: 'Held out as evaluation set only — never used in training. IDRiD provides training pool with 5-fold CV.',
+  },
+  {
     name: 'RFMiD',
     tier: 'Domain', tierColor: 'coral', status: 'active',
     size: '3,200 images', sizeUsed: 'DR subset (binary: DR present / absent)',
@@ -441,6 +472,29 @@ export const CAMERA_GROUPS = {
   'Topcon': ['Messidor-2', 'RFMiD', 'DDR'],
   'Kowa':   ['IDRiD', 'RFMiD'],
   'Zeiss':  ['ODIR-5K'],
+};
+
+// Camera distribution comparison (slide 14): Central Asia regional clinics vs training datasets
+export const CAMERA_DISTRIBUTION = {
+  centralAsia: {
+    label: 'Central Asia clinics (n=36)',
+    Topcon: 53,
+    Canon:  31,
+    Zeiss:  14,
+    Kowa:   2,
+  },
+  training: {
+    label: 'Training datasets (brand share)',
+    Canon:  36,
+    Topcon: 36,
+    Kowa:   18,
+    Zeiss:  9,
+    Other:  1,
+  },
+  coverage: {
+    centralAsia: { label: 'Topcon + Canon coverage of Central Asia clinics', value: 83 },
+    training:    { label: 'Topcon + Canon coverage of training data',       value: 73 },
+  },
 };
 
 // Resolution-based camera analysis — computed from actual image files
@@ -544,6 +598,51 @@ export const DATASET_TIERS = [
   { name: 'Clinical', color: 'teal', description: 'Lesion masks + parameter validation + small data', datasets: ['IDRiD'] },
   { name: 'Degradation', color: 'purple', description: 'Clinical degradation resistance (H-7)', datasets: ['Messidor-2'] },
   { name: 'Domain', color: 'coral', description: 'Device domain shift evaluation (H-6)', datasets: ['DDR', 'ODIR-5K', 'RFMiD'] },
+  { name: 'Local', color: 'amber', description: 'Regional KZ clinical validation (Exp 7)', datasets: ['Clinical KZ'] },
+];
+
+// Publications — 5 total (1 Scopus Q3, 1 Scopus conference, 3 KZ VAK journals)
+export const PUBLICATIONS = [
+  {
+    tier: 'Scopus Q3', tierColor: 'teal', year: '2025',
+    authors: 'Sapakova S., Yesmukhamedov N., Sapakov A.',
+    title: 'Development of an Image Quality Enhancement Approach for Diabetic Retinopathy Diagnosis',
+    venue: 'Eastern-European Journal of Enterprise Technologies',
+    details: 'Vol. 4, No. 9(136). — P. 79–88.',
+    type: 'Journal',
+  },
+  {
+    tier: 'Scopus Conf.', tierColor: 'blue', year: '2025',
+    authors: 'Sapakova S., Yesmukhamedov N. et al.',
+    title: 'Methods for Pre-processing and Analysis of Fundus Images',
+    venue: 'Procedia Computer Science (Elsevier) — DS-2025, Istanbul',
+    details: 'Vol. 272. — P. 496–501.',
+    type: 'Conference',
+  },
+  {
+    tier: 'KZ VAK', tierColor: 'purple', year: '2025',
+    authors: 'Yesmukhamedov N.S. et al.',
+    title: 'Methods for Preprocessing and Analysis of Fundus Images',
+    venue: 'Herald of KBTU',
+    details: 'No. 4(75). — P. 119–130.',
+    type: 'Journal',
+  },
+  {
+    tier: 'KZ VAK', tierColor: 'purple', year: '2025',
+    authors: 'Yesmukhamedov N.S. et al.',
+    title: 'Development of an IS Architecture for Healthcare',
+    venue: 'News of NAN RK',
+    details: 'No. 2(354). — P. 74–91.',
+    type: 'Journal',
+  },
+  {
+    tier: 'KZ VAK', tierColor: 'purple', year: '2024',
+    authors: 'Sapakova S.Z. et al.',
+    title: 'Mathematical Modeling of Laser Exposure',
+    venue: 'Vestnik KazUTB',
+    details: 'Vol. 2, No. 27-740.',
+    type: 'Journal',
+  },
 ];
 
 // Hypotheses — 6 active, all confirmed

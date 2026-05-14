@@ -1,4 +1,4 @@
-import { C, CONFIGS, CLS, CLS_AUC } from '../data';
+import { C, CLS, CLS_AUC } from '../data';
 import { Card, Sec, DataTable, Paired, Note, ImageWithTooltip } from '../components';
 import { useLang } from '../i18n';
 
