@@ -141,7 +141,10 @@
       "PowerShell(python -c \"from svglib.svglib import svg2rlg; from reportlab.graphics import renderPM; import sys; d = svg2rlg\\(r'E:\\\\dissertation-project\\\\defense\\\\assets\\\\datasets\\\\27_overview\\\\12_dataset_class_distribution.svg'\\); renderPM.drawToFile\\(d, r'E:\\\\dissertation-project\\\\defense\\\\assets\\\\datasets\\\\27_overview\\\\test.png', fmt='PNG'\\); print\\('OK'\\)\" 2>&1 | Select-Object -First 30)",
       "PowerShell(python -c \"from reportlab import rl_config; rl_config.renderPMBackend = '_renderPM'; from svglib.svglib import svg2rlg; from reportlab.graphics import renderPM; d = svg2rlg\\(r'E:\\\\dissertation-project\\\\defense\\\\assets\\\\datasets\\\\27_overview\\\\12_dataset_class_distribution.svg'\\); renderPM.drawToFile\\(d, r'E:\\\\dissertation-project\\\\defense\\\\assets\\\\datasets\\\\27_overview\\\\test.png', fmt='PNG'\\); print\\('OK'\\)\" 2>&1 | Select-Object -First 20)",
       "PowerShell(python E:\\\\dissertation-project\\\\defense\\\\build_pptx.py 2>&1 | Select-Object -Last 10)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "PowerShell(\\(Get-ChildItem -Recurse -File 'defense/assets/presentation/' | Measure-Object -Property Length -Sum\\).Sum / 1MB; \\(Get-ChildItem -Recurse -File 'demo/public/images/' | Measure-Object -Property Length -Sum\\).Sum / 1MB)",
+      "PowerShell(Get-ChildItem -Recurse -File 'demo/public/images/','defense/assets/presentation/' | Sort-Object Length -Descending | Select-Object -First 10 | Format-Table @{N='SizeMB';E={[math]::Round\\($_.Length/1MB,2\\)}}, FullName -AutoSize)",
+      "PowerShell(\\(Get-ChildItem -Recurse -File 'demo/public/images/'\\).Count; \\(Get-ChildItem -Recurse -File 'defense/assets/presentation/'\\).Count)"
     ]
   }
 }
