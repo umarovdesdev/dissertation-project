@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <rect width="960" height="720" fill="white"/>
+
+  <!-- Title -->
+  <text x="480" y="28" text-anchor="middle" font-size="17" font-weight="700" fill="#1a1a2e">Деректер жиынтықтарының класс бөлінісі (DR 0–4)</text>
+  <text x="480" y="46" text-anchor="middle" font-size="11" fill="#999">DR деңгей таралымы (%) — стектік bar диаграммалары, 100% = толық бар ені</text>
+
+  <!-- Legend -->
+  <g transform="translate(195, 60)">
+    <rect x="0"   y="0" width="12" height="12" rx="2" fill="#2E7D32"/>
+    <text x="16"  y="10" font-size="10" fill="#444">DR 0 — DR жоқ</text>
+    <rect x="115" y="0" width="12" height="12" rx="2" fill="#F9A825"/>
+    <text x="131" y="10" font-size="10" fill="#444">DR 1 — Жеңіл</text>
+    <rect x="225" y="0" width="12" height="12" rx="2" fill="#EF6C00"/>
+    <text x="241" y="10" font-size="10" fill="#444">DR 2 — Орташа</text>
+    <rect x="345" y="0" width="12" height="12" rx="2" fill="#D32F2F"/>
+    <text x="361" y="10" font-size="10" fill="#444">DR 3 — Ауыр</text>
+    <rect x="445" y="0" width="12" height="12" rx="2" fill="#6A1B9A"/>
+    <text x="461" y="10" font-size="10" fill="#444">DR 4 — PDR</text>
+  </g>
+
+  <line x1="30" y1="84" x2="930" y2="84" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- 100% reference line -->
+  <line x1="720" y1="92" x2="720" y2="416" stroke="#E0E0E0" stroke-width="0.5" stroke-dasharray="4,3"/>
+
+  <!-- 5-class section header -->
+  <text x="24" y="106" font-size="9" fill="#999" font-weight="700" letter-spacing="0.5">5-КЛАСС ICDR ЖІКТЕМЕСІ</text>
+
+  <text x="210" y="128" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">EyePACS</text>
+  <text x="210" y="141" text-anchor="end" font-size="9" fill="#999">n = 35 126</text>
+  <rect x="220" y="116" width="367.5" height="30" fill="#2E7D32"/>
+  <text x="403.75" y="136" text-anchor="middle" font-size="10" fill="white" font-weight="600">74%</text>
+  <rect x="587.5" y="116" width="34.5" height="30" fill="#F9A825"/>
+  <text x="604.75" y="136" text-anchor="middle" font-size="10" fill="#444" font-weight="600">7%</text>
+  <rect x="622.0" y="116" width="75.5" height="30" fill="#EF6C00"/>
+  <text x="659.75" y="136" text-anchor="middle" font-size="10" fill="white" font-weight="600">15%</text>
+  <rect x="697.5" y="116" width="12.5" height="30" fill="#D32F2F"/>
+  <rect x="710.0" y="116" width="10.0" height="30" fill="#6A1B9A"/>
+  <text x="760" y="134" font-size="9" fill="#aaa" font-style="italic">Canon CR-1</text>
+
+  <text x="210" y="178" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">Messidor-2</text>
+  <text x="210" y="191" text-anchor="end" font-size="9" fill="#999">n = 1 744</text>
+  <rect x="220" y="166" width="291.5" height="30" fill="#2E7D32"/>
+  <text x="365.75" y="186" text-anchor="middle" font-size="10" fill="white" font-weight="600">58%</text>
+  <rect x="511.5" y="166" width="77.5" height="30" fill="#F9A825"/>
+  <text x="550.25" y="186" text-anchor="middle" font-size="10" fill="#444" font-weight="600">16%</text>
+  <rect x="589.0" y="166" width="99.5" height="30" fill="#EF6C00"/>
+  <text x="638.75" y="186" text-anchor="middle" font-size="10" fill="white" font-weight="600">20%</text>
+  <rect x="688.5" y="166" width="21.5" height="30" fill="#D32F2F"/>
+  <rect x="710.0" y="166" width="10.0" height="30" fill="#6A1B9A"/>
+  <text x="760" y="184" font-size="9" fill="#aaa" font-style="italic">Topcon TRC NW6</text>
+
+  <text x="210" y="228" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">DDR</text>
+  <text x="210" y="241" text-anchor="end" font-size="9" fill="#999">n = 12 522</text>
+  <rect x="220" y="216" width="250.0" height="30" fill="#2E7D32"/>
+  <text x="345.0" y="236" text-anchor="middle" font-size="10" fill="white" font-weight="600">50%</text>
+  <rect x="470.0" y="216" width="25.0" height="30" fill="#F9A825"/>
+  <rect x="495.0" y="216" width="179.0" height="30" fill="#EF6C00"/>
+  <text x="584.5" y="236" text-anchor="middle" font-size="10" fill="white" font-weight="600">36%</text>
+  <rect x="674.0" y="216" width="9.5" height="30" fill="#D32F2F"/>
+  <rect x="683.5" y="216" width="36.5" height="30" fill="#6A1B9A"/>
+  <text x="701.75" y="236" text-anchor="middle" font-size="10" fill="white" font-weight="600">7%</text>
+  <text x="760" y="234" font-size="9" fill="#aaa" font-style="italic">Canon + Topcon</text>
+
+  <text x="210" y="278" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">APTOS 2019</text>
+  <text x="210" y="291" text-anchor="end" font-size="9" fill="#999">n = 3 662</text>
+  <rect x="220" y="266" width="246.5" height="30" fill="#2E7D32"/>
+  <text x="343.25" y="286" text-anchor="middle" font-size="10" fill="white" font-weight="600">49%</text>
+  <rect x="466.5" y="266" width="50.5" height="30" fill="#F9A825"/>
+  <text x="491.75" y="286" text-anchor="middle" font-size="10" fill="#444" font-weight="600">10%</text>
+  <rect x="517.0" y="266" width="136.5" height="30" fill="#EF6C00"/>
+  <text x="585.25" y="286" text-anchor="middle" font-size="10" fill="white" font-weight="600">27%</text>
+  <rect x="653.5" y="266" width="26.5" height="30" fill="#D32F2F"/>
+  <text x="666.75" y="286" text-anchor="middle" font-size="10" fill="white" font-weight="600">5%</text>
+  <rect x="680.0" y="266" width="40.5" height="30" fill="#6A1B9A"/>
+  <text x="700.25" y="286" text-anchor="middle" font-size="10" fill="white" font-weight="600">8%</text>
+  <text x="760" y="284" font-size="9" fill="#aaa" font-style="italic">Аралас камералар</text>
+
+  <text x="210" y="328" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">IDRiD</text>
+  <text x="210" y="341" text-anchor="end" font-size="9" fill="#999">n = 516</text>
+  <rect x="220" y="316" width="163.0" height="30" fill="#2E7D32"/>
+  <text x="301.5" y="336" text-anchor="middle" font-size="10" fill="white" font-weight="600">33%</text>
+  <rect x="383.0" y="316" width="24.0" height="30" fill="#F9A825"/>
+  <rect x="407.0" y="316" width="163.0" height="30" fill="#EF6C00"/>
+  <text x="488.5" y="336" text-anchor="middle" font-size="10" fill="white" font-weight="600">33%</text>
+  <rect x="570.0" y="316" width="90.0" height="30" fill="#D32F2F"/>
+  <text x="615.0" y="336" text-anchor="middle" font-size="10" fill="white" font-weight="600">18%</text>
+  <rect x="660.0" y="316" width="60.0" height="30" fill="#6A1B9A"/>
+  <text x="690.0" y="336" text-anchor="middle" font-size="10" fill="white" font-weight="600">12%</text>
+  <text x="760" y="334" font-size="9" fill="#aaa" font-style="italic">Kowa VX-10α</text>
+
+  <text x="210" y="378" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">Clinical</text>
+  <text x="210" y="391" text-anchor="end" font-size="9" fill="#999">n = 60</text>
+  <rect x="220" y="366" width="100.0" height="30" fill="#2E7D32"/>
+  <text x="270.0" y="386" text-anchor="middle" font-size="10" fill="white" font-weight="600">20%</text>
+  <rect x="320.0" y="366" width="100.0" height="30" fill="#F9A825"/>
+  <text x="370.0" y="386" text-anchor="middle" font-size="10" fill="#444" font-weight="600">20%</text>
+  <rect x="420.0" y="366" width="100.0" height="30" fill="#EF6C00"/>
+  <text x="470.0" y="386" text-anchor="middle" font-size="10" fill="white" font-weight="600">20%</text>
+  <rect x="520.0" y="366" width="100.0" height="30" fill="#D32F2F"/>
+  <text x="570.0" y="386" text-anchor="middle" font-size="10" fill="white" font-weight="600">20%</text>
+  <rect x="620.0" y="366" width="100.0" height="30" fill="#6A1B9A"/>
+  <text x="670.0" y="386" text-anchor="middle" font-size="10" fill="white" font-weight="600">20%</text>
+  <text x="760" y="384" font-size="9" fill="#aaa" font-style="italic">Алматы, ҚР</text>
+
+  <!-- Separator between sections -->
+  <line x1="220" y1="420" x2="720" y2="420" stroke="#E0E0E0" stroke-width="1" stroke-dasharray="2,2"/>
+
+  <!-- Other-taxonomy section header -->
+  <text x="24" y="438" font-size="9" fill="#999" font-weight="700" letter-spacing="0.5">КІЛТ СӨЗ / БИНАРЛЫ ЖІКТЕМЕ</text>
+
+  <text x="210" y="450" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">ODIR-5K</text>
+  <text x="210" y="463" text-anchor="end" font-size="9" fill="#999">n = 1 818 көз</text>
+  <rect x="220" y="438" width="151.0" height="30" fill="#F9A825"/>
+  <text x="295.5" y="458" text-anchor="middle" font-size="10" fill="#444" font-weight="600">30%</text>
+  <rect x="371.0" y="438" width="290.5" height="30" fill="#EF6C00"/>
+  <text x="516.25" y="458" text-anchor="middle" font-size="10" fill="white" font-weight="600">58%</text>
+  <rect x="661.5" y="438" width="44.5" height="30" fill="#D32F2F"/>
+  <text x="683.75" y="458" text-anchor="middle" font-size="10" fill="white" font-weight="600">9%</text>
+  <rect x="706.0" y="438" width="14.5" height="30" fill="#6A1B9A"/>
+  <text x="760" y="450" font-size="9" fill="#aaa" font-style="italic">Canon + Zeiss</text>
+  <text x="760" y="462" font-size="8" fill="#D85A30">тек DR-positive</text>
+
+  <text x="210" y="500" text-anchor="end" font-size="12" font-weight="600" fill="#1a1a2e">RFMiD</text>
+  <text x="210" y="513" text-anchor="end" font-size="9" fill="#999">n = 3 200</text>
+  <rect x="220" y="488" width="401.5" height="30" fill="#2E7D32"/>
+  <text x="420.75" y="508" text-anchor="middle" font-size="10" fill="white" font-weight="600">80.3% жоқ</text>
+  <rect x="621.5" y="488" width="99.0" height="30" fill="#D32F2F"/>
+  <text x="671.0" y="508" text-anchor="middle" font-size="9" fill="white" font-weight="600">19.8% бар</text>
+  <text x="760" y="500" font-size="9" fill="#aaa" font-style="italic">Topcon + Kowa</text>
+  <text x="760" y="512" font-size="8" fill="#D85A30">тек бинарлы</text>
+
+  <!-- Bottom separator -->
+  <line x1="30" y1="526" x2="930" y2="526" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Annotations -->
+  <text x="40" y="548" font-size="10" fill="#D32F2F" font-weight="600">Класс теңгерімсіздігі әмбебап, бірақ деңгейі әртүрлі</text>
+  <text x="40" y="564" font-size="10" fill="#888">EyePACS: экстремалды теңгерімсіздік (73.5% DR 0) → Focal Loss қажет</text>
+  <text x="40" y="580" font-size="10" fill="#888">DDR: биомодальді — DR 0 (50%) + DR 2 (36%); DR 3 ең сирек (1.9%)</text>
+  <text x="40" y="596" font-size="10" fill="#888">IDRiD: ең теңгерімді 5-класс → класс бойынша бағалауға идеалды</text>
+
+  <text x="500" y="548" font-size="10" fill="#1D9E75" font-weight="600">Clinical (KZ): жобалау бойынша толық теңгерімді</text>
+  <text x="500" y="564" font-size="10" fill="#888">Класс бойынша 12 сурет, Grad-CAM бағалау үшін таңдалған</text>
+  <text x="500" y="580" font-size="10" fill="#888">ODIR-5K: DR 0 жоқ — кілт сөз шығаруы тек DR-positive</text>
+  <text x="500" y="596" font-size="10" fill="#888">RFMiD: бинарлы (тяжелік жоқ) — 4:1 қатынас (жоқ:бар)</text>
+
+  <text x="480" y="622" text-anchor="middle" font-size="10" fill="#888" font-style="italic">Теңгерімсіздік үлгісі классификатор өнімділігіне тікелей әсер етеді — минорлы кластар (DR 1, DR 3) тұрақты түрде ең төмен класс бойынша F1 көрсетеді</text>
+</svg>

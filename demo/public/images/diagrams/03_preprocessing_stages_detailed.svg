@@ -1,0 +1,281 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1900 1130" width="1900" height="1130">
+  <defs>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000000"/>
+    </marker>
+    <style>
+      .doc-ttl    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 700; fill: #111827; font-size: 22px; }
+      .doc-sub    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 400; fill: #4b5563; font-size: 13px; }
+      .pnl-ttl    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 700; fill: #111827; font-size: 17px; }
+      .pnl-mode   { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 600; fill: #ffffff; font-size: 11px; letter-spacing: 0.6px; }
+      .sec-hdr    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 700; fill: #6b7280; font-size: 11px; letter-spacing: 1.4px; }
+      .body       { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 400; fill: #111827; font-size: 13px; }
+      .body-em    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 600; fill: #111827; font-size: 13px; }
+      .mono       { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-weight: 500; fill: #111827; font-size: 12.5px; }
+      .mono-dim   { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-weight: 400; fill: #374151; font-size: 12px; }
+      .arrow-num  { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 700; fill: #6b7280; font-size: 13px; }
+      .legend-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 400; fill: #374151; font-size: 12px; }
+      .edge       { fill: none; stroke: #6b7280; stroke-width: 1.6; }
+    </style>
+  </defs>
+
+  <rect width="1900" height="1130" fill="#ffffff"/>
+
+  <!-- Document header -->
+  <text x="950" y="36" text-anchor="middle" class="doc-ttl">V5 Preprocessing Pipeline — Per-Stage Specification</text>
+  <text x="950" y="56" text-anchor="middle" class="doc-sub">Eight ordered stages mapping raw fundus image (BGR uint8) → CNN-ready tensor (4 × 512 × 512, float32)</text>
+
+  <!-- Inter-panel arrows row 1 (between panels 0→1, 1→2, 2→3) -->
+  <line x1="460" y1="320" x2="478" y2="320" class="edge" marker-end="url(#arrowhead)"/>
+  <line x1="920" y1="320" x2="938" y2="320" class="edge" marker-end="url(#arrowhead)"/>
+  <line x1="1380" y1="320" x2="1398" y2="320" class="edge" marker-end="url(#arrowhead)"/>
+
+  <!-- Inter-panel arrows row 2 (between panels 4→5, 5→6, 6→7) -->
+  <line x1="460" y1="840" x2="478" y2="840" class="edge" marker-end="url(#arrowhead)"/>
+  <line x1="920" y1="840" x2="938" y2="840" class="edge" marker-end="url(#arrowhead)"/>
+  <line x1="1380" y1="840" x2="1398" y2="840" class="edge" marker-end="url(#arrowhead)"/>
+
+  <!-- ===================== STAGE 0 — Canonical Flip ===================== -->
+  <g transform="translate(20, 70)">
+    <rect width="440" height="500" rx="6" fill="#0d9488" fill-opacity="0.07" stroke="#0d9488" stroke-width="2"/>
+    <!-- Title bar -->
+    <text x="20" y="32" class="pnl-ttl">Stage 0 — Canonical Flip</text>
+    <rect x="302" y="14" width="120" height="22" rx="3" fill="#0d9488"/>
+    <text x="362" y="29" text-anchor="middle" class="pnl-mode">LEFT EYE ONLY</text>
+    <line x1="20" y1="50" x2="420" y2="50" stroke="#0d9488" stroke-width="1" stroke-opacity="0.4"/>
+
+    <!-- Input -->
+    <text x="20" y="76" class="sec-hdr">INPUT</text>
+    <text x="20" y="98" class="mono">RGB uint8  ·  H × W × 3</text>
+    <text x="20" y="118" class="body">+ eye laterality  s ∈ {left, right, unknown}</text>
+
+    <!-- Operations -->
+    <text x="20" y="158" class="sec-hdr">OPERATIONS</text>
+    <text x="20" y="182" class="body">1.  Read laterality s from metadata</text>
+    <text x="20" y="204" class="body">2.  If s = “left”  →  horizontal mirror flip</text>
+    <text x="20" y="226" class="body">3.  If s = “right” / unknown  →  pass-through</text>
+    <text x="20" y="252" class="body-em">Purpose:  unify orientation so the optic disc</text>
+    <text x="20" y="270" class="body-em">always lies on the right (right-eye convention)</text>
+
+    <!-- Parameters -->
+    <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
+    <text x="20" y="342" class="body">— (no tunable parameters)</text>
+
+    <!-- Output -->
+    <text x="20" y="402" class="sec-hdr">OUTPUT</text>
+    <text x="20" y="424" class="mono">RGB uint8  ·  H × W × 3</text>
+    <text x="20" y="444" class="body">right-eye orientation</text>
+  </g>
+
+  <!-- ===================== STAGE 1 — OD-Fovea Rotation Normalization ===================== -->
+  <g transform="translate(480, 70)">
+    <rect width="440" height="500" rx="6" fill="#0d9488" fill-opacity="0.07" stroke="#0d9488" stroke-width="2"/>
+    <text x="20" y="32" class="pnl-ttl">Stage 1 — OD-Fovea Rotation</text>
+    <rect x="330" y="14" width="92" height="22" rx="3" fill="#0d9488"/>
+    <text x="376" y="29" text-anchor="middle" class="pnl-mode">ALWAYS ON</text>
+    <line x1="20" y1="50" x2="420" y2="50" stroke="#0d9488" stroke-width="1" stroke-opacity="0.4"/>
+
+    <text x="20" y="76" class="sec-hdr">INPUT</text>
+    <text x="20" y="98" class="mono">RGB uint8  ·  H × W × 3</text>
+    <text x="20" y="118" class="body">right-eye-oriented from Stage 0</text>
+
+    <text x="20" y="158" class="sec-hdr">OPERATIONS</text>
+    <text x="20" y="182" class="body">1.  Detect OD centre  (green-channel</text>
+    <text x="20" y="200" class="body">     bright-region percentile threshold)</text>
+    <text x="20" y="222" class="body">2.  Detect fovea centre  (darkest macular</text>
+    <text x="20" y="240" class="body">     region within search window)</text>
+    <text x="20" y="262" class="body">3.  Compute  θ = ∠(OD → Fovea, x-axis)</text>
+    <text x="20" y="284" class="body">4.  Rotate image by  −θ</text>
+
+    <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
+    <text x="20" y="342" class="body">OD: top-percentile (green-channel)</text>
+    <text x="20" y="360" class="body">Fovea: search window relative to OD</text>
+
+    <text x="20" y="402" class="sec-hdr">OUTPUT</text>
+    <text x="20" y="424" class="mono">RGB uint8  ·  H × W × 3</text>
+    <text x="20" y="444" class="body">retinal axis aligned to horizontal</text>
+  </g>
+
+  <!-- ===================== STAGE 2 — FOV Crop + Isotropic Resize ===================== -->
+  <g transform="translate(940, 70)">
+    <rect width="440" height="500" rx="6" fill="#0d9488" fill-opacity="0.07" stroke="#0d9488" stroke-width="2"/>
+    <text x="20" y="32" class="pnl-ttl">Stage 2 — FOV Crop + Isotropic Resize</text>
+    <rect x="330" y="14" width="92" height="22" rx="3" fill="#0d9488"/>
+    <text x="376" y="29" text-anchor="middle" class="pnl-mode">ALWAYS ON</text>
+    <line x1="20" y1="50" x2="420" y2="50" stroke="#0d9488" stroke-width="1" stroke-opacity="0.4"/>
+
+    <text x="20" y="76" class="sec-hdr">INPUT</text>
+    <text x="20" y="98" class="mono">RGB uint8  ·  H × W × 3</text>
+
+    <text x="20" y="138" class="sec-hdr">OPERATIONS</text>
+    <text x="20" y="162" class="body">1.  Detect FOV bounding box  (PIL fore-</text>
+    <text x="20" y="180" class="body">     ground / brightness threshold)</text>
+    <text x="20" y="202" class="body">2.  Crop with margin m around (cx, cy, R)</text>
+    <text x="20" y="224" class="body">3.  Isotropic scale:  2R  →  512 px</text>
+    <text x="20" y="246" class="body">4.  Centre zero-pad to 512 × 512</text>
+    <text x="20" y="272" class="body-em">Contrast with baseline:  baseline uses</text>
+    <text x="20" y="290" class="body-em">stretch-resize, distorting fundus geometry.</text>
+
+    <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
+    <text x="20" y="342" class="body">target = 512 × 512  ·  preserve aspect ratio</text>
+
+    <text x="20" y="402" class="sec-hdr">OUTPUT</text>
+    <text x="20" y="424" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+    <text x="20" y="444" class="body">circular FOV preserved + zero-padding map</text>
+  </g>
+
+  <!-- ===================== STAGE 3 — FOV Mask Generation ===================== -->
+  <g transform="translate(1400, 70)">
+    <rect width="440" height="500" rx="6" fill="#0d9488" fill-opacity="0.07" stroke="#0d9488" stroke-width="2"/>
+    <text x="20" y="32" class="pnl-ttl">Stage 3 — FOV Mask Generation</text>
+    <rect x="320" y="14" width="102" height="22" rx="3" fill="#0d9488"/>
+    <text x="371" y="29" text-anchor="middle" class="pnl-mode">SIDE BRANCH</text>
+    <line x1="20" y1="50" x2="420" y2="50" stroke="#0d9488" stroke-width="1" stroke-opacity="0.4"/>
+
+    <text x="20" y="76" class="sec-hdr">INPUT</text>
+    <text x="20" y="98" class="body">padding map / FOV geometry from Stage 2</text>
+
+    <text x="20" y="138" class="sec-hdr">OPERATIONS</text>
+    <text x="20" y="162" class="body">1.  M[i, j] = 1.0  if  pixel inside FOV</text>
+    <text x="20" y="180" class="body">     M[i, j] = 0.0  if  pixel is zero-padding</text>
+    <text x="20" y="202" class="body">2.  Optional Gaussian smoothing of mask</text>
+    <text x="20" y="220" class="body">     boundary (soften hard edge)</text>
+    <text x="20" y="252" class="body-em">Routed in parallel to Stages 4–6, then</text>
+    <text x="20" y="270" class="body-em">appended as 4ᵗʰ channel at Stage 7.</text>
+
+    <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
+    <text x="20" y="342" class="body">mask values  ∈ {0.0, 1.0}</text>
+
+    <text x="20" y="402" class="sec-hdr">OUTPUT</text>
+    <text x="20" y="424" class="mono">float32 mask  ·  512 × 512</text>
+    <text x="20" y="444" class="body">M ∈ {0.0, 1.0}</text>
+  </g>
+
+  <!-- ===================== STAGE 4 — Adaptive Flat-Field Correction ===================== -->
+  <g transform="translate(20, 590)">
+    <rect width="440" height="500" rx="6" fill="#c2410c" fill-opacity="0.07" stroke="#c2410c" stroke-width="2"/>
+    <text x="20" y="32" class="pnl-ttl">Stage 4 — Adaptive Flat-Field</text>
+    <rect x="330" y="14" width="92" height="22" rx="3" fill="#c2410c"/>
+    <text x="376" y="29" text-anchor="middle" class="pnl-mode">ALWAYS ON</text>
+    <line x1="20" y1="50" x2="420" y2="50" stroke="#c2410c" stroke-width="1" stroke-opacity="0.4"/>
+
+    <text x="20" y="76" class="sec-hdr">INPUT</text>
+    <text x="20" y="98" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+
+    <text x="20" y="138" class="sec-hdr">OPERATIONS</text>
+    <text x="20" y="162" class="body">1.  Estimate background illumination</text>
+    <text x="20" y="180" class="mono-dim">     B = GaussianBlur(I, σ)</text>
+    <text x="20" y="202" class="body">2.  Subtract:  I′ = I − B + 128</text>
+    <text x="20" y="224" class="body">3.  Clip to valid range  [0, 255]</text>
+    <text x="20" y="252" class="body-em">σ is adaptive to FOV geometry — replaces</text>
+    <text x="20" y="270" class="body-em">the fixed σ = 45 from V4.</text>
+
+    <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
+    <text x="20" y="342" class="mono">σ = 0.07 · D    (D = FOV diameter)</text>
+    <text x="20" y="362" class="body">sweep range in Exp 2:  σ ∈ [0.05, 0.10] · D</text>
+
+    <text x="20" y="402" class="sec-hdr">OUTPUT</text>
+    <text x="20" y="424" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+    <text x="20" y="444" class="body">uniform illumination, vignetting removed</text>
+  </g>
+
+  <!-- ===================== STAGE 5 — Dual-Constraint CLAHE ===================== -->
+  <g transform="translate(480, 590)">
+    <rect width="440" height="500" rx="6" fill="#c2410c" fill-opacity="0.07" stroke="#c2410c" stroke-width="2"/>
+    <text x="20" y="32" class="pnl-ttl">Stage 5 — Dual-Constraint CLAHE</text>
+    <rect x="320" y="14" width="102" height="22" rx="3" fill="#c2410c"/>
+    <text x="371" y="29" text-anchor="middle" class="pnl-mode">STOCHASTIC</text>
+    <line x1="20" y1="50" x2="420" y2="50" stroke="#c2410c" stroke-width="1" stroke-opacity="0.4"/>
+
+    <text x="20" y="76" class="sec-hdr">INPUT</text>
+    <text x="20" y="98" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+
+    <text x="20" y="138" class="sec-hdr">OPERATIONS</text>
+    <text x="20" y="162" class="body">1.  RGB  →  LAB  colour space</text>
+    <text x="20" y="184" class="body">2.  Apply CLAHE to L-channel only with</text>
+    <text x="20" y="202" class="body">     dual-constraint clip limit:</text>
+    <text x="20" y="224" class="mono-dim">     CL_tile = min( c · area / 256 , t · area )</text>
+    <text x="20" y="246" class="body">3.  At train: apply with p = 0.8 (stochastic)</text>
+    <text x="20" y="264" class="body">     At inference: always apply</text>
+    <text x="20" y="286" class="body">4.  LAB  →  RGB</text>
+
+    <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
+    <text x="20" y="342" class="mono">clip_factor c = 2.0   ·   threshold t = 0.01</text>
+    <text x="20" y="362" class="mono">tile_grid = 8 × 8</text>
+
+    <text x="20" y="402" class="sec-hdr">OUTPUT</text>
+    <text x="20" y="424" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+    <text x="20" y="444" class="body">enhanced local contrast (microvasculature)</text>
+  </g>
+
+  <!-- ===================== STAGE 6 — Augmentation (train only, dashed border) ===================== -->
+  <g transform="translate(940, 590)">
+    <rect width="440" height="500" rx="6" fill="#6d28d9" fill-opacity="0.07" stroke="#6d28d9" stroke-width="2" stroke-dasharray="6 4"/>
+    <text x="20" y="32" class="pnl-ttl">Stage 6 — Augmentation</text>
+    <rect x="320" y="14" width="102" height="22" rx="3" fill="#6d28d9"/>
+    <text x="371" y="29" text-anchor="middle" class="pnl-mode">TRAIN ONLY</text>
+    <line x1="20" y1="50" x2="420" y2="50" stroke="#6d28d9" stroke-width="1" stroke-opacity="0.4"/>
+
+    <text x="20" y="76" class="sec-hdr">INPUT</text>
+    <text x="20" y="98" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+
+    <text x="20" y="138" class="sec-hdr">OPERATIONS</text>
+    <text x="20" y="162" class="body">1.  Unified affine: rotation, zoom,</text>
+    <text x="20" y="180" class="body">     optional shear / stretch</text>
+    <text x="20" y="202" class="body">2.  Brightness / contrast jitter (α, β)</text>
+    <text x="20" y="224" class="body">3.  PCA colour jitter  (Krizhevsky-style)</text>
+    <text x="20" y="246" class="body">4.  Horizontal re-flip for diversity</text>
+    <text x="20" y="276" class="body-em">At inference: skipped (deterministic).</text>
+
+    <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
+    <text x="20" y="340" class="mono">rot σ_adapt (fallback 13°, clip ±40°)</text>
+    <text x="20" y="358" class="mono">zoom ∈ [0.9, 1.1]   ·   shear ±2°  (p=0.3)</text>
+    <text x="20" y="376" class="mono">PCA σ = 0.1  (p = 0.5)</text>
+
+    <text x="20" y="402" class="sec-hdr">OUTPUT</text>
+    <text x="20" y="424" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+    <text x="20" y="444" class="body">augmented training sample</text>
+  </g>
+
+  <!-- ===================== STAGE 7 — Normalize + Mask Append ===================== -->
+  <g transform="translate(1400, 590)">
+    <rect width="440" height="500" rx="6" fill="#9f1239" fill-opacity="0.07" stroke="#9f1239" stroke-width="2"/>
+    <text x="20" y="32" class="pnl-ttl">Stage 7 — Normalize + Mask Append</text>
+    <rect x="330" y="14" width="92" height="22" rx="3" fill="#9f1239"/>
+    <text x="376" y="29" text-anchor="middle" class="pnl-mode">ALWAYS ON</text>
+    <line x1="20" y1="50" x2="420" y2="50" stroke="#9f1239" stroke-width="1" stroke-opacity="0.4"/>
+
+    <text x="20" y="76" class="sec-hdr">INPUT</text>
+    <text x="20" y="98" class="mono">RGB uint8  ·  512 × 512 × 3</text>
+    <text x="20" y="118" class="body">+ FOV mask M  (from Stage 3, float32 512²)</text>
+
+    <text x="20" y="158" class="sec-hdr">OPERATIONS</text>
+    <text x="20" y="182" class="body">1.  uint8  →  float32, scale to  [0, 1]</text>
+    <text x="20" y="204" class="body">2.  Per-channel normalize</text>
+    <text x="20" y="222" class="mono-dim">     x′_c = (x_c − μ_c) / σ_c</text>
+    <text x="20" y="244" class="body">3.  Append M as 4ᵗʰ channel</text>
+    <text x="20" y="272" class="body-em">Baseline uses ImageNet (μ, σ) on 3 channels.</text>
+    <text x="20" y="290" class="body-em">Pipeline uses dataset-specific stats on 4ch.</text>
+
+    <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
+    <text x="20" y="342" class="body">(μ_c, σ_c) computed on training set</text>
+    <text x="20" y="360" class="body">after deterministic Stages 0–4</text>
+
+    <text x="20" y="402" class="sec-hdr">OUTPUT</text>
+    <text x="20" y="424" class="mono">float32 tensor  ·  (4, 512, 512)</text>
+    <text x="20" y="444" class="body-em">CNN-ready</text>
+  </g>
+
+  <!-- ===================== Bottom legend ===================== -->
+  <g transform="translate(40, 1100)">
+    <rect x="0"   y="-10" width="14" height="14" rx="2" fill="#0d9488" fill-opacity="0.25" stroke="#0d9488" stroke-width="1.5"/>
+    <text x="22"  y="2"  class="legend-txt">geometry stages (0–3)</text>
+    <rect x="220" y="-10" width="14" height="14" rx="2" fill="#c2410c" fill-opacity="0.25" stroke="#c2410c" stroke-width="1.5"/>
+    <text x="242" y="2"  class="legend-txt">photometric stages (4–5)</text>
+    <rect x="450" y="-10" width="14" height="14" rx="2" fill="#6d28d9" fill-opacity="0.25" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <text x="472" y="2"  class="legend-txt">train-only stage (6)</text>
+    <rect x="650" y="-10" width="14" height="14" rx="2" fill="#9f1239" fill-opacity="0.25" stroke="#9f1239" stroke-width="1.5"/>
+    <text x="672" y="2"  class="legend-txt">normalization stage (7)</text>
+    <text x="900" y="2"  class="legend-txt">·  Stage execution order: 0 → 1 → 2 → 3 (mask side branch) → 4 → 5 → 6 (train) → 7</text>
+  </g>
+</svg>

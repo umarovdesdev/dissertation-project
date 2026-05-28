@@ -102,6 +102,14 @@ const STAGE_VIEWS = {
   8: [
     { id: 'main', label: 'Normalized → 4ch', folder: 'preprocessing/stage_7_normalize' },
   ],
+  9: [
+    { id: 'prediction', label: 'Prediction', folder: 'results/prediction',
+      note: 'Predicted DR grade with class-probability bars from the CNN softmax head.' },
+    { id: 'gradcam', label: 'Grad-CAM', folder: 'results/gradcam',
+      note: 'Grad-CAM heatmap from the final convolutional block — highlights regions that most influenced the predicted class.' },
+    { id: 'attention_overlay', label: 'Attention overlay', folder: 'results/attention_overlay',
+      note: 'Grad-CAM activation blended over the original fundus (masked by the FOV) — clinical-style visualization of attended lesions.' },
+  ],
 };
 
 const STAGE_PANEL_HEIGHT = 380;

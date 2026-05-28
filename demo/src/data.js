@@ -180,6 +180,7 @@ export const PIPE = [
   { id: 6, nm: 'Stage 5: CLAHE (dual-constraint)', desc: 'Adaptive histogram equalization on LAB L-channel. clip_limit = min(clip_factor×tile_area/256, global_threshold×tile_area). Stochastic 80% during training.', detail: 'Tile: 8×8. Parameters from Exp 2 sweep. Stochastic = regularization. Dual-constraint prevents OD over-enhancement.' },
   { id: 7, nm: 'Stage 6: Augmentation (train only)', desc: 'Integrated affine augmentation: 360° rotation (circular FOV), flips, adaptive PCA color jitter, brightness/contrast. Applied only during training, never at inference.', detail: '360° rotation valid because circular FOV. Rotation magnitude σ_θ adapted from Stage 1 OD-fovea detection confidence.' },
   { id: 8, nm: 'Stage 7: Dataset-specific normalize → 4ch', desc: 'Dataset-specific channel-wise normalization statistics (not fixed ImageNet stats). Stack RGB + FOV mask → 4-channel tensor input to CNN.', detail: 'Dataset-specific mean/std computed from EyePACS training set. Output: 4ch (RGBM) tensor at 512×512.' },
+  { id: 9, nm: 'Results: CNN output', desc: 'Final outputs of the trained CNN on the preprocessed 4-channel input: predicted DR grade with class probabilities, Grad-CAM heatmap localizing the regions driving the prediction, and an attention overlay highlighting attended lesions on the original fundus.', detail: 'Prediction: softmax over 5 ICDR classes. Grad-CAM: last conv layer of the backbone. Attention overlay: Grad-CAM × FOV mask, blended over RGB.' },
 ];
 
 // Computational metrics

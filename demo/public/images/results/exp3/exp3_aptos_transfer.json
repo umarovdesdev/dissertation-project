@@ -1,0 +1,52 @@
+{
+  "experiment": "Experiment 3 — APTOS 2019 Cross-Dataset Transferability",
+  "hypothesis": "H-4",
+  "criterion": "Generalization ratio G = F1_APTOS / F1_EyePACS >= 0.85",
+  "training_dataset": "EyePACS (~35,126 images, Canon CR-1)",
+  "evaluation_dataset": "APTOS 2019 (3,662 images, mixed cameras, Indian population)",
+  "protocol": "Zero-shot transfer — no retraining on APTOS 2019",
+  "cross_validation": "5-fold patient-level stratified",
+  "results": {
+    "Config_A": {
+      "description": "Baseline (3ch) + ResNet-50",
+      "eyepacs_f1": 0.724,
+      "aptos_f1": 0.588,
+      "aptos_f1_std": 0.027,
+      "G": 0.812,
+      "h4_satisfied": false
+    },
+    "Config_B": {
+      "description": "Pipeline (4ch) + ResNet-50",
+      "eyepacs_f1": 0.776,
+      "aptos_f1": 0.668,
+      "aptos_f1_std": 0.022,
+      "G": 0.861,
+      "h4_satisfied": true
+    },
+    "Config_C": {
+      "description": "Baseline (3ch) + EfficientNet-B3",
+      "eyepacs_f1": 0.727,
+      "aptos_f1": 0.596,
+      "aptos_f1_std": 0.028,
+      "G": 0.820,
+      "h4_satisfied": false
+    },
+    "Config_D": {
+      "description": "Pipeline (4ch) + EfficientNet-B3",
+      "eyepacs_f1": 0.780,
+      "aptos_f1": 0.694,
+      "aptos_f1_std": 0.024,
+      "aptos_auc": 0.842,
+      "aptos_auc_std": 0.014,
+      "aptos_kappa": 0.618,
+      "aptos_kappa_std": 0.032,
+      "aptos_accuracy": 0.698,
+      "G": 0.890,
+      "h4_satisfied": true
+    }
+  },
+  "statistical_tests": {
+    "delong_auc_config_d": { "p_value": 0.015, "significant": true, "alpha": 0.05 },
+    "bootstrap_delta_g_95ci": [0.04, 0.11]
+  }
+}
