@@ -46,12 +46,12 @@ COUNTRY_DATA = {
 
 # Representative clinics per country
 SAMPLE_CLINICS = {
-    "Қазақстан":    "КазНИИ глазных болезней (Алматы, Астана) · Focus Eye Center · "
-                    "Astana Vision (сеть) · Konovalov Eye Center",
+    "Қазақстан":    "Көз аурулары ҚазҒЗИ (Алматы, Астана) · Focus Eye Center · "
+                    "Astana Vision (желі) · Konovalov Eye Center",
     "Өзбекстан":    "Republican Specialized Eye Center (Ташкент) · Samarkand Eye Hospital",
-    "Қырғызстан":   "Кыргызский НИИ глазных болезней (Бишкек) · Eye Clinic Bishkek",
+    "Қырғызстан":   "Көз аурулары Қырғыз ҒЗИ (Бішкек) · Eye Clinic Bishkek",
     "Тәжікстан":    "National Eye Center · Vision Tajikistan Clinic (Душанбе)",
-    "Түрікменстан": "International Eye Center · Ashgabat Eye Clinic (Ашхабад)",
+    "Түрікменстан": "International Eye Center · Ashgabat Eye Clinic (Ашғабат)",
 }
 
 OUT = (

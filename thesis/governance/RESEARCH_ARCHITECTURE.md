@@ -5,7 +5,9 @@
 **Candidate:** Yesmukhamedov N.S.
 **Status:** Binding Methodological Blueprint
 **Function:** Experimental, statistical, and architectural formalization of the dissertation research
-**Version:** 5.1 | **Date:** 2026-05-13 | **Binding Reference:** INVARIANTS.md v5.1
+**Version:** 5.2 | **Date:** 2026-05-28 | **Binding Reference:** INVARIANTS.md v5.2
+
+**v5.2 Amendment:** RETFound's pretraining corpus is described as the multi-modal retinal imaging corpus on which the foundation model was actually pretrained per Zhou et al. 2023 — ≈904K color fundus photographs (CFP) + ≈736K OCT scans (~1.6M total). The V5 arm of Experiment 1 loads the CFP-pretrained RETFound checkpoint specifically (the OCT-pretrained checkpoint is published separately and is not used; the dissertation's inputs remain fundus-only per SB-1.4 in INVARIANTS.md). Section 4.2bis is updated accordingly. All other v5.1 provisions are retained.
 
 **v5.1 Amendment:** The Experiment 1 factorial is amended so that the V5 arm uses RETFound (in-domain retinal pretrain) and the baseline arm retains ImageNet (cross-domain pretrain). Section 4 (Model Architecture Layer) and Section 5.1 (Experiment 1) reflect the amendment. The operational specifications listed under AOQ-1 through AOQ-4 (INVARIANTS v5.1, Section X) are open and must be resolved before experimental execution; cells marked "TBD per AOQ-x" in this document refer to those open questions.
 
@@ -207,12 +209,16 @@ See `methods/implementation.md` for full implementation details.
 
 ---
 
-## 4.2bis RETFound — V5 Arm Pretraining Source (v5.1) [NEW]
+## 4.2bis RETFound — V5 Arm Pretraining Source (v5.2 — multi-modal corpus, CFP checkpoint loaded)
 
 * Source: Zhou, Y., et al. (2023). *A foundation model for generalizable disease detection from retinal images.* Nature. Repository: `rmaphoh/RETFound_MAE`.
-* Pretraining method: Masked Autoencoder (MAE) self-supervised learning on ~1.6M color fundus photographs (CFP). MAE masks 75% of input patches and reconstructs pixel content; the encoder learns retina-aware representations without supervision.
+* Pretraining corpus (multi-modal, per Zhou et al. 2023): approximately 1.6M retinal images total, comprising:
+  - ≈904K color fundus photographs (CFP) — produces the CFP-pretrained checkpoint.
+  - ≈736K optical coherence tomography (OCT) scans — produces the OCT-pretrained checkpoint (published separately).
+* Pretraining method: Masked Autoencoder (MAE) self-supervised learning. MAE masks 75% of input patches and reconstructs pixel content; the encoder learns retina-aware representations without supervision. Each modality is pretrained independently, yielding two separate checkpoints.
 * Published architecture: ViT-Large (≈300M parameters), 16×16 patch size, 224×224 input resolution as released.
-* Role in v5.1: Initialization source for the V5 arm of Experiment 1, paired with the full V5 preprocessing pipeline (4 channels, 512×512).
+* **Checkpoint loaded in this dissertation (v5.2 binding):** the **CFP-pretrained** RETFound checkpoint. Justification: the V5 pipeline produces fundus-image tensors only; the OCT-pretrained checkpoint operates on single-channel OCT inputs and is not applicable here. The dissertation's input domain remains fundus photography (SB-1.4 in INVARIANTS.md unchanged).
+* Role in v5.2: Initialization source for the V5 arm of Experiment 1, paired with the full V5 preprocessing pipeline (4 channels, 512×512). The multi-modal corpus description characterizes RETFound at the publication level; it does not extend the dissertation's operational input modality.
 * Open operational questions (binding, must be resolved before Experiment 1 execution):
   - **AOQ-1 (backbone choice):** Whether the V5 arm uses (a) RETFound ViT-Large directly, (b) a CNN-compatible domain-adaptive pretraining protocol (SparK-style MIM or SimCLR/MoCo on EyePACS) labeled "RETFound-style," or (c) both V5+RETFound and V5+ImageNet runs for partial factor decomposition. See INVARIANTS v5.1 Section X.
   - **AOQ-2 (4-channel adaptation):** Whether the FOV mask channel is (a) added at the input via patch-embed/conv-stem extension with mean-init of channel 3, (b) dropped from the V5-arm input, or (c) injected at an intermediate layer as a gating mask.

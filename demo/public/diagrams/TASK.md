@@ -6,53 +6,53 @@
 
 ---
 
-## 1. Финальное понимание задачи
+## 1. Final understanding of the task
 
-Нужно построить **три отдельные диаграммы** в формате `.svg` (с дальнейшей конвертацией в `.png` для презентации защиты).
+We need to produce **three separate diagrams** in `.svg` format (later converted to `.png` for the defense presentation).
 
-### 1.1 Согласованные параметры
+### 1.1 Agreed parameters
 
-| Параметр | Значение |
-|----------|----------|
-| Язык подписей | English (только) |
-| Стиль | Строгий академический — тонкие линии, прямоугольники, без иконок и иллюстраций |
-| Фон | Белый |
-| Контраст | ≥ 4.5:1 на белом (WCAG AA) |
-| Формат | SVG → потом конвертация в PNG |
-| Расположение | `demo/public/diagrams/` |
+| Parameter | Value |
+|-----------|-------|
+| Label language | English (only) |
+| Style | Strict academic — thin lines, rectangles, no icons or illustrations |
+| Background | White |
+| Contrast | ≥ 4.5:1 on white (WCAG AA) |
+| Format | SVG → later converted to PNG |
+| Location | `demo/public/diagrams/` |
 
-### 1.2 Концептуальная структура трёх диаграмм
+### 1.2 Conceptual structure of the three diagrams
 
-| № | Уровень абстракции | Что раскрывает | Что остаётся «чёрным ящиком» |
+| # | Abstraction level | What it reveals | What stays a "black box" |
 |---|---|---|---|
-| 1 | Самый высокий — экспериментальный дизайн | 2×2 факториал: {Baseline, Pipeline} × {ResNet-50, EfficientNet-B3} → 4 конфигурации (Config A/B/C/D) → Results | Внутренности препроцессинга, внутренности CNN, агрегация, объяснимость |
-| 2 | Системный — полная end-to-end архитектура | Вход (пара глаз) → препроцессинг как **единый объединённый блок** → выход (обработанное изображение + FOV-маска) → CNN → Patient-Level Aggregation Φ → Prediction → отдельная ветка Grad-CAM | Внутренности 8 этапов препроцессинга (это уровень №3) |
-| 3 | Уровень препроцессинга — детализация всех этапов | Один большой постер с 8 панелями (по одной на каждый Stage 0–7), параметры, формулы, типы тензоров | — (это самая глубокая детализация) |
+| 1 | Highest — experimental design | 2×2 factorial: {Baseline, Pipeline} × {ResNet-50, EfficientNet-B3} → 4 configurations (Config A/B/C/D) → Results | Internals of preprocessing, internals of CNN, aggregation, explainability |
+| 2 | System level — full end-to-end architecture | Input (eye pair) → preprocessing as a **single combined block** → output (processed image + FOV mask) → CNN → Patient-Level Aggregation Φ → Prediction → separate Grad-CAM branch | Internals of the 8 preprocessing stages (that is level №3) |
+| 3 | Preprocessing level — detail of every stage | One large poster with 8 panels (one per Stage 0–7), parameters, formulas, tensor types | — (this is the deepest level of detail) |
 
-**Концепт «разрезания»:** существующий `pipeline_diagram.svg` (старый монолит, который смешивал системный и этапный уровни) мы разделяем:
-- системная часть → Диаграмма №2 (с добавлением Patient-Level Aggregation и Grad-CAM)
-- этапная часть → Диаграмма №3 (постер с 8 панелями)
-
----
-
-## 2. Источники истины
-
-| Файл | Что даёт |
-|------|----------|
-| `CLAUDE.md` (корень) | Центральный тезис: model = preprocessing + CNN |
-| `thesis/governance/CENTRAL_THESIS.md` | Тезис на одном абзаце |
-| `demo/public/diagrams/system_architecture_specification.md` | Полная спецификация архитектуры (Sections 1–14) |
-| `demo/public/diagrams/v5_pipeline_specification.md` | Подробная спецификация 8 этапов препроцессинга |
-| `demo/public/diagrams/general.png` | Референс пользователя для Диаграммы №1 |
-| `demo/public/diagrams/pipeline_diagram.svg` | Существующий монолит — концептуально разрезаем на №2 и №3 |
+**The "splitting" concept:** the existing `pipeline_diagram.svg` (the old monolith, which mixed the system and per-stage levels) is split into two:
+- the system part → Diagram №2 (with Patient-Level Aggregation and Grad-CAM added)
+- the per-stage part → Diagram №3 (poster with 8 panels)
 
 ---
 
-## 3. Диаграмма №1 — Maximally Abstract Architecture (2×2 Factorial)
+## 2. Sources of truth
 
-**Файл:** `demo/public/diagrams/01_abstract_model_architecture.svg`
+| File | What it provides |
+|------|------------------|
+| `CLAUDE.md` (root) | Central thesis: model = preprocessing + CNN |
+| `thesis/governance/CENTRAL_THESIS.md` | Thesis statement in one paragraph |
+| `demo/public/diagrams/system_architecture_specification.md` | Full architecture specification (Sections 1–14) |
+| `demo/public/diagrams/v5_pipeline_specification.md` | Detailed specification of the 8 preprocessing stages |
+| `demo/public/diagrams/general.png` | User's reference for Diagram №1 |
+| `demo/public/diagrams/pipeline_diagram.svg` | Existing monolith — conceptually split into №2 and №3 |
 
-### 3.1 Структура (на основе референса `general.png`)
+---
+
+## 3. Diagram №1 — Maximally Abstract Architecture (2×2 Factorial)
+
+**File:** `demo/public/diagrams/01_abstract_model_architecture.svg`
+
+### 3.1 Structure (based on the reference `general.png`)
 
 ```
                             ┌─────────┐
@@ -79,53 +79,53 @@
                     └──────────┘
 ```
 
-### 3.2 Содержание блоков
+### 3.2 Block contents
 
-- **Image** — Raw fundus photograph (один обобщённый блок).
+- **Image** — Raw fundus photograph (a single generalized block).
 - **Baseline preprocessing** — Stretch-resize 512×512 + ImageNet normalize (3 channels).
-- **Pipeline preprocessing** — Full V5 (8 stages, 4 channels). Раскрывается в Диаграммах №2 и №3.
+- **Pipeline preprocessing** — Full V5 (8 stages, 4 channels). Expanded in Diagrams №2 and №3.
 - **ResNet-50** — CNN backbone, ImageNet-pretrained, 4-channel input adapted.
 - **EfficientNet-B3** — CNN backbone, ImageNet-pretrained, 4-channel input adapted.
-- **Results** — Aggregated metrics (F1 / AUC / κ / accuracy) для всех 4 конфигураций.
+- **Results** — Aggregated metrics (F1 / AUC / κ / accuracy) for all 4 configurations.
 
-### 3.3 Подписи путей
+### 3.3 Path labels
 
-На каждой из 4 рёбер (от препроцессинга к бэкбону) подпись конфигурации:
+Each of the 4 edges (from preprocessing to backbone) carries a configuration label:
 - Baseline → ResNet-50 = **Config A**
 - Pipeline → ResNet-50 = **Config B**
 - Baseline → EfficientNet-B3 = **Config C**
 - Pipeline → EfficientNet-B3 = **Config D**
 
-### 3.4 Визуальные особенности
+### 3.4 Visual features
 
-- 6 прямоугольников + 4 подписи путей.
-- Цветовое кодирование:
-  - Image — графит-серый.
-  - Baseline preprocessing — сланцево-серый (контрольная ветка).
-  - Pipeline preprocessing — тёмно-зелёный (экспериментальная ветка).
-  - CNN backbones — тёмно-синий.
-  - Results — винно-красный.
-- Layout: симметричный «diamond».
-- Шрифт: sans-serif (Inter / Helvetica / Arial), 16pt для блоков, 12pt для подписей путей.
+- 6 rectangles + 4 path labels.
+- Color coding:
+  - Image — graphite gray.
+  - Baseline preprocessing — slate gray (control branch).
+  - Pipeline preprocessing — dark green (experimental branch).
+  - CNN backbones — dark blue.
+  - Results — wine red.
+- Layout: symmetric "diamond".
+- Font: sans-serif (Inter / Helvetica / Arial), 16pt for blocks, 12pt for path labels.
 
-### 3.5 Что НЕ показываем
+### 3.5 What we do NOT show
 
-- Patient-Level Aggregation (это уровень №2).
-- Grad-CAM (это уровень №2).
-- Размерности тензоров (это уровень №2 и №3).
-- Этапы препроцессинга (это уровни №2 и №3).
+- Patient-Level Aggregation (that is level №2).
+- Grad-CAM (that is level №2).
+- Tensor dimensions (that is level №2 and №3).
+- Preprocessing stages (those are levels №2 and №3).
 
 ---
 
-## 4. Диаграмма №2 — Full System Architecture (End-to-End)
+## 4. Diagram №2 — Full System Architecture (End-to-End)
 
-**Файл:** `demo/public/diagrams/02_system_architecture.svg`
+**File:** `demo/public/diagrams/02_system_architecture.svg`
 
-### 4.1 Цель
+### 4.1 Goal
 
-Показать полную end-to-end архитектуру системы согласно `system_architecture_specification.md` (Section 11 «Full Pipeline Flow»). Препроцессинг здесь — **единый объединённый блок** (содержание раскрывается в Диаграмме №3).
+Show the full end-to-end system architecture according to `system_architecture_specification.md` (Section 11 "Full Pipeline Flow"). Preprocessing here is a **single combined block** (its contents are expanded in Diagram №3).
 
-### 4.2 Структура
+### 4.2 Structure
 
 ```
                     Patient Record (bilateral pair)
@@ -180,150 +180,150 @@
                                 └──────────────────┘
 ```
 
-### 4.3 Что показываем
+### 4.3 What we show
 
-- **Bilateral input:** пара изображений (левый/правый глаз) + метаданные laterality.
-- **Preprocessing 𝒫 как единый блок** для каждого глаза. Подпись: «V5 (8 stages, see Diagram №3)».
-- **Output of preprocessing:** обработанное RGB-изображение + FOV-маска = 4-канальный тензор (4×512×512, float32).
-- **CNN backbone:** общие веса для обоих глаз (shared weights).
+- **Bilateral input:** pair of images (left/right eye) + laterality metadata.
+- **Preprocessing 𝒫 as a single block** per eye. Label: "V5 (8 stages, see Diagram №3)".
+- **Output of preprocessing:** processed RGB image + FOV mask = 4-channel tensor (4×512×512, float32).
+- **CNN backbone:** shared weights for both eyes.
 - **Per-eye feature vectors** f_L, f_R.
-- **Patient-Level Aggregation Φ:** max-grade (основная стратегия).
+- **Patient-Level Aggregation Φ:** max-grade (the primary strategy).
 - **Prediction layer g:** softmax → ŷ, p̂.
-- **Diagnosis output:** DR grade + бинарное решение (referable DR).
-- **Grad-CAM ветка:** отдельная ветка, отходящая от prediction layer (или от feature maps), показывает heatmap + метрики ALO/IoU.
+- **Diagnosis output:** DR grade + binary decision (referable DR).
+- **Grad-CAM branch:** a separate branch from the prediction layer (or from feature maps), showing heatmap + ALO/IoU metrics.
 
-### 4.4 Визуальные особенности
+### 4.4 Visual features
 
-- Layout: вертикальный (top-down), симметричный по центру для bilateral pair.
-- Препроцессинг — **единый прямоугольник** на каждый глаз (без раскрытия 8 этапов).
-- На стрелках после препроцессинга — подпись формата тензора `(4, 512, 512), float32`.
-- Patient-Level Aggregation — выделенный блок в центре.
-- Grad-CAM ветка — пунктирные линии (post-hoc, не часть основного inference потока).
-- Цветовое кодирование (согласовано с №1 и №3):
-  - Input — графит.
-  - Preprocessing блок — тёмно-зелёный.
-  - CNN backbones — тёмно-синий.
-  - Aggregation — янтарный.
-  - Prediction — винно-красный.
-  - Grad-CAM ветка — серо-голубой пунктир.
+- Layout: vertical (top-down), symmetric about the center for the bilateral pair.
+- Preprocessing — **a single rectangle** per eye (no expansion of the 8 stages).
+- After preprocessing, the arrow carries a tensor-format label: `(4, 512, 512), float32`.
+- Patient-Level Aggregation — a highlighted block at the center.
+- Grad-CAM branch — dashed lines (post-hoc, not part of the main inference path).
+- Color coding (consistent with №1 and №3):
+  - Input — graphite.
+  - Preprocessing block — dark green.
+  - CNN backbones — dark blue.
+  - Aggregation — amber.
+  - Prediction — wine red.
+  - Grad-CAM branch — slate-blue dashed.
 
-### 4.5 Что НЕ показываем
+### 4.5 What we do NOT show
 
-- Внутренности 8 этапов препроцессинга (это Диаграмма №3).
-- Сравнение Baseline vs Pipeline (это Диаграмма №1).
-- Детали MLP-головы PatientHead (Section 7.4) — она не в активном дизайне.
-- Конкретные размерности feature dimension d (2048 / 1536) — оставляем абстрактно «d».
+- Internals of the 8 preprocessing stages (that is Diagram №3).
+- Baseline vs Pipeline comparison (that is Diagram №1).
+- Details of the MLP head PatientHead (Section 7.4) — it is not in the active design.
+- Specific feature-dimension values d (2048 / 1536) — kept abstract as "d".
 
 ---
 
-## 5. Диаграмма №3 — Detailed Per-Stage Preprocessing Diagram
+## 5. Diagram №3 — Detailed Per-Stage Preprocessing Diagram
 
-**Файл:** `demo/public/diagrams/03_preprocessing_stages_detailed.svg` (одна диаграмма, Вариант A)
+**File:** `demo/public/diagrams/03_preprocessing_stages_detailed.svg` (one diagram, Variant A)
 
-### 5.1 Цель
+### 5.1 Goal
 
-Раскрыть «чёрный ящик» препроцессинга 𝒫 из Диаграммы №2 — показать все 8 этапов V5 с подробностями каждого.
+Open the "black box" of preprocessing 𝒫 from Diagram №2 — show all 8 V5 stages with the details of each.
 
-### 5.2 Формат
+### 5.2 Format
 
-**Один SVG-постер**, разбитый на 8 панелей в grid 4×2 (4 колонки × 2 строки) или 2×4 (2 колонки × 4 строки) — выберу по соотношению сторон при реализации.
+**A single SVG poster**, divided into 8 panels arranged in a 4×2 grid (4 columns × 2 rows) or 2×4 (2 columns × 4 rows) — the choice is made at implementation time based on aspect ratio.
 
-### 5.3 Содержание каждой панели
+### 5.3 Contents of each panel
 
-| Элемент | Описание |
-|---------|----------|
+| Element | Description |
+|---------|-------------|
 | Header | `Stage N — Name` |
-| Input | Формат и размерность тензора (например, `RGB uint8, H×W×3`) |
-| Internal operations | 2–4 шага операции (например, для Stage 1: OD detection → Fovea detection → Compute angle θ → Rotate by −θ) |
-| Output | Формат и размерность тензора |
-| Key parameters | Значения по умолчанию (σ = 0.07·D; clip_factor = 2.0; tile_grid = 8×8; и т.д.) |
+| Input | Tensor format and dimensions (e.g., `RGB uint8, H×W×3`) |
+| Internal operations | 2–4 operation steps (e.g., for Stage 1: OD detection → Fovea detection → Compute angle θ → Rotate by −θ) |
+| Output | Tensor format and dimensions |
+| Key parameters | Default values (σ = 0.07·D; clip_factor = 2.0; tile_grid = 8×8; etc.) |
 | Mode | always-on / train-only / stochastic |
 
-### 5.4 Восемь панелей
+### 5.4 The eight panels
 
 - **Stage 0** — Canonical Flip (always-on)
 - **Stage 1** — OD-Fovea Rotation Normalization (always-on, conditional)
 - **Stage 2** — FOV Crop + Isotropic Resize → 512×512 (always-on)
-- **Stage 3** — FOV Mask Generation (always-on, side branch для 4-го канала)
+- **Stage 3** — FOV Mask Generation (always-on, side branch for the 4th channel)
 - **Stage 4** — Adaptive Flat-Field Correction, σ = 0.07·D (always-on)
-- **Stage 5** — Dual-Constraint CLAHE, LAB L-channel (always-on, stochastic при train)
+- **Stage 5** — Dual-Constraint CLAHE, LAB L-channel (always-on, stochastic at train)
 - **Stage 6** — Augmentation, affine + PCA color (train only)
 - **Stage 7** — Dataset-Specific Normalize + FOV Mask Append (always-on)
 
-### 5.5 Визуальные особенности
+### 5.5 Visual features
 
-- Каждая панель — прямоугольник с border, внутри — структурированный layout (Header / Input / Operations / Output / Params).
-- Между панелями — стрелки, обозначающие порядок исполнения (если grid позволяет — линия с номерами 0→1→2→…→7).
-- Stage 6 (train-only) — выделен пунктирной обводкой.
-- Stage 3 (mask side branch) — выделен другим цветом (бирюзовый), с пунктирной стрелкой к Stage 7 (показать что mask append'ится в конце).
-- Цветовое кодирование (согласовано с №2):
-  - Geometry stages (0–3) — бирюзовый.
-  - Photometric stages (4–5) — оранжевый.
-  - Train-only (6) — фиолетовый, пунктир.
-  - Normalization (7) — винно-красный.
-- Внизу — компактная легенда (always-on / train-only / stochastic / data flow).
-
----
-
-## 6. Унифицированная цветовая палитра
-
-| Назначение | HEX | Контраст на белом |
-|------------|-----|-------------------|
-| Input (`Image`, raw tensor) — графит | `#1f2937` | 14.7:1 |
-| Baseline preprocessing — сланцево-серый | `#475569` | 8.6:1 |
-| Pipeline (V5) preprocessing — тёмно-зелёный | `#166534` | 8.4:1 |
-| Geometry stages (0–3) — бирюзовый | `#0d9488` | 4.7:1 |
-| Photometric stages (4–5) — оранжевый | `#c2410c` | 5.6:1 |
-| Train-only / stochastic (6) — фиолетовый | `#6d28d9` | 7.4:1 |
-| Normalization (7) / Results / Prediction — винно-красный | `#9f1239` | 8.5:1 |
-| CNN backbones (ResNet-50, EfficientNet-B3) — тёмно-синий | `#1e3a8a` | 11.2:1 |
-| Patient-Level Aggregation — янтарный | `#b45309` | 5.0:1 |
-| Grad-CAM ветка — серо-голубой пунктир | `#475569` | 8.6:1 |
-| Текст подписей | `#111827` | 17.3:1 |
-| Стрелки | `#000000` | 21:1 |
-| Заливка блоков | соответствующий цвет с alpha 12–18% | — |
-
-Все цвета имеют контраст ≥ 4.5:1 на белом фоне (WCAG AA).
+- Each panel — a bordered rectangle, with a structured internal layout (Header / Input / Operations / Output / Params).
+- Between panels — arrows indicating execution order (if the grid allows, a numbered line 0→1→2→…→7).
+- Stage 6 (train-only) — outlined with a dashed border.
+- Stage 3 (mask side branch) — drawn in a different color (teal), with a dashed arrow to Stage 7 (showing that the mask is appended at the end).
+- Color coding (consistent with №2):
+  - Geometry stages (0–3) — teal.
+  - Photometric stages (4–5) — orange.
+  - Train-only (6) — purple, dashed.
+  - Normalization (7) — wine red.
+- Below — a compact legend (always-on / train-only / stochastic / data flow).
 
 ---
 
-## 7. Технические детали
+## 6. Unified color palette
 
-- **Формат:** чистый SVG (XML вручную), без зависимостей от внешних шрифтов (sans-serif fallback).
+| Purpose | HEX | Contrast on white |
+|---------|-----|-------------------|
+| Input (`Image`, raw tensor) — graphite | `#1f2937` | 14.7:1 |
+| Baseline preprocessing — slate gray | `#475569` | 8.6:1 |
+| Pipeline (V5) preprocessing — dark green | `#166534` | 8.4:1 |
+| Geometry stages (0–3) — teal | `#0d9488` | 4.7:1 |
+| Photometric stages (4–5) — orange | `#c2410c` | 5.6:1 |
+| Train-only / stochastic (6) — purple | `#6d28d9` | 7.4:1 |
+| Normalization (7) / Results / Prediction — wine red | `#9f1239` | 8.5:1 |
+| CNN backbones (ResNet-50, EfficientNet-B3) — dark blue | `#1e3a8a` | 11.2:1 |
+| Patient-Level Aggregation — amber | `#b45309` | 5.0:1 |
+| Grad-CAM branch — slate-blue dashed | `#475569` | 8.6:1 |
+| Label text | `#111827` | 17.3:1 |
+| Arrows | `#000000` | 21:1 |
+| Block fills | corresponding color at 12–18% alpha | — |
+
+All colors meet contrast ≥ 4.5:1 on white background (WCAG AA).
+
+---
+
+## 7. Technical details
+
+- **Format:** plain SVG (XML written by hand), no dependency on external fonts (sans-serif fallback).
 - **viewBox:**
-  - №1: 1600×900 (16:9 для слайда).
-  - №2: 1200×1600 (вертикальный — bilateral pair требует высоты).
-  - №3: 1920×1080 для grid 4×2 ИЛИ 1080×1920 для grid 2×4.
-- **Toolchain:** SVG пишется руками, без зависимости от Inkscape/Figma.
-- **Конвертация в PNG:** позднее, через ImageMagick / Inkscape CLI / онлайн при экспорте 2× DPI.
+  - №1: 1600×900 (16:9 for a slide).
+  - №2: 1200×1600 (vertical — the bilateral pair requires height).
+  - №3: 1920×1080 for a 4×2 grid OR 1080×1920 for a 2×4 grid.
+- **Toolchain:** SVG is written by hand, with no dependency on Inkscape/Figma.
+- **PNG conversion:** later, via ImageMagick / Inkscape CLI / online, exporting at 2× DPI.
 
 ---
 
-## 8. Согласованные решения
+## 8. Agreed decisions
 
-Все вопросы из предыдущей итерации решены:
+All questions from the previous iteration have been resolved:
 
-| Вопрос | Решение |
-|--------|---------|
-| Язык подписей | English |
-| Стиль | Строгий академический |
-| Диаграмма №1: Config A/B/C/D на путях | Да, показываем |
-| Диаграмма №3: Вариант A или B | Вариант A (одна диаграмма-постер) |
-| Patient-Level Aggregation в №1 | НЕТ — переносим в №2 |
-| Grad-CAM в №1 | НЕТ — переносим в №2 |
-| Препроцессинг в №2 | Единый блок, без раскрытия этапов |
-| Выход препроцессинга в №2 | Обработанное RGB + FOV-маска (4-канальный тензор) |
+| Question | Decision |
+|----------|----------|
+| Label language | English |
+| Style | Strict academic |
+| Diagram №1: Config A/B/C/D on paths | Yes, shown |
+| Diagram №3: Variant A or B | Variant A (one poster diagram) |
+| Patient-Level Aggregation in №1 | NO — moved to №2 |
+| Grad-CAM in №1 | NO — moved to №2 |
+| Preprocessing in №2 | Single block, no stage expansion |
+| Output of preprocessing in №2 | Processed RGB + FOV mask (4-channel tensor) |
 
 ---
 
-## 9. План работ
+## 9. Work plan
 
-1. ✅ Согласовать TASK.md (текущая версия — финальная).
-2. ⏳ Создать Диаграмму №1 (`01_abstract_model_architecture.svg`).
-3. ⏳ Создать Диаграмму №2 (`02_system_architecture.svg`).
-4. ⏳ Создать Диаграмму №3 (`03_preprocessing_stages_detailed.svg`).
-5. ⏳ Визуальная проверка каждой диаграммы.
-6. ⏳ Конвертация SVG → PNG для экспорта.
+1. ✅ Agree on TASK.md (current version — final).
+2. ⏳ Create Diagram №1 (`01_abstract_model_architecture.svg`).
+3. ⏳ Create Diagram №2 (`02_system_architecture.svg`).
+4. ⏳ Create Diagram №3 (`03_preprocessing_stages_detailed.svg`).
+5. ⏳ Visual check of each diagram.
+6. ⏳ Convert SVG → PNG for export.
 
 ---
 

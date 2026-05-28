@@ -65,22 +65,22 @@ The visual distinction should be immediately obvious: baseline fills the square 
 
 ## Source Images
 
-**Обязательное требование:** ВСЕ pipeline-изображения должны быть получены обработкой реальных снимков из директории `E:\dissertation-project\demo\public\fundus-examples\dr04\`. Никакие синтетические, сгенерированные или placeholder-изображения не допускаются. Каждый файл в `public/pipeline/` — это результат прогона реального фундус-снимка через соответствующие стадии пайплайна.
+**Hard requirement:** ALL pipeline images must be produced by processing real fundus images from the directory `E:\dissertation-project\demo\public\fundus-examples\dr04\`. No synthetic, generated, or placeholder images are allowed. Every file in `public/pipeline/` must be the result of running a real fundus image through the corresponding pipeline stages.
 
-Исходные файлы:
+Source files:
 - `E:\dissertation-project\demo\public\fundus-examples\dr04\right_eye.jpeg` — right eye (OD), Patient 43199, EyePACS, DR Grade 4 (Proliferative DR)
 - `E:\dissertation-project\demo\public\fundus-examples\dr04\left_eye.jpeg` — left eye (OS), same patient
 
 The right eye has the optic disc (bright circular region) on the LEFT side. The left eye has the optic disc on the RIGHT side.
 
-**Загрузка:**
+**Loading:**
 ```python
 SRC_DIR = r'E:\dissertation-project\demo\public\fundus-examples\dr04'
 right_img = cv2.cvtColor(cv2.imread(os.path.join(SRC_DIR, 'right_eye.jpeg')), cv2.COLOR_BGR2RGB)
 left_img  = cv2.cvtColor(cv2.imread(os.path.join(SRC_DIR, 'left_eye.jpeg')),  cv2.COLOR_BGR2RGB)
 ```
 
-Если файлы не найдены — скрипт должен завершиться с ошибкой `FileNotFoundError`, а не подставлять заглушки.
+If the files are not found, the script must terminate with `FileNotFoundError` rather than substituting placeholders.
 
 ---
 
