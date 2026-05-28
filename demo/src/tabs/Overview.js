@@ -70,9 +70,26 @@ export default function Overview() {
         </div>
       </Sec>
 
+      <Sec title="Paradigmatic Context (P1 → P2)" note="The principal conceptual contribution of this dissertation is a paradigm shift from end-to-end CNN (P1) to integrated preprocessing-CNN (P2). Gulshan et al. (2016, JAMA) is taken as the canonical representative of P1 on the basis of its observable methodological practice (preprocessing deferred to supplement; main-text emphasis on architecture and data scale) — not on the basis of any explicit theoretical claim about preprocessing (per INVARIANTS v5.3 SIR-9 / CFC-2.9). No direct numerical comparison with Gulshan is performed (per SB-1.12); differences in task, backbone, dataset partition, and validation protocol preclude a sound head-to-head test.">
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240, padding: '10px 14px', background: C.blueBg, borderLeft: `3px solid ${C.blue}`, borderRadius: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: C.blueT, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 4 }}>Paradigm P1 — end-to-end CNN</div>
+            <div style={{ fontSize: 11, color: C.blueT, lineHeight: 1.6 }}>
+              Preprocessing as ancillary data preparation. Canonical representative: <strong>Gulshan et al. (2016)</strong>. Followers: Pratt 2016, Rakhlin 2017, Saxena 2020, Ting 2017, Voets 2019. Operational instantiation in this dissertation: <strong>configs A/C</strong> in Experiment 1 (3-channel, stretch-resize + ImageNet normalize).
+            </div>
+          </div>
+          <div style={{ flex: 1, minWidth: 240, padding: '10px 14px', background: C.tealBg, borderLeft: `3px solid ${C.teal}`, borderRadius: 6 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 4 }}>Paradigm P2 — model = preprocessing + CNN</div>
+            <div style={{ fontSize: 11, color: C.tealT, lineHeight: 1.6 }}>
+              Preprocessing as integral model component. Operational instantiation: <strong>configs B/D</strong> in Experiment 1 (4-channel, full 8-stage V5 pipeline). The 8 stages are the engineering realisation of the P2 paradigm; the controlled factorial of Experiment 1 is its empirical test.
+            </div>
+          </div>
+        </div>
+      </Sec>
+
       <Sec
         title="Central Thesis"
-        note="The 5-component preprocessing pipeline (canonical orientation, FOV normalization, flat-field correction, dual-constraint CLAHE, augmentation) is an integral part of the diagnostic model — not ancillary data preparation. Preprocessing is the primary driver of classification improvement for 5-class DR grading. The pipeline preserves diagnostic features while normalizing cross-device variability."
+        note="The 8-stage preprocessing pipeline (canonical orientation, FOV normalization, flat-field correction, dual-constraint CLAHE, augmentation) is an integral part of the diagnostic model — not ancillary data preparation. Preprocessing is the primary driver of classification improvement for 5-class DR grading. The pipeline preserves diagnostic features while normalizing cross-device variability."
       >
         <div style={{ padding: '12px 14px', background: C.tealBg, borderRadius: 8, fontSize: 12, color: C.tealT, lineHeight: 1.7 }}>
           <strong>Finding:</strong> Preprocessing produces statistically significant improvement for both architectures:

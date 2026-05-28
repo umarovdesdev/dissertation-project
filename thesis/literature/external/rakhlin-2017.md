@@ -205,6 +205,8 @@
 
 # 15. Relevance to Dissertation
 
+**Position in paradigm space (v5.3):** P1 (end-to-end CNN; preprocessing as auxiliary step). Grounds (per SIR-9): the paper applies a preprocessing/normalisation pipeline but does not formalise it as a contributing model component, does not run a preprocessing ablation, and frames image quality as a *data property* rather than a *model component*. Per CFC-2.9 / SIR-1, no theoretical "preprocessing is unimportant" claim is attributed to the author.
+
 - **Relevance to preprocessing dominance hypothesis:** Moderate-to-high. The paper explicitly attributes the Messidor-2 performance advantage over Kaggle to image quality (gradability: 100% vs. 75%), providing empirical support for the claim that preprocessing and data quality conditions dominate model performance. This is one of the most direct statements in the DR literature on image quality as a performance determinant.
 - **Relevance to cross-database validation:** High. The study performs cross-dataset evaluation (Kaggle → Messidor-2), demonstrating that a model trained on one distribution can achieve high AUC on a structurally different dataset — relevant to cross-database generalizability arguments.
 - **Relevance to EyePACS/Messidor benchmarking:** High. Both canonical benchmarks used; results directly comparable (with caveats on rDR definition) to Abramoff et al. (2016) and Gulshan et al. (2016).

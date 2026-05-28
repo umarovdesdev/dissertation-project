@@ -52,12 +52,16 @@ export default function ExpH1() {
 
       <Sec title={t('exp.allConfigs')}>
         <DataTable
-          headers={['Config', 'Preprocessing', 'CNN', 'W.F1 ± σ', 'ROC-AUC ± σ', 'κ ± σ', 'Acc']}
+          headers={['Config', 'Preprocessing', 'CNN', 'Paradigm', 'W.F1 ± σ', 'ROC-AUC ± σ', 'κ ± σ', 'Acc']}
           rows={all4.map(k => {
             const v = CONFIGS[k];
+            const paradigm = (k === 'A' || k === 'C')
+              ? <span key={k + 'p'} style={{ color: C.blueT, fontWeight: 600 }}>P1 instantiation</span>
+              : <span key={k + 'p'} style={{ color: C.tealT, fontWeight: 600 }}>P2 instantiation</span>;
             return [
               <span key={k} style={{ fontWeight: 700, color: k === 'D' ? C.teal : 'inherit' }}>{k}</span>,
               v.preprocessing, v.cnn,
+              paradigm,
               `${v.f1.toFixed(3)} ± ${v.f1s.toFixed(3)}`,
               `${v.auc.toFixed(3)} ± ${v.aucs.toFixed(3)}`,
               `${v.k.toFixed(3)} ± ${v.ks.toFixed(3)}`,
@@ -67,7 +71,7 @@ export default function ExpH1() {
           highlightRow={(row, i) => i === 5}
         />
         <Note>
-          4 configurations (A–D). Baseline configs (A, C) use 3-channel stretch-resize + ImageNet normalize. Pipeline configs (B, D) use 8-stage pipeline with 4-channel input (RGB + FOV mask).
+          4 configurations (A–D). Configs A/C operationally instantiate paradigm P1 (Gulshan-paradigm baseline — end-to-end CNN, 3-channel stretch-resize + ImageNet normalize). Configs B/D operationally instantiate paradigm P2 (V5 integrated pipeline — 8-stage preprocessing as integral model component, 4-channel input including FOV mask). The A-vs-B and C-vs-D contrasts are empirical comparisons between the two paradigms under matched conditions — not numerical comparisons against Gulshan 2016 (per INVARIANTS v5.3 SB-1.12, CFC-2.2).
         </Note>
       </Sec>
 

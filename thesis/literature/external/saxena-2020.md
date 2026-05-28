@@ -260,6 +260,8 @@ No. No significance tests, no confidence intervals, no bootstrapping reported. A
 
 # 15. Relevance to My Dissertation
 
+**Position in paradigm space (v5.3):** P1 (end-to-end CNN; preprocessing as auxiliary step). Grounds (per SIR-9): although the paper reports preprocessing choices (intelligent cropping, resolution selection, targeted augmentation) and acknowledges their impact, preprocessing is treated as a tuning factor for the architecture rather than as a formalised model component, and the conceptual emphasis remains on backbone selection (InceptionResNetV2 vs. InceptionV3) and ensemble methods. The authors' five-factor framing of performance gains (model structure, image size, dataset splitting, preprocessing/augmentation, ensembles) is precisely the P1 framing of preprocessing as one factor among several rather than as an integral part of the model. Per CFC-2.9 / SIR-1, no theoretical "preprocessing is unimportant" claim is attributed to the authors.
+
 **Relevance to preprocessing dominance hypothesis:**
 High. The study provides direct empirical evidence that preprocessing choices — specifically intelligent cropping, resolution selection (512×512 vs. 299×299), and targeted augmentation — materially affect AUC on external benchmarks. The resolution ablation (Messidor-2 AUC: 0.92 at 512×512 vs. 0.86 at 299×299) is a concrete, citable quantification of preprocessing impact. This directly supports a preprocessing-dominance argument.
 

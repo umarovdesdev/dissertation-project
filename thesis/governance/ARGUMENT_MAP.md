@@ -2,7 +2,31 @@
 ## PhD Dissertation: Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Formal Claim-Evidence-Dependency Structure
-**Version:** 5.0 | **Date:** 2026-04-XX | **Binding Reference:** INVARIANTS.md v5.0
+**Version:** 5.3 | **Date:** 2026-05-28 | **Binding Reference:** INVARIANTS.md v5.3
+
+---
+
+## 0. PARADIGMATIC FRAMING (PC-0)
+
+### PC-0
+**Claim ID:** PC-0
+**Formal Statement:** The integrated preprocessing-CNN paradigm (P2), in which preprocessing is formalised as an integral component of the diagnostic model, is conceptually more productive than the end-to-end CNN paradigm (P1, of which Gulshan et al. 2016 is the canonical representative — see INVARIANTS v5.3 SB-1.12, SIR-9), for the specific context of five-class diabetic retinopathy classification across heterogeneous fundus imaging conditions, because P2 (i) renders the preprocessing-to-classifier feature-construction step explicit and contestable, (ii) admits controlled experimental comparison against the P1 instantiation under matched conditions, and (iii) supplies a vocabulary in which downstream questions about cross-dataset transfer, device-domain robustness, and explainability can be posed at the level of the integrated model rather than at the level of the network alone.
+
+**Claim Type:** **Methodological / non-empirical.** PC-0 is not tested experimentally. It is argued *discursively* in dissertation chapters 1.4 (Critical Analysis of Existing Systems) and 1.5 (Formulation of the Research Problem), on the basis of (a) the observable methodological practice of the P1 literature corpus (preprocessing deferred to supplements; absence of a controlled preprocessing-vs-architecture decomposition), and (b) the structural argument that an unformalised preprocessing step is not amenable to the kinds of ablation, transfer, and explainability analyses that the dissertation conducts.
+
+**Required Evidence Type:** Methodological argument with literature support, not an experimental result. Supporting literature: Gulshan 2016 (canonical P1 representative); Pratt 2016, Rakhlin 2017, Saxena 2020, Ting 2017, Voets 2019 (P1 tradition); the LITERATURE_INDEX Paradigm column for the broader survey.
+
+**Relationship to PC-1:** PC-0 → PC-1. The empirical experiments under PC-1 (and PC-6 through PC-10) supply evidence *consistent with* paradigm P2 under the specific conditions of the dissertation's dataset architecture and tested backbones. They do **not** universally prove P2 over P1 (such a universal claim is forbidden by CFC-2.1); they show that, within the tested conditions, the P2 instantiation is at least empirically defensible.
+
+**Forbidden formulations** (per CFC-2.9, SIR-1, SIR-9):
+- "Gulshan claims preprocessing is unimportant" — not stated in the source.
+- "Paradigm P1 is wrong" — universal claim, forbidden by CFC-2.1.
+- "We outperform Gulshan" — forbidden by CFC-2.2 in the absence of a direct replication.
+
+**Permitted formulations:**
+- "Gulshan et al. (2016) exemplify the methodological practice that this dissertation identifies as paradigm P1."
+- "The dissertation's V5 configuration operationalises paradigm P2 and places it under controlled experimental contrast against the P1-instantiation baseline of Experiment 1."
+- "Empirical results under PC-1 are interpreted as evidence consistent with P2 within the tested conditions, not as a universal refutation of P1."
 
 ---
 
@@ -473,8 +497,11 @@ Condition of Failure: If performance variance across camera groups exceeds accep
 ## V. CLAIM DEPENDENCY STRUCTURE
 
 ```
+PC-0 (Paradigmatic Framing — Methodological)            ← supplies the conceptual context
+   │
+   ▼
 IT-1 (Main Thesis)
-├── PC-1 [Empirical — Preprocessing Dominance]          ← No upstream dependency
+├── PC-1 [Empirical — Preprocessing Dominance]          ← No upstream empirical dependency; receives conceptual context from PC-0
 │   ├── SC-1.1 [Accuracy and F1 improvement evidence]
 │   ├── SC-1.2 [Convergence and loss dynamics]
 │   └── SC-1.4 [Class imbalance — interpretive framing]
@@ -507,6 +534,7 @@ IT-1 (Main Thesis)
 ```
 
 **Dependency Rules:**
+- PC-0 is methodological and supplies the *conceptual context* for PC-1 and its dependants. PC-0 is not falsified by adverse empirical outcomes on PC-1; instead, PC-1's empirical result feeds back as evidence consistent or inconsistent with P2 *under the tested conditions*. Adverse PC-1 outcomes weaken PC-0's empirical support but do not refute it universally (per CFC-2.1).
 - PC-2 requires PC-1 to be validated: CLAHE is embedded in the pipeline of PC-1; parameter sensitivity testing presupposes the pipeline's demonstrated effectiveness.
 - PC-5 requires PC-1 for its AI processing module justification. If PC-1 fails, the architecture's core preprocessing-CNN module lacks experimental grounding.
 - PC-4 is independent of PC-1, PC-2, PC-5. Its failure or success does not condition any other primary claim.
@@ -665,4 +693,5 @@ The following propositions are intentionally excluded from the dissertation's ar
 ---
 
 *End of Argument_Map*
-*Version: 5.0 | Bound to: INVARIANTS.md v5.0*
+*Version: 5.3 | Bound to: INVARIANTS.md v5.3*
+*v5.3 amendment: added PC-0 (Paradigmatic Framing Claim, methodological, non-empirical) as a top-level node feeding into IT-1; updated dependency structure to reflect PC-0 → PC-1 conceptual feed.*

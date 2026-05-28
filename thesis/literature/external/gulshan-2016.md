@@ -286,15 +286,54 @@
 
 ## 15. Relevance to My Dissertation
 
-- **Relevance to preprocessing dominance hypothesis:** Moderate. Preprocessing details are not reported in the main text, which limits direct assessment. However, the study's success with end-to-end deep learning (no explicit lesion enhancement or CLAHE) suggests that architecture and data scale may dominate over preprocessing in this context. This could serve as a counterpoint to preprocessing-dominance arguments, or alternatively, the undisclosed preprocessing in the Supplement may have been critical.
-- **Relevance to cross-database validation:** High. The dual external validation on EyePACS-1 and Messidor-2 is a benchmark reference for cross-dataset generalization claims in the DR deep learning literature.
-- **Relevance to EyePACS/Messidor benchmarking:** Very high. This is the foundational Google/JAMA study that established EyePACS and Messidor-2 as standard validation benchmarks for DR deep learning. Almost all subsequent studies reference these results.
-- **Relevance to Vision Transformer comparison:** Moderate. As a CNN-based (Inception-v3) study, this provides the pre-Transformer baseline against which ViT/Swin Transformer studies can be compared.
-- **Risk of contradiction:** Low. The study does not directly test preprocessing dominance. Its findings are compatible with multiple theoretical positions on what drives DR classification performance.
+### Paradigmatic Role (v5.3)
+
+**Position in paradigm space: P1 (canonical representative).** Per INVARIANTS v5.3 SB-1.12, CFC-2.9, and SIR-9, this dissertation designates Gulshan et al. (2016) as the **canonical representative of paradigm P1** — the end-to-end CNN paradigm in which preprocessing is treated as ancillary data preparation rather than as an integral model component. The designation is grounded in the source's *observable methodological practice* (see Methodological-Practice note below), not in an explicit theoretical statement by the authors. The authors of Gulshan 2016 do **not** state "preprocessing is unimportant"; no such statement appears in the cited text, and attributing it would violate SIR-1. The paradigmatic reading is the dissertation's own analytical contribution (SIR-9(b)).
+
+**Methodological-Practice note (grounds for SIR-9(a)).** The grounds for designating Gulshan 2016 the canonical representative of P1 are the following directly observable features of the paper:
+
+- §5 of this card records that resizing, cropping, normalization, CLAHE, colour normalization, and augmentation are **not reported** in the main text; the preprocessing protocol is **deferred to the Supplement** (this card §5, "General note").
+- The main text concentrates methodological discussion on architecture (Inception-v3 ensemble; ~22M parameters per network; 10-network linear-average ensemble), data scale (128,175 development images), training protocol (distributed SGD, early stopping), and reference-standard quality (7–8 ophthalmologists per image, majority vote).
+- Image quality is operationalised at the level of *exclusion* (non-fully-gradable images excluded) rather than at the level of *transformation* (no enhancement of marginal images).
+- Input resolution is not specified in the main text.
+
+These four features jointly satisfy the operational definition of paradigm P1 used in this dissertation: preprocessing is treated as ancillary data preparation that does not require methodological discussion in the main text. The designation is therefore an attribution about *practice*, not about authorial intent (per SIR-9).
+
+**No direct numerical comparison is performed.** Per SB-1.12, the dissertation does not report a head-to-head comparison against the Gulshan 2016 figures. The methodological differences that make such a comparison unsound are:
+
+- *Classification task:* Gulshan 2016 performs **binary** referable-DR detection (moderate-or-worse DR and/or referable DME vs. not); this dissertation performs **five-class** DR staging (DR 0–4).
+- *Backbone architecture:* Gulshan 2016 uses an ensemble of 10 Inception-v3 networks (~22M parameters each); this dissertation uses ResNet-50 and EfficientNet-B3 in the H-1 factorial (single networks, no ensemble for the H-1 comparison).
+- *Pretraining source:* Gulshan 2016 uses ImageNet weights for both arms; the dissertation's V5 arm uses RETFound (CFP-pretrained) per INVARIANTS v5.1/v5.2.
+- *Dataset partition:* Gulshan 2016 uses a private composite development set (EyePACS + 3 Indian hospitals) and private clinical-validation sets (EyePACS-1; Messidor-2); the dissertation trains and tests on a different EyePACS partition.
+- *Reference standard:* Gulshan 2016 uses majority vote of 7–8 board-certified ophthalmologists; the dissertation uses the public five-class labels supplied with each dataset.
+- *Validation protocol:* Gulshan 2016 reports operating-point sensitivity/specificity and AUC for a binary endpoint; the dissertation reports weighted F1, ROC-AUC, Cohen's Kappa, and per-class metrics for a five-class endpoint.
+
+Under any one of these differences a direct numerical comparison would be unsound; under their joint operation it is forbidden by CFC-2.2. Numerical figures from Gulshan 2016 may appear in the dissertation **only** as **historical / contextual reference** in §1.4 (Critical Analysis) and §5.5 (Comparative Analysis), accompanied at every mention by an explicit caveat noting these methodological differences.
+
+**Distinction from the operational experimental baseline.** The experimental baseline of Experiment 1 (configs A/C) — stretch-resize + ImageNet normalize, 3 channels, no FOV mask, per OD-3 — is an **internal operational construct** of the dissertation. It **operationally instantiates the paradigm represented by Gulshan 2016**, but it is **not Gulshan's system**. The two referents must remain terminologically distinct in all dissertation text: "the baseline" or "the baseline configuration" refers exclusively to the OD-3 construct; "Gulshan 2016" refers exclusively to the cited paper. Phrasings of the form "Gulshan is our baseline" are forbidden (CFC-2.9, SB-1.12).
+
+### Other Relevance
+
+- **Relevance to cross-database validation:** High. The dual external validation on EyePACS-1 and Messidor-2 is a landmark reference for cross-dataset generalization design in the DR deep learning literature.
+- **Relevance to EyePACS/Messidor benchmarking:** Very high. This is the foundational JAMA study that established EyePACS and Messidor-2 as standard validation references in the field. Almost all subsequent CNN-based DR studies reference these results.
+- **Relevance to Vision Transformer comparison:** Moderate. As a CNN-based (Inception-v3) study, this provides the pre-Transformer landmark against which later ViT/Swin Transformer studies are typically discussed.
+- **Risk of contradiction:** Low. The source does not state a theoretical position on preprocessing; its compatibility with multiple readings is precisely why this dissertation grounds the paradigmatic attribution in *practice* rather than in *statement* (per SIR-9).
 
 ---
 
 ## 16. Citation-Ready Statements
+
+### Paradigmatic Framing (v5.3 — for chapter 1.4 and defense speech)
+
+P-1. Gulshan et al. (2016) is the canonical representative, in this dissertation's analysis, of paradigm P1 — the end-to-end CNN paradigm in which preprocessing is treated as ancillary data preparation. The grounds for this designation are the observable methodological practice of the paper: preprocessing details are deferred to the supplementary material, and the main-text emphasis is on architecture (Inception-v3 ensemble), data scale (128,175 images), and reference-standard quality (7–8 ophthalmologists per image with majority voting). Per SIR-9, this is a paradigmatic reading of practice, not an attribution to the authors of an explicit theoretical statement.
+
+P-2. The present dissertation does not perform a direct numerical comparison with Gulshan et al. (2016). Differences in classification task (five-class DR 0–4 vs. binary referable DR), backbone (ResNet-50 / EfficientNet-B3 vs. Inception-v3 ensemble), pretraining source, dataset partition, reference standard, and validation protocol jointly preclude a sound head-to-head comparison. The dissertation reports its own internal A-vs-B / C-vs-D contrast (Experiment 1) as an empirical comparison between two paradigms — P1 (configs A/C) and P2 (configs B/D) — under matched conditions.
+
+P-3. The experimental baseline of Experiment 1 (stretch-resize + ImageNet normalize, 3 channels) operationally instantiates the paradigm represented by Gulshan 2016 but is not itself Gulshan's system. The two referents are distinct: "the baseline" refers to the OD-3 construct; "Gulshan 2016" refers to the cited paper.
+
+P-4. The paradigmatic shift from P1 to P2 is the principal conceptual contribution of this dissertation. The 8-stage V5 preprocessing pipeline is the engineering operationalisation of P2; the controlled factorial design of Experiment 1 is its empirical test. The result of Experiment 1 is interpreted, under matched conditions, as evidence consistent with P2 — not as a universal refutation of P1, which is forbidden by CFC-2.1.
+
+### Performance and Methodology
 
 1. Gulshan et al. (2016) demonstrated that a deep learning algorithm based on Inception-v3 achieved an AUC of 0.991 (95% CI, 0.988–0.993) on EyePACS-1 and 0.990 (95% CI, 0.986–0.995) on Messidor-2 for detecting referable diabetic retinopathy.
 
@@ -322,7 +361,9 @@
 
 ## 18. Analytical Synthesis
 
-This study carries very high epistemic weight as the foundational demonstration that deep CNNs can match or exceed ophthalmologist-level performance in detecting referable diabetic retinopathy. Its publication in JAMA in 2016 catalyzed the entire subfield of deep learning for DR screening and established the methodological template — large training sets, multi-grader reference standards, dual external validation on EyePACS and Messidor-2 — that nearly all subsequent studies follow or reference. For dissertation positioning, this paper serves as the primary pre-Transformer CNN baseline: any Vision Transformer study claiming superiority must be evaluated relative to the performance levels and validation rigor established here. The study neither directly supports nor contradicts a preprocessing-dominance hypothesis, as preprocessing details are deferred to supplementary materials and the emphasis is on data scale and architecture (Inception-v3 ensemble). It demonstrates moderate cross-dataset robustness (US and France), though the validation populations remain limited to specific clinical screening contexts. The subsampling experiments (performance plateau at ~60,000 images; tuning set grading density more impactful than training set grading density) provide unique empirical contributions relevant to data-centric arguments about DR classification pipelines.
+This study carries very high epistemic weight as the foundational demonstration that deep CNNs can match or exceed ophthalmologist-level performance in detecting referable diabetic retinopathy. Its publication in JAMA in 2016 catalyzed the entire subfield of deep learning for DR screening and established the methodological template — large training sets, multi-grader reference standards, dual external validation on EyePACS and Messidor-2 — that nearly all subsequent studies follow or reference. The study demonstrates moderate cross-dataset robustness (US and France), though the validation populations remain limited to specific clinical screening contexts. The subsampling experiments (performance plateau at ~60,000 images; tuning set grading density more impactful than training set grading density) provide unique empirical contributions relevant to data-centric arguments about DR classification pipelines.
+
+**Paradigmatic Synthesis (v5.3).** For the purposes of this dissertation, the source's most significant feature is not its numerical result but its *methodological emphasis*: in a paper of fifteen pages in JAMA, the architectural and reference-standard scaffolding receives detailed treatment in the main text, while the preprocessing protocol is offloaded to the Supplement (this card §5; §14 Implicit Limitations). This is not a deficiency of the source — it is a *paradigmatic choice*, one that the broader 2016–2020 deep-learning-for-DR literature largely adopted (see also pratt-2016.md, rakhlin-2017.md, saxena-2020.md, ting-2017.md, voets-2019.md, each tagged P1 in LITERATURE_INDEX). The dissertation reads this choice as the canonical instantiation of paradigm P1 (end-to-end CNN, preprocessing as ancillary data preparation) and, by contrast, formalises its own approach as paradigm P2 (integrated preprocessing-CNN). Per SIR-9, the paradigmatic attribution is grounded in the observable practice of the paper, not in an explicit theoretical claim by the authors; the dissertation is credited for the act of paradigmatic grouping, the source is cited only for what it states or does. Per CFC-2.9 and SB-1.12, no phrasing in the dissertation may attribute to Gulshan 2016 an explicit "preprocessing is unimportant" thesis, treat Gulshan 2016 as "our baseline," or claim numerical superiority over Gulshan's figures.
 
 ---
 

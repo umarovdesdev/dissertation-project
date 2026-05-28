@@ -1,4 +1,8 @@
-**Version:** 5.0 | **Date:** 2026-04-XX | **Binding Reference:** INVARIANTS.md v5.0
+**Version:** 5.3 | **Date:** 2026-05-28 | **Binding Reference:** INVARIANTS.md v5.3
+
+---
+
+**Paradigmatic framing.** The conceptual foundation of this dissertation is a contrast between two paradigms for automated diabetic retinopathy diagnosis. Paradigm **P1** — the end-to-end CNN paradigm — treats preprocessing as ancillary data preparation that does not require methodological discussion; the deep network is taken to learn the relevant invariances directly from raw or minimally normalised pixels. Paradigm **P2** — the integrated preprocessing-CNN paradigm — treats preprocessing as an integral component of the model itself, on the grounds that it defines the feature space available to the network and therefore co-determines what the network can learn. Gulshan et al. (2016, *JAMA*) is designated in this dissertation as the **canonical representative of P1**, by virtue of its observed methodological practice (preprocessing details deferred to the supplementary material; emphasis on architecture, data scale, and training protocol). The present work is the **paradigmatic instantiation of P2**: it formalises an 8-stage preprocessing pipeline as a binding part of the model specification, places it under controlled experimental contrast (Experiment 1, configs A/C vs. B/D), and reports the result as an empirical contrast between two paradigms under otherwise matched conditions — not as a numerical comparison against Gulshan's reported figures (see SB-1.12, CFC-2.9, SIR-9 in INVARIANTS v5.3).
 
 ---
 

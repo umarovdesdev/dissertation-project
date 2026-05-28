@@ -62,60 +62,62 @@
 
 ### Source Index
 
-| # | Source | Type | Key Result | Dataset | Maps to |
-|---|--------|------|------------|---------|---------|
-| 01 | Pratt et al. (2016) | CNN classification | 75% acc, 30% sens, 95% spec, 5-class DR, Kaggle | EyePACS/Kaggle | §1.3.1, §2.2.2, §2.2.3, INTRO |
-| 02 | Saxena et al. (2020) | Cross-dataset validation | AUC 0.958 Messidor-1, 0.92 Messidor-2, binary DR, InceptionResNetV2 | EyePACS/Kaggle, Messidor-1, Messidor-2 | §1.3.2, §1.4, §3.1, §5.1, §5.3, §5.5 |
-| 03 | Sánchez-Gutiérrez et al. (2022) | Clinical validation | AUC 0.988, 90.5% sens, 97.1% spec, 96% workload reduction, RetCAD | Private (Ramon y Cajal) | §1.4, §6.3 |
-| 04 | Arrieta et al. (2022) | CNN classification | AUC 0.94 EyePACS, 0.89 Messidor-2, semi-supervised with 2% labels | EyePACS/Kaggle, Messidor-2 | §1.3.1, §2.3.1, §5.1 |
-| 05 | Rakhlin (2017) | Cross-dataset validation | AUC 0.967 Messidor-2, 0.923 Kaggle, modified VGGNet | EyePACS/Kaggle, Messidor-2 | §1.2.2, §1.3.1, §5.1, §5.5 |
-| 06 | Porwal et al. (2018) | Dataset descriptor | IDRiD: 516 images, 81 pixel-annotated, Indian population, 5-class DR | IDRiD | §1.1.2, §4.1, §4.5, §5.2, INTRO |
-| 07 | Baget-Bernaldiz et al. (2021) | External validation | AUC 0.988 RDR own pop., 0.968 Messidor, 4-class ICDR | Private (Spanish), Messidor-1, EyePACS/Kaggle | §1.4, §5.1, §5.5 |
-| 08 | Wan et al. (2021) | Segmentation | SE 92.77% exudates (e_ophtha_EX), AUPR 0.78 hard exudates (IDRiD) | IDRiD, e_ophtha_EX, Private | §1.3.1, §2.2.1 |
-| 09 | Xu et al. (2024) | Ensemble / Hybrid | Acc 0.97, AUC 0.97, EfficientNet+Swin Transformer V2 hybrid, 5-class | APTOS 2019 | §1.3.1, §1.3.2, §3.2 |
-| 10 | Porwal et al. (2018) | Dataset descriptor | IDRiD: 516 images, pixel-level lesion masks + DR/DME grading, Indian pop. | IDRiD | §1.1.2, §4.1, §4.5, §5.2, INTRO |
-| 11 | Ting et al. (2017) | External validation | AUC 0.936 referable DR, validated on 10 multiethnic datasets (AUC 0.889–0.983) | SIDRP (private), 10 external cohorts | §1.4, §5.1, §5.5, §6.3 |
-| 12 | Gulshan et al. (2016) | CNN classification | AUC 0.991 EyePACS-1, 0.990 Messidor-2, Inception-v3 ensemble | EyePACS (private), Messidor-2 | §1.3.1, §1.3.2, §1.4, §5.1, §5.5, INTRO |
-| 14 | Wewetzer et al. (2021) | Meta-analysis | Pooled sens 87%, spec 90%, SROC AUC 0.9543, 10 DL screening studies in PC | Multiple (pooled) | §1.4, §5.5, §6.3, INTRO |
-| 15 | Liu et al. (2022) | Benchmark study | κw 0.9303 DR grading, 0.70 image quality accuracy, EfficientNet dominant | DeepDRiD | §1.2.2, §1.3.1, §3.1, §4.1 |
-| 16 | Goh et al. (2024) | CNN classification | SWIN AUC 95.7% Kaggle, 97.3% SEED, 96.3% Messidor-1, ViT > CNN | EyePACS/Kaggle, SEED, Messidor-1 | §1.3.1, §5.1, §5.4, §5.5 |
-| 17 | Voets et al. (2019) | Cross-dataset validation | AUC 0.951 EyePACS, 0.853 Messidor-2 (reproduction of Gulshan 2016) | EyePACS/Kaggle, Messidor-2 | §1.2.2, §1.5, §5.1, §5.4 |
-| 18 | González-Díaz et al. (2024) | ViT comparison | ViT acc 83.69%, BEiT F1 86.36%, 4-class AMD, 305 images | Private (curated AMD) | §1.3.1 |
-| **19** | **Sapakova et al. (2025)** 🔹SELF | **Transfer learning** | **F1 0.74 fine-tuned vs 0.62 frozen, EfficientNetB0, 5-class DR** | **APTOS 2019, Private clinical** | **§2.3.2, §3.3, §4.2, §4.1, §2.2.2, §2.2.3, §3.1** |
-| **20** | **Sapakova et al. (2024)** 🔹SELF | **Mathematical modeling** | **Thermal model of laser-fundus interaction, FDM simulation, qualitative** | **None (simulation)** | **§2.4.1** |
-| **21** | **Yesmukhamedov et al. (2025a)** 🔹SELF | **Transfer learning** | **Precision 75% fine-tuned vs 65% frozen, EfficientNetB0, 5-class DR** | **APTOS 2019, Private clinical** | **§2.3.2, §3.3, §4.2, §3.1, §3.4, §2.2.2, §2.2.3** |
-| **22** | **Yesmukhamedov et al. (2025b)** 🔹SELF | **System architecture** | **Modular AI diagnostic architecture for Kazakhstan, physician-in-the-loop** | **None (design study)** | **§6.1, §6.2, §6.3, §1.4, §1.1.2** |
-| **23** | **Sapakova, Yesmukhamedov & Sapakov (2025a)** 🔹SELF | **CLAHE / Enhancement** | **100% acc/sens/spec, upgraded CLAHE T/80 + ResNet50, 5-class retinal** | **STARE** | **§2.1.2, §3.1, §3.3, §4.3, §5.5, §2.1.1** |
-| **24** | **Sapakova, Yesmukhamedov & Sapakov (2025b)** 🔹SELF | **Preprocessing study** | **Val acc 71%→86% with preprocessing, ROC-AUC 0.9638, 4-layer CNN** | **APTOS 2019, Private clinical** | **§3.1, §3.2, §4.2, §4.1, §2.1.2, §5.4, §1.2.2** |
-| 25 | Wikipedia — Adaptive Histogram Equalization | Background reference | Algorithmic description of AHE/CLAHE; clip limit 3–4, 8×8 tile grid | None | §2.1.1, §2.1.2 |
-| 26 | Shaout & Han (2025) | Preprocessing study | FCE+CLAHE 59% preference, 88% combined; fuzzy logic + CLAHE blending | DRIVE | §2.1.1, §3.1 |
-| 27 | Hayati et al. (2023) | CLAHE / Enhancement | CLAHE improved 3/4 CNNs; EfficientNetB4 97.83% acc; ResNet34 −12.02% | APTOS 2019 | §2.1.1, §2.1.2, §3.1, §4.3, §5.4 |
-| 28 | Brancati et al. (2025) | Peripheral (FHIR / breast ML) | MLP 97.67% acc breast lesion, 3 hand-crafted features, BUSI | BUSI | Peripheral |
-| 29 | Tabari et al. (2024) | Review / Survey (FHIR) | 27 studies reviewed; FHIR pipeline-based (21) vs non-linear (6) models | None (scoping review) | Peripheral |
-| 30 | Chakka (2023) | Preprocessing study | Rescaling best of 4 techniques for OCT; ResNet-50; no numerical metrics | Kaggle OCT (4,480 images) | §2.1.1 |
-| 31 | Kesharwani et al. (2021) | Review / Survey (clinical) | Narrative DR review; 95% vision loss preventable if treated early | None (narrative review) | §1.1.1 |
-| 32 | Kusuhara et al. (2018) | Review / Survey (clinical) | DR prevalence 34.6%; pericyte dropout → BRB breakdown; VEGF/Ang2 pathways | None (narrative review) | §1.1.1 |
-| 33 | Gettinger et al. (2025) | Review (pathophysiology / experimental models) | No single model reproduces full human DR phenotype; STZ limited to early-stage | None (narrative review) | §1.1.1, INTRO |
-| 34 | Morya et al. (2024) | Review (pathophysiology / treatment) | DR present in 1/3 of diabetic patients; 35–55% screening compliance; Remidio 98% sens | None (narrative review) | §1.1.1, §1.1.2, §6.3 |
-| 35 | Wang & Lo (2018) | Review (pathophysiology / treatment) | Neurodegeneration may precede microvasculopathy; anti-VEGF first-line for DME/PDR | None (narrative review) | §1.1.1, INTRO |
-| 36 | Nandal (2024) | Empirical (AI-driven HL7/FHIR interoperability) | 93% semantic mapping precision; F1=0.89 NLP extraction; 97% interoperability | MIMIC-III, Synthetic HL7 | §6.2 |
-| 37 | Geetha & Hema (2026) | ViT hybrid (DR + glaucoma) | 98.4% acc; ViT + BFF + HGS optimizer; no external validation | Open-source (unnamed) | §1.3.1 |
-| 38 | Khosravi et al. (2025) | External validation (retinal hemorrhage) | FastViT AUC 0.9811, ResNet18 AUC 0.9626; 2661-image external dataset | RFMiD, DeepEyeNet, BRSET, Private (multi-country) | §1.3.1, §5.1, §5.3 |
-| 39 | Senapati et al. (2024) | Systematic review (DR AI) | PRISMA-based; 2016–2023; EyePACS 75,523 images; identifies overfitting + class imbalance gaps | Multiple (surveyed) | §1.4, §1.5, §2.2.2 |
-| 40 | Araf et al. (2024) | Systematic review (cost-sensitive learning) | 173 papers reviewed; CSL preserves distribution; only 2 validation studies identified | Multiple (surveyed) | §2.2.2, §3.4 |
-| 41 | Sharma et al. (2025) | ViT-CapsNet hybrid (DR) | 94% acc on EyePACS (30,262 images); AUC 0.44–0.56 per class; no external validation | EyePACS/Kaggle | §1.3.1, §4.1 |
-| 42 | Arora et al. (2024) | CNN classification (DR) | EfficientNetB0 avg acc 0.8653; max training acc 97.11%; undersampled to 3,704 images | Kaggle DR Resized (35,108 images) | §1.3.1, §2.2.2 |
-| 43 | Ryu et al. (2021) | CNN classification + external validation (OCTA) | AUC 0.960–0.976 internal; AUC 0.938–0.962 external; ResNet101 on OCTA | Private (single-center) | §1.3.1, §1.4 |
-| 44 | Zhang et al. (2022) | Multicentre external validation (DR screening) | AUROC 0.9931 referable DR (image); 0.9848 (patient); Cohen's κ 0.86–0.93 vs experts | Private (83,465 images, 4 centres) | §1.4, §5.1, §5.5, §6.3 |
-| 45 | Ruamviboonsuk et al. (2022) | Prospective clinical validation (DR screening) | Acc 94.7%, sens 91.4% VTDR; outperformed specialists (p=0.024); 9 Thai sites | Private (7,651 patients, prospective) | §1.4, §5.5, §6.3 |
-| 46 🆕 | Selvaraju et al. (2017) "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization" | Explainability method | Grad-CAM visualization of CNN decisions; gradient-weighted class activation mapping | ImageNet / various | §2.5.1, §2.5.2, §1.3.3, §4.5, §5.2 |
-| 47 🆕 | Cuadros & Bresnick (2009) "EyePACS: An Adaptable Telemedicine System for Diabetic Retinopathy Screening" — OR — Kaggle Diabetic Retinopathy Detection competition descriptor | Dataset descriptor | ~35,126 labeled fundus images (Kaggle labeled partition), 5-class DR grading (0–4), Canon CR-1 camera | EyePACS/Kaggle | §4.1, §1.2.3, INTRO |
-| 48 🆕 | Decencière et al. (2014) "Feedback on a Publicly Distributed Image Database: The Messidor Database" — OR — Messidor-2 dataset descriptor | Dataset descriptor | 1,748 images (Messidor-2), Topcon TRC NW6 camera, referable/non-referable + DR grade | Messidor / Messidor-2 | §4.1, §5.1, INTRO |
-| 49 🆕 | Pachade et al. (2021) "Retinal Fundus Multi-Disease Image Dataset (RFMiD)" | Dataset descriptor | 3,200 images, multi-disease retinal dataset, Topcon TRC-NW300 and Kowa cameras | RFMiD | §4.1, §1.2.3, §5.3 |
-| 50 🆕 | Li et al. (2019) "Diagnostic Assessment of Deep Learning Algorithms for Diabetic Retinopathy Screening" — OR — DDR dataset descriptor | Dataset descriptor | DR grading dataset, Canon and Topcon fundus cameras | DDR | §4.1, §1.2.3, §5.3 |
-| 51 🆕 | TO BE IDENTIFIED — ODIR-5K challenge dataset descriptor (Peking University) | Dataset descriptor | Multi-disease ocular dataset, Canon and Zeiss fundus cameras, ~5,000 patients | ODIR-5K | §4.1, §1.2.3, §5.3 |
-| 52 🆕 | Guo et al. (2017) "On Calibration of Modern Neural Networks" | Calibration methodology | ECE metric definition, calibration analysis of modern deep networks, Brier Score | ImageNet / CIFAR | §2.6, §3.4, §5.4 |
-| 53 🆕 | Wang et al. (2004) "Image Quality Assessment: From Error Visibility to Structural Similarity" | Image quality metric | SSIM definition, structural similarity index for image quality evaluation | Various (image quality benchmarks) | §2.6, §3.1 |
+The **Paradigm** column was added in governance v5.3 to support the paradigmatic framing (P1 / P2 / N/A) per INVARIANTS v5.3 SIR-9. See the *Notes* section below for the full classification rule.
+
+| # | Source | Type | Key Result | Dataset | Paradigm | Maps to |
+|---|--------|------|------------|---------|----------|---------|
+| 01 | Pratt et al. (2016) | CNN classification | 75% acc, 30% sens, 95% spec, 5-class DR, Kaggle | EyePACS/Kaggle | P1 | §1.3.1, §2.2.2, §2.2.3, INTRO |
+| 02 | Saxena et al. (2020) | Cross-dataset validation | AUC 0.958 Messidor-1, 0.92 Messidor-2, binary DR, InceptionResNetV2 | EyePACS/Kaggle, Messidor-1, Messidor-2 | P1 | §1.3.2, §1.4, §3.1, §5.1, §5.3, §5.5 |
+| 03 | Sánchez-Gutiérrez et al. (2022) | Clinical validation | AUC 0.988, 90.5% sens, 97.1% spec, 96% workload reduction, RetCAD | Private (Ramon y Cajal) | P1 | §1.4, §6.3 |
+| 04 | Arrieta et al. (2022) | CNN classification | AUC 0.94 EyePACS, 0.89 Messidor-2, semi-supervised with 2% labels | EyePACS/Kaggle, Messidor-2 | P1 | §1.3.1, §2.3.1, §5.1 |
+| 05 | Rakhlin (2017) | Cross-dataset validation | AUC 0.967 Messidor-2, 0.923 Kaggle, modified VGGNet | EyePACS/Kaggle, Messidor-2 | P1 | §1.2.2, §1.3.1, §5.1, §5.5 |
+| 06 | Porwal et al. (2018) | Dataset descriptor | IDRiD: 516 images, 81 pixel-annotated, Indian population, 5-class DR | IDRiD | N/A | §1.1.2, §4.1, §4.5, §5.2, INTRO |
+| 07 | Baget-Bernaldiz et al. (2021) | External validation | AUC 0.988 RDR own pop., 0.968 Messidor, 4-class ICDR | Private (Spanish), Messidor-1, EyePACS/Kaggle | P1 | §1.4, §5.1, §5.5 |
+| 08 | Wan et al. (2021) | Segmentation | SE 92.77% exudates (e_ophtha_EX), AUPR 0.78 hard exudates (IDRiD) | IDRiD, e_ophtha_EX, Private | P1 | §1.3.1, §2.2.1 |
+| 09 | Xu et al. (2024) | Ensemble / Hybrid | Acc 0.97, AUC 0.97, EfficientNet+Swin Transformer V2 hybrid, 5-class | APTOS 2019 | P1 | §1.3.1, §1.3.2, §3.2 |
+| 10 | Porwal et al. (2018) | Dataset descriptor | IDRiD: 516 images, pixel-level lesion masks + DR/DME grading, Indian pop. | IDRiD | N/A | §1.1.2, §4.1, §4.5, §5.2, INTRO |
+| 11 | Ting et al. (2017) | External validation | AUC 0.936 referable DR, validated on 10 multiethnic datasets (AUC 0.889–0.983) | SIDRP (private), 10 external cohorts | P1 | §1.4, §5.1, §5.5, §6.3 |
+| 12 | Gulshan et al. (2016) | CNN classification | AUC 0.991 EyePACS-1, 0.990 Messidor-2, Inception-v3 ensemble | EyePACS (private), Messidor-2 | P1 (canonical representative) | §1.3.1, §1.3.2, §1.4, §5.1, §5.5, INTRO |
+| 14 | Wewetzer et al. (2021) | Meta-analysis | Pooled sens 87%, spec 90%, SROC AUC 0.9543, 10 DL screening studies in PC | Multiple (pooled) | N/A | §1.4, §5.5, §6.3, INTRO |
+| 15 | Liu et al. (2022) | Benchmark study | κw 0.9303 DR grading, 0.70 image quality accuracy, EfficientNet dominant | DeepDRiD | P1 | §1.2.2, §1.3.1, §3.1, §4.1 |
+| 16 | Goh et al. (2024) | CNN classification | SWIN AUC 95.7% Kaggle, 97.3% SEED, 96.3% Messidor-1, ViT > CNN | EyePACS/Kaggle, SEED, Messidor-1 | P1 | §1.3.1, §5.1, §5.4, §5.5 |
+| 17 | Voets et al. (2019) | Cross-dataset validation | AUC 0.951 EyePACS, 0.853 Messidor-2 (reproduction of Gulshan 2016) | EyePACS/Kaggle, Messidor-2 | P1 | §1.2.2, §1.5, §5.1, §5.4 |
+| 18 | González-Díaz et al. (2024) | ViT comparison | ViT acc 83.69%, BEiT F1 86.36%, 4-class AMD, 305 images | Private (curated AMD) | P1 | §1.3.1 |
+| **19** | **Sapakova et al. (2025)** 🔹SELF | **Transfer learning** | **F1 0.74 fine-tuned vs 0.62 frozen, EfficientNetB0, 5-class DR** | **APTOS 2019, Private clinical** | **P1 (prior self-work)** | **§2.3.2, §3.3, §4.2, §4.1, §2.2.2, §2.2.3, §3.1** |
+| **20** | **Sapakova et al. (2024)** 🔹SELF | **Mathematical modeling** | **Thermal model of laser-fundus interaction, FDM simulation, qualitative** | **None (simulation)** | **N/A** | **§2.4.1** |
+| **21** | **Yesmukhamedov et al. (2025a)** 🔹SELF | **Transfer learning** | **Precision 75% fine-tuned vs 65% frozen, EfficientNetB0, 5-class DR** | **APTOS 2019, Private clinical** | **P1 (prior self-work)** | **§2.3.2, §3.3, §4.2, §3.1, §3.4, §2.2.2, §2.2.3** |
+| **22** | **Yesmukhamedov et al. (2025b)** 🔹SELF | **System architecture** | **Modular AI diagnostic architecture for Kazakhstan, physician-in-the-loop** | **None (design study)** | **N/A** | **§6.1, §6.2, §6.3, §1.4, §1.1.2** |
+| **23** | **Sapakova, Yesmukhamedov & Sapakov (2025a)** 🔹SELF | **CLAHE / Enhancement** | **100% acc/sens/spec, upgraded CLAHE T/80 + ResNet50, 5-class retinal** | **STARE** | **P2-tending (prior self-work toward V5)** | **§2.1.2, §3.1, §3.3, §4.3, §5.5, §2.1.1** |
+| **24** | **Sapakova, Yesmukhamedov & Sapakov (2025b)** 🔹SELF | **Preprocessing study** | **Val acc 71%→86% with preprocessing, ROC-AUC 0.9638, 4-layer CNN** | **APTOS 2019, Private clinical** | **P2-tending (prior self-work toward V5)** | **§3.1, §3.2, §4.2, §4.1, §2.1.2, §5.4, §1.2.2** |
+| 25 | Wikipedia — Adaptive Histogram Equalization | Background reference | Algorithmic description of AHE/CLAHE; clip limit 3–4, 8×8 tile grid | N/A | §2.1.1, §2.1.2 |
+| 26 | Shaout & Han (2025) | Preprocessing study | FCE+CLAHE 59% preference, 88% combined; fuzzy logic + CLAHE blending | DRIVE | N/A (preprocessing method, no CNN comparison) | §2.1.1, §3.1 |
+| 27 | Hayati et al. (2023) | CLAHE / Enhancement | CLAHE improved 3/4 CNNs; EfficientNetB4 97.83% acc; ResNet34 −12.02% | APTOS 2019 | P1 (preprocessing varied but treated as exogenous factor) | §2.1.1, §2.1.2, §3.1, §4.3, §5.4 |
+| 28 | Brancati et al. (2025) | Peripheral (FHIR / breast ML) | MLP 97.67% acc breast lesion, 3 hand-crafted features, BUSI | BUSI | N/A | Peripheral |
+| 29 | Tabari et al. (2024) | Review / Survey (FHIR) | 27 studies reviewed; FHIR pipeline-based (21) vs non-linear (6) models | None (scoping review) | N/A | Peripheral |
+| 30 | Chakka (2023) | Preprocessing study | Rescaling best of 4 techniques for OCT; ResNet-50; no numerical metrics | Kaggle OCT (4,480 images) | P1 | §2.1.1 |
+| 31 | Kesharwani et al. (2021) | Review / Survey (clinical) | Narrative DR review; 95% vision loss preventable if treated early | None (narrative review) | N/A | §1.1.1 |
+| 32 | Kusuhara et al. (2018) | Review / Survey (clinical) | DR prevalence 34.6%; pericyte dropout → BRB breakdown; VEGF/Ang2 pathways | None (narrative review) | N/A | §1.1.1 |
+| 33 | Gettinger et al. (2025) | Review (pathophysiology / experimental models) | No single model reproduces full human DR phenotype; STZ limited to early-stage | None (narrative review) | N/A | §1.1.1, INTRO |
+| 34 | Morya et al. (2024) | Review (pathophysiology / treatment) | DR present in 1/3 of diabetic patients; 35–55% screening compliance; Remidio 98% sens | None (narrative review) | N/A | §1.1.1, §1.1.2, §6.3 |
+| 35 | Wang & Lo (2018) | Review (pathophysiology / treatment) | Neurodegeneration may precede microvasculopathy; anti-VEGF first-line for DME/PDR | None (narrative review) | N/A | §1.1.1, INTRO |
+| 36 | Nandal (2024) | Empirical (AI-driven HL7/FHIR interoperability) | 93% semantic mapping precision; F1=0.89 NLP extraction; 97% interoperability | MIMIC-III, Synthetic HL7 | N/A | §6.2 |
+| 37 | Geetha & Hema (2026) | ViT hybrid (DR + glaucoma) | 98.4% acc; ViT + BFF + HGS optimizer; no external validation | Open-source (unnamed) | P1 | §1.3.1 |
+| 38 | Khosravi et al. (2025) | External validation (retinal hemorrhage) | FastViT AUC 0.9811, ResNet18 AUC 0.9626; 2661-image external dataset | RFMiD, DeepEyeNet, BRSET, Private (multi-country) | P1 | §1.3.1, §5.1, §5.3 |
+| 39 | Senapati et al. (2024) | Systematic review (DR AI) | PRISMA-based; 2016–2023; EyePACS 75,523 images; identifies overfitting + class imbalance gaps | Multiple (surveyed) | N/A (survey) | §1.4, §1.5, §2.2.2 |
+| 40 | Araf et al. (2024) | Systematic review (cost-sensitive learning) | 173 papers reviewed; CSL preserves distribution; only 2 validation studies identified | Multiple (surveyed) | N/A (survey) | §2.2.2, §3.4 |
+| 41 | Sharma et al. (2025) | ViT-CapsNet hybrid (DR) | 94% acc on EyePACS (30,262 images); AUC 0.44–0.56 per class; no external validation | EyePACS/Kaggle | P1 | §1.3.1, §4.1 |
+| 42 | Arora et al. (2024) | CNN classification (DR) | EfficientNetB0 avg acc 0.8653; max training acc 97.11%; undersampled to 3,704 images | Kaggle DR Resized (35,108 images) | P1 | §1.3.1, §2.2.2 |
+| 43 | Ryu et al. (2021) | CNN classification + external validation (OCTA) | AUC 0.960–0.976 internal; AUC 0.938–0.962 external; ResNet101 on OCTA | Private (single-center) | P1 | §1.3.1, §1.4 |
+| 44 | Zhang et al. (2022) | Multicentre external validation (DR screening) | AUROC 0.9931 referable DR (image); 0.9848 (patient); Cohen's κ 0.86–0.93 vs experts | Private (83,465 images, 4 centres) | P1 | §1.4, §5.1, §5.5, §6.3 |
+| 45 | Ruamviboonsuk et al. (2022) | Prospective clinical validation (DR screening) | Acc 94.7%, sens 91.4% VTDR; outperformed specialists (p=0.024); 9 Thai sites | Private (7,651 patients, prospective) | P1 | §1.4, §5.5, §6.3 |
+| 46 🆕 | Selvaraju et al. (2017) "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization" | Explainability method | Grad-CAM visualization of CNN decisions; gradient-weighted class activation mapping | ImageNet / various | N/A (methodology reference) | §2.5.1, §2.5.2, §1.3.3, §4.5, §5.2 |
+| 47 🆕 | Cuadros & Bresnick (2009) "EyePACS: An Adaptable Telemedicine System for Diabetic Retinopathy Screening" — OR — Kaggle Diabetic Retinopathy Detection competition descriptor | Dataset descriptor | ~35,126 labeled fundus images (Kaggle labeled partition), 5-class DR grading (0–4), Canon CR-1 camera | EyePACS/Kaggle | N/A | §4.1, §1.2.3, INTRO |
+| 48 🆕 | Decencière et al. (2014) "Feedback on a Publicly Distributed Image Database: The Messidor Database" — OR — Messidor-2 dataset descriptor | Dataset descriptor | 1,748 images (Messidor-2), Topcon TRC NW6 camera, referable/non-referable + DR grade | Messidor / Messidor-2 | N/A | §4.1, §5.1, INTRO |
+| 49 🆕 | Pachade et al. (2021) "Retinal Fundus Multi-Disease Image Dataset (RFMiD)" | Dataset descriptor | 3,200 images, multi-disease retinal dataset, Topcon TRC-NW300 and Kowa cameras | RFMiD | N/A | §4.1, §1.2.3, §5.3 |
+| 50 🆕 | Li et al. (2019) "Diagnostic Assessment of Deep Learning Algorithms for Diabetic Retinopathy Screening" — OR — DDR dataset descriptor | Dataset descriptor | DR grading dataset, Canon and Topcon fundus cameras | DDR | N/A | §4.1, §1.2.3, §5.3 |
+| 51 🆕 | TO BE IDENTIFIED — ODIR-5K challenge dataset descriptor (Peking University) | Dataset descriptor | Multi-disease ocular dataset, Canon and Zeiss fundus cameras, ~5,000 patients | ODIR-5K | N/A | §4.1, §1.2.3, §5.3 |
+| 52 🆕 | Guo et al. (2017) "On Calibration of Modern Neural Networks" | Calibration methodology | ECE metric definition, calibration analysis of modern deep networks, Brier Score | ImageNet / CIFAR | N/A (methodology reference) | §2.6, §3.4, §5.4 |
+| 53 🆕 | Wang et al. (2004) "Image Quality Assessment: From Error Visibility to Structural Similarity" | Image quality metric | SSIM definition, structural similarity index for image quality evaluation | Various (image quality benchmarks) | N/A (methodology reference) | §2.6, §3.1 |
 
 ---
 
@@ -193,6 +195,15 @@
 ---
 
 ### Notes
+
+**Paradigm column (v5.3) — classification rule.**
+Per INVARIANTS v5.3 SIR-9, every CNN-based or ViT-based DR/retinal-image classification source has been tagged as **P1** (end-to-end CNN paradigm; preprocessing as auxiliary step), **P2-tending** (preprocessing explicitly formalised as model component), or **N/A** (methodology reference, dataset descriptor, clinical/pathophysiology review, mathematical model, system architecture, or survey). Tag rationale:
+- **P1** — backbone-centric study in which preprocessing is either unreported, reported as a fixed exogenous step, or varied but treated as a tuning input rather than as a formalised model component. The dominant class in the literature corpus.
+- **P1 (canonical representative)** — reserved for Gulshan et al. (2016) per SB-1.12 / SIR-9; see gulshan-2016.md §15 Paradigmatic Role for the methodological-practice grounds.
+- **P2-tending (prior self-work toward V5)** — the candidate's prior preprocessing studies (#23, #24) that move toward the V5 formalisation but predate the integrated-preprocessing-CNN paradigm as formally defined in this dissertation. Per CFC-2.7 they must be cited as prior own work and as evolutionary precursors of the V5 pipeline, not as full P2 instantiations.
+- **N/A** — the source does not have a paradigmatic position in the P1/P2 dichotomy: dataset descriptors, methodology references (Grad-CAM, SSIM, calibration), pathophysiology reviews, mathematical models, system architectures, surveys.
+
+Per CFC-2.9 and SIR-1, no source has been attributed an explicit "preprocessing is unimportant" claim. P1 tagging is a claim about *observable methodological practice*, not about authorial intent. Per CFC-2.2, no Paradigm tag licenses a head-to-head numerical comparison with the source. Per SB-1.12, the Paradigm column does not redefine the dissertation's operational experimental baseline (configs A/C, OD-3).
 
 **Existing notes (retained):**
 

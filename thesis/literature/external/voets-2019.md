@@ -130,6 +130,9 @@ Hardware constraints: No distributed training used (vs. original study); authors
 •	Single preprocessing pipeline tested; no exploration of alternative preprocessing (e.g., CLAHE, green channel extraction).
 •	No class-level performance analysis (e.g., per-severity breakdown).
 15. Relevance to My Dissertation
+
+Position in paradigm space (v5.3): P1 (end-to-end CNN; preprocessing as auxiliary step). Grounds (per SIR-9): although the paper is a *reproduction* of Gulshan 2016 rather than an original method paper, it operates within the same P1 framing (Inception-v3, end-to-end training, preprocessing as a fixed tuning configuration). Its principal finding is that *data provenance and labelling quality* drive performance, again treating preprocessing as an exogenous input condition rather than as an integral model component. Per CFC-2.9 / SIR-1, no theoretical "preprocessing is unimportant" claim is attributed to the authors.
+
 Preprocessing dominance hypothesis: MODERATE-HIGH. The study implicitly supports the hypothesis that data quality and preprocessing (including label quality/multi-grading) are critical determinants of performance, potentially more so than architecture choice. The identical InceptionV3 architecture achieved vastly different results depending on data provenance and labeling quality. However, the study does not isolate preprocessing effects from data distribution effects.
 Cross-database validation: HIGH. The study provides direct empirical evidence of cross-dataset performance degradation (AUC drop from 0.951 to 0.853 when moving from EyePACS to Messidor-2), which is a central concern in the dissertation.
 EyePACS/Messidor benchmarking: HIGH. Provides concrete AUC benchmarks on both Kaggle EyePACS (0.951) and Messidor-2 (0.853) using InceptionV3 with ImageNet pretraining, serving as a baseline for comparison with other methods.

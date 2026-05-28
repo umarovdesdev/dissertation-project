@@ -236,6 +236,8 @@ No. No statistical tests, no confidence intervals, no bootstrapping, and no comp
 
 # 15. Relevance to My Dissertation
 
+**Position in paradigm space (v5.3):** P1 (end-to-end CNN; preprocessing as auxiliary step). Grounds (per SIR-9): the paper applies colour normalisation as a fixed preprocessing step but conducts no controlled comparison against the no-preprocessing condition and does not formalise preprocessing as a contributing component of the model. Per CFC-2.9 / SIR-1, no theoretical "preprocessing is unimportant" claim is attributed to the authors.
+
 **Relevance to preprocessing dominance hypothesis:**
 Moderate. The paper implements colour normalisation as the primary preprocessing step and explicitly attributes inter-patient image variability to ethnicity, age, and illumination differences. However, no ablation comparing performance with vs. without preprocessing is conducted, making it impossible to isolate the contribution of preprocessing to the reported metrics. This paper cannot be cited as evidence for or against preprocessing dominance; it documents its use without quantifying its effect.
 

@@ -4,19 +4,27 @@
 
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Formal contributions register
-**Version:** 5.0 | **Date:** 2026-04-XX | **Binding Reference:** INVARIANTS.md v5.0
+**Version:** 5.3 | **Date:** 2026-05-28 | **Binding Reference:** INVARIANTS.md v5.3
+
+---
+
+## Conceptual Framing of the Primary Contributions
+
+The principal conceptual contribution of this dissertation is a **paradigm shift** — from paradigm P1 (the end-to-end CNN paradigm, in which preprocessing is treated as ancillary data preparation; Gulshan et al. 2016 is its canonical representative) to paradigm P2 (the integrated preprocessing-CNN paradigm, in which preprocessing is an integral model component that co-determines the feature space available to the network). The four primary contributions (C-1 through C-3) and the supporting contributions (SC-A through SC-G) operationalise P2: each is, at one level, an engineering result on the 8-stage V5 pipeline and, at a second level, evidence for the productivity of P2 as a methodological stance. The contributions therefore have a dual character — engineering and conceptual — and the dissertation reports them under both readings, in line with SB-1.12, CFC-2.8, CFC-2.9, and SIR-9 in INVARIANTS v5.3.
 
 ---
 
 ## Primary Contributions
 
-### C-1: Cross-Device Normalization Pipeline
+### C-1: Integrated Preprocessing-CNN Pipeline (Operationalisation of Paradigm P2)
 
-**Contribution:** Design, implementation, and experimental validation of an 8-stage V5 fundus image preprocessing pipeline that standardizes retinal image appearance across diverse imaging devices and acquisition conditions while preserving diagnostically relevant retinal features. The pipeline outputs 4-channel tensors (RGB + binary FOV mask) with dataset-specific normalization.
+**Contribution:** Design, implementation, and experimental validation of an 8-stage V5 fundus image preprocessing pipeline that standardizes retinal image appearance across diverse imaging devices and acquisition conditions while preserving diagnostically relevant retinal features. The pipeline outputs 4-channel tensors (RGB + binary FOV mask) with dataset-specific normalization. At the **conceptual** level, the contribution is the formalisation of preprocessing as a binding part of the model specification — the operationalisation of paradigm P2 — and the explicit placement of this paradigm under controlled experimental contrast against the paradigm represented by Gulshan et al. (2016) and the broader P1 literature. At the **engineering** level, the contribution is the specific 8-stage realisation enumerated below.
 
 **Evidence:** Experiment 1 (preprocessing dominance via 2×2 factorial ablation A–D, ResNet-50 and EfficientNet-B3), Experiment 2 (component-level ablation across 7 V5 levels + CLAHE sweep + flat-field σ sweep), and Experiment 6 (device domain shift evaluation across Canon, Topcon, Kowa, Zeiss camera hardware).
 
-**Novelty:** The V5 pipeline introduces: (a) isotropic resize with centered zero-padding preserving fundus circle geometry, (b) explicit FOV mask as a 4th input channel informing the CNN of valid pixel regions, (c) adaptive flat-field correction with σ proportional to FOV diameter (σ = 0.07·D) rather than a fixed global σ, (d) dataset-specific normalization computed from training set mask=1.0 pixels rather than ImageNet defaults, (e) canonical orientation via OD-fovea rotation normalization with adaptive augmentation σ. The pipeline is validated across a multi-dataset architecture (EyePACS, APTOS 2019, IDRiD, Messidor-2, DDR, ODIR-5K, RFMiD, Clinical) and across multiple CNN architectures (ResNet-50, EfficientNet-B3).
+**Novelty:** Novelty is twofold.
+- *Conceptual:* The dissertation reframes preprocessing as an integral model component (paradigm P2) and places this reframing under direct empirical test, in contrast to the P1 tradition (Gulshan, Pratt, Rakhlin, Saxena, Ting, Voets) in which preprocessing is unformalised in the main text or deferred to supplementary material. Per CFC-2.9, this is a claim about the observable methodological practice of those works, not an attribution to them of an explicit "preprocessing is unimportant" thesis.
+- *Engineering:* The V5 pipeline introduces: (a) isotropic resize with centered zero-padding preserving fundus circle geometry, (b) explicit FOV mask as a 4th input channel informing the CNN of valid pixel regions, (c) adaptive flat-field correction with σ proportional to FOV diameter (σ = 0.07·D) rather than a fixed global σ, (d) dataset-specific normalization computed from training set mask=1.0 pixels rather than ImageNet defaults, (e) canonical orientation via OD-fovea rotation normalization with adaptive augmentation σ. The pipeline is validated across a multi-dataset architecture (EyePACS, APTOS 2019, IDRiD, Messidor-2, DDR, ODIR-5K, RFMiD, Clinical) and across multiple CNN architectures (ResNet-50, EfficientNet-B3).
 
 ---
 
