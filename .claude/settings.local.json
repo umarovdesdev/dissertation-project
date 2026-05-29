@@ -156,7 +156,15 @@
       "Bash(rg -niE 'version[ :=]+[0-9]+\\\\.[0-9]+' --no-ignore --glob !thesis/** --glob !**/node_modules/** --glob !**/build/** --glob !.strip-versions/** defense/ demo/ experiments/ *.md)",
       "Bash(rg -nE '[Vv]5' defense/slides/05_LITERATURE_REVIEW.md experiments/configs/default.yaml defense/idea.md)",
       "Bash(rg -nE '\\\\bV[1-4]\\\\b\\(?!\\\\.\\)' --no-ignore --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** --glob !**/dist/** --glob !.strip-versions/** --glob !STRIP_VERSIONS_PLAN.md defense/ demo/ experiments/ *.md)",
-      "Bash(rg -cE '\\\\bV[1-4]\\\\b' --no-ignore --glob '!thesis/**' --glob '!**/node_modules/**' --glob '!**/build/**' --glob '!.strip-versions/**' defense/ demo/ experiments/ *.md)"
+      "Bash(rg -cE '\\\\bV[1-4]\\\\b' --no-ignore --glob '!thesis/**' --glob '!**/node_modules/**' --glob '!**/build/**' --glob '!.strip-versions/**' defense/ demo/ experiments/ *.md)",
+      "Bash(echo \"rg exit: $?\")",
+      "Bash(rg -nE --no-config --no-ignore-vcs '\\\\b[Vv][0-9]+\\\\.[0-9]+\\(\\\\.[0-9]+\\)?\\\\b|\\\\b[Vv]ersion[: ]+[0-9]+\\\\.[0-9]+|\\\\bper\\\\s+v?[0-9]+\\\\.[0-9]+' --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** --glob !**/dist/** --glob !.strip-versions/** --glob !STRIP_VERSIONS_PLAN.md --glob !STRIP_VERSIONS_FIX_PLAN.md --glob !STRIP_VERSIONS_REPORT.md --glob '!**/~$*' --glob '!**/*.{pdf,pptx,docx,png,jpg,jpeg,gif,ico,woff,woff2,ttf,zip,bin}' .)",
+      "Bash(tee .strip-versions/method-a-rc.txt)",
+      "Bash(RIPGREP_CONFIG_PATH='' rg -n --no-ignore-vcs '\\\\b[Vv][0-9]+\\\\.[0-9]+\\(\\\\.[0-9]+\\)?\\\\b|\\\\b[Vv]ersion[: ]+[0-9]+\\\\.[0-9]+|\\\\bper\\\\s+v?[0-9]+\\\\.[0-9]+' --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** --glob !**/dist/** --glob !.strip-versions/** --glob !STRIP_VERSIONS_PLAN.md --glob !STRIP_VERSIONS_FIX_PLAN.md --glob !STRIP_VERSIONS_REPORT.md --glob '!**/~$*' --glob '!**/*.{pdf,pptx,docx,png,jpg,jpeg,gif,ico,woff,woff2,ttf,zip,bin}' .)",
+      "Bash(tee .strip-versions/method-b-rc.txt)",
+      "Bash(RIPGREP_CONFIG_PATH='' rg -n --no-ignore-vcs '\\\\b[Vv][0-9]+\\\\.[0-9]+\\(\\\\.[0-9]+\\)?\\\\b|\\\\b[Vv]ersion[: ]+[0-9]+\\\\.[0-9]+|\\\\bper\\\\s+v?[0-9]+\\\\.[0-9]+' --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** --glob !**/dist/** --glob !.strip-versions/** --glob !STRIP_VERSIONS_*.md --glob '!**/~$*' --glob '!**/*.{pdf,pptx,docx,png,jpg,jpeg,gif,ico,woff,woff2,ttf,zip,bin}' .)",
+      "Bash(gh pr *)",
+      "PowerShell(gh pr list --head chore/version-archaeology-and-strip --json number,url,state)"
     ]
   }
 }
