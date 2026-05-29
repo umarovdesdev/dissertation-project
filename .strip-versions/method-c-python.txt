@@ -1,11 +1,8 @@
 structure.txt:242:    |   |   |-- ARCHIVED-chapter-01-review-prompt-v1.0.md
 CLAUDE.md:26:All governance documents live in `thesis/governance/` (v5.0). These are the authoritative versions:
 demo/public/RESULTS.md:1:# Experimental Results — Canonical Numerical Reference v5.0
-demo/public/RESULTS.md:7:**Version:** 5.0
 demo/public/RESULTS.md:8:**Governance:** INVARIANTS v5.0 | HYPOTHESIS v5.0 | RESEARCH_ARCHITECTURE v5.0
-demo/public/RESULTS.md:525:**Document version:** 5.0 | **Date:** 2026-04-12
 demo/public/RESULTS.md:526:**Binding reference:** INVARIANTS v5.0, HYPOTHESIS v5.0, RESEARCH_ARCHITECTURE v5.0
-demo/public/diagrams/v5_pipeline_specification.md:5:**Pipeline Version:** 5.0
 demo/public/diagrams/v5_pipeline_specification.md:6:**Binding Reference:** INVARIANTS.md v5.0, RESEARCH_ARCHITECTURE.md v5.0
 demo/public/diagrams/system_architecture_specification.md:6:Version: 5.0 | Binding Reference: INVARIANTS.md v5.0, CENTRAL_THESIS.md v5.0
 demo/src/i18n.js:68:    'paradigm.note': 'No direct numerical comparison with Gulshan is performed (INVARIANTS v5.3 SB-1.12); A-vs-B / C-vs-D contrasts are matched-condition comparisons between paradigms, not against external figures.',
