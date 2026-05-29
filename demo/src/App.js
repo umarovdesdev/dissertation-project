@@ -3,6 +3,7 @@ import { C } from './data';
 import { useLang } from './i18n';
 import { LangSwitcher } from './components';
 import Overview from './tabs/Overview';
+import Demo from './tabs/Demo';
 import ModelArchitecture from './tabs/ModelArchitecture';
 import ModelPipeline from './tabs/ModelPipeline';
 import ModelMethods from './tabs/ModelMethods';
@@ -26,6 +27,7 @@ import Publications from './tabs/Publications';
 function getNav(t) {
   return [
     { id: 'overview', label: t('nav.overview') },
+    { id: 'demo', label: t('nav.demo') },
     { type: 'group', label: t('nav.model') },
     { id: 'arch', label: t('nav.model.architecture'), indent: true },
     { id: 'pipeline', label: t('nav.model.pipeline'), indent: true },
@@ -56,6 +58,7 @@ function getNav(t) {
 
 const COMPONENTS = {
   overview: Overview,
+  demo: Demo,
   arch: ModelArchitecture,
   pipeline: ModelPipeline,
   methods: ModelMethods,
