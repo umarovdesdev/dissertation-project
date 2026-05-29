@@ -46,7 +46,7 @@
 
 ## 4. Қосымша — Әдіснамалық ескертулер (Methodological notes)
 
-**Тікелей сандық салыстыру жоқ / No direct numerical comparison.** Gulshan 2016 — бинарлық referable-DR, Inception-v3 ансамблі, жеке композиттік деректер жинағы; біздің диссертация — 5-кластық DR 0–4, ResNet-50 / EfficientNet-B3, EyePACS-тің ашық бөлімі. Бұл айырмашылықтар бетпе-бет сандық салыстыруды әдіснамалық тұрғыдан болмайтын етеді (INVARIANTS v5.3 SB-1.12, CFC-2.2).
+**Тікелей сандық салыстыру жоқ / No direct numerical comparison.** Gulshan 2016 — бинарлық referable-DR, Inception-v3 ансамблі, жеке композиттік деректер жинағы; біздің диссертация — 5-кластық DR 0–4, ResNet-50 / EfficientNet-B3, EyePACS-тің ашық бөлімі. Бұл айырмашылықтар бетпе-бет сандық салыстыруды әдіснамалық тұрғыдан болмайтын етеді (INVARIANTS SB-1.12, CFC-2.2).
 
 **Базалық конфигурация ≠ Gulshan жүйесі.** Эксперимент 1-дегі базалық конфигурация (configs A/C) — OD-3-те анықталған *операционды конструкт* (stretch-resize + ImageNet normalize, 3-канал). Ол Gulshan ұсынған парадигманы операционализациялайды, бірақ Gulshan-ның жүйесі емес. "Gulshan — біздің baseline" деген тұжырым тыйым салынған (CFC-2.9).
 
@@ -59,10 +59,10 @@
 
 ## 5. Қосымша — Дереккөздер (Source references)
 
-- `thesis/governance/INVARIANTS.md` v5.3 — SB-1.12, CFC-2.9, SIR-9
-- `thesis/governance/CENTRAL_THESIS.md` v5.3 — Paradigmatic framing paragraph
-- `thesis/governance/CONTRIBUTIONS.md` v5.3 — Conceptual framing of primary contributions
-- `thesis/governance/ARGUMENT_MAP.md` v5.3 — PC-0 (Paradigmatic Framing Claim)
+- `thesis/governance/INVARIANTS.md` — SB-1.12, CFC-2.9, SIR-9
+- `thesis/governance/CENTRAL_THESIS.md` — Paradigmatic framing paragraph
+- `thesis/governance/CONTRIBUTIONS.md` — Conceptual framing of primary contributions
+- `thesis/governance/ARGUMENT_MAP.md` — PC-0 (Paradigmatic Framing Claim)
 - `thesis/literature/external/gulshan-2016.md` §15 (Paradigmatic Role) + §18 (Paradigmatic Synthesis)
 - `thesis/literature/LITERATURE_INDEX.md` — Paradigm column
 - `GULSHAN_PARADIGM_INTEGRATION_PLAN.md` — integration tracker

@@ -3,7 +3,7 @@
 **Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification**
 
 Candidate: Yesmukhamedov N.S. | IITU Doctoral Programme  
-Version: 5.0 | Binding Reference: INVARIANTS.md v5.0, CENTRAL_THESIS.md v5.0
+Binding Reference: INVARIANTS.md, CENTRAL_THESIS.md
 
 ---
 

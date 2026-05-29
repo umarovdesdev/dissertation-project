@@ -144,7 +144,19 @@
       "Bash(npm run *)",
       "PowerShell(\\(Get-ChildItem -Recurse -File 'defense/assets/presentation/' | Measure-Object -Property Length -Sum\\).Sum / 1MB; \\(Get-ChildItem -Recurse -File 'demo/public/images/' | Measure-Object -Property Length -Sum\\).Sum / 1MB)",
       "PowerShell(Get-ChildItem -Recurse -File 'demo/public/images/','defense/assets/presentation/' | Sort-Object Length -Descending | Select-Object -First 10 | Format-Table @{N='SizeMB';E={[math]::Round\\($_.Length/1MB,2\\)}}, FullName -AutoSize)",
-      "PowerShell(\\(Get-ChildItem -Recurse -File 'demo/public/images/'\\).Count; \\(Get-ChildItem -Recurse -File 'defense/assets/presentation/'\\).Count)"
+      "PowerShell(\\(Get-ChildItem -Recurse -File 'demo/public/images/'\\).Count; \\(Get-ChildItem -Recurse -File 'defense/assets/presentation/'\\).Count)",
+      "Bash(command -v rg)",
+      "Bash(command -v python3)",
+      "Bash(command -v python)",
+      "Bash(rg -nE '\\\\b[Vv][0-9]+\\(\\\\.[0-9]+\\){1,2}\\\\b|\\\\b[Vv]ersion[: ]+[0-9]+\\\\.[0-9]+|\\\\bper\\\\s+v?[0-9]+\\\\.[0-9]+' --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** --glob !**/dist/** --glob !.strip-versions/** --glob !STRIP_VERSIONS_PLAN.md --glob !STRIP_VERSIONS_REPORT.md defense/ demo/ experiments/ *.md)",
+      "Bash(rg -nE '\\\\b[Vv][0-9]+\\(\\\\.[0-9]+\\){1,2}\\\\b|\\\\b[Vv]ersion[: ]+[0-9]+\\\\.[0-9]+|\\\\bper\\\\s+v?[0-9]+\\\\.[0-9]+' --no-ignore --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** --glob !**/dist/** --glob !.strip-versions/** --glob !STRIP_VERSIONS_PLAN.md --glob !STRIP_VERSIONS_REPORT.md defense/ demo/ experiments/ *.md)",
+      "Bash(rg -oiN 'V[ ]?5\\(\\\\.[0-9]+\\){0,2}|version[ :]*[0-9.]*' .strip-versions/office-scan)",
+      "Bash(rg -N 'cp:revision|cp:version|<cp:lastModifiedBy|AppVersion' .strip-versions/office-scan)",
+      "Bash(rg -nE '[Vv][0-9]+\\\\.[0-9]+' --no-ignore --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** --glob !**/dist/** --glob !.strip-versions/** --glob !STRIP_VERSIONS_PLAN.md defense/ demo/ experiments/ *.md)",
+      "Bash(rg -niE 'version[ :=]+[0-9]+\\\\.[0-9]+' --no-ignore --glob !thesis/** --glob !**/node_modules/** --glob !**/build/** --glob !.strip-versions/** defense/ demo/ experiments/ *.md)",
+      "Bash(rg -nE '[Vv]5' defense/slides/05_LITERATURE_REVIEW.md experiments/configs/default.yaml defense/idea.md)",
+      "Bash(rg -nE '\\\\bV[1-4]\\\\b\\(?!\\\\.\\)' --no-ignore --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** --glob !**/dist/** --glob !.strip-versions/** --glob !STRIP_VERSIONS_PLAN.md defense/ demo/ experiments/ *.md)",
+      "Bash(rg -cE '\\\\bV[1-4]\\\\b' --no-ignore --glob '!thesis/**' --glob '!**/node_modules/**' --glob '!**/build/**' --glob '!.strip-versions/**' defense/ demo/ experiments/ *.md)"
     ]
   }
 }

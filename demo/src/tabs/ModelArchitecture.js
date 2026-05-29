@@ -38,8 +38,8 @@ export default function ModelArchitecture() {
         />
         <Note>
           Baseline arm: ImageNet-pretrained weights (cross-domain transfer from natural images).
-          V5 arm (per governance v5.2): initialization from RETFound (Zhou et al., 2023, Nature) — a retinal foundation model MAE-pretrained on a multi-modal corpus of ~1.6M retinal images (~904K color fundus photographs + ~736K OCT scans). The CFP-pretrained checkpoint is loaded for the dissertation's fundus-only downstream task; the OCT-pretrained checkpoint is published separately and is not used (dissertation inputs remain fundus-only — see SB-1.4).
-          Backbone choice for the V5 arm is bound by open question AOQ-1 (INVARIANTS.md v5.2, §X). Per CFC-2.8, observed differences are attributable only to the integrated (preprocessing × pretrain) pair, not to either factor in isolation.
+          V5 arm: initialization from RETFound (Zhou et al., 2023, Nature) — a retinal foundation model MAE-pretrained on a multi-modal corpus of ~1.6M retinal images (~904K color fundus photographs + ~736K OCT scans). The CFP-pretrained checkpoint is loaded for the dissertation's fundus-only downstream task; the OCT-pretrained checkpoint is published separately and is not used (dissertation inputs remain fundus-only — see SB-1.4).
+          Backbone choice for the V5 arm is bound by open question AOQ-1 (INVARIANTS.md, §X). Per CFC-2.8, observed differences are attributable only to the integrated (preprocessing × pretrain) pair, not to either factor in isolation.
           All models trained with patient-level 5-fold cross-validation.
           Mixed precision disabled for EfficientNet models; batch size 16 (EfficientNet) / 32 (ResNet-50).
           Hardware: NVIDIA RTX 3060 12GB, WSL2 Ubuntu, PyTorch 2.5.

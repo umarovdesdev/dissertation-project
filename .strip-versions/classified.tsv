@@ -1,0 +1,43 @@
+file	line	match	decision	reason
+structure.txt	242	v1.0	MANUAL	tree-listing reproduction of legitimate thesis/ filename
+CLAUDE.md	26	v5.0	STRIP	decimal governance version marker outside thesis/
+demo/public/RESULTS.md	1	v5.0	STRIP	decimal governance version marker outside thesis/
+demo/public/RESULTS.md	7	Version:** 5.0	STRIP	decimal governance version marker outside thesis/
+demo/public/RESULTS.md	8	v5.0	STRIP	decimal governance version marker outside thesis/
+demo/public/RESULTS.md	525	version:** 5.0	STRIP	decimal governance version marker outside thesis/
+demo/public/RESULTS.md	526	v5.0	STRIP	decimal governance version marker outside thesis/
+demo/public/diagrams/v5_pipeline_specification.md	5	Version:** 5.0	STRIP	decimal governance version marker outside thesis/
+demo/public/diagrams/v5_pipeline_specification.md	6	v5.0	STRIP	decimal governance version marker outside thesis/
+demo/public/diagrams/system_architecture_specification.md	6	v5.0	STRIP	decimal governance version marker outside thesis/
+demo/src/i18n.js	68	v5.3	STRIP	decimal governance version marker outside thesis/
+demo/src/i18n.js	319	v5.3	STRIP	decimal governance version marker outside thesis/
+demo/src/tabs/ModelArchitecture.js	41	v5.2	STRIP	decimal governance version marker outside thesis/
+demo/src/tabs/ModelArchitecture.js	42	v5.2	STRIP	decimal governance version marker outside thesis/
+demo/src/tabs/Overview.js	73	v5.3	STRIP	decimal governance version marker outside thesis/
+demo/src/tabs/ExpH1.js	74	v5.3	STRIP	decimal governance version marker outside thesis/
+experiments/README.md	88	v4.0	STRIP	decimal governance version marker outside thesis/
+experiments/scripts/generate_report.py	452	v2.2	STRIP	decimal governance version marker outside thesis/
+experiments/src/experiments/exp4_explainability.py	16	v2.2	STRIP	decimal governance version marker outside thesis/
+experiments/src/experiments/exp4_explainability.py	415	v2.2	STRIP	decimal governance version marker outside thesis/
+experiments/src/explainability/__init__.py	3	v2.2	STRIP	decimal governance version marker outside thesis/
+experiments/src/explainability/gradcam.py	7	v2.2	STRIP	decimal governance version marker outside thesis/
+experiments/src/explainability/iou.py	3	v2.2	STRIP	decimal governance version marker outside thesis/
+experiments/src/explainability/iou.py	4	v2.2	STRIP	decimal governance version marker outside thesis/
+experiments/src/explainability/visualization.py	3	v2.2	STRIP	decimal governance version marker outside thesis/
+defense/idea.md	6	v5.0	STRIP	decimal governance version marker outside thesis/
+defense/slide_plan.md	33	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/paradigmatic_speech.md	4	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/paradigmatic_speech.md	6	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/paradigmatic_speech.md	61	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/paradigmatic_speech.md	74	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/slides/08_CNN_ARCHITECTURE.md	22	v5.2	STRIP	decimal governance version marker outside thesis/
+defense/slides/09_ARCHITECTURE_COMPARISON.md	11	v5.2	STRIP	decimal governance version marker outside thesis/
+defense/slides/09_ARCHITECTURE_COMPARISON.md	23	v5.1	STRIP	decimal governance version marker outside thesis/
+defense/slides/09_ARCHITECTURE_COMPARISON.md	33	v5.2	STRIP	decimal governance version marker outside thesis/
+defense/slides/09_ARCHITECTURE_COMPARISON.md	37	v5.1	STRIP	decimal governance version marker outside thesis/
+defense/slides/05a_PARADIGMATIC_POSITIONING.md	49	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/slides/05a_PARADIGMATIC_POSITIONING.md	62	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/slides/05a_PARADIGMATIC_POSITIONING.md	63	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/slides/05a_PARADIGMATIC_POSITIONING.md	64	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/slides/05a_PARADIGMATIC_POSITIONING.md	65	v5.3	STRIP	decimal governance version marker outside thesis/
+defense/slides/44_NOVELTY.md	9	v5.3	STRIP	decimal governance version marker outside thesis/

@@ -13,7 +13,7 @@ Protocol:
 Output: <output_dir>/exp4/iou_results.json
         <output_dir>/exp4/gradcam/  (PNG per IDRiD image)
 
-NC-14 (INVARIANTS v2.2): Grad-CAM activation does NOT constitute clinical
+NC-14 (INVARIANTS): Grad-CAM activation does NOT constitute clinical
 localization of pathology — it is an interpretability tool only.
 """
 
@@ -412,7 +412,7 @@ def run(
     ]
     h5_supported = len(improved_lesion_types) >= 3
 
-    # ALO H-5 direction (primary metric per INVARIANTS v2.2)
+    # ALO H-5 direction (primary metric per INVARIANTS)
     improved_alo_types = [
         lt for lt in _LESION_TYPES
         if (not np.isnan(mean_alo_full.get(lt, float("nan")))

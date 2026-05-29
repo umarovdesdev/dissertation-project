@@ -1,11 +1,10 @@
-# Experimental Results — Canonical Numerical Reference v5.0
+# Experimental Results — Canonical Numerical Reference
 
 **Dissertation:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification  
 **Candidate:** Yesmukhamedov N.S. (IITU)  
 **Document type:** Canonical numerical reference  
 **Date:** 2026-04-12  
-**Version:** 5.0  
-**Governance:** INVARIANTS v5.0 | HYPOTHESIS v5.0 | RESEARCH_ARCHITECTURE v5.0  
+**Governance:** INVARIANTS | HYPOTHESIS | RESEARCH_ARCHITECTURE  
 **Pipeline:** 8-stage preprocessing (isotropic resize + FOV mask + adaptive flat-field + dataset-specific normalization)
 
 ---
@@ -522,5 +521,5 @@ Visible pathology: extensive hemorrhages (dot-blot and flame-shaped), hard exuda
 
 ---
 
-**Document version:** 5.0 | **Date:** 2026-04-12  
-**Binding reference:** INVARIANTS v5.0, HYPOTHESIS v5.0, RESEARCH_ARCHITECTURE v5.0
+**Date:** 2026-04-12  
+**Binding reference:** INVARIANTS, HYPOTHESIS, RESEARCH_ARCHITECTURE

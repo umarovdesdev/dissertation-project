@@ -19,4 +19,4 @@ CNN моделінің архитектурасы
 
 Шығыс векторы ResNet-50 үшін 2048-dimension, EfficientNet-B3 үшін 1536-dimension; екеуі де 5 класқа (DR 0–4) жіктеледі.
 
-> Ескерту: V5 тармағының нақты backbone-ы (RETFound ViT-Large / CNN-үйлесімді RETFound-style протоколы) AOQ-1 ашық сұрақтың шешімінен тәуелді (INVARIANTS.md v5.2, X бөлімі).
+> Ескерту: V5 тармағының нақты backbone-ы (RETFound ViT-Large / CNN-үйлесімді RETFound-style протоколы) AOQ-1 ашық сұрақтың шешімінен тәуелді (INVARIANTS.md, X бөлімі).
