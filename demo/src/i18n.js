@@ -65,7 +65,7 @@ const translations = {
     'paradigm.p1.body': 'Preprocessing as ancillary data preparation. Canonical representative: Gulshan et al. (2016). Operational instantiation: configs A/C in Experiment 1.',
     'paradigm.p2.label': 'Paradigm P2 — model = preprocessing + CNN',
     'paradigm.p2.body': 'Preprocessing as integral model component. Operational instantiation: configs B/D (full V5 integrated pipeline).',
-    'paradigm.note': 'No direct numerical comparison with Gulshan is performed (INVARIANTS v5.3 SB-1.12); A-vs-B / C-vs-D contrasts are matched-condition comparisons between paradigms, not against external figures.',
+    'paradigm.note': 'No direct numerical comparison with Gulshan is performed (INVARIANTS SB-1.12); A-vs-B / C-vs-D contrasts are matched-condition comparisons between paradigms, not against external figures.',
     'paradigm.configA': 'P1 instantiation (Gulshan-paradigm baseline)',
     'paradigm.configB': 'P2 instantiation (V5 integrated pipeline)',
 
@@ -316,7 +316,7 @@ const translations = {
     'paradigm.p1.body': 'Препроцессинг — қосалқы дайындау. Канондық өкіл: Gulshan et al. (2016). Операционды іске асырылуы: Эксперимент 1-дегі A/C конфигурациялары.',
     'paradigm.p2.label': 'Парадигма P2 — model = preprocessing + CNN',
     'paradigm.p2.body': 'Препроцессинг — модельдің ажырамас компоненті. Операционды іске асырылуы: B/D конфигурациялары (толық V5 интегралды pipeline).',
-    'paradigm.note': 'Gulshan-мен тікелей сандық салыстыру жасалмайды (INVARIANTS v5.3 SB-1.12); A vs B / C vs D — сыртқы көрсеткіштерге қарсы емес, тең шарттардағы парадигмалар арасындағы салыстыру.',
+    'paradigm.note': 'Gulshan-мен тікелей сандық салыстыру жасалмайды (INVARIANTS SB-1.12); A vs B / C vs D — сыртқы көрсеткіштерге қарсы емес, тең шарттардағы парадигмалар арасындағы салыстыру.',
     'paradigm.configA': 'P1 іске асырылуы (Gulshan-парадигмасының базалық конфигурациясы)',
     'paradigm.configB': 'P2 іске асырылуы (V5 интегралды pipeline)',
 

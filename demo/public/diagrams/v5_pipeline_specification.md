@@ -2,8 +2,7 @@
 
 **Dissertation:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification  
 **Candidate:** Yesmukhamedov N.S.  
-**Pipeline Version:** 5.0  
-**Binding Reference:** INVARIANTS.md v5.0, RESEARCH_ARCHITECTURE.md v5.0
+**Binding Reference:** INVARIANTS.md, RESEARCH_ARCHITECTURE.md
 
 ---
 
