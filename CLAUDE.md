@@ -23,7 +23,7 @@ model = preprocessing + CNN. The 8-stage V5 preprocessing pipeline is an integra
 
 ## Governance — Single Source of Truth
 
-All governance documents live in `thesis/governance/` (v5.0). These are the authoritative versions:
+All governance documents live in `thesis/governance/`. These are the authoritative versions:
 - INVARIANTS.md — scope boundaries, forbidden claims, binding constraints
 - HYPOTHESIS.md — H-1 through H-7 formal definitions
 - ARGUMENT_MAP.md — claim-evidence dependency structure
