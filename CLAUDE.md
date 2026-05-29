@@ -93,3 +93,11 @@ cd demo
 npm start     # localhost:3000
 npm run build # production build
 ```
+
+## Versioning policy
+
+Version markers (`v5.X`, `V5.X`, `version 5.X`, etc.) appear **only inside `thesis/`**. `defense/`, `demo/`, `experiments/`, and root-level files reflect the current authoritative state of `thesis/` without explicit version references.
+
+`V5` (uppercase, no decimal) is the proper noun for the 8-stage preprocessing pipeline and is preserved everywhere.
+
+Version bumps follow semantic versioning: `MAJOR.MINOR.PATCH`. See `thesis/governance/VERSIONING_POLICY.md` for the full scheme, detection regexes, and workflow. `STRIP_VERSIONS_PLAN.md` (repo root) is the automated enforcement.
