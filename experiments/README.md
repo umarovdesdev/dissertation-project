@@ -85,7 +85,7 @@ dr-classifier/
 │   ├── degradation/             # Synthetic image perturbations (Exp 3)
 │   └── utils/                   # Config loader, seed, image quality
 ├── docs/                        # Governance system
-│   ├── INVARIANTS.md            #   Binding constraint system (v4.0)
+│   ├── INVARIANTS.md            #   Binding constraint system
 │   ├── ARGUMENT_MAP.md          #   Claim-evidence-dependency structure
 │   ├── RESEARCH_ARCHITECTURE.md #   Methodological blueprint
 │   ├── HYPOTHESIS.md            #   H-1 through H-6
