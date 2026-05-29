@@ -3,7 +3,7 @@
 **Candidate:** Yesmukhamedov N.S., IITU (Almaty, Kazakhstan)
 **Dissertation:** "Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification"
 **Compiled:** 2026-04-24
-**Sources:** `thesis/governance/` v5.0 (CONTRIBUTIONS.md, HYPOTHESIS.md, CENTRAL_THESIS.md, RESEARCH_ARCHITECTURE.md)
+**Sources:** `thesis/governance/` (CONTRIBUTIONS.md, HYPOTHESIS.md, CENTRAL_THESIS.md, RESEARCH_ARCHITECTURE.md)
 
 This document consolidates every original solution claimed in the dissertation, so novelty can be verified in one place against the literature and the implementation.
 

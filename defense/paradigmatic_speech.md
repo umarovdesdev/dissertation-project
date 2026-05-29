@@ -1,9 +1,8 @@
 # Paradigmatic Framing — Defense Speech and Anticipated Q&A
 ## Companion document to slide 05a_PARADIGMATIC_POSITIONING.md
 
-**Version:** Generated under governance v5.3 (paradigmatic framing amendment)
 **Date:** 2026-05-28
-**Bindings:** INVARIANTS.md v5.3 SB-1.12, CFC-2.9, SIR-9; CONTRIBUTIONS.md v5.3 §Conceptual framing; ARGUMENT_MAP.md v5.3 PC-0; gulshan-2016.md §15 Paradigmatic Role.
+**Bindings:** INVARIANTS.md SB-1.12, CFC-2.9, SIR-9; CONTRIBUTIONS.md §Conceptual framing; ARGUMENT_MAP.md PC-0; gulshan-2016.md §15 Paradigmatic Role.
 
 ---
 
@@ -58,7 +57,7 @@ Three reasons motivated the choice of ResNet-50 and EfficientNet-B3 over Incepti
 ### Q3. "What are the numerical differences between your results and Gulshan's?"
 
 **Answer.**
-I do not report a direct numerical comparison against Gulshan 2016, and the dissertation's governance documents explicitly forbid such a comparison (INVARIANTS v5.3 SB-1.12, CFC-2.2). The reason is that the two studies are not commensurable:
+I do not report a direct numerical comparison against Gulshan 2016, and the dissertation's governance documents explicitly forbid such a comparison (INVARIANTS SB-1.12, CFC-2.2). The reason is that the two studies are not commensurable:
 
 - Gulshan reports binary referable-DR AUC = 0.991 on EyePACS-1 and 0.990 on Messidor-2.
 - The dissertation reports five-class weighted F1, ROC-AUC (multi-class one-vs-rest), Cohen's Kappa with quadratic weights, and Accuracy on the EyePACS public partition.
@@ -71,7 +70,7 @@ What the dissertation *does* report is its own internal contrast: configs B and 
 
 ## 3. Forbidden Phrasings in Live Speech
 
-The following phrasings are forbidden during the live defense, in line with INVARIANTS v5.3:
+The following phrasings are forbidden during the live defense, in line with INVARIANTS:
 
 - "Gulshan is our baseline" — conflicts with OD-3 and SB-1.12. The operational baseline is configs A/C, defined in OD-3; it is not Gulshan's system.
 - "We outperform Gulshan" / "We beat Gulshan" — forbidden by CFC-2.2 in the absence of a direct controlled replication.
