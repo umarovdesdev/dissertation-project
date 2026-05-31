@@ -187,7 +187,8 @@
       "PowerShell($env:PATH = \"C:\\\\Program Files\\\\Graphviz\\\\bin;\" + $env:PATH; python -c \"import importlib.util as u; print\\('torch', bool\\(u.find_spec\\('torch'\\)\\)\\); print\\('timm', bool\\(u.find_spec\\('timm'\\)\\)\\); print\\('graphviz', bool\\(u.find_spec\\('graphviz'\\)\\)\\)\")",
       "PowerShell(Set-Location \"E:\\\\dissertation-project\\\\demo\\\\public\\\\webApp\\\\scripts\"; $env:PATH = \"C:\\\\Program Files\\\\Graphviz\\\\bin;\" + $env:PATH; \"=== fig2 ===\"; python fig2_lesion_overlays.py; \"=== fig9 ===\"; python fig9_confusion_matrix.py; \"=== fig6 ===\"; python fig6_model_graph.py)",
       "PowerShell(python -c \"import PIL; print\\('Pillow', PIL.__version__\\); import os, matplotlib; d=os.path.join\\(os.path.dirname\\(matplotlib.__file__\\),'mpl-data','fonts','ttf'\\); print\\('dejavu bold:', os.path.isfile\\(os.path.join\\(d,'DejaVuSans-Bold.ttf'\\)\\)\\); print\\('arialbd:', os.path.isfile\\(r'C:\\\\Windows\\\\Fonts\\\\arialbd.ttf'\\)\\)\")",
-      "PowerShell(Set-Location \"E:\\\\dissertation-project\\\\demo\\\\public\\\\webApp\\\\scripts\"; $env:PATH = \"C:\\\\Program Files\\\\Graphviz\\\\bin;\" + $env:PATH; python fig6_model_graph.py)"
+      "PowerShell(Set-Location \"E:\\\\dissertation-project\\\\demo\\\\public\\\\webApp\\\\scripts\"; $env:PATH = \"C:\\\\Program Files\\\\Graphviz\\\\bin;\" + $env:PATH; python fig6_model_graph.py)",
+      "Bash(npx eslint *)"
     ]
   }
 }

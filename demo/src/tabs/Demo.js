@@ -10,6 +10,7 @@ import { C, CONFIGS } from '../data';
 import { Sec, Note } from '../components';
 import { useLang } from '../i18n';
 import { EYEPACS_PAIRS } from './_eyepacsPairs';
+import { analyzeFundus } from './_analyzeFundus';
 
 // ---------------------------------------------------------------------------
 // Walk-through cases that share an image with the preprocessing-pipeline
@@ -158,18 +159,24 @@ function patientPrediction(eyes) {
 // ---------------------------------------------------------------------------
 // UI sub-components
 // ---------------------------------------------------------------------------
-function EyeSlot({ label, eye, image, onPick, onClear, t }) {
+function EyeSlot({ label, eye, image, onPick, onClear, onSwap, t }) {
   const inputRef = useRef(null);
   const [dims, setDims] = useState(null);
-  // Reset the size badge when the loaded image changes (or is cleared) so we
-  // never display the previous image's dimensions while the new one is decoding.
-  useEffect(() => { setDims(null); }, [image && image.src]);
+  // "Keep" dismisses the wrong-slot warning for the current image only.
+  const [dismissed, setDismissed] = useState(false);
+  // Reset the size badge and dismissed-warning state when the loaded image
+  // changes (or is cleared) so we never carry the previous image's dimensions
+  // or a stale dismissal into a freshly loaded image.
+  useEffect(() => { setDims(null); setDismissed(false); }, [image && image.src]);
 
   const onChange = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => onPick({ src: ev.target.result, name: file.name, fromUpload: true });
+    reader.onload = async (ev) => {
+      const checks = await analyzeFundus(ev.target.result);
+      onPick({ src: ev.target.result, name: file.name, fromUpload: true, checks });
+    };
     reader.readAsDataURL(file);
   };
   const onDrop = (e) => {
@@ -177,9 +184,24 @@ function EyeSlot({ label, eye, image, onPick, onClear, t }) {
     const file = e.dataTransfer.files && e.dataTransfer.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => onPick({ src: ev.target.result, name: file.name, fromUpload: true });
+    reader.onload = async (ev) => {
+      const checks = await analyzeFundus(ev.target.result);
+      onPick({ src: ev.target.result, name: file.name, fromUpload: true, checks });
+    };
     reader.readAsDataURL(file);
   };
+
+  // Derived check state for the chips below the preview.
+  const checks = image && image.checks;
+  const showNotFundus = !!(checks && checks.isFundus === false);
+  const showWrongSide = !!(
+    checks && checks.laterality && checks.laterality !== eye &&
+    checks.confidence > 0.5 && !dismissed
+  );
+  const wrongSideMsg = showWrongSide
+    ? t('demo.check.wrongSide').replace('{eye}', t('demo.check.eye.' + checks.laterality))
+    : '';
+
   return (
     <div style={{ flex: 1, minWidth: 220 }}>
       <div style={{
@@ -233,6 +255,45 @@ function EyeSlot({ label, eye, image, onPick, onClear, t }) {
         )}
         <input ref={inputRef} type="file" accept="image/*" onChange={onChange} style={{ display: 'none' }} />
       </div>
+
+      {/* Validation chips (uploaded images only). Warn, never block. */}
+      {showNotFundus && (
+        <div style={{
+          marginTop: 6, padding: '4px 8px', borderRadius: 4, fontSize: 10,
+          background: C.amberBg, color: C.amberT, border: `1px solid ${C.amber}`,
+        }}>
+          ⚠ {t('demo.check.notFundus')}
+        </div>
+      )}
+      {showWrongSide && (
+        <div style={{
+          marginTop: 6, padding: '6px 8px', borderRadius: 4, fontSize: 10,
+          background: C.redBg, color: C.redT, border: `1px solid ${C.red}`,
+          display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap',
+        }}>
+          <span style={{ flex: 1, minWidth: 120 }}>⚠ {wrongSideMsg}</span>
+          <button
+            onClick={onSwap}
+            style={{
+              padding: '2px 8px', fontSize: 10, fontWeight: 600,
+              background: C.red, color: 'white', border: 'none',
+              borderRadius: 3, cursor: 'pointer',
+            }}
+          >
+            {t('demo.check.swap')}
+          </button>
+          <button
+            onClick={() => setDismissed(true)}
+            style={{
+              padding: '2px 8px', fontSize: 10,
+              background: 'transparent', color: C.redT,
+              border: `1px solid ${C.red}`, borderRadius: 3, cursor: 'pointer',
+            }}
+          >
+            {t('demo.check.keep')}
+          </button>
+        </div>
+      )}
       {/* Always reserve the Clear button's vertical space so the form height
           doesn't change when an image is added/removed. The button is only
           visible (and clickable) when there is something to clear. */}
@@ -352,6 +413,16 @@ export default function Demo() {
     return list;
   }, [leftImg, rightImg]);
 
+  // Swap the two slots — used by the wrong-slot warning chip. Both images
+  // (with their attached `checks`) move to the opposite slot; the laterality
+  // check then re-evaluates against the new slot and the warning clears.
+  const swapSlots = () => {
+    setLeftImg(rightImg);
+    setRightImg(leftImg);
+    setResult(null);
+    setFeedbackMode(null);
+  };
+
   const reset = (keepHistory = true) => {
     setLeftImg(null);
     setRightImg(null);
@@ -464,6 +535,7 @@ export default function Demo() {
             image={leftImg}
             onPick={(img) => { setLeftImg(img); if (img && img.fromUpload) setCaseRef(null); }}
             onClear={() => { setLeftImg(null); setCaseRef(null); setResult(null); setFeedbackMode(null); }}
+            onSwap={swapSlots}
             t={t}
           />
           <EyeSlot
@@ -472,6 +544,7 @@ export default function Demo() {
             image={rightImg}
             onPick={(img) => { setRightImg(img); if (img && img.fromUpload) setCaseRef(null); }}
             onClear={() => { setRightImg(null); setCaseRef(null); setResult(null); setFeedbackMode(null); }}
+            onSwap={swapSlots}
             t={t}
           />
         </div>

@@ -226,6 +226,14 @@ const translations = {
     'demo.viz.disclaimer': 'Heatmaps are pre-generated proxy visualizations derived from flat-field anomaly detection; a real Grad-CAM from a trained Config-D checkpoint will be substituted once Exp 1 completes.',
     'demo.viz.unavailable': 'Grad-CAM and attention overlay are pre-generated only for walk-through cases. Pick one of the walk-through buttons above to see them.',
 
+    // Upload validation checks
+    'demo.check.notFundus': "This doesn't look like a fundus image.",
+    'demo.check.wrongSide': 'Looks like the {eye} — wrong slot?',
+    'demo.check.eye.left': 'left eye',
+    'demo.check.eye.right': 'right eye',
+    'demo.check.swap': 'Swap',
+    'demo.check.keep': 'Keep',
+
     // Tooltips EN
     'tooltip.fig01': 'Weighted F1-score for the 4 factorial configurations (A-D). Config D (EfficientNet-B3 + full pipeline) achieves the highest F1 of 0.780. Error bars show ±1 standard deviation across 5 folds.',
     'tooltip.fig02': 'All four primary metrics (F1, AUC, κ, Accuracy) side by side. Config D outperforms all others on every metric.',
@@ -486,6 +494,14 @@ const translations = {
     'demo.viz.cam': 'Grad-CAM',
     'demo.viz.disclaimer': 'Heatmap-тар flat-field аномалияларын анықтаудан алынған алдын ала есептелген проксилер; үйретілген Config-D чекпойнтінен нақты Grad-CAM Эксперимент 1 аяқталған соң қойылады.',
     'demo.viz.unavailable': 'Grad-CAM пен attention overlay тек walk-through кейстер үшін алдын ала есептелген. Жоғарыдағы walk-through түймелерінің бірін таңдаңыз.',
+
+    // Upload validation checks (KZ)
+    'demo.check.notFundus': 'Бұл көз түбі суретіне ұқсамайды.',
+    'demo.check.wrongSide': '{eye} сияқты — слот қате ме?',
+    'demo.check.eye.left': 'сол көз',
+    'demo.check.eye.right': 'оң көз',
+    'demo.check.swap': 'Алмастыру',
+    'demo.check.keep': 'Қалдыру',
 
     // Tooltips KZ (partial — EN fallback used for unlisted)
     'tooltip.fig01': 'A-D конфигурациялары үшін weighted F1-score. D конфигурациясы (EfficientNet-B3 + толық pipeline) ең жоғары F1=0.780 көрсетеді. Қате жолдары 5 fold бойынша ±1 стандартты ауытқуды көрсетеді.',
