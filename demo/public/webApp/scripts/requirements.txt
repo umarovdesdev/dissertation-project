@@ -1,0 +1,14 @@
+# Minimum packages required to run the figure-generation scripts.
+matplotlib>=3.7
+numpy>=1.24
+Pillow>=10.0
+opencv-python>=4.8
+pandas>=2.0
+scikit-learn>=1.3
+
+# fig6_model_graph.py only:
+torch>=2.0
+timm>=0.9
+torchinfo>=1.8
+# Optional: torchviz needs the system Graphviz binary on PATH.
+torchviz>=0.0.2

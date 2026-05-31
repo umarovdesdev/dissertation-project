@@ -164,7 +164,30 @@
       "Bash(tee .strip-versions/method-b-rc.txt)",
       "Bash(RIPGREP_CONFIG_PATH='' rg -n --no-ignore-vcs '\\\\b[Vv][0-9]+\\\\.[0-9]+\\(\\\\.[0-9]+\\)?\\\\b|\\\\b[Vv]ersion[: ]+[0-9]+\\\\.[0-9]+|\\\\bper\\\\s+v?[0-9]+\\\\.[0-9]+' --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** --glob !**/dist/** --glob !.strip-versions/** --glob !STRIP_VERSIONS_*.md --glob '!**/~$*' --glob '!**/*.{pdf,pptx,docx,png,jpg,jpeg,gif,ico,woff,woff2,ttf,zip,bin}' .)",
       "Bash(gh pr *)",
-      "PowerShell(gh pr list --head chore/version-archaeology-and-strip --json number,url,state)"
+      "PowerShell(gh pr list --head chore/version-archaeology-and-strip --json number,url,state)",
+      "Bash(pip --version)",
+      "Bash(winget install *)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\Graphviz\\\\bin;\" + $env:PATH; Set-Location E:\\\\dissertation-project\\\\demo\\\\public\\\\webApp\\\\scripts; python fig6_model_graph.py 2>&1 | Select-String \"\\\\[fig6\\\\]\" | Select-Object -Unique)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\Graphviz\\\\bin;\" + $env:PATH; python -c \"import shutil; print\\('which dot:', shutil.which\\('dot'\\)\\); import graphviz; print\\('graphviz ver:', graphviz.__version__\\); from graphviz.backend import dot_command\" 2>&1)",
+      "PowerShell(python -c \"print\\('HELLO_MARKER_123'\\)\" 2>&1)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(find . -type f \\\\\\( -iname \"*.pth\" -o -iname \"*.ckpt\" -o -iname \"*.pt\" -o -iname \"*.safetensors\" \\\\\\) -not -path \"*/node_modules/*\" -not -path \"*/.git/*\")",
+      "Bash(find . -type f \\\\\\( -iname \"*prediction*\" -o -iname \"*probs*\" -o -iname \"*.npz\" \\\\\\) -not -path \"*/node_modules/*\" -not -path \"*/.git/*\")",
+      "Bash(find experiments/outputs -type f)",
+      "Bash(echo \"exit=$?\")",
+      "PowerShell($p = \"E:\\\\dissertation-project\\\\demo\\\\public\\\\webApp\\\\figures_mine\\\\fig4_flowchart.png\"; if \\(Test-Path $p\\) { \"FIG4 EXISTS \" + \\(Get-Item $p\\).Length } else { \"FIG4 MISSING\" })",
+      "Bash(dot -V)",
+      "PowerShell($d = \\(Get-Command dot -ErrorAction SilentlyContinue\\); if \\($d\\) { \"dot: \" + $d.Source; & dot -V } else { \"dot NOT on PATH\" }; \"py: \" + \\(Get-Command python\\).Source; python --version)",
+      "PowerShell($paths = @\\(\"C:\\\\Program Files\\\\Graphviz\",\"C:\\\\Program Files \\(x86\\)\\\\Graphviz\",\"$env:LOCALAPPDATA\\\\Programs\\\\Graphviz\",\"C:\\\\Python312\\\\Lib\\\\site-packages\\\\graphviz\"\\); foreach\\($p in $paths\\){ if\\(Test-Path $p\\){ Get-ChildItem -Path $p -Recurse -Filter dot.exe -ErrorAction SilentlyContinue | Select-Object -First 3 -ExpandProperty FullName } }; \"--- pip graphviz ---\"; python -c \"import graphviz, shutil; print\\('backend dot:', shutil.which\\('dot'\\)\\)\")",
+      "PowerShell(dot *)",
+      "PowerShell(Copy-Item *)",
+      "PowerShell(python \"E:\\\\dissertation-project\\\\demo\\\\public\\\\webApp\\\\scripts\\\\_verify_tmp.py\")",
+      "PowerShell(\\(Get-Item \"E:\\\\dissertation-project\\\\demo\\\\public\\\\webApp\\\\figures_mine\\\\fig9_confusion_matrix.png\"\\).LastWriteTime = Get-Date; \"fig9 mtime bumped to now\")",
+      "PowerShell(Remove-Item *)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\Graphviz\\\\bin;\" + $env:PATH; python -c \"import importlib.util as u; print\\('torch', bool\\(u.find_spec\\('torch'\\)\\)\\); print\\('timm', bool\\(u.find_spec\\('timm'\\)\\)\\); print\\('graphviz', bool\\(u.find_spec\\('graphviz'\\)\\)\\)\")",
+      "PowerShell(Set-Location \"E:\\\\dissertation-project\\\\demo\\\\public\\\\webApp\\\\scripts\"; $env:PATH = \"C:\\\\Program Files\\\\Graphviz\\\\bin;\" + $env:PATH; \"=== fig2 ===\"; python fig2_lesion_overlays.py; \"=== fig9 ===\"; python fig9_confusion_matrix.py; \"=== fig6 ===\"; python fig6_model_graph.py)",
+      "PowerShell(python -c \"import PIL; print\\('Pillow', PIL.__version__\\); import os, matplotlib; d=os.path.join\\(os.path.dirname\\(matplotlib.__file__\\),'mpl-data','fonts','ttf'\\); print\\('dejavu bold:', os.path.isfile\\(os.path.join\\(d,'DejaVuSans-Bold.ttf'\\)\\)\\); print\\('arialbd:', os.path.isfile\\(r'C:\\\\Windows\\\\Fonts\\\\arialbd.ttf'\\)\\)\")",
+      "PowerShell(Set-Location \"E:\\\\dissertation-project\\\\demo\\\\public\\\\webApp\\\\scripts\"; $env:PATH = \"C:\\\\Program Files\\\\Graphviz\\\\bin;\" + $env:PATH; python fig6_model_graph.py)"
     ]
   }
 }

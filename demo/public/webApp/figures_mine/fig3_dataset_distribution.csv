@@ -1,0 +1,26 @@
+dataset,grade,label,count
+EyePACS (full),0,No DR,25810
+EyePACS (full),1,Mild,2443
+EyePACS (full),2,Moderate,5292
+EyePACS (full),3,Severe,873
+EyePACS (full),4,Proliferative DR,708
+idrid (demo samples),0,No DR,4
+idrid (demo samples),1,Mild,4
+idrid (demo samples),2,Moderate,4
+idrid (demo samples),3,Severe,4
+idrid (demo samples),4,Proliferative DR,4
+messidor2 (demo samples),0,No DR,4
+messidor2 (demo samples),1,Mild,4
+messidor2 (demo samples),2,Moderate,4
+messidor2 (demo samples),3,Severe,4
+messidor2 (demo samples),4,Proliferative DR,4
+eyepacs (demo samples),0,No DR,4
+eyepacs (demo samples),1,Mild,4
+eyepacs (demo samples),2,Moderate,4
+eyepacs (demo samples),3,Severe,4
+eyepacs (demo samples),4,Proliferative DR,4
+ddr (demo samples),0,No DR,4
+ddr (demo samples),1,Mild,4
+ddr (demo samples),2,Moderate,4
+ddr (demo samples),3,Severe,4
+ddr (demo samples),4,Proliferative DR,4

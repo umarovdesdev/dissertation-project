@@ -37,8 +37,8 @@ export function Hbar({ items, maxV, height = 20 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
       {items.map((it, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ fontSize: 10, color: 'var(--color-text-secondary,#666)', minWidth: 150, textAlign: 'right', lineHeight: 1.2 }}>
+        <div key={i} className="hbar-row" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="hbar-label" style={{ fontSize: 10, color: 'var(--color-text-secondary,#666)', minWidth: 150, textAlign: 'right', lineHeight: 1.2 }}>
             {it.label}
           </div>
           <div style={{ flex: 1, height, background: 'var(--color-background-secondary,#eeede9)', borderRadius: 3, position: 'relative', overflow: 'hidden' }}>
@@ -172,7 +172,7 @@ export function DiagramViewer({ src, alt, caption, tooltip }) {
         </div>
       )}
       {show && tooltipText && (
-        <div style={{
+        <div className="tooltip-bubble" style={{
           position: 'absolute', bottom: '100%', left: '50%',
           transform: 'translateX(-50%)', marginBottom: 8,
           padding: '10px 14px', background: 'rgba(0,0,0,0.88)', color: 'white',
@@ -216,7 +216,7 @@ export function ImageWithTooltip({ src, alt, tooltip, figNum, caption, style }) 
         </div>
       )}
       {show && tooltipText && (
-        <div style={{
+        <div className="tooltip-bubble" style={{
           position: 'absolute', bottom: '100%', left: '50%',
           transform: 'translateX(-50%)', marginBottom: 8,
           padding: '10px 14px', background: 'rgba(0,0,0,0.88)', color: 'white',
@@ -240,19 +240,37 @@ export function ImageWithTooltip({ src, alt, tooltip, figNum, caption, style }) 
 
 export function LangSwitcher() {
   const { lang, setLang } = useLang();
-  const C_teal = '#1D9E75';
+  const label = lang === 'en' ? 'EN' : 'ҚАЗ';
+  const next = lang === 'en' ? 'kz' : 'en';
   return (
-    <div style={{ display: 'flex', gap: 3 }}>
-      {[['en', 'EN'], ['kz', 'ҚАЗ']].map(([code, label]) => (
-        <button key={code} onClick={() => setLang(code)} style={{
-          padding: '3px 8px', borderRadius: 4, border: 'none', cursor: 'pointer',
-          fontSize: 10, fontWeight: lang === code ? 700 : 400,
-          background: lang === code ? C_teal : 'var(--color-background-primary,#e8e8e6)',
-          color: lang === code ? 'white' : 'var(--color-text-secondary,#666)',
-        }}>
-          {label}
-        </button>
-      ))}
-    </div>
+    <button
+      type="button"
+      className="chip-toggle"
+      onClick={() => setLang(next)}
+      title={`Language: ${label} (click to switch)`}
+      aria-label={`Language: ${label}, click to switch`}
+    >
+      <span aria-hidden="true">🌐</span>
+      <span>{label}</span>
+    </button>
+  );
+}
+
+export function ModeSwitcher({ mode, setMode }) {
+  const isLite = mode === 'lite';
+  const icon = isLite ? '⚡' : '📚';
+  const label = isLite ? 'Lite' : 'Full';
+  const next = isLite ? 'full' : 'lite';
+  return (
+    <button
+      type="button"
+      className="chip-toggle"
+      onClick={() => setMode(next)}
+      title={`Mode: ${label} (click to switch)`}
+      aria-label={`Mode: ${label}, click to switch`}
+    >
+      <span aria-hidden="true">{icon}</span>
+      <span>{label}</span>
+    </button>
   );
 }
