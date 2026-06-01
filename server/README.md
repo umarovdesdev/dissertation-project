@@ -27,9 +27,21 @@ server/
 
 | Method | Path | Body | Returns |
 |---|---|---|---|
-| GET  | `/api/health`  | — | `{status, model, checkpoint, checkpoint_loaded, device}` |
-| POST | `/api/predict` | multipart `left?`, `right?` | patient-level + `per_eye` (see `schemas.py`) |
-| POST | `/api/gradcam` | multipart `eye`, `image` | **501** (scaffold) |
+| GET  | `/api/health`   | — | `{status, model, checkpoint, checkpoint_loaded, device, version, git_sha}` |
+| POST | `/api/predict`  | multipart `left?`, `right?`, `password?` | patient-level + `per_eye` |
+| POST | `/api/gradcam`  | multipart `image`, `eye`, `password?`, `target_class?` | `{gradcam_png_b64, attention_overlay_png_b64, target_class}` |
+| POST | `/api/visualize`| multipart `image`, `eye`, `password?` | `{fov_mask_png_b64, v5_preview_png_b64, od_fovea}` |
+| GET  | `/api/selftest` | query `password?` | per-op pass/fail report |
+
+- **Grad-CAM** is a self-contained torch implementation on EfficientNet's
+  `conv_head` (no `pytorch-grad-cam` dependency); JET overlay over the original
+  image. **/api/visualize** returns the 6-panel V5 stage strip (via
+  `pipeline_v5.stage_breakdown`), the FOV mask, and the classical-CV OD/fovea
+  payload (`od_fovea`).
+- **Password gate (§C.2):** set `DEMO_PASSWORD` to require a `password` field on
+  every endpoint except `/api/health`. Unset → gate **open** (local dev).
+- **Safety limits (§C.4):** ≤ 8 MB/image, MIME ∈ {jpeg,png,webp} (else 415),
+  decoded ≤ 4096×4096; all decoding in-memory (no disk writes).
 
 ## Why two files in `checkpoints/`
 
@@ -83,10 +95,20 @@ pytest server/tests/test_inference.py
 They boot the app and assert response *shape/behaviour*; they pass even without
 a checkpoint (random-init weights still give a valid softmax).
 
+## Configuration (added env vars)
+
+| Var | Default | Purpose |
+|---|---|---|
+| `DEMO_PASSWORD` | (unset) | Shared access password; unset = gate open. |
+| `DEMO_VERSION` | `__version__` | Version string in `/api/health`. |
+| `GIT_SHA` | `git rev-parse` | Provenance SHA (best-effort). |
+
 ## Status / next
 
 - [x] Bootable API, real V5 preprocessing + model wiring, worst-eye aggregation.
 - [x] Dataset-specific normalize injection (no preprocessing drift).
-- [ ] Grad-CAM (`gradcam.py`) — TASK-Demo §C.5.
-- [ ] Password gate, `/api/visualize`, `/api/selftest`, OD/fovea payload — TASK-Demo Part C.
+- [x] Grad-CAM (live, self-contained), `/api/visualize` (V5 strip + FOV mask +
+      OD/fovea), `/api/selftest`, password gate, safety limits, health provenance.
+- [ ] Frontend wiring of the new endpoints (per-image widget, live Grad-CAM,
+      provenance footer, password screen) — TASK-Demo Part D.
 - [ ] Bundle real checkpoint after Kaggle training (Part A).

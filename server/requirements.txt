@@ -8,8 +8,9 @@ opencv-python-headless>=4.8
 numpy>=1.24
 Pillow>=10.0
 pydantic>=2.0
-# Grad-CAM (pinned to the version used for the Chapter 4 figures; see README).
-grad-cam==1.5.0
+# Note: the live Grad-CAM is a self-contained torch implementation
+# (server/app/gradcam.py, conv_head target) — no pytorch-grad-cam dependency.
+# The Chapter 4 / Exp 4 figures pin grad-cam==1.5.0 separately in experiments/.
 # Tests
 httpx>=0.27
 pytest>=8.0

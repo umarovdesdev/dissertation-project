@@ -42,6 +42,11 @@ class Settings:
         self.device: str = os.getenv("DEVICE", "auto")
         self.preset: str = os.getenv("PREPROCESSING_PRESET", "efficientnet")
 
+        # Access gate + provenance (TASK-Demo §C.2/§E.4).
+        self.demo_password: str = os.getenv("DEMO_PASSWORD", "")
+        self.demo_version: str = os.getenv("DEMO_VERSION", "")  # falls back to __version__
+        self.git_sha: str = os.getenv("GIT_SHA", "")            # best-effort, see resolve_git_sha
+
         origins = os.getenv("CORS_ORIGINS", "http://localhost:3000")
         self.cors_origins: list[str] = [o.strip() for o in origins.split(",") if o.strip()]
 
@@ -57,6 +62,30 @@ class Settings:
             return "cuda" if torch.cuda.is_available() else "cpu"
         except Exception:
             return "cpu"
+
+    def resolve_version(self) -> str:
+        """Return the configured demo version, or the bundled ``__version__``."""
+        if self.demo_version:
+            return self.demo_version
+        try:
+            from server.__version__ import __version__
+            return __version__
+        except Exception:
+            return "0.0.0"
+
+    def resolve_git_sha(self) -> str:
+        """Best-effort short git SHA: env override, else ``git rev-parse``, else ''."""
+        if self.git_sha:
+            return self.git_sha
+        try:
+            import subprocess
+            sha = subprocess.run(
+                ["git", "rev-parse", "--short", "HEAD"],
+                cwd=str(_SERVER_ROOT.parent), capture_output=True, text=True, timeout=2,
+            )
+            return sha.stdout.strip() if sha.returncode == 0 else ""
+        except Exception:
+            return ""
 
 
 settings = Settings()

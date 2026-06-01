@@ -210,6 +210,86 @@ class PreprocessingPipelineV5:
         return torch.cat([rgb_tensor, mask_tensor], dim=0)      # (4, H, W)
 
     # ------------------------------------------------------------------
+    # Stage breakdown (for the demo "what preprocessing does" panel)
+    # ------------------------------------------------------------------
+
+    def stage_breakdown(
+        self,
+        image: np.ndarray,
+        eye_side: str = "unknown",
+    ) -> dict:
+        """Run preprocessing Stages 0–5 capturing each intermediate.
+
+        Mirrors :meth:`__call__` up to (but excluding) augmentation and Stage 7
+        normalize, returning the labelled intermediate images for the demo's
+        V5 preview strip (TASK-Demo §C.6) plus the FOV mask and OD/fovea result.
+        Deterministic (inference mode): CLAHE is applied with no stochasticity.
+
+        Args:
+            image: Raw uint8 array matching ``input_color_space``.
+            eye_side: ``"left"``, ``"right"``, or ``"unknown"``.
+
+        Returns:
+            Dict with:
+              - ``stages``: list of ``(label, rgb_uint8)`` from original →
+                flip → rotation → FOV crop+resize → flat-field → CLAHE.
+              - ``fov_mask``: float32 ``(H, W)`` mask (1.0 inside FOV).
+              - ``od_fovea``: :class:`ODFoveaResult` or ``None``.
+        """
+        if self._input_color_space == "bgr":
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        stages: list[tuple[str, np.ndarray]] = [("original", image.copy())]
+
+        # Stage 0: canonical flip only (for a dedicated panel).
+        flipped = (
+            canonical_flip(image, eye_side)
+            if self.config.use_canonical_flip else image
+        )
+        stages.append(("canonical_flip", flipped.copy()))
+
+        # Stage 0+1: flip + OD-fovea rotation (the real path), with OD result.
+        od_fovea_result: ODFoveaResult | None = None
+        if self.config.use_canonical_flip or self.config.use_od_fovea_rotation:
+            oriented, od_fovea_result = canonical_orientation(
+                image,
+                eye_side=eye_side if self.config.use_canonical_flip else "unknown",
+                enable_rotation=self.config.use_od_fovea_rotation,
+            )
+        else:
+            oriented = image
+        stages.append(("od_fovea_rotation", oriented.copy()))
+
+        # Stage 2/3: FOV crop + isotropic resize → (image, mask).
+        cropped, fov_mask = crop_and_resize(oriented, self.config.target_size)
+        stages.append(("fov_crop_resize", cropped.copy()))
+
+        # Stage 4: flat-field correction (adaptive σ).
+        flat = cropped
+        if self.config.use_flat_field:
+            if self.config.flat_field_mode == "adaptive":
+                fov_rows = np.any(fov_mask > 0, axis=1)
+                sigma = self.config.flat_field_sigma_factor * float(np.sum(fov_rows))
+            else:
+                sigma = self.config.flat_field_sigma
+            flat = apply_flat_field(
+                cropped, sigma=sigma,
+                mask=fov_mask if self.config.flat_field_mask_only else None,
+            )
+        stages.append(("flat_field", flat.copy()))
+
+        # Stage 5: CLAHE (deterministic at inference).
+        clahed = flat
+        if self.config.use_clahe:
+            clahed = maybe_apply_clahe(
+                flat, params=self._clahe_params,
+                is_training=False, train_prob=self.config.clahe_train_prob,
+            )
+        stages.append(("clahe", clahed.copy()))
+
+        return {"stages": stages, "fov_mask": fov_mask, "od_fovea": od_fovea_result}
+
+    # ------------------------------------------------------------------
     # State queries
     # ------------------------------------------------------------------
 

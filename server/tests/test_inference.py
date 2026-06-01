@@ -46,6 +46,8 @@ def test_health(client: TestClient) -> None:
     assert body["status"] == "ok"
     assert body["model"] == "config-D"
     assert "checkpoint_loaded" in body
+    # Provenance fields for the demo footer (§D.7).
+    assert "version" in body and "git_sha" in body
 
 
 def test_predict_left_only(client: TestClient) -> None:
@@ -71,10 +73,45 @@ def test_predict_both_eyes(client: TestClient) -> None:
 
 
 def test_predict_rejects_non_image(client: TestClient) -> None:
+    # text/plain is rejected by the MIME gate (415); a mislabeled image would
+    # be caught by the decoder (400). Either is an acceptable rejection.
     r = client.post("/api/predict", files={"left": ("note.txt", b"not an image", "text/plain")})
-    assert r.status_code == 400
+    assert r.status_code in (400, 415)
 
 
 def test_predict_requires_an_eye(client: TestClient) -> None:
     r = client.post("/api/predict")
     assert r.status_code == 400
+
+
+def test_gradcam(client: TestClient) -> None:
+    r = client.post(
+        "/api/gradcam",
+        data={"eye": "left"},
+        files={"image": ("left.png", _synthetic_fundus(), "image/png")},
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["gradcam_png_b64"] and body["attention_overlay_png_b64"]
+    assert 0 <= body["target_class"] <= 4
+
+
+def test_visualize(client: TestClient) -> None:
+    r = client.post(
+        "/api/visualize",
+        data={"eye": "left"},
+        files={"image": ("left.png", _synthetic_fundus(), "image/png")},
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["v5_preview_png_b64"] and body["fov_mask_png_b64"]
+    assert "confident" in body["od_fovea"]
+
+
+def test_selftest(client: TestClient) -> None:
+    r = client.get("/api/selftest")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["predict"] == "pass"
+    assert body["gradcam"] == "pass"
+    assert body["visualize"] == "pass"

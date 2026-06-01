@@ -8,15 +8,24 @@ from __future__ import annotations
 
 import asyncio
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
+from . import gradcam as gradcam_mod
+from . import imaging
+from . import visualize as visualize_mod
 from .config import settings
-from .gradcam import compute_gradcam
 from .inference import engine
-from .schemas import HealthResponse, PatientPredictionResponse
+from .schemas import (
+    GradcamResponse,
+    HealthResponse,
+    PatientPredictionResponse,
+    SelftestResponse,
+    VisualizeResponse,
+)
+from .security import check_password
 
-app = FastAPI(title="DR-Classifier Demo API", version="0.1.0")
+app = FastAPI(title="DR-Classifier Demo API", version=settings.resolve_version())
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,6 +38,47 @@ app.add_middleware(
 # Single CUDA stream → serialize predictions to avoid races on one GPU.
 _predict_lock = asyncio.Lock()
 
+# Map imaging-layer exceptions to HTTP status codes (TASK-Demo §C.4).
+_IMAGING_STATUS = {
+    imaging.PayloadTooLarge: 413,
+    imaging.UnsupportedMedia: 415,
+    imaging.BadImage: 400,
+}
+
+
+def _http_from_imaging(exc: Exception) -> HTTPException:
+    """Translate an imaging exception into an HTTPException."""
+    for cls, status in _IMAGING_STATUS.items():
+        if isinstance(exc, cls):
+            return HTTPException(status_code=status, detail=str(exc))
+    return HTTPException(status_code=400, detail=str(exc))
+
+
+def _require_password(password: str | None) -> None:
+    """Enforce the shared-password gate (TASK-Demo §C.2)."""
+    if not check_password(password):
+        raise HTTPException(status_code=401, detail="Access denied — invalid password.")
+
+
+async def _read_validated(upload: UploadFile) -> bytes:
+    """Read an upload and validate MIME + size before decoding.
+
+    Args:
+        upload: The incoming file.
+
+    Returns:
+        The raw bytes.
+
+    Raises:
+        HTTPException: 413/415 on limit violations.
+    """
+    data = await upload.read()
+    try:
+        imaging.check_upload(upload.content_type, len(data))
+    except (imaging.PayloadTooLarge, imaging.UnsupportedMedia) as exc:
+        raise _http_from_imaging(exc) from exc
+    return data
+
 
 @app.on_event("startup")
 async def _startup() -> None:
@@ -36,7 +86,7 @@ async def _startup() -> None:
     engine.load()
     if not engine.checkpoint_loaded:
         print(f"[WARN] checkpoint not found at {settings.checkpoint_path} — "
-              "predictions will use random-init weights until one is provided.")
+              "predictions use random-init weights until one is provided.")
     if not engine.using_dataset_stats:
         print(f"[WARN] norm stats not found at {settings.norm_stats_path} — "
               "Stage 7 falls back to ImageNet (preprocessing drift vs Config D).")
@@ -44,13 +94,15 @@ async def _startup() -> None:
 
 @app.get("/api/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
-    """Liveness + provenance for the frontend badge."""
+    """Liveness + provenance for the frontend badge/footer."""
     return HealthResponse(
         status="ok",
         model="config-D",
         checkpoint=settings.checkpoint_id,
         checkpoint_loaded=engine.checkpoint_loaded,
         device=str(engine.device),
+        version=settings.resolve_version(),
+        git_sha=settings.resolve_git_sha(),
     )
 
 
@@ -58,37 +110,60 @@ async def health() -> HealthResponse:
 async def predict(
     left: UploadFile | None = File(default=None),
     right: UploadFile | None = File(default=None),
+    password: str | None = Form(default=None),
 ) -> PatientPredictionResponse:
-    """Predict DR grade for one or both eyes (worst-eye patient grade).
-
-    Args:
-        left: Optional left-eye image upload.
-        right: Optional right-eye image upload.
-
-    Returns:
-        Patient-level prediction with per-eye breakdown.
-    """
+    """Predict DR grade for one or both eyes (worst-eye patient grade)."""
+    _require_password(password)
     if left is None and right is None:
         raise HTTPException(status_code=400, detail="Provide at least one of left/right.")
 
-    left_bytes = await left.read() if left is not None else None
-    right_bytes = await right.read() if right is not None else None
+    left_bytes = await _read_validated(left) if left is not None else None
+    right_bytes = await _read_validated(right) if right is not None else None
 
     try:
         async with _predict_lock:
             return engine.predict_patient(left_bytes, right_bytes)
+    except (imaging.BadImage, imaging.PayloadTooLarge, imaging.UnsupportedMedia) as exc:
+        raise _http_from_imaging(exc) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@app.post("/api/gradcam")
+@app.post("/api/gradcam", response_model=GradcamResponse)
 async def gradcam(
-    eye: str = "left",
     image: UploadFile = File(...),
-) -> dict:
-    """Grad-CAM overlay for one eye (scaffold → 501)."""
-    image_bytes = await image.read()
+    eye: str = Form(default="left"),
+    password: str | None = Form(default=None),
+    target_class: int | None = Form(default=None),
+) -> GradcamResponse:
+    """Grad-CAM overlay for one eye, computed on the live checkpoint."""
+    _require_password(password)
+    data = await _read_validated(image)
     try:
-        return compute_gradcam(image_bytes, eye)
-    except NotImplementedError as exc:
-        raise HTTPException(status_code=501, detail=str(exc)) from exc
+        async with _predict_lock:
+            return GradcamResponse(**gradcam_mod.compute_gradcam(engine, data, eye, target_class))
+    except (imaging.BadImage, imaging.PayloadTooLarge) as exc:
+        raise _http_from_imaging(exc) from exc
+
+
+@app.post("/api/visualize", response_model=VisualizeResponse)
+async def visualize(
+    image: UploadFile = File(...),
+    eye: str = Form(default="left"),
+    password: str | None = Form(default=None),
+) -> VisualizeResponse:
+    """V5 preview strip + FOV mask + OD/fovea payload for one image."""
+    _require_password(password)
+    data = await _read_validated(image)
+    try:
+        return VisualizeResponse(**visualize_mod.compute_visualization(engine, data, eye))
+    except (imaging.BadImage, imaging.PayloadTooLarge) as exc:
+        raise _http_from_imaging(exc) from exc
+
+
+@app.get("/api/selftest", response_model=SelftestResponse)
+async def selftest(password: str | None = Query(default=None)) -> SelftestResponse:
+    """Run predict + gradcam + visualize on synthetic fundus images (§C.7)."""
+    _require_password(password)
+    from .selftest import run_selftest
+    return SelftestResponse(**run_selftest(engine))
