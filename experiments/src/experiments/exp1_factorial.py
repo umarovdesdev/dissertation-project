@@ -51,6 +51,8 @@ def _make_preprocessing(
     is_training: bool,
     pca_eigvecs: np.ndarray | None = None,
     pca_eigvals: np.ndarray | None = None,
+    dataset_mean: tuple[float, float, float] | None = None,
+    dataset_std: tuple[float, float, float] | None = None,
 ) -> PreprocessingPipelineV5:
     """Build a V5 preprocessing pipeline.
 
@@ -62,6 +64,10 @@ def _make_preprocessing(
         is_training: Enables stochastic CLAHE and augmentation when ``True``.
         pca_eigvecs: PCA eigenvectors for colour augmentation (optional).
         pca_eigvals: PCA eigenvalues for colour augmentation (optional).
+        dataset_mean: EyePACS-computed per-channel mean for Stage 7
+            dataset-specific normalize (full pipeline only). ``None`` falls
+            back to ImageNet stats (and prints a warning).
+        dataset_std: EyePACS-computed per-channel std (see ``dataset_mean``).
 
     Returns:
         Configured :class:`~src.preprocessing.pipeline_v5.PreprocessingPipelineV5`.
@@ -74,6 +80,13 @@ def _make_preprocessing(
 
     preset_name = "efficientnet" if "efficientnet" in model_name else "resnet"
     config = PreprocessingV5Config.from_preset(preset_name)
+
+    # Stage 7: dataset-specific normalize (D-2). The preset leaves these None,
+    # which silently falls back to ImageNet — not the thesis-defended pipeline
+    # for the full configs. Inject EyePACS-computed stats when available.
+    if dataset_mean is not None and dataset_std is not None:
+        config.dataset_mean = tuple(dataset_mean)
+        config.dataset_std = tuple(dataset_std)
 
     if is_training:
         return PreprocessingPipelineV5.create_for_training(
@@ -234,6 +247,25 @@ def run(
     else:
         print("  PCA eigenvectors not found — colour augmentation disabled.")
 
+    # ── Dataset-specific normalize stats (Stage 7, D-2) ───────────────────────
+    # Computed by scripts/compute_dataset_stats.py (Stages 0–4, mask=1.0 only).
+    # Consumed by the full configs (B/D). Absent → ImageNet fallback (warned).
+    dataset_mean: tuple[float, float, float] | None = None
+    dataset_std: tuple[float, float, float] | None = None
+    stats_path = pca_dir / "eyepacs_norm_stats.json"
+    if stats_path.exists():
+        with open(stats_path) as f:
+            _stats = json.load(f)
+        dataset_mean = tuple(_stats["mean"])
+        dataset_std = tuple(_stats["std"])
+        print(f"  Dataset normalize stats loaded from {stats_path}")
+        print(f"    mean={[round(x, 4) for x in dataset_mean]} "
+              f"std={[round(x, 4) for x in dataset_std]}")
+    else:
+        print("  Dataset normalize stats not found — full configs (B/D) will "
+              "fall back to ImageNet (NOT thesis-faithful). Run "
+              "scripts/compute_dataset_stats.py to fix.")
+
     # ── Load index once ───────────────────────────────────────────────────────
     print(f"Loading EyePACS index from {labels_csv} …")
     all_paths, all_labels, all_pids, all_eye_sides = _load_eyepacs_index(
@@ -333,9 +365,11 @@ def run(
             train_preproc = _make_preprocessing(
                 preproc_kind, model_name, is_training=True,
                 pca_eigvecs=pca_eigvecs, pca_eigvals=pca_eigvals,
+                dataset_mean=dataset_mean, dataset_std=dataset_std,
             )
             val_preproc = _make_preprocessing(
                 preproc_kind, model_name, is_training=False,
+                dataset_mean=dataset_mean, dataset_std=dataset_std,
             )
 
             ckpt_dir = output_dir / "checkpoints" / f"{cfg_key}_fold{fold_idx}"
