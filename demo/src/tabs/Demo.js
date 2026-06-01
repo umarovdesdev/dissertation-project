@@ -11,6 +11,7 @@ import { Sec, Note } from '../components';
 import { useLang } from '../i18n';
 import { EYEPACS_PAIRS } from './_eyepacsPairs';
 import { analyzeFundus } from './_analyzeFundus';
+import { predictPatient, getHealth } from './_apiPredict';
 
 // ---------------------------------------------------------------------------
 // Walk-through cases that share an image with the preprocessing-pipeline
@@ -153,6 +154,28 @@ function patientPrediction(eyes) {
     confidence: norm[worst.result.pred],
     probs: norm,
     latencyMs: Math.max(...perEye.map(p => p.result.latencyMs)),
+  };
+}
+
+// Normalize the backend's PatientPredictionResponse (snake_case, no per-eye
+// src) into the exact shape `patientPrediction` produces, so the Result panel
+// renders identically whether the source is the real model or the simulator.
+function normalizeApiResult(r, eyes) {
+  return {
+    pred: r.pred,
+    probs: r.probs,
+    confidence: r.confidence,
+    latencyMs: r.latency_ms,
+    perEye: (r.per_eye || []).map(p => ({
+      eye: p.eye,
+      src: (eyes.find(e => e.eye === p.eye) || {}).src,
+      result: {
+        pred: p.pred,
+        probs: p.probs,
+        confidence: p.confidence,
+        latencyMs: p.latency_ms,
+      },
+    })),
   };
 }
 
@@ -403,6 +426,22 @@ export default function Demo() {
   // for images that don't have a pre-generated companion under
   // `pipeline/dr0N/results/`.
   const [caseRef, setCaseRef] = useState(null);
+  // Backend health. `health` is the /api/health payload (or null when the
+  // backend is unreachable). `healthChecked` flips once the probe resolves so
+  // the badge can show a "checking…" state in between. `useRealModel` lets the
+  // user force the offline simulator even when the backend is up.
+  const [health, setHealth] = useState(null);
+  const [healthChecked, setHealthChecked] = useState(false);
+  const [useRealModel, setUseRealModel] = useState(true);
+  useEffect(() => {
+    let alive = true;
+    getHealth().then((h) => { if (alive) { setHealth(h); setHealthChecked(true); } });
+    return () => { alive = false; };
+  }, []);
+  // Real model is usable only when the backend is up AND a real checkpoint is
+  // loaded (a boot without a checkpoint runs on random weights — meaningless,
+  // so we stay on the simulator and say so).
+  const apiReady = !!(health && health.checkpoint_loaded) && useRealModel;
 
   const D = CONFIGS.D;
 
@@ -433,18 +472,32 @@ export default function Demo() {
     if (!keepHistory) setHistory([]);
   };
 
-  const handleRun = () => {
+  const handleRun = async () => {
     if (eyes.length === 0) return;
     setRunning(true);
     setResult(null);
     setFeedbackMode(null);
-    // Simulate latency so the UI feels realistic.
-    const minLatency = 700;
+
+    if (apiReady) {
+      try {
+        const r = await predictPatient(eyes);
+        setResult(normalizeApiResult(r, eyes));
+      } catch (e) {
+        console.error(e);
+        setToast(t('demo.modelStatus.fallbackToast'));
+        setTimeout(() => setToast(''), 4000);
+        setResult(patientPrediction(eyes)); // graceful fallback
+      } finally {
+        setRunning(false);
+      }
+      return;
+    }
+
+    // Simulator path — keep a small latency so the UI feels realistic.
     setTimeout(() => {
-      const r = patientPrediction(eyes);
-      setResult(r);
+      setResult(patientPrediction(eyes));
       setRunning(false);
-    }, minLatency);
+    }, 700);
   };
 
   const loadSample = (sample) => {
@@ -606,6 +659,29 @@ export default function Demo() {
             <span style={{ fontSize: 11, color: 'var(--color-text-secondary,#666)' }}>
               {eyes.length} {eyes.length === 1 ? 'image' : 'images'} · {t('demo.modelVersion')}: Config D
             </span>
+          )}
+          {/* Model status badge: checking → real → simulator. */}
+          <span style={{
+            fontSize: 10, fontWeight: 600,
+            color: !healthChecked ? C.gray : (apiReady ? C.greenT : C.amberT),
+          }}>
+            {!healthChecked
+              ? t('demo.modelStatus.checking')
+              : apiReady ? t('demo.modelStatus.real') : t('demo.modelStatus.simulator')}
+          </span>
+          {/* Toggle real/simulator — only when a real checkpoint is actually loaded. */}
+          {health && health.checkpoint_loaded && (
+            <button
+              onClick={() => setUseRealModel(v => !v)}
+              style={{
+                fontSize: 10, padding: '2px 8px', background: 'transparent',
+                color: 'var(--color-text-secondary,#666)',
+                border: '1px solid var(--color-border-secondary,#ccc)',
+                borderRadius: 4, cursor: 'pointer',
+              }}
+            >
+              {useRealModel ? t('demo.modelStatus.useSimulator') : t('demo.modelStatus.useReal')}
+            </button>
           )}
         </div>
       </Sec>
@@ -820,10 +896,10 @@ export default function Demo() {
         )}
       </Sec>
 
-      {/* Footer caveat */}
+      {/* Footer caveat — reflects whether predictions are live or simulated. */}
       <Note>
-        Predicted via Config D (Pipeline + EfficientNet-B3).
-        Reported reference metrics on held-out EyePACS: F1={D.f1.toFixed(3)}, AUC={D.auc.toFixed(3)}, κ={D.k.toFixed(3)}.
+        {apiReady ? t('demo.modelStatus.footerReal') : t('demo.modelStatus.footerSim')}
+        {' '}Reference metrics on held-out EyePACS: F1={D.f1.toFixed(3)}, AUC={D.auc.toFixed(3)}, κ={D.k.toFixed(3)}.
       </Note>
 
       <div style={{ marginTop: 14 }}>
