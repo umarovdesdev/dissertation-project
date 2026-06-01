@@ -18,8 +18,11 @@
 
 ## ✅ Progress status (updated 2026-06-01)
 
-All code is **implemented and on `main`**. The only blockers left are the
-candidate's manual Kaggle run and the deployment steps.
+**Completion verdict: code-complete, manually pending.** Every code item in this
+task is implemented and on `main`. The task is *not* fully closed: it still
+depends on off-machine manual steps (the Kaggle training run, dropping the
+checkpoint, running the test suite in a `fastapi`/`torch` env, and deployment).
+There is no remaining code work Claude can do here — the blockers are all manual.
 
 **Done (committed):**
 - **Part A — repo + notebook.** `experiments/kaggle/` has `train_config_d.ipynb`
@@ -60,6 +63,36 @@ candidate's manual Kaggle run and the deployment steps.
 **Config B' (V5 + RETFound)**; AOQ-1 is unresolved. Shipped as the practical/demo
 artifact; the RETFound/B' reconciliation is deferred. The Stage 7 normalize work
 above is governance-consistent regardless of the pretrain question.
+
+### Kaggle run log
+
+**2026-06-01 — fold 0 launched.**
+- **EyePACS source chosen: Kaggle dataset `dreamer07/eyepacs`** — 35,126 `*.jpeg`
+  with original `<id>_<side>` filenames + `trainLabels.csv` (`image,level`),
+  ~35 GB, pre-extracted. Verified via the browser: CSV path
+  `.../eyepacs/trainLabels.csv/trainLabels.csv`, images flat under
+  `.../eyepacs/data/data/`, extension `.jpeg`.
+  - Rejected `tantai31124/eyepacs-original` (98 GB, ImageFolder
+    `{train,val,test}/{0..4}`, **no `trainLabels.csv`**, already re-split →
+    patient-leak + relabel-provenance risk).
+  - Competition `diabetic-retinopathy-detection` (rules accepted) kept only as a
+    canonical fallback — its multi-part `train.zip.00x` extraction can exceed the
+    `/kaggle/working` quota (the notebook's heavy fallback path).
+  - Local `E:/datasets/EyePACS` is the same canonical layout but unused on Kaggle
+    (would need a ~35 GB upload).
+- **Adapter bug fixed (Cell 6 / `experiments/kaggle/_build_notebook.py`).**
+  `dreamer07/eyepacs` wraps the CSV in a *folder* also named `trainLabels.csv`,
+  so `INPUT.rglob("trainLabels.csv")` matched the directory first and `first()`
+  resolved `labels` to a dir → `read_csv` would raise `IsADirectoryError`. Fix:
+  both probes now filter `if p.is_file()`. `_build_notebook.py` patched and
+  `train_config_d.ipynb` regenerated; the same cell was hand-replaced in the
+  running Kaggle notebook. **TODO:** mirror this fix into the `dr-classifier`
+  GitHub repo (the notebook imports from there) so future imports are correct.
+- **Status:** *Config-D Version #1* training on Kaggle (GPU **T4 x2**), fold 0,
+  `Save & Run All (Commit)`. Awaiting `D_fold0/best_model.pt` +
+  `eyepacs_norm_stats.json`. Folds 1–4 deferred (mind the ~30 h/week GPU quota);
+  **fold 0 alone unblocks the demo** — folds 1–4 only feed `verify_exp1.py`'s
+  dominance check (which also needs a Config C run, out of scope here).
 
 ---
 

@@ -10,9 +10,13 @@
 
 ## ✅ Progress status (updated 2026-06-01)
 
-Code for the demo (backend + frontend) is **implemented and on `main`**. What
-remains is the candidate's manual work: train the checkpoint, curate images,
-deploy, and run the QA gate. Nothing here is blocked on more code.
+**Completion verdict: code-complete, manually pending.** All demo code (backend +
+frontend), *including the two formerly-deferred items* — predicted-class
+rationale (D.3) and the password entry screen (C.2/D) — is implemented and on
+`main`. The task is *not* fully closed: it still depends on the candidate's
+manual work — train the checkpoint, curate the 5 walkthrough images, deploy
+(HF Space + Vercel), and run the Part F QA gate. Nothing here is blocked on more
+code; there is no remaining code work Claude can do.
 
 **Done (committed):**
 - TASK-Config-D **Part A** — Kaggle training notebook + dataset-specific Stage 7
@@ -48,6 +52,9 @@ deploy, and run the QA gate. Nothing here is blocked on more code.
 **Remaining — manual (the candidate):**
 1. Train Config D on Kaggle → drop `best_model.pt` → `server/checkpoints/config_d_fold0.pt`
    and `eyepacs_norm_stats.json` alongside it.
+   *In progress:* fold 0 launched 2026-06-01 on Kaggle (GPU T4 x2), EyePACS source
+   `dreamer07/eyepacs`; adapter `is_file()` fix applied. See the **Kaggle run log**
+   in `TASK-Config-D.md` for the data-source decision and the adapter fix.
 2. Curate the **5 walkthrough images** (D.4) — expert selection.
 3. Deploy: HF Space (env vars) + Vercel (`REACT_APP_API_URL`) — Part E.
 4. Pre-launch QA — Part F.

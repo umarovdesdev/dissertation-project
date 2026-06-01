@@ -60,8 +60,8 @@ def first(gen):
         return x
     return None
 
-labels    = first(INPUT.rglob("trainLabels.csv"))
-train_jpeg = first(INPUT.rglob("*.jpeg"))      # any EyePACS train image
+labels    = first(p for p in INPUT.rglob("trainLabels.csv") if p.is_file())
+train_jpeg = first(p for p in INPUT.rglob("*.jpeg") if p.is_file())  # any EyePACS train image
 train_dir  = train_jpeg.parent if train_jpeg else None
 
 print("labels   :", labels)
@@ -82,7 +82,7 @@ if labels is None or train_dir is None:
         subprocess.run(f"unzip -o -q /kaggle/working/train.zip -d '{WORK}'", shell=True, check=True)
         os.remove("/kaggle/working/train.zip")
         train_dir = WORK / "train"
-    train_jpeg = first(WORK.rglob("*.jpeg"))
+    train_jpeg = first(p for p in WORK.rglob("*.jpeg") if p.is_file())
     train_dir  = train_jpeg.parent if train_jpeg else train_dir
 
 assert labels is not None and train_dir is not None, \
