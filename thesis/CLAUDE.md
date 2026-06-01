@@ -7,14 +7,14 @@ Candidate: Yesmukhamedov N.S., IITU, Almaty, Kazakhstan.
 
 ```
 governance/          — SINGLE SOURCE OF TRUTH for all project claims
-  INVARIANTS.md        v5.0 — scope, forbidden claims, binding constraints
-  HYPOTHESIS.md        v5.0 — H-1 through H-7 formal definitions
-  ARGUMENT_MAP.md      v5.0 — claim-evidence dependency DAG
-  CENTRAL_THESIS.md    v5.0 — one-paragraph thesis statement
-  CORE_OBJECTIVE.md    v5.0 — research goal
-  CONTRIBUTIONS.md     v5.0 — 4 primary + supporting contributions
-  RESEARCH_ARCHITECTURE.md  v5.0 — full experimental design
-  VERSION_SYNC.md      v5.0 — cross-file version register
+  INVARIANTS.md        v6.0.0 — scope, forbidden claims, binding constraints
+  HYPOTHESIS.md        v6.0.0 — H-1 through H-7 formal definitions
+  ARGUMENT_MAP.md      v6.0.0 — claim-evidence dependency DAG
+  CENTRAL_THESIS.md    v6.0.0 — one-paragraph thesis statement
+  CORE_OBJECTIVE.md    v5.0 — research goal (RETFound→SSL review pending)
+  CONTRIBUTIONS.md     v6.0.0 — 4 primary + supporting contributions
+  RESEARCH_ARCHITECTURE.md  v6.0.0 — full experimental design
+  VERSION_SYNC.md      v6.0.0 — cross-file version register
 
 chapters/            — 8 chapters (00–07), each with:
   briefs/              section briefs (writing specs)
@@ -100,7 +100,7 @@ INVARIANTS.md is the supreme authority. If any document conflicts with INVARIANT
 
 ## Hypotheses
 
-- H-1: Preprocessing Dominance (Exp 1, EyePACS 100%)
+- H-1: Integrated Pipeline Dominance (Exp 1, EyePACS 100%; V5 arm = ophthalmology-SSL, composite IV, CFC-2.8)
 - H-2: V5 Component Ablation + CLAHE/σ sweeps (Exp 2, EyePACS)
 - H-3: DROPPED in V3
 - H-4: Cross-Dataset Transferability on APTOS 2019 (Exp 3, G ≥ 0.85)

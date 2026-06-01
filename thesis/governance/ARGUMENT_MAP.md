@@ -2,7 +2,7 @@
 ## PhD Dissertation: Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Formal Claim-Evidence-Dependency Structure
-**Version:** 5.3 | **Date:** 2026-05-28 | **Binding Reference:** INVARIANTS.md v5.3
+**Version:** 6.0.0 | **Date:** 2026-06-01 | **Binding Reference:** INVARIANTS.md v6.0.0
 
 ---
 
@@ -693,5 +693,5 @@ The following propositions are intentionally excluded from the dissertation's ar
 ---
 
 *End of Argument_Map*
-*Version: 5.3 | Bound to: INVARIANTS.md v5.3*
+*Version: 6.0.0 | Bound to: INVARIANTS.md v6.0.0*
 *v5.3 amendment: added PC-0 (Paradigmatic Framing Claim, methodological, non-empirical) as a top-level node feeding into IT-1; updated dependency structure to reflect PC-0 → PC-1 conceptual feed.*

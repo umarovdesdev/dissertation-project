@@ -5,9 +5,11 @@
 **Candidate:** Yesmukhamedov N.S.
 **Status:** Binding Methodological Blueprint
 **Function:** Experimental, statistical, and architectural formalization of the dissertation research
-**Version:** 5.2 | **Date:** 2026-05-28 | **Binding Reference:** INVARIANTS.md v5.2
+**Version:** 6.0.0 | **Date:** 2026-06-01 | **Binding Reference:** INVARIANTS.md v6.0.0
 
-**v5.2 Amendment:** RETFound's pretraining corpus is described as the multi-modal retinal imaging corpus on which the foundation model was actually pretrained per Zhou et al. 2023 — ≈904K color fundus photographs (CFP) + ≈736K OCT scans (~1.6M total). The V5 arm of Experiment 1 loads the CFP-pretrained RETFound checkpoint specifically (the OCT-pretrained checkpoint is published separately and is not used; the dissertation's inputs remain fundus-only per SB-1.4 in INVARIANTS.md). Section 4.2bis is updated accordingly. All other v5.1 provisions are retained.
+**v6.0.0 Amendment:** RETFound is removed as the V5-arm initialization source. The V5 arm of Experiment 1 now initializes the existing CNN backbone (ResNet-50 / EfficientNet-B3) from **ophthalmology-specific self-supervised pretraining** on an unlabeled retinal fundus corpus (CNN-compatible domain-adaptive SSL — DINO / BYOL / SimCLR / MoCo family — selected empirically). Because the SSL initialization is CNN-native, the 2×2 *(preprocessing × architecture)* factorial is restored: the retired configs **B and D are reinstated** and config **B′ is retired**. Section 4.2bis and Section 5.1 are updated; AOQ-1/AOQ-3/AOQ-4 are resolved and AOQ-2 is simplified (INVARIANTS v6.0.0 Section X). The composite *(preprocessing × pretraining)* independent variable and CFC-2.8 are retained.
+
+**v5.2 Amendment:** RETFound's pretraining corpus is described as the multi-modal retinal imaging corpus on which the foundation model was actually pretrained per Zhou et al. 2023 — ≈904K color fundus photographs (CFP) + ≈736K OCT scans (~1.6M total). The V5 arm of Experiment 1 loads the CFP-pretrained RETFound checkpoint specifically (the OCT-pretrained checkpoint is published separately and is not used; the dissertation's inputs remain fundus-only per SB-1.4 in INVARIANTS.md). Section 4.2bis is updated accordingly. *(Superseded by v6.0.0: RETFound is no longer used.)*
 
 **v5.1 Amendment:** The Experiment 1 factorial is amended so that the V5 arm uses RETFound (in-domain retinal pretrain) and the baseline arm retains ImageNet (cross-domain pretrain). Section 4 (Model Architecture Layer) and Section 5.1 (Experiment 1) reflect the amendment. The operational specifications listed under AOQ-1 through AOQ-4 (INVARIANTS v5.1, Section X) are open and must be resolved before experimental execution; cells marked "TBD per AOQ-x" in this document refer to those open questions.
 
@@ -189,43 +191,34 @@ See `methods/implementation.md` for full implementation details.
 
 ---
 
-## 4.1 ResNet-50 — Baseline Arm (v5.1)
+## 4.1 ResNet-50 — Backbone (Baseline and V5 Arms) [v6.0.0]
 
-* Pre-trained on **ImageNet** (IMAGENET1K_V2 weights via torchvision)
+* Baseline arm (config A): initialized from **ImageNet** (IMAGENET1K_V2 weights via torchvision), 3-channel input.
+* V5 arm (config B): initialized from **ophthalmology-specific self-supervised pretraining** on an unlabeled fundus corpus, 4-channel input (RGB + FOV mask).
 * Adapted via fine-tuning for 5-class DR classification
-* Serves as a baseline-arm backbone in the v5.1 Experiment 1 factorial
 * Represents the residual-connection architecture family
-* Input: 3 channels (baseline configurations only)
 
 ---
 
-## 4.2 EfficientNet-B3 — Baseline Arm (v5.1)
+## 4.2 EfficientNet-B3 — Backbone (Baseline and V5 Arms) [v6.0.0]
 
-* Pre-trained on **ImageNet** (timm weights)
+* Baseline arm (config C): initialized from **ImageNet** (timm weights), 3-channel input.
+* V5 arm (config D): initialized from **ophthalmology-specific self-supervised pretraining** on an unlabeled fundus corpus, 4-channel input (RGB + FOV mask).
 * Adapted via fine-tuning for 5-class DR classification
-* Serves as a baseline-arm backbone in the v5.1 Experiment 1 factorial
 * Represents the compound-scaling architecture family (EfficientNet)
-* Input: 3 channels (baseline configurations only)
 
 ---
 
-## 4.2bis RETFound — V5 Arm Pretraining Source (v5.2 — multi-modal corpus, CFP checkpoint loaded)
+## 4.2bis Ophthalmology-Specific Self-Supervised Pretraining — V5 Arm Source (v6.0.0)
 
-* Source: Zhou, Y., et al. (2023). *A foundation model for generalizable disease detection from retinal images.* Nature. Repository: `rmaphoh/RETFound_MAE`.
-* Pretraining corpus (multi-modal, per Zhou et al. 2023): approximately 1.6M retinal images total, comprising:
-  - ≈904K color fundus photographs (CFP) — produces the CFP-pretrained checkpoint.
-  - ≈736K optical coherence tomography (OCT) scans — produces the OCT-pretrained checkpoint (published separately).
-* Pretraining method: Masked Autoencoder (MAE) self-supervised learning. MAE masks 75% of input patches and reconstructs pixel content; the encoder learns retina-aware representations without supervision. Each modality is pretrained independently, yielding two separate checkpoints.
-* Published architecture: ViT-Large (≈300M parameters), 16×16 patch size, 224×224 input resolution as released.
-* **Checkpoint loaded in this dissertation (v5.2 binding):** the **CFP-pretrained** RETFound checkpoint. Justification: the V5 pipeline produces fundus-image tensors only; the OCT-pretrained checkpoint operates on single-channel OCT inputs and is not applicable here. The dissertation's input domain remains fundus photography (SB-1.4 in INVARIANTS.md unchanged).
-* Role in v5.2: Initialization source for the V5 arm of Experiment 1, paired with the full V5 preprocessing pipeline (4 channels, 512×512). The multi-modal corpus description characterizes RETFound at the publication level; it does not extend the dissertation's operational input modality.
-* Open operational questions (binding, must be resolved before Experiment 1 execution):
-  - **AOQ-1 (backbone choice):** Whether the V5 arm uses (a) RETFound ViT-Large directly, (b) a CNN-compatible domain-adaptive pretraining protocol (SparK-style MIM or SimCLR/MoCo on EyePACS) labeled "RETFound-style," or (c) both V5+RETFound and V5+ImageNet runs for partial factor decomposition. See INVARIANTS v5.1 Section X.
-  - **AOQ-2 (4-channel adaptation):** Whether the FOV mask channel is (a) added at the input via patch-embed/conv-stem extension with mean-init of channel 3, (b) dropped from the V5-arm input, or (c) injected at an intermediate layer as a gating mask.
-  - **AOQ-3 (license):** Verification that RETFound weights' license terms (CC BY-NC 4.0 at last check) permit the intended downstream use.
-  - **AOQ-4 (factorial symmetry):** Whether the baseline arm retains both ResNet-50 and EfficientNet-B3 (asymmetric 2×1 vs 1×1 factorial) or is reduced to a single backbone matched to the V5-arm backbone family for symmetric comparison.
+* **Approach:** The V5 arm initializes the same CNN backbone used in the baseline arm (ResNet-50 or EfficientNet-B3) from **ophthalmology-specific self-supervised pretraining** on an unlabeled retinal fundus corpus, rather than from generic ImageNet weights or from an external foundation model. This changes only the *initialization stage*, preserving the CNN architecture across both arms.
+* **Pretraining protocol:** A CNN-compatible domain-adaptive self-supervised learning protocol from the **DINO / BYOL / SimCLR / MoCo** family. The specific protocol is selected empirically and recorded once chosen (mirroring the resolution of AOQ-1 → option (b) in INVARIANTS v6.0.0 Section X). No diabetic-retinopathy labels are used during pretraining; the objective is representation learning over fundus imagery — vascular topology, optic-disc and macular morphology, retinal texture, illumination variability, and imaging artifacts.
+* **Input channels:** Because the SSL pretraining is performed in-house, the encoder can be pretrained directly on the 4-channel V5 tensor (RGB + FOV mask), eliminating any input-channel mismatch (AOQ-2 simplified). The copy-and-mean-init protocol for channel 3 (`experiments/src/models/resnet.py` lines 47–52) remains available as a fallback.
+* **Rationale:** Adopting RETFound (ViT-Large) would change both the architecture and the initialization, confounding the preprocessing contribution with an architecture change. A CNN-native SSL initialization isolates the architecture factor, preserving the CNN-centred research design and a defensible causal interpretation of the preprocessing contrast.
+* **Role:** Initialization source for the V5 arm of Experiment 1 (configs B and D), paired with the full V5 preprocessing pipeline (4 channels, 512×512).
+* **Resolved questions (INVARIANTS v6.0.0 Section X):** AOQ-1 → option (b) (CNN-compatible SSL, not ViT-Large); AOQ-3 retired (no external license); AOQ-4 resolved (both backbones in both arms — symmetric 2×2). AOQ-2 simplified (4-channel SSL pretraining).
 
-The replication test across architecture families that v5.0 established via ResNet-50 + EfficientNet-B3 under fixed ImageNet pretrain is **suspended** under v5.1. EH-4 replication satisfaction in v5.1 must be re-derived after AOQ-1 and AOQ-4 are resolved.
+Because both ResNet-50 and EfficientNet-B3 now run in both the baseline and the V5 arm, the replication test across architecture families that v5.0 established under fixed ImageNet pretrain is **reinstated** in v6.0.0. EH-4 replication is re-armed (it was suspended under v5.1).
 
 ---
 
@@ -271,27 +264,28 @@ All experiments use 5-fold cross-validation with patient-level stratified split.
 
 ## 5.1 Experiment 1 — Causal Improvement (Preprocessing vs. Architecture)
 
-**Purpose [v5.1 amended]:** Determine whether the integrated configuration (V5 preprocessing + RETFound in-domain pretrain) outperforms the baseline configuration (stretch-resize + ImageNet pretrain) as a unitary system. This is the primary experiment validating H-1 v5.1 and promoting PC-1.
+**Purpose [v6.0.0]:** Determine whether the integrated configuration (V5 preprocessing + ophthalmology-specific SSL in-domain pretrain) outperforms the baseline configuration (stretch-resize + ImageNet pretrain) as a unitary system. This is the primary experiment validating H-1 and promoting PC-1.
 
 **Dataset:** EyePACS
 
-**Design (v5.1):** Configurations are indexed by *(preprocessing, pretraining source)* pairs. The architecture used in each cell is bound by AOQ-1 and AOQ-4 (INVARIANTS v5.1 Section X) and is not yet finalized.
+**Design (v6.0.0):** A restored 2×2 factorial over *(preprocessing × architecture)*, with the pretraining source slaved to the preprocessing arm (baseline ⟹ ImageNet, V5 ⟹ ophthalmology-specific SSL). Because the SSL initialization is CNN-native, both backbone families appear in both arms.
 
 | Config | Preprocessing | Pretraining source | Backbone | Input channels |
 | --- | --- | --- | --- | --- |
 | A | baseline (stretch-resize + ImageNet norm) | ImageNet | ResNet-50 | 3 |
+| B | full V5 pipeline | ophthalmology-specific SSL | ResNet-50 | 4 |
 | C | baseline (stretch-resize + ImageNet norm) | ImageNet | EfficientNet-B3 | 3 |
-| B' | full V5 pipeline | **RETFound** | TBD per AOQ-1 (ViT-Large or CNN-compatible RETFound-style) | 4 (subject to AOQ-2) |
+| D | full V5 pipeline | ophthalmology-specific SSL | EfficientNet-B3 | 4 |
 
-The v5.0 designations B (V5 + ResNet-50 + ImageNet) and D (V5 + EfficientNet-B3 + ImageNet) are **retired** under v5.1. Config B' replaces both. If AOQ-1 resolves to option (c) (run both V5 + RETFound and V5 + ImageNet), the v5.0 B and D configurations are reinstated as auxiliary cells for factor decomposition.
+The v5.1 config **B′** (single V5 + RETFound cell) is **retired** in v6.0.0; the v5.0 designations **B** (V5 + ResNet-50) and **D** (V5 + EfficientNet-B3) are **reinstated**, now with ophthalmology-SSL initialization in place of ImageNet.
 
-**Dominance validation (v5.1):** Integrated Pipeline Dominance is validated if Performance(B') > max(Performance(A), Performance(C)) with EH-3 criteria satisfied. Attribution of the observed effect to preprocessing alone, pretraining alone, or their interaction is forbidden under CFC-2.8 (INVARIANTS v5.1).
+**Dominance validation (v6.0.0):** Integrated Pipeline Dominance is validated if the V5 arm (B, D) outperforms the baseline arm (A, C) — i.e. Performance(B) > Performance(A) and Performance(D) > Performance(C) — with EH-3 criteria satisfied. Attribution of the observed effect to preprocessing alone, pretraining alone, or their interaction is forbidden under CFC-2.8 (INVARIANTS v6.0.0): each V5 cell differs from its baseline counterpart along both the preprocessing and the pretraining axis.
 
-**Config N (normalization control) — retained from v5.0:** Baseline preprocessing + dataset-specific normalization (no V5 pipeline stages). Continues to isolate the normalization statistics effect from other pipeline contributions, with the understanding that under v5.1 the V5 arm now also differs in pretrain source.
+**Config N (normalization control) — retained from v5.0:** Baseline preprocessing + dataset-specific normalization (no V5 pipeline stages). Continues to isolate the normalization statistics effect from other pipeline contributions, with the understanding that the V5 arm also differs in pretrain source (ImageNet → ophthalmology-SSL).
 
-**Known limitations (v5.1):**
-- The measured H-1 effect conflates (i) preprocessing pipeline stages, (ii) normalization statistics change, and (iii) pretraining source change. No single-factor attribution is recoverable from Config A/C vs Config B' alone.
-- If AOQ-1 resolves to option (a) (ViT-Large) and AOQ-4 retains both ResNet-50 and EfficientNet-B3 in the baseline, the comparison further confounds architecture family. A symmetric design requires either reducing the baseline to one architecture or resolving AOQ-1 to option (c).
+**Known limitations (v6.0.0):**
+- The measured H-1 effect conflates (i) preprocessing pipeline stages, (ii) normalization statistics change, and (iii) pretraining source change (ImageNet → ophthalmology-SSL). No single-factor attribution is recoverable from the baseline arm (A/C) vs the V5 arm (B/D) alone; per CFC-2.8 the dominance claim is over the integrated *(preprocessing, pretrain)* pair only.
+- Architecture family is **not** confounded: because the SSL initialization is CNN-native, ResNet-50 and EfficientNet-B3 each appear in both arms (A↔B and C↔D), so the preprocessing+pretraining contrast is read within a fixed backbone. Cross-architecture replication (EH-4) is provided by the two parallel contrasts.
 
 **Statistical analysis:** Mixed-effects model across folds (fold as random effect). McNemar test for paired classification comparison. DeLong test for ROC-AUC comparison. Bonferroni/Holm correction for multiple comparisons.
 
@@ -500,21 +494,22 @@ Mandatory:
 
 ---
 
-# 7. ABLATION PROTOCOL [v5.1 amended]
+# 7. ABLATION PROTOCOL [v6.0.0 amended]
 
-Integrated Pipeline Dominance (Experiment 1 v5.1 design):
+Integrated Pipeline Dominance (Experiment 1 v6.0.0 design — restored 2×2 factorial):
 
 | Config | Preprocessing | Pretraining source | Backbone | Input channels |
 | --- | --- | --- | --- | --- |
 | A | baseline (stretch-resize + ImageNet norm) | ImageNet | ResNet-50 | 3 |
+| B | full V5 pipeline | ophthalmology-specific SSL | ResNet-50 | 4 |
 | C | baseline (stretch-resize + ImageNet norm) | ImageNet | EfficientNet-B3 | 3 |
-| B' | full V5 pipeline | RETFound (resolution per AOQ-1) | TBD per AOQ-1 | 4 (per AOQ-2) |
+| D | full V5 pipeline | ophthalmology-specific SSL | EfficientNet-B3 | 4 |
 
-**Dominance validation criterion (v5.1):** Integrated Pipeline Dominance is validated if:
+**Dominance validation criterion (v6.0.0):** Integrated Pipeline Dominance is validated if:
 
-* Performance(B') > max(Performance(A), Performance(C))
+* Performance(B) > Performance(A) and Performance(D) > Performance(C)
 
-with EH-3 criteria (Δ weighted F1 ≥ 5 pp; Δ ROC-AUC ≥ 0.02; no Cohen's Kappa degradation) satisfied. Per CFC-2.8 (INVARIANTS v5.1), the attribution of the difference to preprocessing alone is forbidden — the dominance claim is over the integrated *(preprocessing, pretrain)* pair only.
+with EH-3 criteria (Δ weighted F1 ≥ 5 pp; Δ ROC-AUC ≥ 0.02; no Cohen's Kappa degradation) satisfied. Per CFC-2.8 (INVARIANTS v6.0.0), the attribution of the difference to preprocessing alone is forbidden — the dominance claim is over the integrated *(preprocessing, pretrain)* pair only.
 
 ---
 

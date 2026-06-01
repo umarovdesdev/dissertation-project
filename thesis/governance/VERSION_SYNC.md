@@ -1,6 +1,12 @@
 # VERSION SYNCHRONIZATION REGISTER
 
-**Version:** 5.3 | **Date:** 2026-05-28
+**Version:** 6.0.0 | **Date:** 2026-06-01
+
+## v6.0.0 Amendment Scope
+
+**RETFound replaced by ophthalmology-specific self-supervised pretraining.** The V5 arm of Experiment 1 no longer initializes from the RETFound ViT-Large foundation model; instead the existing CNN backbones (ResNet-50 / EfficientNet-B3) are initialized from a CNN-compatible domain-adaptive self-supervised learning protocol (DINO / BYOL / SimCLR / MoCo family, selected empirically) pretrained on an unlabeled retinal fundus corpus. Rationale: RETFound changes both architecture and initialization, confounding the preprocessing contribution; a CNN-native SSL initialization changes only the initialization stage. **This reverses the v5.1–v5.2 RETFound binding → MAJOR bump per VERSIONING_POLICY §4.**
+
+Resolutions: **AOQ-1 → option (b)** (CNN-compatible SSL); **AOQ-4 resolved** (the 2×2 *(preprocessing × architecture)* factorial symmetry is restored — both backbones in both arms; configs **B and D reinstated**, config **B′ retired**); **AOQ-3 retired** (RETFound license moot); **AOQ-2 simplified** (SSL pretrained directly on the 4-channel V5 tensor). The composite *(preprocessing × pretraining)* independent variable and **CFC-2.8 are retained** (baseline ⟹ ImageNet, V5 ⟹ ophthalmology-SSL), so the H-1 effect remains non-attributable to preprocessing alone. EH-4 cross-architecture replication is reinstated. A new supporting contribution **SC-H** records the SSL initialization (bounded by CFC-2.8). No preprocessing operational definitions (OD-3, Stages 0–7) are modified. The v5.3 paradigmatic framing (P1/P2, SB-1.12, CFC-2.9, SIR-9) is retained unchanged.
 
 ## v5.3 Amendment Scope
 
@@ -18,13 +24,13 @@ Pretraining source amendment: V5 arm of Experiment 1 uses RETFound; baseline arm
 
 | File | Version | Synced |
 |------|---------|--------|
-| governance/INVARIANTS.md | 5.3 | ✅ — v5.3 amendment: paradigmatic framing (SB-1.12, CFC-2.9, SIR-9) — completed 2026-05-28 |
-| governance/HYPOTHESIS.md | 5.2 | ⚠️ — no v5.3 hypothesis changes; review only for any phrasings touching Gulshan/baseline conflation |
-| governance/RESEARCH_ARCHITECTURE.md | 5.2 | ⚠️ — no v5.3 experimental-design changes; review only for paradigmatic phrasings if any |
-| governance/VERSION_SYNC.md | 5.3 | ✅ |
-| governance/ARGUMENT_MAP.md | 5.3 | ✅ — v5.3 amendment: PC-0 (Paradigmatic Framing Claim, methodological) added as top-level node — completed 2026-05-28; v5.1/v5.2 H-1 reframing not yet propagated (separate work item, see note) |
-| governance/CONTRIBUTIONS.md | 5.3 | ✅ — v5.3 amendment: conceptual-framing block + reframed C-1 novelty (paradigm shift + 8-stage engineering) — completed 2026-05-28; v5.1/v5.2 CFC-2.8 reframing not yet propagated (separate work item) |
-| governance/CENTRAL_THESIS.md | 5.3 | ✅ — v5.3 amendment: introductory paradigmatic-framing paragraph — completed 2026-05-28; v5.1/v5.2 pretrain-symmetry phrasing not yet propagated (separate work item) |
+| governance/INVARIANTS.md | 6.0.0 | ✅ — v6.0.0: RETFound→ophthalmology-SSL in H-1/DGL-6/CFC-2.8; Section X AOQ-1/3/4 resolved, AOQ-2 simplified — completed 2026-06-01 |
+| governance/HYPOTHESIS.md | 6.0.0 | ✅ — v6.0.0: H-1 RETFound clause replaced with ophthalmology-SSL; AOQ references marked resolved — completed 2026-06-01 |
+| governance/RESEARCH_ARCHITECTURE.md | 6.0.0 | ✅ — v6.0.0: §4.1/4.2/4.2bis rewritten; Exp-1 A/B/C/D factorial restored, B′ retired; §7 ablation table updated; EH-4 reinstated — completed 2026-06-01 |
+| governance/VERSION_SYNC.md | 6.0.0 | ✅ |
+| governance/ARGUMENT_MAP.md | 6.0.0 | ✅ — v6.0.0: binding-ref bump only (no RETFound/pretraining node in this file) — completed 2026-06-01 |
+| governance/CONTRIBUTIONS.md | 6.0.0 | ✅ — v6.0.0: SC-H (ophthalmology-SSL initialization, CFC-2.8-bounded) added; header amendment note — completed 2026-06-01 |
+| governance/CENTRAL_THESIS.md | 6.0.0 | ✅ — v6.0.0: binding-ref bump only (no pretraining reference in body) — completed 2026-06-01 |
 | literature/external/gulshan-2016.md | v5.3 sync ✅ | ✅ — v5.3: §15 Paradigmatic Role block + §16 Paradigmatic citation-ready statements + §18 Paradigmatic Synthesis — completed 2026-05-28 |
 | literature/external/pratt-2016.md | v5.3 sync ✅ | ✅ — v5.3: P1 position-in-paradigm-space line added to §15 |
 | literature/external/rakhlin-2017.md | v5.3 sync ✅ | ✅ — v5.3: P1 position-in-paradigm-space line added to §15 |
@@ -49,33 +55,35 @@ Pretraining source amendment: V5 arm of Experiment 1 uses RETFound; baseline arm
 | outline/MASTER_OUTLINE.md | 5.0 | ❌ — chapter outlines that frame H-1 must be updated AND paradigmatic framing inserted in ch 1.4 / 1.5 |
 | outline/TABLE_OF_CONTENTS_EN.md | 5.0 | ⚠️ — likely unchanged but verify |
 | outline/TABLE_OF_CONTENTS_KZ.md | 5.0 | ⚠️ — likely unchanged but verify |
-| glossary/GLOSSARY_EN.md | 5.0 | ❌ — add RETFound terms (v5.1/v5.2) AND paradigm P1, paradigm P2, canonical representative, paradigmatic instantiation (v5.3) |
+| glossary/GLOSSARY_EN.md | 5.0 | ❌ — v6.0.0: add ophthalmology-specific SSL, DINO, BYOL, SimCLR, MoCo terms (RETFound now historical); plus paradigm P1/P2, canonical representative (v5.3) |
 | glossary/GLOSSARY_KZ.md | 5.0 | ❌ — Kazakh equivalents for new glossary terms |
-| literature/LITERATURE_INDEX.md | 5.0 | ❌ — Zhou et al. 2023 (RETFound) card AND Paradigm column (v5.3) — see GULSHAN_PARADIGM_INTEGRATION_PLAN.md Task 1.3 |
+| literature/LITERATURE_INDEX.md | 5.0 | ❌ — v6.0.0: SSL-family cards (DINO/BYOL/SimCLR/MoCo) for the V5-arm pretraining; Zhou et al. 2023 (RETFound) demoted to historical/contrast; Paradigm column (v5.3) |
 | literature/external/gulshan-2016.md | 5.0 | ❌ — Paradigmatic Role block required in §15 (v5.3) — see Task 1.1 |
-| experiments/experimental-protocol.md | 5.0 | ❌ — Exp 1 protocol must reflect v5.1 configurations and AOQ-1/2 resolutions |
+| experiments/experimental-protocol.md | 5.0 | ❌ — v6.0.0: Exp 1 protocol must reflect the restored A/B/C/D factorial (V5 arm = ophthalmology-SSL); AOQ-1/3/4 resolved, AOQ-2 simplified |
 | methods/preprocessing-pipeline.md | 5.0 | ⚠️ — preprocessing stages unchanged; review for pretrain references |
-| methods/implementation.md | 5.0 | ❌ — model loading code paths must accommodate RETFound CFP-checkpoint weights |
+| methods/implementation.md | 5.0 | ❌ — v6.0.0: model loading code paths must load an in-house ophthalmology-SSL CNN checkpoint (no RETFound/ViT-Large loader needed) |
 
 ## Downstream Code Status (not part of governance, listed for completeness)
 
 | Path | Sync status |
 |------|-------------|
-| experiments/configs/default.yaml | Out of sync — `pretrained: true` lines and `imagenet_*` keys must accommodate the V5 arm (RETFound CFP checkpoint per v5.2) |
-| experiments/src/models/factory.py | Out of sync — no RETFound loader |
-| experiments/src/models/resnet.py | Out of sync if AOQ-1 resolves to option (a) ViT-Large |
-| experiments/src/models/efficientnet.py | Out of sync if AOQ-1 resolves to option (a) |
-| demo/src/tabs/ModelArchitecture.js | Updated 2026-05-28 — V5 arm row (RETFound CFP-pretrained, multi-modal corpus) added to architecture table |
+| experiments/configs/default.yaml | Out of sync — V5-arm config must point at an in-house ophthalmology-SSL CNN checkpoint (not ImageNet, not RETFound) |
+| experiments/src/models/factory.py | Out of sync — needs an SSL-pretrained-CNN checkpoint loader for the V5 arm |
+| experiments/src/models/resnet.py | In sync re: backbone (AOQ-1 resolved to option (b) — CNN unchanged); only the init-weights source changes |
+| experiments/src/models/efficientnet.py | In sync re: backbone (AOQ-1 resolved to option (b) — CNN unchanged); only the init-weights source changes |
+| demo/src/tabs/ModelArchitecture.js | Out of sync (v6.0.0) — V5-arm row must change from RETFound CFP-pretrained to ophthalmology-specific SSL (CNN backbone) |
 | defense/slides/08_CNN_ARCHITECTURE.md | Updated 2026-05-28 — disambiguated baseline/V5 pretrain sources |
 | defense/slides/09_ARCHITECTURE_COMPARISON.md | Updated 2026-05-28 — pretrain source clarified in factorial table |
 
-Per the user's 2026-05-13 directive: governance v5.1 was the authoritative reference; v5.2 (2026-05-28) refines RETFound corpus to multi-modal CFP + OCT. v5.3 (2026-05-28) introduces the paradigmatic framing (P1 / P2; Gulshan as canonical representative of P1). v5.3 is a *purely additive* governance amendment: no v5.2 binding is reversed, and no hypothesis or operational definition is modified. Downstream code and dependent governance files will be brought into sync in subsequent passes; the v5.3 integration tracker is `GULSHAN_PARADIGM_INTEGRATION_PLAN.md` at the repository root.
+Version history: v5.1 (2026-05-14) adopted RETFound for the V5 arm; v5.2 (2026-05-28) refined the RETFound corpus to multi-modal CFP + OCT; v5.3 (2026-05-28) introduced the paradigmatic framing (P1 / P2; Gulshan as canonical representative of P1). **v6.0.0 (2026-06-01) reverses the RETFound adoption** in favour of ophthalmology-specific self-supervised pretraining of the existing CNN backbones (MAJOR bump). The dependent governance and downstream files marked ❌/Out-of-sync above must be brought to v6.0.0 in subsequent passes; once governance is stable, `STRIP_VERSIONS_PLAN.md` enforces version containment outside `thesis/`.
+
+**Note — Config-D naming divergence:** the *shipped* demo/training artifact "Config D" is the retired ImageNet pipeline (EfficientNet-B3 + ImageNet); governance **Config D** is now V5 + EfficientNet-B3 + ophthalmology-SSL. These must not be silently merged — the shipped demo predates this amendment.
 
 ## Sync Protocol
 
 Before any chapter-writing session:
-1. Verify all governance files marked ✅ are at version 5.3 (current authoritative version).
-2. Files marked ❌ must not be cited as authoritative until brought to v5.3.
-3. AOQ-1 through AOQ-4 (INVARIANTS v5.1/v5.2 Section X) must be resolved before Experiment 1 execution.
-4. The v5.3 paradigmatic-framing constraints (SB-1.12, CFC-2.9, SIR-9) bind every chapter, slide, and demo update from 2026-05-28 onward.
+1. Verify all governance files marked ✅ are at version 6.0.0 (current authoritative version).
+2. Files marked ❌ must not be cited as authoritative until brought to v6.0.0.
+3. AOQ-1/AOQ-3/AOQ-4 are resolved and AOQ-2 simplified in v6.0.0 (INVARIANTS Section X); the V5 arm uses ophthalmology-specific SSL on the existing CNN backbones.
+4. The v5.3 paradigmatic-framing constraints (SB-1.12, CFC-2.9, SIR-9) remain binding on every chapter, slide, and demo update.
 5. After any governance update, re-verify dependent files.

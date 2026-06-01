@@ -4,7 +4,9 @@
 
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Formal contributions register
-**Version:** 5.3 | **Date:** 2026-05-28 | **Binding Reference:** INVARIANTS.md v5.3
+**Version:** 6.0.0 | **Date:** 2026-06-01 | **Binding Reference:** INVARIANTS.md v6.0.0
+
+**v6.0.0 Amendment:** The V5-arm pretraining source is changed from the RETFound foundation model to **ophthalmology-specific self-supervised pretraining** of the existing CNN backbone (see SC-H). The composite *(preprocessing × pretraining)* independent variable and CFC-2.8 are retained, so the SSL initialization is reported as part of the integrated V5 configuration, not as an independently attributable contribution.
 
 ---
 
@@ -108,6 +110,16 @@ The principal conceptual contribution of this dissertation is a **paradigm shift
 
 ---
 
+### SC-H: Ophthalmology-Specific Self-Supervised Initialization of the CNN Backbone
+
+**Contribution:** Replacement of generic ImageNet transfer with an in-domain initialization for the V5 arm: the same CNN backbone (ResNet-50 / EfficientNet-B3) is pretrained with a CNN-compatible domain-adaptive self-supervised learning protocol (DINO / BYOL / SimCLR / MoCo family) on an unlabeled retinal fundus corpus, then fine-tuned for DR classification. This preserves the CNN architecture — avoiding the architecture confound that a foundation model such as RETFound (ViT-Large) would introduce — while supplying retina-aware representations (vascular topology, optic-disc and macular morphology, retinal texture, illumination/artifact variability) as the starting point for the integrated pipeline.
+
+**Evidence:** Experiment 1 V5 arm (configs B, D), paired with the full V5 preprocessing pipeline.
+
+**Boundary (CFC-2.8):** Because the V5 arm differs from baseline along both the preprocessing and the pretraining axis, the isolated effect of the SSL initialization is **not** independently claimed; it is reported as a component of the integrated V5 configuration. The associated research question — how ophthalmology-specific SSL interacts with the V5 preprocessing pipeline for robustness and generalization — is framed as a direction motivated by this design, bounded by CFC-2.8.
+
+---
+
 ## Relationship to Primary Claims
 
 | Contribution | Primary Claims Supported |
@@ -122,6 +134,7 @@ The principal conceptual contribution of this dissertation is a **paradigm shift
 | SC-E | PC-1, PC-8 |
 | SC-F | PC-1, PC-8 |
 | SC-G | PC-10 |
+| SC-H | PC-1, PC-8 |
 
 ---
 
