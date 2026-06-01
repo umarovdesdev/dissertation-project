@@ -71,9 +71,13 @@ Pretraining source amendment: V5 arm of Experiment 1 uses RETFound; baseline arm
 | experiments/src/models/factory.py | Out of sync — needs an SSL-pretrained-CNN checkpoint loader for the V5 arm |
 | experiments/src/models/resnet.py | In sync re: backbone (AOQ-1 resolved to option (b) — CNN unchanged); only the init-weights source changes |
 | experiments/src/models/efficientnet.py | In sync re: backbone (AOQ-1 resolved to option (b) — CNN unchanged); only the init-weights source changes |
-| demo/src/tabs/ModelArchitecture.js | Out of sync (v6.0.0) — V5-arm row must change from RETFound CFP-pretrained to ophthalmology-specific SSL (CNN backbone) |
-| defense/slides/08_CNN_ARCHITECTURE.md | Updated 2026-05-28 — disambiguated baseline/V5 pretrain sources |
-| defense/slides/09_ARCHITECTURE_COMPARISON.md | Updated 2026-05-28 — pretrain source clarified in factorial table |
+| demo/src/tabs/ModelArchitecture.js | ✅ Synced 2026-06-01 (v6.0.0) — V5-arm row + note now ophthalmology-specific SSL on ResNet-50/EfficientNet-B3 (configs B/D); RETFound removed |
+| defense/slides/08_CNN_ARCHITECTURE.md | ✅ Synced 2026-06-01 (v6.0.0) — V5 bullet → ophthalmology-SSL; AOQ-1 note replaced with "symmetry restored" |
+| defense/slides/09_ARCHITECTURE_COMPARISON.md | ✅ Synced 2026-06-01 (v6.0.0) — factorial table restored to A/B/C/D; B′ retired; Factor 2 + speech → SSL |
+| defense/paradigmatic_speech.md | ✅ Synced 2026-06-01 (v6.0.0) — Gulshan caveat pretraining-source line → ImageNet / ophthalmology-SSL |
+| thesis/chapters/01-problem-domain/README.md | ✅ Synced 2026-06-01 (v6.0.0) — §1.3.2 in-domain-pretraining contrast → ophthalmology-SSL (RETFound demoted to related work) |
+| thesis/chapters/05-validation/README.md | ✅ Synced 2026-06-01 (v6.0.0) — Gulshan caveat-block pretraining-source item → ophthalmology-SSL |
+| thesis/literature/external/gulshan-2016.md | ✅ Synced 2026-06-01 (v6.0.0) — § unsound-comparison pretraining-source line → ophthalmology-SSL (separate from the still-pending Paradigmatic Role block) |
 
 Version history: v5.1 (2026-05-14) adopted RETFound for the V5 arm; v5.2 (2026-05-28) refined the RETFound corpus to multi-modal CFP + OCT; v5.3 (2026-05-28) introduced the paradigmatic framing (P1 / P2; Gulshan as canonical representative of P1). **v6.0.0 (2026-06-01) reverses the RETFound adoption** in favour of ophthalmology-specific self-supervised pretraining of the existing CNN backbones (MAJOR bump). The dependent governance and downstream files marked ❌/Out-of-sync above must be brought to v6.0.0 in subsequent passes; once governance is stable, `STRIP_VERSIONS_PLAN.md` enforces version containment outside `thesis/`.
 

@@ -15,7 +15,7 @@ This chapter is the **primary site** for the paradigmatic framing in the dissert
 
 ### §1.3.2 (Transfer Learning Strategies) — Task 2.2
 - Mention Gulshan as an example of **ImageNet → fundus** transfer without explicit in-domain pretraining.
-- Contrast with RETFound (Zhou et al. 2023, Nature; INVARIANTS v5.1/v5.2 amendment): an in-domain retinal foundation model pre-trained on a multi-modal CFP + OCT corpus.
+- Contrast with the dissertation's in-domain initialization (INVARIANTS v6.0.0 amendment): **ophthalmology-specific self-supervised pretraining** of the same CNN backbone on an unlabeled fundus corpus (CNN-compatible domain-adaptive SSL — DINO / BYOL / SimCLR / MoCo family). Retinal foundation models such as RETFound (Zhou et al. 2023, Nature) may be cited as related work, but are not adopted here — they change the backbone (ViT-Large) and would confound the preprocessing contrast.
 
 ### §1.4 (Critical Analysis of Existing Systems) — Task 2.3 — PRIMARY SITE FOR PARADIGMATIC FRAMING
 - **2.3.1** Introduce the explicit **P1 vs P2** contrast (definitions from INVARIANTS v5.3 §I and CENTRAL_THESIS §Paradigmatic framing).

@@ -33,13 +33,13 @@ export default function ModelArchitecture() {
           rows={[
             ['Baseline', 'ResNet-50', '25.6M', 'ImageNet (torchvision)', '3 ch, 512×512', 'Exp 1 (Config A)'],
             ['Baseline', 'EfficientNet-B3', '12.2M', 'ImageNet (timm)', '3 ch, 512×512', 'Exp 1 (Config C), Exp 4 (Grad-CAM/ALO)'],
-            ['V5 (proposed)', 'TBD per AOQ-1 (ViT-Large / CNN-compatible)', '—', 'RETFound — CFP checkpoint (multi-modal corpus: ~904K CFP + ~736K OCT)', '4 ch, 512×512 (RGB + FOV mask)', 'Exp 1 (Config B′)'],
+            ['V5 (proposed)', 'ResNet-50 / EfficientNet-B3', '25.6M / 12.2M', 'Ophthalmology-specific SSL (in-house fundus pretrain)', '4 ch, 512×512 (RGB + FOV mask)', 'Exp 1 (Config B / D)'],
           ]}
         />
         <Note>
           Baseline arm: ImageNet-pretrained weights (cross-domain transfer from natural images).
-          V5 arm: initialization from RETFound (Zhou et al., 2023, Nature) — a retinal foundation model MAE-pretrained on a multi-modal corpus of ~1.6M retinal images (~904K color fundus photographs + ~736K OCT scans). The CFP-pretrained checkpoint is loaded for the dissertation's fundus-only downstream task; the OCT-pretrained checkpoint is published separately and is not used (dissertation inputs remain fundus-only — see SB-1.4).
-          Backbone choice for the V5 arm is bound by open question AOQ-1 (INVARIANTS.md, §X). Per CFC-2.8, observed differences are attributable only to the integrated (preprocessing × pretrain) pair, not to either factor in isolation.
+          V5 arm: the same CNN backbones (ResNet-50 / EfficientNet-B3) initialized from ophthalmology-specific self-supervised pretraining — a CNN-compatible domain-adaptive SSL protocol (DINO / BYOL / SimCLR / MoCo family) pretrained on an unlabeled retinal fundus corpus, then fine-tuned for DR classification. This keeps the CNN architecture identical across arms, isolating the architecture factor.
+          Per CFC-2.8, observed differences are attributable only to the integrated (preprocessing × pretrain) pair, not to either factor in isolation.
           All models trained with patient-level 5-fold cross-validation.
           Mixed precision disabled for EfficientNet models; batch size 16 (EfficientNet) / 32 (ResNet-50).
           Hardware: NVIDIA RTX 3060 12GB, WSL2 Ubuntu, PyTorch 2.5.
