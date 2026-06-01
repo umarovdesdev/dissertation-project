@@ -20,6 +20,20 @@ function appendPassword(fd) {
   return fd;
 }
 
+// POST /api/auth — validate the shared access password (§C.2). Resolves true
+// when the backend accepts it (or runs with the gate open), false on a 401,
+// and throws only on a network/transport failure so the caller can distinguish
+// "wrong password" from "backend unreachable".
+export async function verifyPassword(pw) {
+  if (!API) throw new Error('REACT_APP_API_URL is not set');
+  const fd = new FormData();
+  if (pw) fd.append('password', pw);
+  const res = await fetch(`${API}/api/auth`, { method: 'POST', body: fd });
+  if (res.status === 401) return false;
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  return true;
+}
+
 async function srcToBlob(src) {
   // Works for both data: URLs (uploads) and public asset paths (samples):
   // fetch resolves both, and through CRA's dev server the proxy/CORS apply.

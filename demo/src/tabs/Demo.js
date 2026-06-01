@@ -11,7 +11,7 @@ import { Sec, Note } from '../components';
 import { useLang } from '../i18n';
 import { EYEPACS_PAIRS } from './_eyepacsPairs';
 import { analyzeFundus } from './_analyzeFundus';
-import { predictPatient, getHealth } from './_apiPredict';
+import { predictPatient, getHealth, getPassword, setPassword, verifyPassword } from './_apiPredict';
 import VisionWidget from './_VisionWidget';
 import LiveVisualizationBlock from './_LiveGradcam';
 
@@ -191,8 +191,11 @@ function EyeSlot({ label, eye, image, onPick, onClear, onSwap, t }) {
   const [dismissed, setDismissed] = useState(false);
   // Reset the size badge and dismissed-warning state when the loaded image
   // changes (or is cleared) so we never carry the previous image's dimensions
-  // or a stale dismissal into a freshly loaded image.
-  useEffect(() => { setDims(null); setDismissed(false); }, [image && image.src]);
+  // or a stale dismissal into a freshly loaded image. (Extracted to a variable
+  // so react-hooks/exhaustive-deps can statically check it — a bare
+  // `image && image.src` in the deps array trips the CI build under CI=1.)
+  const imageSrc = image && image.src;
+  useEffect(() => { setDims(null); setDismissed(false); }, [imageSrc]);
 
   const onChange = (e) => {
     const file = e.target.files && e.target.files[0];
@@ -412,6 +415,70 @@ function VisualizationBlock({ caseRef, leftPresent, rightPresent, t }) {
 // ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
+// Access-password screen (TASK-Demo §C.2). Shown only when the backend reports
+// `requires_password` and no valid password is held yet. A single input — no
+// accounts, no login flow — adequate for a ~15-person academic beta.
+function PasswordGate({ onUnlock, t }) {
+  const [pw, setPw] = useState('');
+  const [status, setStatus] = useState('idle'); // idle | checking | denied
+  const submit = async () => {
+    if (!pw || status === 'checking') return;
+    setStatus('checking');
+    try {
+      const ok = await verifyPassword(pw);
+      if (ok) {
+        setPassword(pw);          // persist for subsequent protected requests
+        onUnlock();
+      } else {
+        setStatus('denied');
+      }
+    } catch {
+      // Network error reaching the backend — treat as denied but distinct copy.
+      setStatus('denied');
+    }
+  };
+  return (
+    <div style={{ maxWidth: 380, margin: '40px auto', textAlign: 'center' }}>
+      <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text-primary,#222)', marginBottom: 6 }}>
+        {t('demo.gate.title')}
+      </h2>
+      <p style={{ fontSize: 12, color: 'var(--color-text-secondary,#666)', lineHeight: 1.55, marginBottom: 14 }}>
+        {t('demo.gate.prompt')}
+      </p>
+      <input
+        type="password"
+        value={pw}
+        autoFocus
+        onChange={(e) => { setPw(e.target.value); if (status === 'denied') setStatus('idle'); }}
+        onKeyDown={(e) => { if (e.key === 'Enter') submit(); }}
+        placeholder={t('demo.gate.placeholder')}
+        style={{
+          width: '100%', padding: '8px 12px', fontSize: 13, boxSizing: 'border-box',
+          border: `1px solid ${status === 'denied' ? C.red : 'var(--color-border-secondary,#ccc)'}`,
+          borderRadius: 6, marginBottom: 10,
+        }}
+      />
+      <button
+        onClick={submit}
+        disabled={!pw || status === 'checking'}
+        style={{
+          width: '100%', padding: '8px 18px', fontSize: 12, fontWeight: 600,
+          background: (!pw || status === 'checking') ? C.gray : C.teal,
+          color: 'white', border: 'none', borderRadius: 6,
+          cursor: (!pw || status === 'checking') ? 'not-allowed' : 'pointer',
+        }}
+      >
+        {status === 'checking' ? t('demo.gate.checking') : t('demo.gate.submit')}
+      </button>
+      {status === 'denied' && (
+        <div style={{ marginTop: 10, fontSize: 11, color: C.redT }}>
+          {t('demo.gate.denied')}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Demo() {
   const { t } = useLang();
   const [leftImg, setLeftImg] = useState(null);
@@ -435,9 +502,25 @@ export default function Demo() {
   const [health, setHealth] = useState(null);
   const [healthChecked, setHealthChecked] = useState(false);
   const [useRealModel, setUseRealModel] = useState(true);
+  // Access gate (TASK-Demo §C.2/D). `authed` is true when the demo body is
+  // unlocked: either the backend reports no password requirement / is offline
+  // (simulator stays usable), or the user has supplied a valid password (which
+  // we also revalidate from sessionStorage on reload).
+  const [authed, setAuthed] = useState(false);
   useEffect(() => {
     let alive = true;
-    getHealth().then((h) => { if (alive) { setHealth(h); setHealthChecked(true); } });
+    getHealth().then(async (h) => {
+      if (!alive) return;
+      setHealth(h);
+      setHealthChecked(true);
+      // No live gate to satisfy → unlock immediately (offline demo included).
+      if (!h || !h.requires_password) { setAuthed(true); return; }
+      // Gate active: try a previously stored password silently.
+      const stored = getPassword();
+      if (stored) {
+        try { if (await verifyPassword(stored)) setAuthed(true); } catch { /* offline */ }
+      }
+    });
     return () => { alive = false; };
   }, []);
   // Real model is usable only when the backend is up AND a real checkpoint is
@@ -569,6 +652,13 @@ export default function Demo() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  // Block the demo body behind the access screen only when the backend
+  // actively requires a password and we are not yet authenticated. A null/
+  // offline health never gates — the simulator must stay reachable.
+  if (healthChecked && health && health.requires_password && !authed) {
+    return <PasswordGate onUnlock={() => setAuthed(true)} t={t} />;
+  }
 
   return (
     <div>

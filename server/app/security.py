@@ -22,6 +22,16 @@ def gate_disabled() -> bool:
     return False
 
 
+def password_required() -> bool:
+    """Return True when a password gate is active (``DEMO_PASSWORD`` set).
+
+    Unlike :func:`gate_disabled` this has no logging side effect — it is safe to
+    call on every ``/api/health`` probe so the frontend can decide whether to
+    show the access-password screen.
+    """
+    return bool(settings.demo_password)
+
+
 def check_password(password: str | None) -> bool:
     """Validate a supplied password against ``DEMO_PASSWORD``.
 

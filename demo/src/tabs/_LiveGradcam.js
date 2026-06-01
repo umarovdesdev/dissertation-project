@@ -50,6 +50,18 @@ function EyeGradcam({ eye, src, name, t }) {
           <figcaption style={{ fontSize: 10, marginTop: 4, color: 'var(--color-text-secondary,#666)' }}>{t('demo.viz.overlay')}</figcaption>
         </figure>
       </div>
+      {/* Predicted-class rationale (TASK-Demo D.3) — backend-generated from CAM
+          geometry (no LLM). English only, per the backend-copy scope note. */}
+      {data.rationale && (
+        <div style={{ marginTop: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-text-secondary,#666)' }}>
+            {t('demo.viz.rationaleLabel')}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--color-text-primary,#333)', lineHeight: 1.5, marginTop: 2 }}>
+            {data.rationale}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

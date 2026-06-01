@@ -17,13 +17,14 @@ from . import visualize as visualize_mod
 from .config import settings
 from .inference import engine
 from .schemas import (
+    AuthResponse,
     GradcamResponse,
     HealthResponse,
     PatientPredictionResponse,
     SelftestResponse,
     VisualizeResponse,
 )
-from .security import check_password
+from .security import check_password, password_required
 
 app = FastAPI(title="DR-Classifier Demo API", version=settings.resolve_version())
 
@@ -103,7 +104,20 @@ async def health() -> HealthResponse:
         device=str(engine.device),
         version=settings.resolve_version(),
         git_sha=settings.resolve_git_sha(),
+        requires_password=password_required(),
     )
+
+
+@app.post("/api/auth", response_model=AuthResponse)
+async def auth(password: str | None = Form(default=None)) -> AuthResponse:
+    """Validate the shared password for the frontend access screen (§C.2).
+
+    Returns ``{ "ok": true }`` when the gate is open or the password matches;
+    raises 401 otherwise. Stateless — the frontend re-sends the password on
+    every protected request regardless.
+    """
+    _require_password(password)
+    return AuthResponse(ok=True)
 
 
 @app.post("/api/predict", response_model=PatientPredictionResponse)

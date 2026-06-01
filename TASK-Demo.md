@@ -32,6 +32,18 @@ deploy, and run the QA gate. Nothing here is blocked on more code.
   live Grad-CAM `_LiveGradcam.js` (D.3), provenance footer (D.7). EN+KZ i18n.
   Verified: ESLint 0 errors, `npm run build` OK; backend logic tested on
   random-init weights.
+- TASK-Demo **predicted-class rationale (D.3)** — `/api/gradcam` now emits a
+  backend-generated one-line `rationale` (+ `cam_pixel_count`/`cam_area_frac`/
+  `cam_region`) from CAM geometry (no LLM; neutral image-space region wording per
+  NC-14); `_LiveGradcam.js` renders it per eye.
+- TASK-Demo **password entry screen (C.2/D)** — `/api/health` advertises
+  `requires_password`; new `POST /api/auth` validates the shared password;
+  `_apiPredict.js::verifyPassword`; `Demo.js` shows a single-input access gate
+  (revalidates a stored password on reload) that blocks the demo body only when
+  the backend requires one and the user isn't authenticated (offline/simulator
+  never gated). EN+KZ i18n. Verified: ESLint clean, `CI=1 npm run build` OK.
+  Also fixed a pre-existing `react-hooks/exhaustive-deps` warning in `EyeSlot`
+  that would have failed the Vercel build (CI=1).
 
 **Remaining — manual (the candidate):**
 1. Train Config D on Kaggle → drop `best_model.pt` → `server/checkpoints/config_d_fold0.pt`
@@ -42,9 +54,6 @@ deploy, and run the QA gate. Nothing here is blocked on more code.
 5. Distribution email — Part E.3.
 
 **Deferred / not built (by decision):**
-- "Predicted class rationale" sentence (D.3) — backend does not emit it yet.
-- Password **entry screen** — only the plumbing exists (`getPassword`/`setPassword`
-  in `_apiPredict.js`); a UI is needed once `DEMO_PASSWORD` is set.
 - **Governance gap:** the shipped "Config D" is the **v5.0** design
   (V5 + EfficientNet-B3 + **ImageNet** pretrain). Governance **v5.1 retired** it
   for **Config B' (V5 + RETFound)**; AOQ-1 is unresolved. Shipped as the
@@ -174,11 +183,18 @@ POST /api/visualize
 
 ### C.2 Password gate
 
-Implementation:
+Implementation **(built)**:
 - Env var `DEMO_PASSWORD` set on the Space. Single static string.
 - Every endpoint except `/api/health` checks `password` field. Mismatch → 401.
-- Frontend stores the password in `sessionStorage` after first successful submit and includes it in every subsequent request. No login screen — a single input on the landing page with "Enter access password" and a Submit button.
-- Wrong password → frontend shows a polite "Access denied — contact the candidate for the beta password" message.
+  `/api/health` exposes `requires_password` (no secret leaked) so the frontend
+  knows whether to show the gate; `/api/auth` validates the password for it.
+- Frontend stores the password in `sessionStorage` (`setPassword`) after the
+  first successful submit and includes it in every subsequent request; on reload
+  it silently revalidates the stored password via `/api/auth`. The access screen
+  is a single input — no accounts, no login flow. The gate blocks the demo body
+  only when the backend requires a password and the user isn't authenticated;
+  when the backend is offline the simulator stays reachable (never gated).
+- Wrong password → "Access denied — contact the candidate for the beta password".
 
 This is intentionally minimal. Anything stronger (OAuth, magic links) is out of scope for ~15 academics.
 
@@ -257,7 +273,7 @@ This widget is the visual core of contributions C-1, SC-E, and SC-F. It must wor
 After Run completes, the existing Result section (`Demo.js` lines ~614–683) keeps its layout but:
 
 - Replace pre-rendered `HeatmapPair` with the live Grad-CAM PNG returned by `/api/gradcam`. Same two-pane grid: heatmap + attention overlay.
-- Add a third sub-panel "Predicted class rationale": a one-line auto-generated sentence like "Model attends to N pixels coincident with the upper-temporal arcade, consistent with DR grade 2 features." (Generated on backend from CAM region statistics, no LLM.)
+- Add a third sub-panel "Predicted class rationale": a one-line auto-generated sentence like "Model attends to N pixels coincident with the upper-temporal arcade, consistent with DR grade 2 features." (Generated on backend from CAM region statistics, no LLM.) **Built:** `/api/gradcam` emits `rationale` + `cam_pixel_count`/`cam_area_frac`/`cam_region`; the region is worded in **neutral image-space terms** (e.g. "upper-left"), not anatomical arcades, per NC-14. `_LiveGradcam.js` renders it under each eye's heatmap pair.
 - Drop the existing `// <div>⚠ {t('demo.disclaimer')}</div>` (currently commented out) — replace with a single muted footnote: "Beta research demo. Predictions are model output on the dissertation pipeline; not a clinical recommendation."
 
 ### D.4 Walkthrough cases for the beta
@@ -372,9 +388,11 @@ If any of F.1–F.5 fails, do not share the URL.
 - [ ] `TASK-Config-D.md` Part A — checkpoint exists. Notebook ready; **training is the candidate's manual Kaggle run**. (Real path: `experiments/outputs/exp1/checkpoints/D_fold{N}/best_model.pt`.)
 - [x] `TASK-Config-D.md` Part B — backend implemented (`server/`). "Boots locally" needs `pip install -r server/requirements.txt` (fastapi/torch).
 - [x] `TASK-Config-D.md` Part C — `Demo.js` calls the backend with simulator fallback + status badge.
-- [x] Backend endpoints added: `/api/visualize`, `/api/selftest`, password gate on protected endpoints.
+- [x] Backend endpoints added: `/api/visualize`, `/api/selftest`, `/api/auth`, password gate on protected endpoints.
 - [x] `stage_breakdown` exists in `pipeline_v5.py` and returns labeled intermediates.
 - [x] Live Grad-CAM works on arbitrary uploads (code; meaningful output needs a real checkpoint).
+- [x] Predicted-class rationale (D.3): `/api/gradcam` emits a CAM-geometry sentence (no LLM); `_LiveGradcam.js` renders it per eye.
+- [x] Password entry screen (C.2/D): `/api/health.requires_password` + `/api/auth` + `Demo.js` access gate; offline/simulator never gated.
 - [x] Live OD/Fovea overlay works on arbitrary uploads (`_VisionWidget.js`).
 - [x] V5 preview strip endpoint returns a composite PNG with all six stages.
 - [ ] Frontend: five curated walkthroughs (one per DR grade) — structure is 5 (dr00–dr04); **image curation is manual**.

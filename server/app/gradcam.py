@@ -82,6 +82,72 @@ class _GradCAM:
         return cam, target_class
 
 
+def _build_rationale(heatmap_full: np.ndarray, target_class: int) -> dict:
+    """Compose a one-line predicted-class rationale from CAM geometry (§D.3).
+
+    Derives the sentence purely from the Grad-CAM heatmap — pixel count above a
+    salience threshold and the centroid of that region — with no LLM. The region
+    is described in neutral image-space terms (e.g. "upper-left"), not anatomical
+    arcade names, per INVARIANTS NC-14: Grad-CAM is interpretability evidence,
+    not clinical localization of pathology.
+
+    Args:
+        heatmap_full: Grad-CAM heatmap in ``[0, 1]`` at the original image size,
+            shape ``(H, W)``.
+        target_class: The DR grade (0–4) the CAM explains.
+
+    Returns:
+        Dict with ``rationale`` (str), ``cam_pixel_count`` (int),
+        ``cam_area_frac`` (float in ``[0, 1]``), ``cam_region`` (str).
+    """
+    h, w = heatmap_full.shape
+    total = float(h * w) or 1.0
+    salient = heatmap_full >= 0.5
+    n_pix = int(salient.sum())
+    area_frac = n_pix / total
+
+    if n_pix == 0:
+        region = "diffuse"
+        sentence = (
+            "Grad-CAM shows no concentrated activation above threshold; attention "
+            f"is diffuse across the field, consistent with the features the model "
+            f"associates with DR grade {target_class}."
+        )
+        return {
+            "rationale": sentence,
+            "cam_pixel_count": 0,
+            "cam_area_frac": 0.0,
+            "cam_region": region,
+        }
+
+    ys, xs = np.nonzero(salient)
+    cy = float(ys.mean()) / h          # normalized centroid (0=top, 1=bottom)
+    cx = float(xs.mean()) / w          # normalized centroid (0=left, 1=right)
+    vert = "upper" if cy < 0.40 else "lower" if cy > 0.60 else "mid"
+    horiz = "left" if cx < 0.40 else "right" if cx > 0.60 else "central"
+    if vert == "mid" and horiz == "central":
+        region = "central"
+    elif vert == "mid":
+        region = horiz
+    elif horiz == "central":
+        region = vert
+    else:
+        region = f"{vert}-{horiz}"
+
+    sentence = (
+        f"Model attention concentrates on ~{n_pix:,} pixels "
+        f"({area_frac * 100:.1f}% of the field) in the {region} region of the "
+        f"image, consistent with the features the model associates with DR grade "
+        f"{target_class}."
+    )
+    return {
+        "rationale": sentence,
+        "cam_pixel_count": n_pix,
+        "cam_area_frac": round(area_frac, 4),
+        "cam_region": region,
+    }
+
+
 def compute_gradcam(engine, image_bytes: bytes, eye: str,
                     target_class: int | None = None) -> dict:
     """Run Grad-CAM for one eye and return base64 PNG overlays.
@@ -94,7 +160,8 @@ def compute_gradcam(engine, image_bytes: bytes, eye: str,
 
     Returns:
         Dict with ``gradcam_png_b64``, ``attention_overlay_png_b64``,
-        ``target_class``.
+        ``target_class``, and the predicted-class rationale fields
+        (``rationale``, ``cam_pixel_count``, ``cam_area_frac``, ``cam_region``).
 
     Raises:
         RuntimeError: If the model is not loaded.
@@ -122,4 +189,5 @@ def compute_gradcam(engine, image_bytes: bytes, eye: str,
         "gradcam_png_b64": imaging.png_b64_from_bgr(heatmap_bgr),
         "attention_overlay_png_b64": imaging.png_b64_from_bgr(overlay_bgr),
         "target_class": int(target),
+        **_build_rationale(heatmap_full, int(target)),
     }

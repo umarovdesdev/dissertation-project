@@ -42,6 +42,7 @@ class HealthResponse(BaseModel):
     device: str
     version: str
     git_sha: str
+    requires_password: bool
 
 
 class ODFoveaPayload(BaseModel):
@@ -69,6 +70,12 @@ class GradcamResponse(BaseModel):
     gradcam_png_b64: str
     attention_overlay_png_b64: str
     target_class: int
+    # Predicted-class rationale (TASK-Demo §D.3): a one-line sentence and the
+    # CAM region statistics it is derived from. No LLM — pure CAM geometry.
+    rationale: str
+    cam_pixel_count: int
+    cam_area_frac: float
+    cam_region: str
 
 
 class VisualizeResponse(BaseModel):
@@ -86,3 +93,13 @@ class SelftestResponse(BaseModel):
     gradcam: str
     visualize: str
     details: list[str] = []
+
+
+class AuthResponse(BaseModel):
+    """POST /api/auth payload — password-gate validation (§C.2).
+
+    Used by the frontend access screen to validate the shared password before
+    unlocking the demo body. A wrong password returns HTTP 401, not this shape.
+    """
+
+    ok: bool

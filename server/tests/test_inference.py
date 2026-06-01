@@ -115,3 +115,54 @@ def test_selftest(client: TestClient) -> None:
     assert body["predict"] == "pass"
     assert body["gradcam"] == "pass"
     assert body["visualize"] == "pass"
+
+
+def test_health_reports_password_requirement(client: TestClient) -> None:
+    # §C.2/D: the frontend reads this flag to decide whether to show the gate.
+    body = client.get("/api/health").json()
+    assert isinstance(body.get("requires_password"), bool)
+
+
+def test_gradcam_emits_rationale(client: TestClient) -> None:
+    # §D.3: a one-line predicted-class rationale + the CAM stats behind it.
+    r = client.post(
+        "/api/gradcam",
+        data={"eye": "left"},
+        files={"image": ("left.png", _synthetic_fundus(), "image/png")},
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert isinstance(body["rationale"], str) and body["rationale"]
+    assert f"grade {body['target_class']}" in body["rationale"]
+    assert body["cam_pixel_count"] >= 0
+    assert 0.0 <= body["cam_area_frac"] <= 1.0
+    assert body["cam_region"]
+
+
+def test_auth_open_when_no_password(client: TestClient) -> None:
+    # With DEMO_PASSWORD unset (default in tests) the gate is open.
+    r = client.post("/api/auth")
+    assert r.status_code == 200, r.text
+    assert r.json()["ok"] is True
+
+
+def test_password_gate_enforced(monkeypatch: pytest.MonkeyPatch) -> None:
+    # When DEMO_PASSWORD is set: wrong/absent password → 401, correct → 200,
+    # and /api/health advertises the requirement.
+    from server.app import config, security
+
+    monkeypatch.setattr(config.settings, "demo_password", "s3cret")
+    monkeypatch.setattr(security.settings, "demo_password", "s3cret")
+    with TestClient(app) as c:
+        assert c.get("/api/health").json()["requires_password"] is True
+        assert c.post("/api/auth").status_code == 401
+        assert c.post("/api/auth", data={"password": "wrong"}).status_code == 401
+        ok = c.post("/api/auth", data={"password": "s3cret"})
+        assert ok.status_code == 200 and ok.json()["ok"] is True
+        # A protected endpoint rejects a missing password too.
+        denied = c.post(
+            "/api/gradcam",
+            data={"eye": "left"},
+            files={"image": ("left.png", _synthetic_fundus(), "image/png")},
+        )
+        assert denied.status_code == 401

@@ -27,19 +27,25 @@ server/
 
 | Method | Path | Body | Returns |
 |---|---|---|---|
-| GET  | `/api/health`   | — | `{status, model, checkpoint, checkpoint_loaded, device, version, git_sha}` |
+| GET  | `/api/health`   | — | `{status, model, checkpoint, checkpoint_loaded, device, version, git_sha, requires_password}` |
+| POST | `/api/auth`     | multipart `password?` | `{ok: true}` (gate open / match) or 401 |
 | POST | `/api/predict`  | multipart `left?`, `right?`, `password?` | patient-level + `per_eye` |
-| POST | `/api/gradcam`  | multipart `image`, `eye`, `password?`, `target_class?` | `{gradcam_png_b64, attention_overlay_png_b64, target_class}` |
+| POST | `/api/gradcam`  | multipart `image`, `eye`, `password?`, `target_class?` | `{gradcam_png_b64, attention_overlay_png_b64, target_class, rationale, cam_pixel_count, cam_area_frac, cam_region}` |
 | POST | `/api/visualize`| multipart `image`, `eye`, `password?` | `{fov_mask_png_b64, v5_preview_png_b64, od_fovea}` |
 | GET  | `/api/selftest` | query `password?` | per-op pass/fail report |
 
 - **Grad-CAM** is a self-contained torch implementation on EfficientNet's
   `conv_head` (no `pytorch-grad-cam` dependency); JET overlay over the original
-  image. **/api/visualize** returns the 6-panel V5 stage strip (via
+  image. It also emits a backend-generated **predicted-class rationale** (§D.3):
+  a one-line sentence derived purely from CAM geometry (salient-pixel count +
+  centroid region, no LLM), described in neutral image-space terms per NC-14.
+  **/api/visualize** returns the 6-panel V5 stage strip (via
   `pipeline_v5.stage_breakdown`), the FOV mask, and the classical-CV OD/fovea
   payload (`od_fovea`).
 - **Password gate (§C.2):** set `DEMO_PASSWORD` to require a `password` field on
   every endpoint except `/api/health`. Unset → gate **open** (local dev).
+  `/api/health.requires_password` lets the frontend decide whether to show the
+  access screen; `/api/auth` validates the password for that screen.
 - **Safety limits (§C.4):** ≤ 8 MB/image, MIME ∈ {jpeg,png,webp} (else 415),
   decoded ≤ 4096×4096; all decoding in-memory (no disk writes).
 
@@ -107,8 +113,9 @@ a checkpoint (random-init weights still give a valid softmax).
 
 - [x] Bootable API, real V5 preprocessing + model wiring, worst-eye aggregation.
 - [x] Dataset-specific normalize injection (no preprocessing drift).
-- [x] Grad-CAM (live, self-contained), `/api/visualize` (V5 strip + FOV mask +
-      OD/fovea), `/api/selftest`, password gate, safety limits, health provenance.
-- [ ] Frontend wiring of the new endpoints (per-image widget, live Grad-CAM,
-      provenance footer, password screen) — TASK-Demo Part D.
+- [x] Grad-CAM (live, self-contained) + predicted-class rationale, `/api/visualize`
+      (V5 strip + FOV mask + OD/fovea), `/api/selftest`, password gate + `/api/auth`,
+      safety limits, health provenance (incl. `requires_password`).
+- [x] Frontend wiring of the new endpoints (per-image widget, live Grad-CAM +
+      rationale, provenance footer, password screen) — TASK-Demo Part D.
 - [ ] Bundle real checkpoint after Kaggle training (Part A).
