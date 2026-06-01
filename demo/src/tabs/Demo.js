@@ -12,6 +12,8 @@ import { useLang } from '../i18n';
 import { EYEPACS_PAIRS } from './_eyepacsPairs';
 import { analyzeFundus } from './_analyzeFundus';
 import { predictPatient, getHealth } from './_apiPredict';
+import VisionWidget from './_VisionWidget';
+import LiveVisualizationBlock from './_LiveGradcam';
 
 // ---------------------------------------------------------------------------
 // Walk-through cases that share an image with the preprocessing-pipeline
@@ -442,6 +444,10 @@ export default function Demo() {
   // loaded (a boot without a checkpoint runs on random weights — meaningless,
   // so we stay on the simulator and say so).
   const apiReady = !!(health && health.checkpoint_loaded) && useRealModel;
+  // Preprocessing visualizations (/api/visualize, /api/gradcam) only need the
+  // backend reachable — /api/visualize is checkpoint-free, so the "what the
+  // model sees" widget lights up even before Config D is trained.
+  const liveVisuals = !!health && useRealModel;
 
   const D = CONFIGS.D;
 
@@ -574,6 +580,15 @@ export default function Demo() {
         <p style={{ fontSize: 12, color: 'var(--color-text-secondary,#666)', margin: '0 0 8px 0', lineHeight: 1.55 }}>
           {t('demo.subtitle')}
         </p>
+        {/* Framing block (TASK-Demo D.1) — muted, no marketing copy. */}
+        <div style={{
+          fontSize: 11, color: 'var(--color-text-secondary,#777)', lineHeight: 1.6,
+          borderLeft: `2px solid ${C.teal}`, paddingLeft: 10, margin: '0 0 8px 0',
+        }}>
+          <div style={{ fontWeight: 700 }}>{t('demo.framing.line1')}</div>
+          <div>{t('demo.framing.line2')}</div>
+          <div>{t('demo.framing.line3')}</div>
+        </div>
         {/* <div style={{ fontSize: 10, color: C.amberT, background: C.amberBg, padding: '6px 10px', borderRadius: 6, display: 'inline-block' }}>
           ⚠ {t('demo.disclaimer')}
         </div> */}
@@ -601,6 +616,19 @@ export default function Demo() {
             t={t}
           />
         </div>
+
+        {/* Per-image "what the model sees" widget (TASK-Demo D.2). Backed by
+            /api/visualize (preprocessing-only — no checkpoint needed). */}
+        {liveVisuals && (leftImg || rightImg) && (
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 12 }}>
+            {leftImg && (
+              <VisionWidget src={leftImg.src} eye="left" name={leftImg.name} enabled={liveVisuals} t={t} />
+            )}
+            {rightImg && (
+              <VisionWidget src={rightImg.src} eye="right" name={rightImg.name} enabled={liveVisuals} t={t} />
+            )}
+          </div>
+        )}
 
         <div style={{ marginTop: 14 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary,#666)', marginBottom: 6 }}>
@@ -748,13 +776,19 @@ export default function Demo() {
             </div>
           )}
 
-          {/* Grad-CAM heatmap + attention overlay */}
-          <VisualizationBlock
-            caseRef={caseRef}
-            leftPresent={!!leftImg}
-            rightPresent={!!rightImg}
-            t={t}
-          />
+          {/* Grad-CAM heatmap + attention overlay.
+              Live (from the checkpoint) for custom uploads when the real model
+              is active; pre-rendered walkthrough assets otherwise. */}
+          {apiReady && caseRef === null && eyes.length > 0 ? (
+            <LiveVisualizationBlock eyes={eyes} t={t} />
+          ) : (
+            <VisualizationBlock
+              caseRef={caseRef}
+              leftPresent={!!leftImg}
+              rightPresent={!!rightImg}
+              t={t}
+            />
+          )}
         </Sec>
       )}
 
@@ -901,6 +935,13 @@ export default function Demo() {
         {apiReady ? t('demo.modelStatus.footerReal') : t('demo.modelStatus.footerSim')}
         {' '}Reference metrics on held-out EyePACS: F1={D.f1.toFixed(3)}, AUC={D.auc.toFixed(3)}, κ={D.k.toFixed(3)}.
       </Note>
+      {/* Provenance string (TASK-Demo D.7) — what the committee can quote. */}
+      {health && (
+        <div style={{ fontSize: 9, color: C.gray, marginTop: 4, fontFamily: 'monospace' }}>
+          version {health.version} · git {health.git_sha || 'n/a'} · checkpoint {health.checkpoint}
+          {health.checkpoint_loaded ? '' : ' (not loaded)'} · {health.device}
+        </div>
+      )}
 
       <div style={{ marginTop: 14 }}>
         <button onClick={() => reset(true)} style={{
