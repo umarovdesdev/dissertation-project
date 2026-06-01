@@ -59,7 +59,7 @@ warning and falls back to ImageNet — **don't** demo Config D that way.
 ## Local dev
 
 ```bash
-cd E:/dissertation-project
+cd <repo-root>   # the dissertation-project checkout
 # 1. Put the trained artifacts in place:
 cp experiments/outputs/exp1/checkpoints/D_fold0/best_model.pt server/checkpoints/config_d_fold0.pt
 cp experiments/data/processed/eyepacs_norm_stats.json        server/checkpoints/

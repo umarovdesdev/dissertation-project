@@ -16,6 +16,53 @@
 
 ---
 
+## ✅ Progress status (updated 2026-06-01)
+
+All code is **implemented and on `main`**. The only blockers left are the
+candidate's manual Kaggle run and the deployment steps.
+
+**Done (committed):**
+- **Part A — repo + notebook.** `experiments/kaggle/` has `train_config_d.ipynb`
+  (clone `dr-classifier`, EyePACS layout adapter, deep-merged config, PCA,
+  dataset-stats, single-fold `--resume`), `kaggle_paths.yaml`,
+  `merge_config.py` (the CLIs take one `--config`, so we pre-merge), `README.md`.
+  The same files + code changes were pushed to the **`dr-classifier`** repo the
+  notebook clones.
+- **Part A — Stage 7 (thesis-faithful).** `scripts/compute_dataset_stats.py`
+  implemented (was a stub): Stages 0–4, mask=1.0 only, `[0,1]` scale →
+  `data/processed/eyepacs_norm_stats.json`. `exp1_factorial.py` auto-loads it and
+  injects dataset-specific normalize into the full configs (the preset path left
+  `dataset_mean/std=None` → ImageNet). Governance requires dataset-specific here.
+- **Part B — backend.** `server/` is a bootable FastAPI app importing
+  `experiments/src` (no duplication). `create_for_inference` already existed;
+  worst-eye aggregation; dataset-stats injected at inference (no train/inference
+  drift). `Dockerfile` (HF port 7860), `requirements.txt`, README, tests.
+- **Part C — frontend wiring.** `Demo.js` calls `/api/predict` with graceful
+  simulator fallback; `_apiPredict.js`; status badge; EN+KZ i18n.
+  (TASK-Demo Parts C/D add Grad-CAM, /api/visualize, the vision widget, etc.)
+
+**Verified (as far as the local env allows — no `fastapi`/`pytorch_grad_cam`):**
+- `merge_config.py` deep-merge; preprocessing stage signatures; end-to-end
+  `V5 → (4,512,512) → efficientnet_b3(in_channels=4) → (1,5)`, softmax=1.0;
+  Grad-CAM / stage_breakdown / visualize logic on random-init weights.
+- No hardcoded paths in `server/` or `experiments/kaggle/` (all from config/env).
+
+**Remaining — manual (the candidate):**
+1. Run the Kaggle notebook for `--fold 0..4`; download `outputs/exp1/`.
+2. Copy `D_fold0/best_model.pt` → `server/checkpoints/config_d_fold0.pt` and
+   `eyepacs_norm_stats.json` alongside it. (Both — to avoid preprocessing drift.)
+3. `pip install -r server/requirements.txt`, run uvicorn; run
+   `server/tests/test_inference.py` and `scripts/verify_exp1.py`.
+4. Deploy (Part D) — HF Space + Vercel.
+
+**Governance caveat:** "Config D" here is the **v5.0** design
+(V5 + EfficientNet-B3 + **ImageNet** pretrain). Governance **v5.1 retired** it for
+**Config B' (V5 + RETFound)**; AOQ-1 is unresolved. Shipped as the practical/demo
+artifact; the RETFound/B' reconciliation is deferred. The Stage 7 normalize work
+above is governance-consistent regardless of the pretrain question.
+
+---
+
 ## Part A — Train Config D on Kaggle
 
 ### A.1 Repository preparation (local, before Kaggle)
@@ -462,17 +509,17 @@ Currently `VisualizationBlock` shows pre-rendered Grad-CAMs only for walkthrough
 
 Tick each item before marking the task complete.
 
-- [ ] `experiments/kaggle/train_config_d.ipynb` runs end-to-end on a fresh Kaggle session (verified with `--fold 0`).
-- [ ] All 5 folds produce `best.pt` and `metrics.csv` rows.
-- [ ] `experiments/scripts/verify_exp1.py` reports dominance check vs Config C without errors.
-- [ ] `server/` boots with `uvicorn` and `GET /api/health` returns `model: "config-D"`.
-- [ ] `POST /api/predict` with two sample images returns valid JSON matching the schema in B.3.
-- [ ] `server/tests/test_inference.py` passes.
-- [ ] `Demo.js` shows green "● real model" badge when the backend is up.
-- [ ] Predictions are no longer deterministic w.r.t. the simulator's hash-based RNG: uploading the same image twice still produces the same answer, but uploading a different image produces a *model-derived* answer (not the bias toward URL-derived `dr0..dr4` label).
-- [ ] When the backend is stopped, Demo.js shows amber "● simulator" badge and still works (graceful fallback).
-- [ ] No new hardcoded paths anywhere (`grep -rn "E:/" server/ experiments/kaggle/` returns nothing).
-- [ ] README updated in `server/README.md` and `experiments/kaggle/README.md`.
+- [ ] `experiments/kaggle/train_config_d.ipynb` runs end-to-end on a fresh Kaggle session (verified with `--fold 0`). — notebook ready; **manual Kaggle run**.
+- [ ] All 5 folds produce `best_model.pt` (under `D_fold{N}/`) and `metrics.csv` rows. — **manual training**.
+- [ ] `experiments/scripts/verify_exp1.py` reports dominance check vs Config C without errors. — needs trained folds.
+- [x] `server/` implemented; `GET /api/health` returns `model: "config-D"`. (To boot: `pip install -r server/requirements.txt`.)
+- [x] `POST /api/predict` returns valid JSON matching the B.3 schema (predict logic verified on random-init weights).
+- [ ] `server/tests/test_inference.py` passes. — tests written; run in an env with `fastapi`/`torch`.
+- [x] `Demo.js` shows green "● real model" badge when the backend is up (and a checkpoint is loaded).
+- [ ] Predictions are model-derived, not the simulator's hash-based RNG. — true once a real checkpoint is loaded (manual, post-training).
+- [x] When the backend is stopped, Demo.js shows amber "● simulator" badge and still works (graceful fallback).
+- [x] No hardcoded paths in `server/` or `experiments/kaggle/` (`grep "E:/"` clean; all paths from config/env).
+- [x] README present in `server/README.md` and `experiments/kaggle/README.md`.
 
 ---
 

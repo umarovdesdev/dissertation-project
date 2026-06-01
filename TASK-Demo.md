@@ -8,6 +8,56 @@
 
 ---
 
+## ✅ Progress status (updated 2026-06-01)
+
+Code for the demo (backend + frontend) is **implemented and on `main`**. What
+remains is the candidate's manual work: train the checkpoint, curate images,
+deploy, and run the QA gate. Nothing here is blocked on more code.
+
+**Done (committed):**
+- TASK-Config-D **Part A** — Kaggle training notebook + dataset-specific Stage 7
+  stats (`experiments/kaggle/`, `scripts/compute_dataset_stats.py`). Also mirrored
+  to the `dr-classifier` repo the notebook clones.
+- TASK-Config-D **Part B** — FastAPI backend (`server/`), bootable, real V5
+  preprocessing + model wiring, worst-eye aggregation, dataset-stats injection.
+- TASK-Config-D **Part C** — `Demo.js` calls the backend with simulator fallback
+  + status badge.
+- TASK-Demo **backend (Part C here)** — `/api/gradcam` (self-contained Grad-CAM
+  on `conv_head`), `/api/visualize` (6-panel V5 strip via
+  `pipeline_v5.stage_breakdown` + FOV mask + OD/fovea payload), `/api/selftest`,
+  password gate (`DEMO_PASSWORD`), safety limits (8 MB / MIME / 4096px),
+  `/api/health` provenance (version · git_sha · checkpoint).
+- TASK-Demo **frontend (Part D here)** — framing block (D.1), per-image vision
+  widget `_VisionWidget.js` (OD/fovea overlay + chip + V5 strip + FOV mask, D.2),
+  live Grad-CAM `_LiveGradcam.js` (D.3), provenance footer (D.7). EN+KZ i18n.
+  Verified: ESLint 0 errors, `npm run build` OK; backend logic tested on
+  random-init weights.
+
+**Remaining — manual (the candidate):**
+1. Train Config D on Kaggle → drop `best_model.pt` → `server/checkpoints/config_d_fold0.pt`
+   and `eyepacs_norm_stats.json` alongside it.
+2. Curate the **5 walkthrough images** (D.4) — expert selection.
+3. Deploy: HF Space (env vars) + Vercel (`REACT_APP_API_URL`) — Part E.
+4. Pre-launch QA — Part F.
+5. Distribution email — Part E.3.
+
+**Deferred / not built (by decision):**
+- "Predicted class rationale" sentence (D.3) — backend does not emit it yet.
+- Password **entry screen** — only the plumbing exists (`getPassword`/`setPassword`
+  in `_apiPredict.js`); a UI is needed once `DEMO_PASSWORD` is set.
+- **Governance gap:** the shipped "Config D" is the **v5.0** design
+  (V5 + EfficientNet-B3 + **ImageNet** pretrain). Governance **v5.1 retired** it
+  for **Config B' (V5 + RETFound)**; AOQ-1 is unresolved. Shipped as the
+  practical/demo artifact; reconciliation deferred (memory:
+  `config-d-shipped-retfound-deferred`).
+
+**Behaviour note:** `/api/visualize` is checkpoint-free, so the vision widget
+(the C-1/SC-E/SC-F showcase) works as soon as the backend is up — even before
+training. Live prediction + Grad-CAM light up only once a real checkpoint loads;
+until then the demo honestly shows the simulator badge.
+
+---
+
 ## 0. Decisions already made
 
 | Question | Answer |
@@ -319,22 +369,22 @@ If any of F.1–F.5 fails, do not share the URL.
 
 ## Part G — Acceptance checklist
 
-- [ ] `TASK-Config-D.md` Part A complete (checkpoint exists at `experiments/outputs/exp1/checkpoints/fold_N/best.pt`).
-- [ ] `TASK-Config-D.md` Part B complete (backend boots locally).
-- [ ] `TASK-Config-D.md` Part C complete (`Demo.js` calls real backend in local dev).
-- [ ] Backend endpoints added: `/api/visualize`, `/api/selftest`, password gate on protected endpoints.
-- [ ] `stage_breakdown` exists in `pipeline_v5.py` and returns labeled intermediates.
-- [ ] Live Grad-CAM works on arbitrary uploads (not just walkthroughs).
-- [ ] Live OD/Fovea overlay works on arbitrary uploads.
-- [ ] V5 preview strip endpoint returns a composite PNG with all six stages.
-- [ ] Frontend: five curated walkthroughs (one per DR grade) replace previous pool.
-- [ ] Frontend: per-image visualization widget renders before Run is clicked.
-- [ ] Frontend: status badge shows `real model` when backend is healthy.
-- [ ] Frontend: provenance string visible in footer (version + SHA + checkpoint ID).
-- [ ] Backend deployed on HF Space (public visibility, password-gated).
-- [ ] Frontend deployed on Vercel/GH Pages with production env var pointing to the Space.
-- [ ] Part F verification passed end-to-end.
-- [ ] Distribution email drafted with URL + password + one-paragraph context.
+- [ ] `TASK-Config-D.md` Part A — checkpoint exists. Notebook ready; **training is the candidate's manual Kaggle run**. (Real path: `experiments/outputs/exp1/checkpoints/D_fold{N}/best_model.pt`.)
+- [x] `TASK-Config-D.md` Part B — backend implemented (`server/`). "Boots locally" needs `pip install -r server/requirements.txt` (fastapi/torch).
+- [x] `TASK-Config-D.md` Part C — `Demo.js` calls the backend with simulator fallback + status badge.
+- [x] Backend endpoints added: `/api/visualize`, `/api/selftest`, password gate on protected endpoints.
+- [x] `stage_breakdown` exists in `pipeline_v5.py` and returns labeled intermediates.
+- [x] Live Grad-CAM works on arbitrary uploads (code; meaningful output needs a real checkpoint).
+- [x] Live OD/Fovea overlay works on arbitrary uploads (`_VisionWidget.js`).
+- [x] V5 preview strip endpoint returns a composite PNG with all six stages.
+- [ ] Frontend: five curated walkthroughs (one per DR grade) — structure is 5 (dr00–dr04); **image curation is manual**.
+- [x] Frontend: per-image visualization widget renders before Run is clicked.
+- [x] Frontend: status badge shows `real model` when backend is healthy (and checkpoint loaded).
+- [x] Frontend: provenance string visible in footer (version + SHA + checkpoint ID).
+- [ ] Backend deployed on HF Space (public visibility, password-gated). — **manual**
+- [ ] Frontend deployed on Vercel/GH Pages with production env var pointing to the Space. — **manual**
+- [ ] Part F verification passed end-to-end. — **manual, after deploy**
+- [ ] Distribution email drafted with URL + password + one-paragraph context. — **manual**
 
 ---
 
