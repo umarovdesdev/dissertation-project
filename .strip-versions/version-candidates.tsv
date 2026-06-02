@@ -1,9 +1,0 @@
-version	commit-sha	commit-date	inferred	method	evidence
-v1.0.0	015436c038c156c830aeb91ca2f0d4b50eb23369	2026-03-08	yes	msg-grep	Commit "feat meat V1"; earliest explicit governance version marker, mapped to 1.0.0 (predates 3-component scheme).
-v2.0.0	593ce720dfb1e3015a3901290dd8dce1f56796d4	2026-03-09	no	msg-grep	Commit "V2"; explicit version marker.
-v3.0.0	fefd7c97662615089667b09ac45655041002a0b6	2026-03-14	no	msg-grep	Commit "docs: update README with V3.0 pipeline description"; final commit of the V3.0 governance-sync series (95eaaef "V3 checked" -> 03-14 sync).
-v4.0.0	291b70ac79dddd9a486938c28f81c95c06745733	2026-03-24	no	msg-grep	Commit "V4 synchrone"; most recent V4 commit (V4 series 12a00c1..291b70a on 03-24).
-v5.0.0	8514bf394f24e9286d76c6e0f42e51a1afac32aa	2026-04-09	no	version-sync	VERSION_SYNC.md header 5.0 (Method A); commit "feat V5".
-v5.1.0	e91212e24469dab1b1c5f6c41d578c98163d4717	2026-05-14	no	version-sync	VERSION_SYNC.md header 5.1 (Method A); governance sync commit.
-v5.2.0	2a207fe06ead2eb7df93b01fde858875350168b6	2026-05-28	no	version-sync	VERSION_SYNC.md header 5.2 (Method A); RETFound multi-modal corpus refinement.
-v5.3.0	835c33c8006c45ba57f69d7f07b9af27c07b4086	2026-05-28	no	version-sync	VERSION_SYNC.md header 5.3 (Method A); paradigmatic framing P1/P2; tip of main.

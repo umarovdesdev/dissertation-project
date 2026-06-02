@@ -1,4 +1,0 @@
- M .claude/settings.local.json
-?? .strip-versions/preflight-status.txt
-?? STRIP_VERSIONS_FIX_PLAN.md
-?? STRIP_VERSIONS_PLAN.md
