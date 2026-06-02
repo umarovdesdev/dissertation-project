@@ -100,4 +100,4 @@ Version markers (`v5.X`, `V5.X`, `version 5.X`, etc.) appear **only inside `thes
 
 `V5` (uppercase, no decimal) is the proper noun for the 8-stage preprocessing pipeline and is preserved everywhere.
 
-Version bumps follow semantic versioning: `MAJOR.MINOR.PATCH`. See `thesis/governance/VERSIONING_POLICY.md` for the full scheme, detection regexes, and workflow. `STRIP_VERSIONS_PLAN.md` (repo root) is the automated enforcement.
+Version bumps follow semantic versioning: `MAJOR.MINOR.PATCH`. See `thesis/governance/VERSIONING_POLICY.md` for the full scheme, detection regexes, and workflow. Containment outside `thesis/` is enforced by the version-marker scan in §6 of that policy.

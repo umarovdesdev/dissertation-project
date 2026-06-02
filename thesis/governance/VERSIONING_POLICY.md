@@ -87,13 +87,11 @@ Pre-V2 history is tagged `v1.0.0` (inferred — predates explicit versioning).
 5. Tag the commit: `git tag -a vX.Y.Z -m "Governance vX.Y.Z"`.
 6. Push commit and tag.
 7. Bring dependent files (literature, chapters) to the new version. Re-commit; do not re-tag.
-8. Once governance is stable at the new version, run `STRIP_VERSIONS_PLAN.md` to bring `defense/`, `demo/`, `experiments/` into compliance.
+8. Once governance is stable at the new version, run the version-marker scan (§6) and remove any STRIP-class markers that have appeared in `defense/`, `demo/`, `experiments/`.
 
 ## 6. Enforcement
 
-`STRIP_VERSIONS_PLAN.md` (repo root) is the automated enforcement of §1. Its verification phase fails if any STRIP-class marker remains outside `thesis/`.
-
-Recommended additional enforcement — a pre-push or CI hook:
+Enforcement of §1 is the version-marker scan below — run as a pre-push or CI hook. It fails if any STRIP-class marker remains outside `thesis/`:
 ```bash
 rg -nE '\b[Vv][0-9]+\.[0-9]+|\bversion\s+[0-9]+\.[0-9]+' \
   --glob '!thesis/**' \
