@@ -215,7 +215,24 @@
       "Bash(rm -rf demo/public/webApp)",
       "Read(//e/dissertation-project/**)",
       "Bash(rg -n -e 'v[0-9]+\\\\.[0-9]+' -e 'V[0-9]+\\\\.[0-9]+' -e 'ersion[: ]+[0-9]+\\\\.[0-9]+' --glob !thesis/** --glob !.git/** --glob !**/node_modules/** --glob !**/build/** .)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "PowerShell($dirs = @\\(\"E:\\\\datasets\",\"E:\\\\\",\"C:\\\\Users\\\\yesmu\\\\Downloads\",\"C:\\\\Users\\\\yesmu\"\\); foreach \\($d in $dirs\\) { if \\(Test-Path $d\\) { Write-Output \"=== $d ===\"; Get-ChildItem -Path $d -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'config|kaggle|aptos|eyepacs|dest|output' } | Select-Object LastWriteTime, FullName } })",
+      "PowerShell($k = Get-Command kaggle -ErrorAction SilentlyContinue; if \\($k\\) { Write-Output \"kaggle: $\\($k.Source\\)\" } else { Write-Output \"kaggle CLI: NOT FOUND\" }; Write-Output \"--- .kaggle contents ---\"; Get-ChildItem \"C:\\\\Users\\\\yesmu\\\\.kaggle\" -ErrorAction SilentlyContinue | Select-Object Name, Length, LastWriteTime; Write-Output \"--- python -m kaggle? ---\"; python -c \"import kaggle; print\\('kaggle module OK'\\)\" 2>$null; if \\(-not $?\\) { Write-Output \"python kaggle module: NOT importable \\(likely needs creds at import\\)\" })",
+      "PowerShell(New-Item *)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(wsl -l -v 2>&1; Write-Output \"--- conda in wsl ---\"; wsl bash -lc \"which conda; conda env list 2>/dev/null\" 2>&1)",
+      "PowerShell(wsl -d Ubuntu bash -lc \"which conda; echo '---envs---'; conda env list 2>/dev/null; echo '---deps in dr-classifier---'; conda run -n dr-classifier python -c 'import fastapi,uvicorn,torch,timm,cv2; print\\(\\\\\"OK torch\\\\\",torch.__version__,\\\\\"cuda\\\\\",torch.cuda.is_available\\(\\)\\)' 2>&1 | tail -5\" 2>&1)",
+      "PowerShell(wsl -d Ubuntu bash -lc \"conda env list; echo '=== probe dr-classifier ==='; conda run -n dr-classifier python /mnt/e/dissertation-project/server/_probe_env.py\" 2>&1)",
+      "PowerShell(wsl -d Ubuntu bash -lc \"ls -d ~/miniconda3 ~/anaconda3 ~/miniforge3 /opt/conda 2>/dev/null; echo '---'; for c in ~/miniconda3/bin/conda ~/anaconda3/bin/conda ~/miniforge3/bin/conda /opt/conda/bin/conda; do [ -x \\\\$c ] && echo FOUND:\\\\$c; done; echo '--- envs dir ---'; ls ~/miniconda3/envs ~/anaconda3/envs ~/miniforge3/envs 2>/dev/null\" 2>&1)",
+      "PowerShell(wsl -d Ubuntu bash /mnt/e/dissertation-project/server/_find_conda.sh 2>&1)",
+      "PowerShell(wsl -d Ubuntu /home/yesmu/miniconda3/bin/conda run -n dr-classifier python /mnt/e/dissertation-project/server/_probe_env.py 2>&1)",
+      "PowerShell(wsl -d Ubuntu /home/yesmu/miniconda3/bin/conda run -n dr-classifier pip install \"fastapi>=0.115\" \"uvicorn[standard]>=0.32\" \"python-multipart>=0.0.9\" \"pydantic>=2.0\" 2>&1 | Select-Object -Last 15)",
+      "PowerShell(wsl -d Ubuntu bash /mnt/e/dissertation-project/server/_run_server.sh)",
+      "PowerShell(try { $h = Invoke-RestMethod -Uri \"http://127.0.0.1:8000/api/health\" -TimeoutSec 10; Write-Output \"=== /api/health ===\"; $h | ConvertTo-Json } catch { Write-Output \"health via 127.0.0.1 failed: $\\($_.Exception.Message\\)\"; try { $ip = \\(wsl -d Ubuntu hostname -I\\).Trim\\(\\).Split\\(\\)[0]; Write-Output \"trying WSL IP $ip\"; \\(Invoke-RestMethod -Uri \"http://$ip`:8000/api/health\" -TimeoutSec 10\\) | ConvertTo-Json } catch { Write-Output \"WSL IP also failed: $\\($_.Exception.Message\\)\" } })",
+      "PowerShell(try { $s = Invoke-RestMethod -Uri \"http://127.0.0.1:8000/api/selftest\" -TimeoutSec 60; Write-Output \"=== /api/selftest ===\"; $s | ConvertTo-Json -Depth 6 } catch { Write-Output \"selftest failed: $\\($_.Exception.Message\\)\"; if \\($_.ErrorDetails\\) { $_.ErrorDetails.Message } })",
+      "PowerShell(npm start *)",
+      "PowerShell($L = \"E:\\\\dissertation-project\\\\demo\\\\public\\\\fundus-examples\\\\left.png\"; $R = \"E:\\\\dissertation-project\\\\demo\\\\public\\\\fundus-examples\\\\right.png\"; Write-Output \"=== predict \\(browser-like, Origin localhost:3000\\) ===\"; curl.exe -s -i -X POST \"http://localhost:8000/api/predict\" -H \"Origin: http://localhost:3000\" -F \"left=@$L\" -F \"right=@$R\" 2>&1 | Select-String -Pattern \"HTTP/|access-control-allow-origin|^\\\\{|pred|probs|confidence|per_eye\")",
+      "Bash(grep -iE \"pt$|checkpoint|norm_stats|settings.local|\\\\.pt\")"
     ]
   }
 }
