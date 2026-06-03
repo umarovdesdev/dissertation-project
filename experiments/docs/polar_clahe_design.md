@@ -197,7 +197,7 @@ Current:  flat-field → upgraded_clahe (8×8 rect, dual clip, NO interpolation)
 Proposed: flat-field → polar_clahe (Nr×Nθ polar, dual clip + vessel adaptive, WITH interpolation)
 ```
 
-Stage 5 in V5 pipeline would use polar_clahe instead of upgraded_clahe.
+Stage 5 in the pipeline would use polar_clahe instead of upgraded_clahe.
 All other stages unchanged.
 
 ---

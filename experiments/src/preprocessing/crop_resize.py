@@ -1,8 +1,8 @@
 """
-Stage 1 (V4): FOV Crop + Isotropic Resize + FOV Mask generation.
+Stage 1: FOV Crop + Isotropic Resize + FOV Mask generation.
 
-Replaces Hough-circle FOV detection (V3 ``fov.py``) with PIL-based foreground
-detection from the V4 spec.  Left/right edge pixels are sampled to estimate
+Replaces Hough-circle FOV detection (``fov.py``) with PIL-based foreground
+detection from the spec.  Left/right edge pixels are sampled to estimate
 background intensity; any pixel brighter than background + 10 is foreground.
 The bounding box of the foreground mask is used as the crop region.
 

@@ -1,4 +1,4 @@
-# Kaggle — Train Config D (Full V5 + EfficientNet-B3)
+# Kaggle — Train Config D (full pipeline + EfficientNet-B3)
 
 Trains Experiment 1 / Config D on EyePACS, one fold per Kaggle session, working
 around the 12 h limit. Mirrors `experiments/` and is consumed from the

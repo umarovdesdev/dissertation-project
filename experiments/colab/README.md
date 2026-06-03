@@ -1,12 +1,12 @@
-# Google Colab — Train Config D (Full V5 + EfficientNet-B3), cached + Kaggle-persisted
+# Google Colab — Train Config D (full pipeline + EfficientNet-B3), cached + Kaggle-persisted
 
-The Colab runner for the real Experiment-1 / Config-D run (Full V5 +
+The Colab runner for the real Experiment-1 / Config-D run (full pipeline +
 EfficientNet-B3, 4-channel, Focal Loss, 5-fold patient-level CV), engineered so it
 actually finishes on Colab.
 
 Two engineering decisions make it viable (see `TASK.md` §2):
 
-1. **V5 Stage 0–4 cache (throughput fix).** The deterministic Stages 0–4 (OD/fovea,
+1. **Stage 0–4 cache (throughput fix).** The deterministic Stages 0–4 (OD/fovea,
    FOV crop+resize, flat-field) are the expensive part and carry no train-time
    randomness, so they are computed **once** and cached as 4-channel PNGs. Training
    then runs only the stochastic Stages 5–7 per epoch → the epoch becomes
@@ -31,7 +31,7 @@ folder at runtime — it is self-contained.
 
 | MODE | What it does | When |
 |---|---|---|
-| `"build_cache"` | Download dataset → V5 Stages 0–4 cache + dataset-stats + PCA → push as the Kaggle dataset `<user>/eyepacs-v5-cache-<dataset>`. | **Once.** ~1–2 h (EyePACS) / minutes (APTOS test). |
+| `"build_cache"` | Download dataset → Stages 0–4 cache + dataset-stats + PCA → push as the Kaggle dataset `<user>/eyepacs-cache-<dataset>`. | **Once.** ~1–2 h (EyePACS) / minutes (APTOS test). |
 | `"train"` | Pull the cache + last checkpoint → train one fold (GPU-bound) → push checkpoints to `<user>/dr-config-d-ckpts-<dataset>`. | **Per fold** (`FOLD=0..4`). |
 
 `DATASET` switches the source: `"eyepacs"` (real, `dreamer07/eyepacs`, ~35k) or
@@ -60,7 +60,7 @@ credentials live only in your Colab session.
 
 1. Open the notebook in Colab. `Runtime → Change runtime type → T4 GPU`.
 2. **Cell 1:** set `KAGGLE_USERNAME`, `DATASET="eyepacs"`.
-3. **Build once:** `MODE="build_cache"` → *Run all*. Pushes `<user>/eyepacs-v5-cache-eyepacs`.
+3. **Build once:** `MODE="build_cache"` → *Run all*. Pushes `<user>/eyepacs-cache-eyepacs`.
 4. **Train per fold:** `MODE="train"`, `FOLD=0` → *Run all*. Repeat with `FOLD=1..4`.
    * **fold 0 alone unblocks the demo.** Folds 1–4 only feed `verify_exp1.py`'s
      dominance check (which also needs a Config C run — out of scope here).
@@ -93,7 +93,7 @@ Only this EyePACS checkpoint is thesis-faithful.
   OOMs at 512px, uncomment `training.batch_size=8` in cell 6d.
 * The cache is **preset-specific for Stages 0–4** (`efficientnet`). Configs B and D
   share Stages 0–4, so one cache serves both; baseline configs (A/C) must run
-  **without** `v5_cache_dir`.
+  **without** `cache_dir`.
 * The cached path is **bit-identical** to the live pipeline (verified max|Δ| = 0.0,
   inference + seeded training) — the same pipeline object finishes both paths via
   `finish_from_cache`, so there is no train/inference drift.
@@ -101,8 +101,8 @@ Only this EyePACS checkpoint is thesis-faithful.
 ## ⚠ Prerequisite: the cloned repo must be current
 
 The notebook clones `yesmukhamedov/dr-classifier`. That repo must contain this
-branch's `experiments/` — in particular `scripts/precompute_v5_cache.py`, the
+branch's `experiments/` — in particular `scripts/precompute_cache.py`, the
 `precompute_deterministic`/`finish_from_cache` split in
-`src/preprocessing/pipeline_v5.py`, `CachedEyePACSDataset` in `src/data/datasets.py`,
-and the `paths.v5_cache_dir` wiring in `src/experiments/exp1_factorial.py`. If it is
+`src/preprocessing/pipeline.py`, `CachedEyePACSDataset` in `src/data/datasets.py`,
+and the `paths.cache_dir` wiring in `src/experiments/exp1_factorial.py`. If it is
 stale, mirror the latest `experiments/` tree into it first.

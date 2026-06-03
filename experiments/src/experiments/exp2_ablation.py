@@ -1,7 +1,7 @@
 """Experiment 2: Preprocessing Component Ablation + Parameter Sweeps (H-2).
 
 Part A — Component ablation:
-  7 V5 pipeline levels trained on EyePACS with k-fold CV using EfficientNet-B3.
+  7 pipeline levels trained on EyePACS with k-fold CV using EfficientNet-B3.
   Image quality metrics (CNR, Entropy, SSIM) measured on sample images.
 
 Part B — CLAHE threshold sensitivity sweep.
@@ -23,25 +23,25 @@ from torch.utils.data import DataLoader
 from src.data.datasets import EyePACSDataset, IDRiDDataset
 from src.data.splits import PatientLevelKFold
 from src.models.factory import create_model
-from src.preprocessing.pipeline_v5 import PreprocessingPipelineV5
-from src.preprocessing.config import PreprocessingV5Config
+from src.preprocessing.pipeline import PreprocessingPipeline
+from src.preprocessing.config import PreprocessingConfig
 from src.training.checkpoint import CheckpointManager
 from src.training.trainer import Trainer
 from src.utils.image_quality import compute_all_quality_metrics
 from src.utils.seed import set_seed
 
 
-class _V5PipelineAdapter:
-    """Wraps PreprocessingPipelineV5 to return numpy HWC uint8 instead of torch.Tensor.
+class _PipelineAdapter:
+    """Wraps PreprocessingPipeline to return numpy HWC uint8 instead of torch.Tensor.
 
     datasets.py.__getitem__ expects preprocessing to return a numpy array
     (it handles float conversion and HWC→CHW transposition itself).
-    PreprocessingPipelineV5 returns a normalised torch.Tensor (CHW float32).
+    PreprocessingPipeline returns a normalised torch.Tensor (CHW float32).
     This adapter converts the tensor back to numpy HWC uint8 so datasets.py
     can process it correctly.
     """
 
-    def __init__(self, pipeline: "PreprocessingPipelineV5") -> None:
+    def __init__(self, pipeline: "PreprocessingPipeline") -> None:
         self._pipeline = pipeline
 
     def __call__(self, image: np.ndarray) -> np.ndarray:
@@ -93,8 +93,8 @@ _ABLATION_LEVELS: list[dict] = [
                       use_brightness_contrast=True, use_shear=True, use_stretch=True),
     },
     {
-        "name": "full_v5",
-        "description": "All V5 stages 0+1+2+3+4+5+6+7",
+        "name": "full",
+        "description": "All stages 0+1+2+3+4+5+6+7",
         "flags": dict(use_canonical_flip=True, use_od_fovea_rotation=True,
                       use_flat_field=True, use_clahe=True, use_pca_color=True,
                       use_brightness_contrast=True, use_shear=True, use_stretch=True),
@@ -129,49 +129,49 @@ def _load_eyepacs_index(
     return paths, labels, pids
 
 
-def _build_v5_pipeline(
-    v5_cfg: dict[str, Any],
+def _build_pipeline(
+    prep_cfg: dict[str, Any],
     level_flags: dict[str, bool],
     is_training: bool,
-) -> PreprocessingPipelineV5:
-    """Instantiate a PreprocessingPipelineV5 for a given ablation level.
+) -> PreprocessingPipeline:
+    """Instantiate a PreprocessingPipeline for a given ablation level.
 
     Args:
-        v5_cfg: The ``preprocessing_v5`` section of the merged config dict.
+        prep_cfg: The ``preprocessing`` section of the merged config dict.
         level_flags: Toggle overrides for this ablation level (from ``_ABLATION_LEVELS``).
         is_training: Whether to enable stochastic CLAHE and augmentation.
 
     Returns:
-        Configured :class:`PreprocessingPipelineV5` instance.
+        Configured :class:`PreprocessingPipeline` instance.
     """
-    preproc_config = PreprocessingV5Config(
-        target_size=v5_cfg.get("target_size", 512),
-        flat_field_sigma=v5_cfg.get("flat_field_sigma", 45.0),
-        flat_field_mode=v5_cfg.get("flat_field_mode", "adaptive"),
-        flat_field_sigma_factor=v5_cfg.get("flat_field_sigma_factor", 0.07),
-        flat_field_mask_only=v5_cfg.get("flat_field_mask_only", True),
-        clahe_clip_factor=v5_cfg.get("clahe_clip_factor", 2.0),
-        clahe_global_threshold=v5_cfg.get("clahe_global_threshold", 0.01),
-        clahe_tile_grid_size=tuple(v5_cfg.get("clahe_tile_grid_size", [8, 8])),
-        clahe_train_prob=v5_cfg.get("clahe_train_prob", 0.8),
-        rotation_sigma=v5_cfg.get("rotation_sigma", 13.0),
-        rotation_clip=v5_cfg.get("rotation_clip", 40.0),
-        zoom_range=tuple(v5_cfg.get("zoom_range", [0.9, 1.1])),
-        shear_range=tuple(v5_cfg.get("shear_range", [-2.0, 2.0])),
-        shear_prob=v5_cfg.get("shear_prob", 0.3),
-        pca_color_sigma=v5_cfg.get("pca_color_sigma", 0.1),
-        pca_color_prob=v5_cfg.get("pca_color_prob", 0.5),
-        brightness_alpha_range=tuple(v5_cfg.get("brightness_alpha_range", [0.9, 1.1])),
-        brightness_beta_range=tuple(v5_cfg.get("brightness_beta_range", [-10.0, 10.0])),
-        bc_prob=v5_cfg.get("bc_prob", 0.5),
+    preproc_config = PreprocessingConfig(
+        target_size=prep_cfg.get("target_size", 512),
+        flat_field_sigma=prep_cfg.get("flat_field_sigma", 45.0),
+        flat_field_mode=prep_cfg.get("flat_field_mode", "adaptive"),
+        flat_field_sigma_factor=prep_cfg.get("flat_field_sigma_factor", 0.07),
+        flat_field_mask_only=prep_cfg.get("flat_field_mask_only", True),
+        clahe_clip_factor=prep_cfg.get("clahe_clip_factor", 2.0),
+        clahe_global_threshold=prep_cfg.get("clahe_global_threshold", 0.01),
+        clahe_tile_grid_size=tuple(prep_cfg.get("clahe_tile_grid_size", [8, 8])),
+        clahe_train_prob=prep_cfg.get("clahe_train_prob", 0.8),
+        rotation_sigma=prep_cfg.get("rotation_sigma", 13.0),
+        rotation_clip=prep_cfg.get("rotation_clip", 40.0),
+        zoom_range=tuple(prep_cfg.get("zoom_range", [0.9, 1.1])),
+        shear_range=tuple(prep_cfg.get("shear_range", [-2.0, 2.0])),
+        shear_prob=prep_cfg.get("shear_prob", 0.3),
+        pca_color_sigma=prep_cfg.get("pca_color_sigma", 0.1),
+        pca_color_prob=prep_cfg.get("pca_color_prob", 0.5),
+        brightness_alpha_range=tuple(prep_cfg.get("brightness_alpha_range", [0.9, 1.1])),
+        brightness_beta_range=tuple(prep_cfg.get("brightness_beta_range", [-10.0, 10.0])),
+        bc_prob=prep_cfg.get("bc_prob", 0.5),
         **level_flags,
     )
-    return PreprocessingPipelineV5(preproc_config, is_training=is_training)
+    return PreprocessingPipeline(preproc_config, is_training=is_training)
 
 
 def _measure_quality_on_sample(
     image_paths: list[str],
-    pipeline: PreprocessingPipelineV5,
+    pipeline: PreprocessingPipeline,
     n_samples: int = 100,
     seed: int = 42,
 ) -> dict[str, float]:
@@ -244,7 +244,7 @@ def _run_ablation(
     trainer: Trainer,
     fold_range: list[int],
     levels_to_run: list[str] | None,
-    v5_cfg: dict,
+    prep_cfg: dict,
     model_name: str,
     model_cfg: dict,
     quality_n_samples: int,
@@ -267,8 +267,8 @@ def _run_ablation(
         print(f"  Description: {level_spec['description']}")
         print(f"{'='*65}")
 
-        pipeline_train = _V5PipelineAdapter(_build_v5_pipeline(v5_cfg, level_flags, is_training=True))
-        pipeline_val   = _V5PipelineAdapter(_build_v5_pipeline(v5_cfg, level_flags, is_training=False))
+        pipeline_train = _PipelineAdapter(_build_pipeline(prep_cfg, level_flags, is_training=True))
+        pipeline_val   = _PipelineAdapter(_build_pipeline(prep_cfg, level_flags, is_training=False))
 
         # Image quality on sample images (train pool only — fold 0 train split)
         train_idx_0 = splits[0][0]
@@ -353,7 +353,7 @@ def _run_clahe_sweep(
 
     Returns dict mapping str(clip_factor) -> {"per_class_f1": [...], "dr1_f1", "dr2_f1"}.
     """
-    v5_cfg = config.get("preprocessing_v5", config.get("preprocessing_v4", {}))
+    prep_cfg = config.get("preprocessing", {})
 
     # Load IDRiD
     idrid_ds_full = IDRiDDataset.from_directory(
@@ -386,17 +386,17 @@ def _run_clahe_sweep(
         key = str(clip_factor)
         print(f"\n  CLAHE sweep — clahe_clip_factor={clip_factor}")
 
-        # Build a V5 config with clahe enabled and the swept clip_factor
+        # Build a config with clahe enabled and the swept clip_factor
         sweep_flags = dict(
             use_canonical_flip=False, use_flat_field=False,
             use_clahe=True, use_pca_color=False,
             use_brightness_contrast=False, use_shear=False, use_stretch=False,
         )
-        sweep_v5_cfg = dict(v5_cfg)
-        sweep_v5_cfg["clahe_clip_factor"] = clip_factor
+        sweep_prep_cfg = dict(prep_cfg)
+        sweep_prep_cfg["clahe_clip_factor"] = clip_factor
 
-        pipeline_train = _V5PipelineAdapter(_build_v5_pipeline(sweep_v5_cfg, sweep_flags, is_training=True))
-        pipeline_val   = _V5PipelineAdapter(_build_v5_pipeline(sweep_v5_cfg, sweep_flags, is_training=False))
+        pipeline_train = _PipelineAdapter(_build_pipeline(sweep_prep_cfg, sweep_flags, is_training=True))
+        pipeline_val   = _PipelineAdapter(_build_pipeline(sweep_prep_cfg, sweep_flags, is_training=False))
 
         train_ds = IDRiDDataset(
             image_paths=[idrid_ds_full.image_paths[i] for i in train_idx],
@@ -476,7 +476,7 @@ def run(
     _quality_n_samples: int = 100,
     _configs_to_run: list[str] | None = None,  # ignored — accepted for CLI compat
 ) -> None:
-    """Run Experiment 2: V4 component ablation + CLAHE clip_factor sweep.
+    """Run Experiment 2: component ablation + CLAHE clip_factor sweep.
 
     Args:
         config: Full merged config dict.
@@ -497,7 +497,7 @@ def run(
     metrics_csv = output_dir / "metrics.csv"
 
     cv_cfg  = config["cross_validation"]
-    v5_cfg  = config.get("preprocessing_v5", config.get("preprocessing_v4", {}))
+    prep_cfg  = config.get("preprocessing", {})
     n_folds = cv_cfg["n_folds"]
     fold_range = [fold] if fold is not None else list(range(n_folds))
 
@@ -534,7 +534,7 @@ def run(
     # PART A — Component Ablation
     # ════════════════════════════════════════════════════════════
     print(f"\n{'='*65}")
-    print("PART A — V4 Component Ablation")
+    print("PART A — Component Ablation")
     print(f"{'='*65}")
 
     ablation_results = _run_ablation(
@@ -548,7 +548,7 @@ def run(
         trainer=trainer,
         fold_range=fold_range,
         levels_to_run=_levels_to_run,
-        v5_cfg=v5_cfg,
+        prep_cfg=prep_cfg,
         model_name=model_name,
         model_cfg=model_cfg,
         quality_n_samples=_quality_n_samples,

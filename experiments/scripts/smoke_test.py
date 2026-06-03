@@ -1,4 +1,4 @@
-"""V4 Pipeline Smoke Test — verifies end-to-end data flow."""
+"""Pipeline Smoke Test — verifies end-to-end data flow."""
 
 import pathlib
 import sys
@@ -9,14 +9,14 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 import numpy as np
 import torch
 
-from src.preprocessing.config import PreprocessingV4Config, PIPELINE_PRESETS
-from src.preprocessing.pipeline_v4 import PreprocessingPipelineV4
+from src.preprocessing.config import PreprocessingConfig, PIPELINE_PRESETS
+from src.preprocessing.pipeline import PreprocessingPipeline
 from src.preprocessing.canonical_flip import detect_eye_side, canonical_flip
 from src.preprocessing.crop_resize import crop_and_resize
 from src.preprocessing.flat_field import apply_flat_field
 from src.preprocessing.upgraded_clahe import apply_upgraded_clahe, ClaheParams
 from src.preprocessing.imagenet_normalize import imagenet_normalize
-from src.data.augmentation_v4 import FundusAugmentationV4
+from src.data.augmentation_unified import UnifiedFundusAugmentation
 from src.models.patient_model import DRPatientModel, Backbone
 from src.models.factory import create_model, create_patient_model
 
@@ -61,28 +61,28 @@ def test_individual_stages() -> None:
 
 
 def test_full_pipeline() -> None:
-    """Test the full V4 pipeline."""
+    """Test the full pipeline."""
     print("\nTesting full pipeline...")
 
     img = np.random.randint(30, 220, (600, 800, 3), dtype=np.uint8)
 
     for preset in ["resnet", "efficientnet"]:
-        config = PreprocessingV4Config.from_preset(preset)
+        config = PreprocessingConfig.from_preset(preset)
 
         # Training mode
-        pipe = PreprocessingPipelineV4.create_for_training(config)
+        pipe = PreprocessingPipeline.create_for_training(config)
         tensor = pipe(img, eye_side="left")
         assert tensor.shape == (3, 512, 512)
 
         # Inference mode
-        pipe_inf = PreprocessingPipelineV4.create_for_inference(config)
+        pipe_inf = PreprocessingPipeline.create_for_inference(config)
         tensor_inf = pipe_inf(img, eye_side="right")
         assert tensor_inf.shape == (3, 512, 512)
 
         print(f"  Preset '{preset}': OK (train + inference)")
 
     # Baseline
-    pipe_base = PreprocessingPipelineV4.create_baseline()
+    pipe_base = PreprocessingPipeline.create_baseline()
     tensor_base = pipe_base(img)
     assert tensor_base.shape == (3, 512, 512)
     print("  Baseline pipeline: OK")
@@ -114,9 +114,9 @@ def test_patient_model() -> None:
         print(f"  {model_name}: OK")
 
 
-def test_v3_backward_compat() -> None:
-    """Verify V3 pipeline still works."""
-    print("\nTesting V3 backward compatibility...")
+def test_backward_compat() -> None:
+    """Verify legacy pipeline still works."""
+    print("\nTesting backward compatibility...")
 
     from src.preprocessing import PreprocessingPipeline
 
@@ -129,12 +129,12 @@ def test_v3_backward_compat() -> None:
     from src.data.augmentation import FundusAugmentation
     aug = FundusAugmentation({"horizontal_flip": True})
 
-    print("  V3 imports: OK")
+    print("  imports: OK")
 
 
 if __name__ == "__main__":
     test_individual_stages()
     test_full_pipeline()
     test_patient_model()
-    test_v3_backward_compat()
-    print("\nAll V4 smoke tests passed!")
+    test_backward_compat()
+    print("\nAll smoke tests passed!")

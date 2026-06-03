@@ -1,6 +1,6 @@
-"""Precompute and cache V5 Stages 0–4 for the full EyePACS set (throughput fix).
+"""Precompute and cache Stages 0–4 for the full EyePACS set (throughput fix).
 
-The V5 bottleneck (TASK.md §2): the entire 8-stage pipeline runs on CPU inside
+The bottleneck (TASK.md §2): the entire 8-stage pipeline runs on CPU inside
 the DataLoader, per image, **every epoch**. The heaviest stages (OD/fovea
 detection, FOV crop+resize, flat-field) are the deterministic Stages 0–4 — they
 carry no train-time randomness (the first stochastic stage is CLAHE, Stage 5).
@@ -8,7 +8,7 @@ So they can be computed **once** and cached; training then loads the cache and
 runs only the cheap stochastic Stages 5–7, turning a CPU-bound epoch into a
 GPU-bound one.
 
-This script mirrors ``PreprocessingPipelineV5.precompute_deterministic`` exactly
+This script mirrors ``PreprocessingPipeline.precompute_deterministic`` exactly
 (it *is* that call) so the cache is bit-identical to what the live pipeline would
 have produced. Output per image is a 4-channel PNG:
 
@@ -20,10 +20,10 @@ plus a sidecar ``cache_meta.csv`` with the two OD/fovea scalars Stage 6 reads
 cache dir so the cache is a self-contained training input.
 
 Usage:
-    python scripts/precompute_v5_cache.py \
+    python scripts/precompute_cache.py \
         --images-root /path/to/EyePACS/train \
         --labels-csv  /path/to/EyePACS/trainLabels.csv \
-        --output-dir  /path/to/v5_cache \
+        --output-dir  /path/to/cache \
         --num-workers 8 \
         --preset      efficientnet
 
@@ -62,17 +62,17 @@ def _init_worker(preset: str, out_dir: str, png_compression: int) -> None:
     """Pool initializer: build one inference pipeline per worker.
 
     Args:
-        preset: ``PreprocessingV5Config`` preset name (must match the training
+        preset: ``PreprocessingConfig`` preset name (must match the training
             config — Config D uses ``"efficientnet"``).
         out_dir: Cache output directory.
         png_compression: cv2 PNG compression level (0–9).
     """
     global _PIPELINE, _OUT_DIR, _PNG_COMPRESSION
-    from src.preprocessing.config import PreprocessingV5Config
-    from src.preprocessing.pipeline_v5 import PreprocessingPipelineV5
+    from src.preprocessing.config import PreprocessingConfig
+    from src.preprocessing.pipeline import PreprocessingPipeline
 
-    _PIPELINE = PreprocessingPipelineV5.create_for_inference(
-        PreprocessingV5Config.from_preset(preset)
+    _PIPELINE = PreprocessingPipeline.create_for_inference(
+        PreprocessingConfig.from_preset(preset)
     )
     _OUT_DIR = pathlib.Path(out_dir)
     _PNG_COMPRESSION = png_compression
@@ -161,7 +161,7 @@ def _load_done(meta_path: pathlib.Path, out_dir: pathlib.Path) -> set[str]:
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Precompute V5 Stages 0–4 cache for EyePACS (throughput fix).",
+        description="Precompute Stages 0–4 cache for EyePACS (throughput fix).",
     )
     parser.add_argument("--images-root", required=True, type=pathlib.Path,
                         help="Directory of <name>.jpeg EyePACS train images.")
@@ -170,7 +170,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", required=True, type=pathlib.Path,
                         help="Cache output directory (PNGs + cache_meta.csv).")
     parser.add_argument("--preset", default="efficientnet",
-                        help="PreprocessingV5Config preset; must match training "
+                        help="PreprocessingConfig preset; must match training "
                              "(Config D = 'efficientnet'). Default: efficientnet.")
     parser.add_argument("--num-workers", default=max(1, os.cpu_count() or 1), type=int,
                         help="Parallel worker processes (default: all CPU cores).")
@@ -255,7 +255,7 @@ def main() -> None:
             print(f"  - {e}")
     print(f"Sidecar     : {meta_path.name}  +  trainLabels.csv")
     print("─" * 56)
-    print("Point training at this dir via  paths.v5_cache_dir=<output-dir>.")
+    print("Point training at this dir via  paths.cache_dir=<output-dir>.")
 
 
 if __name__ == "__main__":

@@ -74,7 +74,7 @@
 | 30 | 30_SECTION_RESULTS.md | **Нәтижелер (Results)** |
 | 31 | 31_METRICS.md | Метрикалар: F1, AUC, Cohen's κ, Generalization gap (G), ALO |
 | 32 | 32_RESULTS_EXP1.md | 1-эксперимент: H-1 — Препроцессингтің доминанттылығы |
-| 33 | 33_RESULTS_EXP2.md | 2-эксперимент: H-2 — V5 компоненттерінің абляциясы |
+| 33 | 33_RESULTS_EXP2.md | 2-эксперимент: H-2 — pipeline компоненттерінің абляциясы |
 | 34 | 34_RESULTS_EXP3.md | 3-эксперимент: H-4 — Cross-dataset жалпылау |
 | 35 | 35_RESULTS_EXP4.md | 4-эксперимент: H-5 — Түсіндірмелілік (ALO/IoU + Grad-CAM) |
 | 36 | 36_RESULTS_EXP5.md | 5-эксперимент: H-7 — Сапа төмендеуіне төзімділік |

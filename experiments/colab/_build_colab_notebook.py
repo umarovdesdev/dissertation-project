@@ -4,9 +4,9 @@
 One-shot authoring helper (kept for reproducibility). Targets Google Colab with
 two design goals that make the **real EyePACS Config-D run** actually feasible:
 
-1. **V5 Stage 0–4 cache (the throughput fix).** The bottleneck is CPU-side V5
+1. **Stage 0–4 cache (the throughput fix).** The bottleneck is CPU-side
    preprocessing recomputed per image every epoch (TASK §2). This notebook builds
-   the deterministic Stages 0–4 cache **once** (scripts/precompute_v5_cache.py),
+   the deterministic Stages 0–4 cache **once** (scripts/precompute_cache.py),
    then trains from it so each epoch is GPU-bound. Built once, reused every fold.
 
 2. **Kaggle-Dataset persistence (replaces Google Drive entirely).** No Drive, no
@@ -40,13 +40,13 @@ def code(src):
 cells = []
 
 cells.append(md(
-"""# Train Config D (Full V5 + EfficientNet-B3) on Colab — cached + Kaggle-persisted
+"""# Train Config D (full pipeline + EfficientNet-B3) on Colab — cached + Kaggle-persisted
 
-The real Experiment-1 / Config-D run (Full V5 + EfficientNet-B3, 4-channel, Focal
+The real Experiment-1 / Config-D run (full pipeline + EfficientNet-B3, 4-channel, Focal
 Loss, 5-fold patient-level CV), engineered to actually finish on Colab.
 
 ## Why this version exists
-* **Throughput fix.** The V5 pipeline's deterministic Stages 0–4 (OD/fovea, FOV
+* **Throughput fix.** The pipeline's deterministic Stages 0–4 (OD/fovea, FOV
   crop+resize, flat-field) are the expensive part and carry no train-time
   randomness, so we cache them **once**. Training then runs only Stages 5–7
   (CLAHE + augmentation + normalize) per epoch → the epoch becomes **GPU-bound**
@@ -99,16 +99,16 @@ CKPT_UPLOAD_EVERY_MIN = 30 # background checkpoint upload cadence (0 = disable)
 assert KAGGLE_USERNAME, "Set KAGGLE_USERNAME (your Kaggle username) in cell 1."
 
 # Persistence datasets (private, owned by you). Created automatically on first push.
-CACHE_SLUG = f"{KAGGLE_USERNAME}/eyepacs-v5-cache-{DATASET}"
+CACHE_SLUG = f"{KAGGLE_USERNAME}/eyepacs-cache-{DATASET}"
 CKPT_SLUG  = f"{KAGGLE_USERNAME}/dr-config-d-ckpts-{DATASET}"
 
 # Ephemeral /content working dirs (re-created each session).
 from pathlib import Path
 DATA        = Path("/content/data")        # raw dataset download (build mode only)
-CACHE_LOCAL = Path("/content/v5_cache")    # extracted Stage 0–4 cache (train reads this)
+CACHE_LOCAL = Path("/content/cache")    # extracted Stage 0–4 cache (train reads this)
 OUT_LOCAL   = Path("/content/outputs")     # exp1 writes checkpoints here
 PROC_LOCAL  = Path("/content/data_proc")   # data/processed (stats + PCA) for exp1
-for d in (CACHE_LOCAL, OUT_LOCAL, PROC_LOCAL):
+for d in (DATA, CACHE_LOCAL, OUT_LOCAL, PROC_LOCAL):
     d.mkdir(parents=True, exist_ok=True)
 
 # Kaggle source per dataset (download handled in build mode).
@@ -193,7 +193,7 @@ if not done:
 print("Kaggle auth ready.")
 '''))
 
-cells.append(md("## 3. Clone repo + install deps\n\nThe repo must contain the up-to-date `experiments/` — in particular `scripts/precompute_v5_cache.py`, the `paths.v5_cache_dir` wiring in `exp1_factorial.py`, and the EyePACS adapter `is_file()` fix. Mirror the latest `experiments/` into `yesmukhamedov/dr-classifier` before running."))
+cells.append(md("## 3. Clone repo + install deps\n\nThe repo must contain the up-to-date `experiments/` — in particular `scripts/precompute_cache.py`, the `paths.cache_dir` wiring in `exp1_factorial.py`, and the EyePACS adapter `is_file()` fix. Mirror the latest `experiments/` into `yesmukhamedov/dr-classifier` before running."))
 cells.append(code(
 """!git clone --depth 1 https://github.com/yesmukhamedov/dr-classifier.git /content/repo
 %cd /content/repo
@@ -206,7 +206,7 @@ cells.append(md(
 
 Push/pull helpers used by both modes. A dataset is **created** on first push and
 **versioned** thereafter. Large folders are tarred into a single archive first
-(35k PNGs → one `v5_cache.tar`) for fast, reliable upload/download."""))
+(35k PNGs → one `cache.tar`) for fast, reliable upload/download."""))
 cells.append(code(
 r'''import subprocess, json, time, threading
 from pathlib import Path
@@ -258,7 +258,7 @@ cells.append(md(
 
 Runs **only** when `MODE="build_cache"`. Downloads the raw dataset, adapts the
 layout, computes dataset-stats (Stage 7) + PCA (Stage 6 colour), runs
-`precompute_v5_cache.py` over all images, bundles everything, and pushes it as the
+`precompute_cache.py` over all images, bundles everything, and pushes it as the
 `CACHE_SLUG` dataset. Skip straight to §6 if you already built the cache."""))
 cells.append(code(
 r'''import os, sys, subprocess, glob
@@ -351,9 +351,9 @@ if MODE == "build_cache":
     except Exception as e:
         print("PCA step skipped (colour aug will be disabled):", e)
 
-    # The heavy one-shot: V5 Stages 0–4 cache for ALL images (multi-process).
+    # The heavy one-shot: Stages 0–4 cache for ALL images (multi-process).
     import os as _os
-    subprocess.run([sys.executable, "scripts/precompute_v5_cache.py",
+    subprocess.run([sys.executable, "scripts/precompute_cache.py",
         "--images-root", str(Path(EYEPACS_ROOT) / "train"),
         "--labels-csv",  str(Path(EYEPACS_ROOT) / "trainLabels.csv"),
         "--output-dir",  str(CACHE_LOCAL),
@@ -368,8 +368,8 @@ if MODE == "build_cache":
 
     # Tar the whole cache dir into one archive and push as a Kaggle Dataset.
     push_dir = Path("/content/cache_push"); push_dir.mkdir(exist_ok=True)
-    tar_dir(CACHE_LOCAL, push_dir / "v5_cache.tar")
-    push_dataset(push_dir, CACHE_SLUG, f"EyePACS V5 Stage0-4 cache ({DATASET})", "build")
+    tar_dir(CACHE_LOCAL, push_dir / "cache.tar")
+    push_dataset(push_dir, CACHE_SLUG, f"EyePACS Stage0-4 cache ({DATASET})", "build")
     print("\\nCache pushed ->", CACHE_SLUG, "\\nNow set MODE='train', FOLD=0 and Run all.")
 '''))
 
@@ -423,7 +423,7 @@ if MODE == "train":
         "--base", "configs/default.yaml",
         "--out",  "configs/colab_merged.yaml",
         f"paths.eyepacs={CACHE_LOCAL}",        # unused for indexing in cache mode, but required key
-        f"paths.v5_cache_dir={CACHE_LOCAL}",   # <-- the throughput fix: read cached Stages 0–4
+        f"paths.cache_dir={CACHE_LOCAL}",   # <-- the throughput fix: read cached Stages 0–4
         f"paths.output_dir={OUT_LOCAL}",
         "training.num_workers=2",
         # If T4 OOMs at 512px (EfficientNet runs fp32), uncomment:
@@ -496,7 +496,7 @@ cells.append(md(
   OOMs at 512px, uncomment `training.batch_size=8` in cell 6d.
 * The cache is **preset-specific for Stages 0–4** (`efficientnet`). Configs B and D
   share Stages 0–4, so the same cache serves both; baseline configs (A/C) must run
-  **without** `v5_cache_dir` (they use a different preprocessing path)."""))
+  **without** `cache_dir` (they use a different preprocessing path)."""))
 
 nb = {
     "cells": cells,

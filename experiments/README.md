@@ -6,7 +6,7 @@ Classifies fundus photographs into five DR severity grades (0–4) per the Inter
 
 ## Pipeline Architecture
 
-The V4 preprocessing pipeline processes each fundus image through six stages:
+The preprocessing pipeline processes each fundus image through six stages:
 
 | Stage | Operation | Always On | Description |
 |-------|-----------|-----------|-------------|
@@ -25,7 +25,7 @@ Six experiments map directly to six hypotheses (H-1 through H-6):
 
 | Experiment | Hypothesis | Design | Dataset |
 |------------|-----------|--------|---------|
-| **Exp 1** — Factorial Ablation | H-1: Preprocessing Dominance | 2×3 factorial: {ResNet-50, EfficientNet-B3} × {baseline, full V4, V4+PatientHead}, configs A–F | EyePACS (~14k images) |
+| **Exp 1** — Factorial Ablation | H-1: Preprocessing Dominance | 2×3 factorial: {ResNet-50, EfficientNet-B3} × {baseline, full pipeline, pipeline+PatientHead}, configs A–F | EyePACS (~14k images) |
 | **Exp 2** — Component Ablation | H-2: CLAHE Sensitivity | CLAHE clip-limit sweep + pipeline component ablation | EyePACS + IDRiD |
 | **Exp 3** — Robustness | — | Synthetic degradation (noise, blur, low illumination) | APTOS 2019 (DROPPED) |
 | **Exp 4** — Explainability | H-5: Grad-CAM ALO | Attention–Lesion Overlap with pixel-level lesion masks | IDRiD |
@@ -43,18 +43,18 @@ dr-classifier/
 │   ├── default.yaml             # Master config (pipeline, training, evaluation)
 │
 ├── src/
-│   ├── preprocessing/           # V4 pipeline (14 modules)
-│   │   ├── pipeline_v4.py       #   Pipeline orchestrator
+│   ├── preprocessing/           # pipeline (14 modules)
+│   │   ├── pipeline.py       #   Pipeline orchestrator
 │   │   ├── canonical_orientation.py
 │   │   ├── crop_resize.py       #   FOV crop + isotropic resize + mask
 │   │   ├── flat_field.py        #   Gaussian blur subtraction
 │   │   ├── upgraded_clahe.py    #   Dual-constraint stochastic CLAHE
 │   │   ├── od_fovea_detect.py   #   OD/fovea detection for Stage 0b
 │   │   ├── imagenet_normalize.py
-│   │   └── config.py            #   PreprocessingV4Config dataclass
+│   │   └── config.py            #   PreprocessingConfig dataclass
 │   ├── data/                    # Dataset classes & augmentation
 │   │   ├── datasets.py          #   EyePACS, IDRiD, Messidor, RFMiD, DDR, ODIR
-│   │   ├── augmentation_v4.py   #   Unified affine + PCA colour jitter
+│   │   ├── augmentation_unified.py   #   Unified affine + PCA colour jitter
 │   │   ├── splits.py            #   Patient-level stratified k-fold
 │   │   └── label_harmonization.py
 │   ├── models/                  # CNN architectures
@@ -94,7 +94,7 @@ dr-classifier/
 │   ├── generate_report.py       #   Auto-generate dissertation-ready report
 │   ├── compute_pca_eigvecs.py   #   PCA eigenvectors for colour augmentation
 │   ├── verify_*.py              #   Integration tests (datasets, models, experiments)
-│   └── smoke_test_v4.py
+│   └── smoke_test.py
 ├── tests/                       # Unit tests
 ├── logs/                        # Training logs
 ├── environment.yml              # Conda environment (Python 3.10, PyTorch 2.5.1, CUDA 12.1)
@@ -157,7 +157,7 @@ python scripts/generate_report.py
 ```bash
 python scripts/verify_datasets.py     # Check dataset paths and label distributions
 python scripts/verify_models.py       # Verify model creation and forward pass
-python scripts/smoke_test_v4.py       # End-to-end pipeline smoke test
+python scripts/smoke_test.py       # End-to-end pipeline smoke test
 ```
 
 ## Datasets

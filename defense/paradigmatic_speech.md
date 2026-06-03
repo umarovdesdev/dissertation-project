@@ -46,7 +46,7 @@ For the same three reasons, I do not claim to outperform Gulshan numerically. Th
 **Answer.**
 Three reasons motivated the choice of ResNet-50 and EfficientNet-B3 over Inception-v3.
 
-1. **Compatibility with the hardware constraint.** The experiments were run on a single NVIDIA RTX 3060 with 12 GB VRAM at image resolution 512×512 and batch size 16. ResNet-50 and EfficientNet-B3 fit this budget comfortably; Inception-v3 at the same resolution and batch size approaches the VRAM limit and does not leave headroom for the 4-channel V5 configuration (RGB + FOV mask).
+1. **Compatibility with the hardware constraint.** The experiments were run on a single NVIDIA RTX 3060 with 12 GB VRAM at image resolution 512×512 and batch size 16. ResNet-50 and EfficientNet-B3 fit this budget comfortably; Inception-v3 at the same resolution and batch size approaches the VRAM limit and does not leave headroom for the 4-channel pipeline configuration (RGB + FOV mask).
 
 2. **Factorial-design symmetry.** Experiment 1 is a 2×2 factorial in *(preprocessing × architecture)*. The dissertation's research question requires *two* architectures so that the preprocessing main effect can be tested for robustness across backbone families: a residual-connection backbone (ResNet-50) and a compound-scaling backbone (EfficientNet-B3). Inception-v3 alone would not have permitted this test.
 
@@ -62,7 +62,7 @@ I do not report a direct numerical comparison against Gulshan 2016, and the diss
 - Gulshan reports binary referable-DR AUC = 0.991 on EyePACS-1 and 0.990 on Messidor-2.
 - The dissertation reports five-class weighted F1, ROC-AUC (multi-class one-vs-rest), Cohen's Kappa with quadratic weights, and Accuracy on the EyePACS public partition.
 
-A binary AUC and a five-class weighted F1 are not on the same scale; any "X > Y" statement comparing them would be methodologically meaningless. Furthermore, the backbone (Inception-v3 ensemble of 10 networks vs. single ResNet-50 / EfficientNet-B3), the pretraining source (ImageNet for both arms in Gulshan; ImageNet baseline / ophthalmology-specific SSL V5 arm in the dissertation), and the reference standard (multi-grader majority vote vs. public competition labels) differ in ways that make the comparison unsound under any of these differences alone, and forbidden under their joint operation.
+A binary AUC and a five-class weighted F1 are not on the same scale; any "X > Y" statement comparing them would be methodologically meaningless. Furthermore, the backbone (Inception-v3 ensemble of 10 networks vs. single ResNet-50 / EfficientNet-B3), the pretraining source (ImageNet for both arms in Gulshan; ImageNet baseline / ophthalmology-specific SSL pipeline arm in the dissertation), and the reference standard (multi-grader majority vote vs. public competition labels) differ in ways that make the comparison unsound under any of these differences alone, and forbidden under their joint operation.
 
 What the dissertation *does* report is its own internal contrast: configs B and D (P2 instantiation) versus configs A and C (P1 instantiation) under matched conditions on the same EyePACS partition. That contrast is the empirical evidence for the paradigmatic claim. Numerical figures from Gulshan are admitted into the dissertation only as historical / contextual reference (chapters 1.4 and 5.5), each accompanied by the methodological-differences caveat block.
 
@@ -83,4 +83,4 @@ The following phrasings are forbidden during the live defense, in line with INVA
 - "The baseline configuration of Experiment 1 operationally instantiates the paradigm represented by Gulshan."
 - "Direct numerical comparison with Gulshan is not performed due to differences in task, backbone, dataset partition, reference standard, and validation protocol."
 - "The A-vs-B and C-vs-D contrasts are empirical comparisons between two paradigms under matched conditions, not against external figures."
-- "The principal conceptual contribution of this dissertation is the P1 → P2 paradigm shift; the 8-stage V5 pipeline is its engineering operationalisation."
+- "The principal conceptual contribution of this dissertation is the P1 → P2 paradigm shift; the 8-stage preprocessing pipeline is its engineering operationalisation."

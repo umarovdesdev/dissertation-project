@@ -12,7 +12,7 @@
 
 | Міндет | Нәтиже |
 |--------|--------|
-| 1. Модельді әзірлеу | V5 8-кезеңді pipeline + CNN: 4ch кіріс, patient-level aggregation |
+| 1. Модельді әзірлеу | 8-кезеңді pipeline + CNN: 4ch кіріс, patient-level aggregation |
 | 2. Тиімділікті бекіту | EH-3 расталды: ΔF1 +5.2–5.3pp, ANOVA p < 0.001, interaction n.s. |
 | 3. Жалпыланғыштық қабілеті | G ≥ 0.85 (APTOS), device σ² −46%, degradation −22..24% |
 | 4. Түсіндірілгіштік | ALO +31–61% (4 зақым типі), attention consistency +33% |

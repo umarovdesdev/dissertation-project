@@ -134,7 +134,7 @@ def make_cnn_architecture() -> plt.Figure:
     )
 
     fig.suptitle(
-        "CNN Backbones  —  4-channel conv1 modification (V5 contribution)",
+        "CNN Backbones  —  4-channel conv1 modification (pipeline contribution)",
         fontsize=15, fontweight="bold", y=0.99,
     )
     return fig

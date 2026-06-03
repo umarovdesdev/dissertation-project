@@ -1,6 +1,6 @@
 """Experiment 3: Cross-Dataset Transferability (H-4).
 
-Train on EyePACS with full V5 pipeline, evaluate zero-shot on APTOS 2019.
+Train on EyePACS with full pipeline, evaluate zero-shot on APTOS 2019.
 Compute generalization ratio G = F1_APTOS / F1_EyePACS.
 Success criterion: G >= 0.85.
 """

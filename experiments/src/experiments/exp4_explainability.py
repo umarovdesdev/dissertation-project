@@ -40,8 +40,8 @@ from src.explainability.iou import (
 )
 from src.explainability.visualization import create_comparison_figure
 from src.models.efficientnet import create_efficientnet, get_gradcam_target_layer
-from src.preprocessing.pipeline_v5 import PreprocessingPipelineV5
-from src.preprocessing.config import PreprocessingV5Config
+from src.preprocessing.pipeline import PreprocessingPipeline
+from src.preprocessing.config import PreprocessingConfig
 from src.training.checkpoint import CheckpointManager
 from src.training.trainer import Trainer
 from src.utils.seed import set_seed
@@ -74,21 +74,21 @@ def _load_eyepacs_index(
     return paths, labels, pids
 
 
-def _build_pipeline(config: dict, full: bool, is_training: bool = False) -> PreprocessingPipelineV5:
-    """Build baseline (resize-only) or full V5 preprocessing pipeline."""
+def _build_pipeline(config: dict, full: bool, is_training: bool = False) -> PreprocessingPipeline:
+    """Build baseline (resize-only) or full pipeline preprocessing pipeline."""
     if full:
-        v5_cfg = config.get("preprocessing_v5", {})
-        pp_config = PreprocessingV5Config.from_dict(v5_cfg)
-        return PreprocessingPipelineV5(pp_config, is_training=is_training)
-    target_size = config.get("preprocessing_v5", {}).get("target_size", 512)
-    return PreprocessingPipelineV5.create_baseline_v5(
+        prep_cfg = config.get("preprocessing", {})
+        pp_config = PreprocessingConfig.from_dict(prep_cfg)
+        return PreprocessingPipeline(pp_config, is_training=is_training)
+    target_size = config.get("preprocessing", {}).get("target_size", 512)
+    return PreprocessingPipeline.create_baseline(
         target_size=target_size, is_training=is_training,
     )
 
 
 def _train_model(
     config: dict,
-    pipeline: PreprocessingPipelineV5,
+    pipeline: PreprocessingPipeline,
     all_paths: list[str],
     all_labels: list[int],
     all_pids: list[str],
@@ -250,7 +250,7 @@ def run(
     gradcam_dir.mkdir(exist_ok=True)
 
     cv_cfg      = config["cross_validation"]
-    # V5 pipeline config
+    # pipeline config
     n_folds     = cv_cfg["n_folds"]
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -1,6 +1,6 @@
-# V5 exports (canonical pipeline)
-from .pipeline_v5 import PreprocessingPipelineV5
-from .config import PreprocessingV5Config, PIPELINE_PRESETS
+# Pipeline exports (canonical)
+from .pipeline import PreprocessingPipeline
+from .config import PreprocessingConfig, PIPELINE_PRESETS
 from .canonical_orientation import detect_eye_side, canonical_flip, canonical_orientation
 from .crop_resize import crop_and_resize
 from .flat_field import apply_flat_field
@@ -10,9 +10,9 @@ from .imagenet_normalize import imagenet_normalize, normalize_to_tensor
 from .od_fovea_detect import ODFoveaResult, detect_od_fovea, rotate_to_horizontal
 
 __all__ = [
-    # V5 pipeline
-    "PreprocessingPipelineV5",
-    "PreprocessingV5Config",
+    # pipeline
+    "PreprocessingPipeline",
+    "PreprocessingConfig",
     "PIPELINE_PRESETS",
     "detect_eye_side",
     "canonical_flip",

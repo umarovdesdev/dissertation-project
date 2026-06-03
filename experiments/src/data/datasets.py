@@ -9,12 +9,12 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-# PreprocessingPipelineV5 is imported lazily inside methods to avoid circular
-# imports (src.preprocessing.pipeline_v5 imports from src.data.augmentation_v4,
+# PreprocessingPipeline is imported lazily inside methods to avoid circular
+# imports (src.preprocessing.pipeline imports from src.data.augmentation_unified,
 # which is a sibling of this module).
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.preprocessing.pipeline_v5 import PreprocessingPipelineV5
+    from src.preprocessing.pipeline import PreprocessingPipeline
 
 
 class BaseFundusDataset(Dataset):
@@ -131,14 +131,14 @@ class EyePACSDataset(BaseFundusDataset):
         )
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, int]:
-        """Load and return one sample, routing through V4 or V3 pipeline.
+        """Load and return one sample, routing through the pipeline.
 
         Args:
             idx: Sample index.
 
         Returns:
             Tuple of (image_tensor, label) where image_tensor is float32
-            CHW and values are ImageNet-normalised (V4) or in [0, 1] (V3).
+            CHW and values are ImageNet-normalised or in [0, 1].
         """
         image = cv2.imread(str(self.image_paths[idx]))
         if image is None:
@@ -147,14 +147,14 @@ class EyePACSDataset(BaseFundusDataset):
         eye_side = self.eye_sides[idx]
 
         if self.preprocessing is not None:
-            from src.preprocessing.pipeline_v5 import PreprocessingPipelineV5  # noqa: PLC0415
-            if isinstance(self.preprocessing, PreprocessingPipelineV5):
-                # V4 pipeline handles BGR→RGB conversion, all stages, and
+            from src.preprocessing.pipeline import PreprocessingPipeline  # noqa: PLC0415
+            if isinstance(self.preprocessing, PreprocessingPipeline):
+                # pipeline handles BGR→RGB conversion, all stages, and
                 # returns a normalised tensor directly.
                 tensor = self.preprocessing(image, eye_side=eye_side)
                 return tensor, self.labels[idx]
             else:
-                # V3 legacy path
+                # legacy path
                 image = self.preprocessing(image)
 
         if self.augmentation is not None:
@@ -215,10 +215,10 @@ class EyePACSDataset(BaseFundusDataset):
 
 
 def load_cache_meta(cache_dir: str | Path) -> dict[str, tuple[bool, float]]:
-    """Load the V5 cache sidecar mapping image name → (confident, rotation_sigma_deg).
+    """Load the cache sidecar mapping image name → (confident, rotation_sigma_deg).
 
     These are the only two OD/fovea scalars Stage 6 augmentation reads; they are
-    cached alongside the Stage-4 PNGs by ``scripts/precompute_v5_cache.py``.
+    cached alongside the Stage-4 PNGs by ``scripts/precompute_cache.py``.
 
     Args:
         cache_dir: Directory containing ``cache_meta.csv`` (columns:
@@ -236,23 +236,23 @@ def load_cache_meta(cache_dir: str | Path) -> dict[str, tuple[bool, float]]:
 
 
 class CachedEyePACSDataset(EyePACSDataset):
-    """EyePACS dataset reading a precomputed V5 Stage 0–4 cache (the throughput fix).
+    """EyePACS dataset reading a precomputed Stage 0–4 cache (the throughput fix).
 
-    Each sample is a 4-channel PNG written by ``scripts/precompute_v5_cache.py``
+    Each sample is a 4-channel PNG written by ``scripts/precompute_cache.py``
     (RGB = Stage-4 flat-field output, alpha = binary FOV mask) plus two cached
     OD/fovea scalars. Only the stochastic Stages 5–7 (CLAHE + augmentation +
-    normalize) run per epoch via :meth:`PreprocessingPipelineV5.finish_from_cache`,
+    normalize) run per epoch via :meth:`PreprocessingPipeline.finish_from_cache`,
     so the DataLoader stops being the bottleneck and the GPU no longer starves.
 
     The ``preprocessing`` pipeline MUST be a **full** (non-baseline)
-    :class:`PreprocessingPipelineV5`; baseline configs have no cacheable
+    :class:`PreprocessingPipeline`; baseline configs have no cacheable
     Stage 0–4 and must use :class:`EyePACSDataset` on raw images instead.
 
     Args:
         image_paths: Absolute paths to the cached ``{name}.png`` files.
         labels: DR grade labels (0–4).
         patient_ids: Numeric patient strings.
-        preprocessing: Full V5 pipeline (its ``finish_from_cache`` is called).
+        preprocessing: Full pipeline pipeline (its ``finish_from_cache`` is called).
         cache_meta: Mapping from :func:`load_cache_meta`.
         eye_sides: ``"left"``/``"right"`` per image (unused at read time — the
             cache already encodes Stage-0 orientation — kept for parity).
@@ -815,7 +815,7 @@ class EyePACSPatientPairDataset(Dataset):
         patient_data: Dict mapping ``patient_id`` to a dict with keys
             ``"left_path"``, ``"right_path"``, ``"left_label"``,
             ``"right_label"`` (each is a ``str | None`` / ``int | None``).
-        preprocessing: :class:`PreprocessingPipelineV5` applied to each eye.
+        preprocessing: :class:`PreprocessingPipeline` applied to each eye.
         label_strategy: How to derive a single label per patient.
             ``"max"`` uses the maximum grade across both eyes (default).
     """
@@ -823,7 +823,7 @@ class EyePACSPatientPairDataset(Dataset):
     def __init__(
         self,
         patient_data: dict[str, dict],
-        preprocessing: "PreprocessingPipelineV5",
+        preprocessing: "PreprocessingPipeline",
         label_strategy: str = "max",
     ) -> None:
         self.patient_data = patient_data
@@ -885,7 +885,7 @@ class EyePACSPatientPairDataset(Dataset):
         root: str | Path,
         labels_csv: str | Path,
         subset_indices: list[int] | None = None,
-        preprocessing: "PreprocessingPipelineV5 | None" = None,
+        preprocessing: "PreprocessingPipeline | None" = None,
     ) -> "EyePACSPatientPairDataset":
         """Build a patient-pair dataset from the EyePACS directory layout.
 
@@ -896,14 +896,14 @@ class EyePACSPatientPairDataset(Dataset):
             root: Path to the train/ image directory.
             labels_csv: Path to ``trainLabels.csv`` (columns: image, level).
             subset_indices: Optional list of CSV row indices to include.
-            preprocessing: :class:`PreprocessingPipelineV5` instance.
+            preprocessing: :class:`PreprocessingPipeline` instance.
                 Defaults to an inference-mode pipeline with default config.
 
         Returns:
             :class:`EyePACSPatientPairDataset` instance.
         """
-        from src.preprocessing.config import PreprocessingV5Config
-        from src.preprocessing.pipeline_v5 import PreprocessingPipelineV5  # noqa: PLC0415
+        from src.preprocessing.config import PreprocessingConfig
+        from src.preprocessing.pipeline import PreprocessingPipeline  # noqa: PLC0415
 
         root = Path(root)
         df = pd.read_csv(labels_csv)
@@ -911,8 +911,8 @@ class EyePACSPatientPairDataset(Dataset):
             df = df.iloc[subset_indices].reset_index(drop=True)
 
         if preprocessing is None:
-            preprocessing = PreprocessingPipelineV5.create_for_inference(
-                PreprocessingV5Config()
+            preprocessing = PreprocessingPipeline.create_for_inference(
+                PreprocessingConfig()
             )
 
         patient_data: dict[str, dict] = {}

@@ -21,8 +21,8 @@
 | H-1 | Препроцессинг доминанттылығы | ΔF1 ≥ 5pp, ΔAUC ≥ 0.02, Δκ ≥ 0 | 1 |
 | H-2 | Компонент sensitivity | CLAHE + flat-field оптимумдары | 2 |
 | H-4 | Cross-dataset жалпылау | G = F1_ext / F1_train ≥ 0.85 | 3 |
-| H-5 | Түсіндірілгіштік (explainability) | ALO_V5 > ALO_baseline | 4 |
-| H-7 | Клиникалық деградация төзімділігі | Δ_V5 < Δ_baseline | 5 |
+| H-5 | Түсіндірілгіштік (explainability) | ALO_pipeline > ALO_baseline | 4 |
+| H-7 | Клиникалық деградация төзімділігі | Δ_pipeline < Δ_baseline | 5 |
 | H-6 | Құрылғы domain shift | F1 тұрақты, 4 камера өндірушісі | 6 |
 
 ---

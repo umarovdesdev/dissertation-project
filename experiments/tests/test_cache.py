@@ -1,4 +1,4 @@
-"""Drift-regression tests for the V5 Stage 0–4 cache (throughput fix, TASK §2).
+"""Drift-regression tests for the Stage 0–4 cache (throughput fix, TASK §2).
 
 The cache is only safe if the cached path (``precompute_deterministic`` →
 PNG round-trip → ``finish_from_cache``) reproduces the live pipeline
@@ -13,8 +13,8 @@ import cv2
 import numpy as np
 import torch
 
-from src.preprocessing.config import PreprocessingV5Config
-from src.preprocessing.pipeline_v5 import PreprocessingPipelineV5
+from src.preprocessing.config import PreprocessingConfig
+from src.preprocessing.pipeline import PreprocessingPipeline
 
 
 def _make_synthetic_fundus(seed: int = 0) -> np.ndarray:
@@ -32,7 +32,7 @@ def _png_roundtrip(flat_rgb: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, 
     bgr = cv2.cvtColor(flat_rgb, cv2.COLOR_RGB2BGR)
     alpha = (mask > 0.5).astype(np.uint8) * 255
     bgra = np.dstack([bgr, alpha])
-    path = os.path.join(tempfile.gettempdir(), "v5_cache_test_tile.png")
+    path = os.path.join(tempfile.gettempdir(), "cache_test_tile.png")
     cv2.imwrite(path, bgra, [cv2.IMWRITE_PNG_COMPRESSION, 6])
     back = cv2.imread(path, cv2.IMREAD_UNCHANGED)
     rgb2 = cv2.cvtColor(back[:, :, :3], cv2.COLOR_BGR2RGB)
@@ -40,8 +40,8 @@ def _png_roundtrip(flat_rgb: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, 
     return rgb2, mask2
 
 
-def _config() -> PreprocessingV5Config:
-    cfg = PreprocessingV5Config.from_preset("efficientnet")
+def _config() -> PreprocessingConfig:
+    cfg = PreprocessingConfig.from_preset("efficientnet")
     cfg.dataset_mean = (0.42, 0.31, 0.22)  # exercise dataset-specific Stage 7
     cfg.dataset_std = (0.27, 0.20, 0.16)
     return cfg
@@ -49,7 +49,7 @@ def _config() -> PreprocessingV5Config:
 
 def test_mask_png_roundtrip_is_lossless():
     """The binary FOV mask survives the 0↔255 alpha round-trip exactly."""
-    pipe = PreprocessingPipelineV5.create_for_inference(_config())
+    pipe = PreprocessingPipeline.create_for_inference(_config())
     flat, mask, _, _ = pipe.precompute_deterministic(_make_synthetic_fundus(), "left")
     _, mask2 = _png_roundtrip(flat, mask)
     assert set(np.unique(mask)).issubset({0.0, 1.0})
@@ -58,7 +58,7 @@ def test_mask_png_roundtrip_is_lossless():
 
 def test_cache_matches_live_inference():
     """Cached path == live ``__call__`` in deterministic inference mode."""
-    pipe = PreprocessingPipelineV5.create_for_inference(_config())
+    pipe = PreprocessingPipeline.create_for_inference(_config())
     img = _make_synthetic_fundus()
     t_live = pipe(img.copy(), eye_side="left")
     flat, mask, conf, rot = pipe.precompute_deterministic(img.copy(), "left")
@@ -74,7 +74,7 @@ def test_cache_matches_live_training_seeded():
     Stages 0–4 consume no ``np.random``, so seeding before each path makes the
     stochastic Stages 5–7 (CLAHE + augmentation) draw identically.
     """
-    pipe = PreprocessingPipelineV5.create_for_training(_config())
+    pipe = PreprocessingPipeline.create_for_training(_config())
     img = _make_synthetic_fundus()
 
     np.random.seed(0)

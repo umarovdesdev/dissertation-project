@@ -1,14 +1,14 @@
 """Experiment 1: 2×2 Factorial — Preprocessing Dominance (H-1).
 
-Tests whether the V5 preprocessing pipeline produces statistically dominant
+Tests whether the preprocessing pipeline produces statistically dominant
 improvement over resize-only baseline, independently for ResNet-50 and
 EfficientNet-B3 (dominance criteria: ΔF1≥5pp, ΔAUC≥0.02, no κ degradation).
 
 Configurations:
   A — baseline (stretch-resize+ImageNet norm, 3ch) + ResNet-50
-  B — full V5 pipeline (4ch)                       + ResNet-50
+  B — full pipeline (4ch)                       + ResNet-50
   C — baseline (stretch-resize+ImageNet norm, 3ch) + EfficientNet-B3
-  D — full V5 pipeline (4ch)                       + EfficientNet-B3
+  D — full pipeline (4ch)                       + EfficientNet-B3
 """
 
 from __future__ import annotations
@@ -32,8 +32,8 @@ from src.data.datasets import (
 from src.data.splits import PatientLevelKFold
 from src.evaluation.metrics import check_dominance
 from src.models.factory import create_model, create_patient_model
-from src.preprocessing.config import PreprocessingV5Config
-from src.preprocessing.pipeline_v5 import PreprocessingPipelineV5
+from src.preprocessing.config import PreprocessingConfig
+from src.preprocessing.pipeline import PreprocessingPipeline
 from src.training.checkpoint import CheckpointManager
 from src.training.patient_trainer import PatientTrainer
 from src.training.trainer import Trainer
@@ -49,7 +49,7 @@ _CONFIGS: dict[str, dict[str, Any]] = {
 }
 
 
-# ── V5 preprocessing factory ──────────────────────────────────────────────────
+# ── preprocessing factory ──────────────────────────────────────────────────
 
 def _make_preprocessing(
     kind: str,
@@ -59,12 +59,12 @@ def _make_preprocessing(
     pca_eigvals: np.ndarray | None = None,
     dataset_mean: tuple[float, float, float] | None = None,
     dataset_std: tuple[float, float, float] | None = None,
-) -> PreprocessingPipelineV5:
-    """Build a V5 preprocessing pipeline.
+) -> PreprocessingPipeline:
+    """Build a preprocessing pipeline.
 
     Args:
         kind: ``"baseline"`` (stretch-resize + ImageNet normalize, 3ch) or
-            ``"full"`` (all V5 stages, 4ch, model-specific preset).
+            ``"full"`` (all stages, 4ch, model-specific preset).
         model_name: ``"resnet50"`` or ``"efficientnet_b3"`` — selects the
             augmentation preset for the full pipeline.
         is_training: Enables stochastic CLAHE and augmentation when ``True``.
@@ -76,16 +76,16 @@ def _make_preprocessing(
         dataset_std: EyePACS-computed per-channel std (see ``dataset_mean``).
 
     Returns:
-        Configured :class:`~src.preprocessing.pipeline_v5.PreprocessingPipelineV5`.
+        Configured :class:`~src.preprocessing.pipeline.PreprocessingPipeline`.
     """
     if kind == "baseline":
-        return PreprocessingPipelineV5.create_baseline_v5(
+        return PreprocessingPipeline.create_baseline(
             target_size=512,
             is_training=is_training,
         )
 
     preset_name = "efficientnet" if "efficientnet" in model_name else "resnet"
-    config = PreprocessingV5Config.from_preset(preset_name)
+    config = PreprocessingConfig.from_preset(preset_name)
 
     # Stage 7: dataset-specific normalize (D-2). The preset leaves these None,
     # which silently falls back to ImageNet — not the thesis-defended pipeline
@@ -95,12 +95,12 @@ def _make_preprocessing(
         config.dataset_std = tuple(dataset_std)
 
     if is_training:
-        return PreprocessingPipelineV5.create_for_training(
+        return PreprocessingPipeline.create_for_training(
             config,
             pca_eigvecs=pca_eigvecs,
             pca_eigvals=pca_eigvals,
         )
-    return PreprocessingPipelineV5.create_for_inference(config)
+    return PreprocessingPipeline.create_for_inference(config)
 
 
 # ── Data helpers ──────────────────────────────────────────────────────────────
@@ -150,13 +150,13 @@ def _load_cache_index(
     cache_dir: str,
     subset_size: int | None = None,
 ) -> tuple[list[str], list[int], list[str], list[str]]:
-    """Read the V5 cache index (drop-in for :func:`_load_eyepacs_index`).
+    """Read the cache index (drop-in for :func:`_load_eyepacs_index`).
 
     Uses the cache's self-contained ``trainLabels.csv``; "paths" are the cached
     ``<name>.png`` files, filtered to those present on disk.
 
     Args:
-        cache_dir: Directory written by ``scripts/precompute_v5_cache.py``.
+        cache_dir: Directory written by ``scripts/precompute_cache.py``.
         subset_size: If set, use only the first N CSV rows (smoke tests).
 
     Returns:
@@ -268,9 +268,9 @@ def run(
     eyepacs_root = config["paths"]["eyepacs"]
     labels_csv   = str(Path(eyepacs_root) / "trainLabels.csv")
     images_root  = str(Path(eyepacs_root) / "train")
-    # Optional V5 Stage 0–4 cache (throughput fix, TASK §2). When set, the full
+    # Optional Stage 0–4 cache (throughput fix, TASK §2). When set, the full
     # configs (B/D) read cached PNGs and run only Stages 5–7 per epoch.
-    v5_cache_dir = config.get("paths", {}).get("v5_cache_dir")
+    cache_dir = config.get("paths", {}).get("cache_dir")
     output_dir   = Path(config["paths"]["output_dir"]) / "exp1"
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "logs").mkdir(exist_ok=True)
@@ -316,12 +316,12 @@ def run(
 
     # ── Load index once ───────────────────────────────────────────────────────
     cache_meta: dict[str, tuple[bool, float]] | None = None
-    if v5_cache_dir:
-        print(f"Loading V5 cache index from {v5_cache_dir} …")
+    if cache_dir:
+        print(f"Loading cache index from {cache_dir} …")
         all_paths, all_labels, all_pids, all_eye_sides = _load_cache_index(
-            v5_cache_dir, subset_size=_subset_size
+            cache_dir, subset_size=_subset_size
         )
-        cache_meta = load_cache_meta(v5_cache_dir)
+        cache_meta = load_cache_meta(cache_dir)
         print(f"  Found {len(all_paths)} cached images | {len(set(all_pids))} patients "
               f"| {len(cache_meta)} meta rows")
     else:
@@ -419,7 +419,7 @@ def run(
             va_pids   = [all_pids[i]      for i in val_idx]
             va_sides  = [all_eye_sides[i] for i in val_idx]
 
-            # V4 preprocessing pipelines (augmentation integrated into train pipeline)
+            # preprocessing pipelines (augmentation integrated into train pipeline)
             train_preproc = _make_preprocessing(
                 preproc_kind, model_name, is_training=True,
                 pca_eigvecs=pca_eigvecs, pca_eigvals=pca_eigvals,
@@ -434,7 +434,7 @@ def run(
             ckpt_dir.mkdir(parents=True, exist_ok=True)
 
             # ── Configs A–D: standard single-image training ────────────────
-            if v5_cache_dir and preproc_kind == "full":
+            if cache_dir and preproc_kind == "full":
                 # Throughput fix: read cached Stage 0–4 PNGs, run only 5–7.
                 train_ds = CachedEyePACSDataset(
                     image_paths=tr_paths, labels=tr_labels, patient_ids=tr_pids,
@@ -446,11 +446,11 @@ def run(
                     preprocessing=val_preproc, cache_meta=cache_meta,
                     eye_sides=va_sides,
                 )
-            elif v5_cache_dir and preproc_kind == "baseline":
+            elif cache_dir and preproc_kind == "baseline":
                 raise ValueError(
-                    f"paths.v5_cache_dir is set but Config {cfg_key} is baseline; "
-                    "the V5 cache only covers full-pipeline configs (B/D). "
-                    "Run baseline configs (A/C) without v5_cache_dir."
+                    f"paths.cache_dir is set but Config {cfg_key} is baseline; "
+                    "the cache only covers full-pipeline configs (B/D). "
+                    "Run baseline configs (A/C) without cache_dir."
                 )
             else:
                 train_ds = EyePACSDataset(
@@ -458,7 +458,7 @@ def run(
                     labels=tr_labels,
                     patient_ids=tr_pids,
                     preprocessing=train_preproc,
-                    augmentation=None,   # augmentation is inside V5 pipeline
+                    augmentation=None,   # augmentation is inside pipeline
                     eye_sides=tr_sides,
                 )
                 val_ds = EyePACSDataset(
