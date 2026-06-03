@@ -38,8 +38,10 @@ candidate's manual steps**, and the **active next action** (launch Config-D on C
   this. The real fix is **precompute-and-cache V5 Stages 0–4** (§2). Until that lands,
   EyePACS will hit the same wall on Colab.
 
-**The single next action:** launch Config-D on Colab (§1). But for EyePACS to finish in
-a week, decide on the caching fix (§2) first.
+**The single next action:** the Kaggle `KGAT_…` token is now in hand and cell 3 accepts
+it, so Config-D on Colab is launchable (§1 checklist). But a Colab T4 is ~2 vCPU =
+identical to Kaggle, so EyePACS will hit the same wall — **build the §2 V5 cache first** or
+fold 0 won't finish.
 
 ---
 
@@ -54,6 +56,37 @@ Two modes via `DATASET` in cell 1:
 |-------------|----------------------------------------|-----------|----------------------------------------|
 | `"aptos"`   | competition `aptos2019-blindness-detection` | ~3.7k | **Quick functional test** — full Config-D pass in minutes to prove the Colab pipeline works. |
 | `"eyepacs"` | dataset `dreamer07/eyepacs`            | ~35k      | **The real Config-D run.**             |
+
+### ▶ Exact launch checklist (Kaggle token available — 2026-06-03)
+
+A Kaggle **new-format `KGAT_…` access token** is now in hand, and cell 3 of the
+notebook was updated to accept it (see auth step 1 below). Run order:
+
+The notebook is now **two-mode** (cell 1 `MODE`) and uses the **V5 cache + Kaggle-Dataset
+persistence** (no Google Drive) — see §2. Run order:
+
+1. **Store the token as a Colab Secret** (never paste it into a cell):
+   Colab → 🔑 (left sidebar) → *Add new secret* → Name **`KAGGLE_API_TOKEN`**,
+   Value = the candidate's `KGAT_…` token, toggle **Notebook access** on.
+   *(The literal token is intentionally not committed here — it is a live secret.
+   It lives only in the candidate's Colab Secrets. Rotate it on Kaggle if leaked.)*
+2. **Cell 1:** set `KAGGLE_USERNAME` (your Kaggle username — required for the
+   persistence dataset slugs) and `DATASET = "eyepacs"`.
+3. `Runtime → Change runtime type → T4 GPU`.
+4. **Build the cache once:** set `MODE = "build_cache"` → `Run all`. Downloads
+   EyePACS, runs Stages 0–4 + dataset-stats + PCA, pushes the bundle as the Kaggle
+   dataset `<user>/eyepacs-v5-cache-eyepacs`. (~1–2 h; do the same with
+   `DATASET="aptos"` first for a minutes-long end-to-end smoke test.)
+5. **Train fold 0:** set `MODE = "train"`, `FOLD = 0` → `Run all`. Pulls the cache +
+   any prior checkpoint, trains GPU-bound, versions the checkpoint dataset
+   periodically + at the end. Repeat with `FOLD = 1..4` for the rest.
+6. `dreamer07/eyepacs` needs **no** rule acceptance (the APTOS-only rule step does
+   not apply to the real run).
+
+> ✅ The §2 throughput blocker is now fixed in code (cache) and the §2 24 h-limit /
+> persistence questions are resolved (Kaggle-Dataset persistence + `--resume`). The
+> token unblocks the download; the cache unblocks the throughput; Kaggle Datasets
+> unblock persistence without paid Drive.
 
 ### Why this needs the candidate (no browser/Colab access for Claude)
 
@@ -70,11 +103,15 @@ dataset-stats + PCA caching, single-fold `--resume`) is automated in the cells.
 
 ### The 3 authorization steps (one-time, minimal, nothing secret leaves the session)
 
-1. **Kaggle API token** — either add `KAGGLE_USERNAME` + `KAGGLE_KEY` to **Colab
-   Secrets** (🔑 left sidebar), or upload `kaggle.json` when cell 3 prompts.
-   - Kaggle → *Settings* → *API* → *Create New Token* → downloads `kaggle.json` of the
-     form `{"username":"...","key":"..."}`. **Note:** `C:\Users\yesmu\.kaggle\access_token`
-     is **not** that format — use the `kaggle.json` from Create New Token.
+1. **Kaggle API token** — cell 3 now accepts **both** token formats:
+   - **New (`KGAT_…`, recommended)** — Kaggle → *Settings* → *API* → *Create New Token*
+     yields a `KGAT_…` access token. Add it as a **Colab Secret named
+     `KAGGLE_API_TOKEN`** (🔑 left sidebar). The cell writes it to
+     `~/.kaggle/access_token` + the `KAGGLE_API_TOKEN` env var.
+   - **Legacy** — add `KAGGLE_USERNAME` + `KAGGLE_KEY` to Colab Secrets, or upload a
+     `kaggle.json` of the form `{"username":"...","key":"..."}`.
+   - The upload fallback auto-detects which kind of file you upload (a raw `KGAT_…`
+     text token or a legacy `kaggle.json`).
 2. **Google Drive** — click *Authorize* on the mount cell (OAuth). Checkpoints,
    dataset-stats and PCA eigvecs persist under `<DRIVE_DIR>` so per-fold `--resume`
    survives Colab disconnects.
@@ -87,12 +124,18 @@ dataset-stats + PCA caching, single-fold `--resume`) is automated in the cells.
 The notebook clones `yesmukhamedov/dr-classifier`. That repo must already contain the
 **up-to-date `experiments/`** — in particular:
 - `scripts/compute_dataset_stats.py` (the **real** implementation, not the old stub),
+- `scripts/precompute_v5_cache.py` (**new** — the V5 cache builder, §2),
+- `src/preprocessing/pipeline_v5.py` with `precompute_deterministic` +
+  `finish_from_cache` (**new** — the deterministic/stochastic split, §2),
+- `src/data/datasets.py` with `CachedEyePACSDataset` + `load_cache_meta` (**new**),
+- `src/experiments/exp1_factorial.py` with the `paths.v5_cache_dir` wiring (**new**),
 - `kaggle/merge_config.py`,
 - the EyePACS adapter **`is_file()` fix** (the CSV is wrapped in a same-named folder, so
   the probe must filter `if p.is_file()` or `read_csv` raises `IsADirectoryError`).
 
 If `dr-classifier` is stale, **mirror the latest `experiments/` tree into it first.**
-This is the same unclosed TODO carried over from the old Config-D task.
+This is the same unclosed TODO carried over from the old Config-D task — now also
+gating the cache code above.
 
 ### Order of actions
 
@@ -146,35 +189,115 @@ Evidence in code:
 2) gives ~4× but 20 epochs × 5 folds still won't fit a week while re-preprocessing every
 epoch.
 
-### The real fix — precompute V5 Stages 0–4 once and cache
+### The real fix — precompute V5 Stages 0–4 once and cache  ✅ IMPLEMENTED (branch `feat/v5-cache-colab`)
 
 Stages 0→4 (flip, OD-fovea rotation, crop/resize, FOV-mask, flat-field) are **fully
 deterministic** — no train-time randomness until Stage 5 (CLAHE p=0.8) and Stage 6
-(augmentation). So:
+(augmentation). The cache stores each image as a **4-channel PNG** (RGB = Stage-4
+flat-field output, alpha = binary FOV mask — **lossless**, the mask is strictly
+{0,1}) plus a `cache_meta.csv` of the two OD/fovea scalars Stage 6 reads
+(`confident`, `rotation_sigma_deg`). ~8 GB PNG-compressed for 35k.
 
-1. Run Stages 0–4 **once** for all 35k → save as 512×512×4 `uint8` (~35 GB raw, or
-   ~8 GB PNG-compressed).
-2. Train-time `__getitem__` loads the small cache and does only CLAHE + augmentation +
-   normalize → the epoch becomes **GPU-bound** (~15–40 min).
-3. Store the cache on **paid Google Drive** so it survives Colab's ephemeral disk
-   between per-fold sessions.
+**What landed (all on `feat/v5-cache-colab`, verified max|Δ| = 0.0 vs the live pipeline):**
+- `src/preprocessing/pipeline_v5.py` — split the full path into deterministic
+  `precompute_deterministic` (Stages 0–4) + stochastic `finish_from_cache`
+  (Stages 5–7). `__call__` now routes through both, so the cached and live paths are
+  **provably identical** (same `_finish`). The 4th-channel mask stays the un-warped
+  FOV mask, exactly as before — zero drift.
+- `scripts/precompute_v5_cache.py` — multiprocess cache builder (resumable; skips
+  images already in `cache_meta.csv`). Writes `<name>.png` + `cache_meta.csv` +
+  copies `trainLabels.csv` so the cache is a self-contained training input.
+- `src/data/datasets.py` — `CachedEyePACSDataset` (+ `load_cache_meta`): reads the
+  PNG cache and calls `finish_from_cache`; per-epoch CPU cost collapses to CLAHE +
+  aug + normalize.
+- `src/experiments/exp1_factorial.py` — opt-in via `paths.v5_cache_dir`. When set,
+  the **full** configs (B/D) read the cache; baseline (A/C) errors clearly (no
+  cacheable Stages 0–4). Drift-proof: same pipeline object finishes both paths.
+
+**Verification (run locally, CPU):** synthetic-image round-trip and a tiny
+end-to-end build→load test both give **max|Δ| = 0.0** between the cached tensor and
+the live-pipeline tensor, in inference and seeded-training mode.
 
 **Budget with the cache:** build ~1–2 h once → fold 0 (the one the demo needs) ~half a
-day → all 5 folds fit a week with margin. **Without the cache: no.**
+day (GPU-bound) → all 5 folds fit a week with margin. **Without the cache: no.**
 
-**This requires code** (precompute script + a "load-from-cache" dataset branch + a Colab
-cell). Claude can write it on request — this is the step that actually unblocks the
-EyePACS run.
+### Persistence — Kaggle Datasets fully replace Google Drive (no Drive, no paid tier)
 
-### What to confirm with browser-Claude (web access — verify current 2026 tiers)
+The ~8 GB cache + the re-downloaded EyePACS don't both fit free Drive (15 GB). So
+the Colab notebook (`experiments/colab/`) now persists **everything on Kaggle
+Datasets**, pushed/pulled with the **same KGAT_ token** that downloads EyePACS — no
+Drive, no OAuth, no paid storage:
+- **Cache dataset** `<user>/eyepacs-v5-cache-<dataset>` — built once (MODE
+  `build_cache`), pulled each training session (~8 GB tar, a few min vs re-downloading
+  35 GB EyePACS every time). Bundles the Stage-7 norm-stats + PCA so they travel with it.
+- **Checkpoints dataset** `<user>/dr-config-d-ckpts-<dataset>` — created on first
+  push, **versioned** thereafter. A background thread versions it every
+  `CKPT_UPLOAD_EVERY_MIN` (default 30) + a final push in a `finally`.
 
-> 1. Google Colab as of 2026 — for **Free, Pro, Pro+, and Pay-As-You-Go**: how many
->    **vCPU (CPU cores)** and how much **RAM** per GPU instance? Especially the vCPU
->    count, because my bottleneck is **CPU preprocessing in the DataLoader**, not the GPU.
-> 2. Which GPUs are actually available on **Pro and Pro+** (T4 / L4 / A100), and can I
->    pick a **High-RAM / more-CPU** runtime?
-> 3. **Background execution** (notebook keeps running when the tab is closed / on idle):
->    on which tiers, and the **max continuous session limit** (12 h? 24 h?)?
+The notebook is now a **two-mode** flow (cell 1 `MODE`): `build_cache` (once) →
+`train` (per fold). KGAT auth, push/pull/tar helpers, and the uploader thread are all
+automated.
+
+### Handling the 24 h cap / a fold that doesn't finish in one session
+
+- **Free Colab** ≈ 12 h, **no** background execution; **Pro+** ≈ 24 h continuous in
+  the background. With the cache, **fold 0 ≈ 12 h fits one session** (Pro+ comfortably).
+- If a session is killed mid-fold: the background uploader has already versioned the
+  checkpoint dataset (≤ `CKPT_UPLOAD_EVERY_MIN` old). Re-run MODE `train` with the
+  **same `FOLD`** → the cell pulls the latest checkpoint and `--resume` continues; you
+  lose at most one upload cadence. **One fold per session; cache built only once.**
+- So even on **free** Colab the full run is feasible (more sessions, same resume
+  loop). Pro+ just removes the babysitting (background 24 h) — it is **not** required.
+
+### What to collect from the browser (Claude browser extension) before launching
+
+1. **Your Kaggle username** — needed for the dataset slugs (`<user>/…`). It's the
+   `kaggle.com/<username>` on your profile. Put it in cell 1 `KAGGLE_USERNAME`.
+2. **Confirm `dreamer07/eyepacs` is still public + its layout** — open the dataset
+   page; verify it exposes `trainLabels.csv` (cols `image`,`level`) + `train/*.jpeg`
+   (the adapter expects this; the `is_file()` fix handles the same-named-folder wrap).
+3. **Confirm your Colab tier** — Pro+ (for 24 h background) is *nice-to-have*, not
+   required. Free works with the one-fold-per-session resume loop.
+4. **(Repo currency — not browser)** the notebook clones `yesmukhamedov/dr-classifier`;
+   it must contain this branch's `experiments/` (precompute script, the
+   `paths.v5_cache_dir` wiring, `CachedEyePACSDataset`). Mirror `experiments/` into
+   that repo before running — see §1 prerequisite.
+
+### Colab tier findings (confirmed 2026-06-03 from official Colab subscription page + FAQ)
+
+Google **does not publish** exact vCPU / RAM / GPU numbers — the FAQ states they
+"vary over time." Below: official facts + commonly observed values. **Bottom line:
+Colab gives no direct "N CPU cores" lever, so the §2 caching fix is mandatory.**
+
+- **vCPU is tied to the machine, not the subscription.** A standard **T4 instance is
+  ~2 vCPU — identical to Kaggle.** More vCPU only comes indirectly via a heavier
+  machine (A100 ~12 vCPU historically) or a **High-RAM** runtime (paid tiers,
+  `Runtime → Change runtime type → High-RAM`). There is **no** "more CPU" toggle.
+- **GPU pool "varies over time."** Commonly T4 (also Free), L4, A100. Pro = "faster
+  GPUs"; **Pro+ = priority access**, not an exclusive GPU set. No fixed tier→GPU map.
+- **Background execution (tab closed / idle) is Pro+ only**, up to **24 h continuous**
+  while code runs. Free/Pro/PAYG cap ~12 h, no background execution. All tiers stop
+  once Compute Units are exhausted.
+
+**Throughput math (≈2.25 s/img V5 on CPU × 35,126 imgs; EfficientNet-B3 GPU ≈30 min/epoch):**
+
+| Path | vCPU | preproc/epoch | bound by | 1 fold (20 ep) | 5 folds (100 ep) |
+|------|------|---------------|----------|----------------|------------------|
+| Kaggle / Colab **T4** | 2 | ~11 h | **CPU (GPU idle)** | ~220 h | ~1100 h |
+| Colab Pro High-RAM | ~8 | ~2.7 h | CPU | ~55 h | ~270 h |
+| Colab **A100** | ~12 | ~1.8 h | CPU | ~36 h | ~180 h |
+| **Cached (Stages 0–4)** | any | ~0 | **GPU ~30–40 min** | **~12 h** | ~58 h + ~2 h build |
+
+**A100 is the wrong buy:** even at ~180 h for 5 folds it (a) still exceeds a week and
+(b) burns the entire Pro+ ~500 CU/month in ~38 h (A100 ≈13 CU/h) — paying premium GPU
+rates for a GPU that **sits idle waiting on CPU**. The cache flips the epoch to
+GPU-bound **on a plain T4**, so **fold 0 (the only fold the demo needs) finishes in
+~half a day** with no A100/Pro+ required. Pro+ stays *optional* (nice for 24 h
+background execution so fold 0 survives a closed laptop), not a throughput fix.
+
+**Open question for the cache:** the ~8 GB PNG cache + the re-downloaded EyePACS won't
+both fit the free 15 GB Drive tier → the cache assumes **paid Google Drive** (or another
+persistent location). Confirm storage before building.
 
 ---
 

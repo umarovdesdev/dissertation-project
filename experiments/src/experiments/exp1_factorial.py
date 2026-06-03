@@ -22,7 +22,13 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 
-from src.data.datasets import EyePACSDataset, EyePACSPatientPairDataset, patient_pair_collate
+from src.data.datasets import (
+    CachedEyePACSDataset,
+    EyePACSDataset,
+    EyePACSPatientPairDataset,
+    load_cache_meta,
+    patient_pair_collate,
+)
 from src.data.splits import PatientLevelKFold
 from src.evaluation.metrics import check_dominance
 from src.models.factory import create_model, create_patient_model
@@ -140,6 +146,45 @@ def _load_eyepacs_index(
     return paths, labels, pids, eye_sides
 
 
+def _load_cache_index(
+    cache_dir: str,
+    subset_size: int | None = None,
+) -> tuple[list[str], list[int], list[str], list[str]]:
+    """Read the V5 cache index (drop-in for :func:`_load_eyepacs_index`).
+
+    Uses the cache's self-contained ``trainLabels.csv``; "paths" are the cached
+    ``<name>.png`` files, filtered to those present on disk.
+
+    Args:
+        cache_dir: Directory written by ``scripts/precompute_v5_cache.py``.
+        subset_size: If set, use only the first N CSV rows (smoke tests).
+
+    Returns:
+        Tuple ``(cache_png_paths, labels, patient_ids, eye_sides)``.
+    """
+    cache_path = Path(cache_dir)
+    df = pd.read_csv(cache_path / "trainLabels.csv")
+    if subset_size is not None:
+        df = df.iloc[:subset_size].reset_index(drop=True)
+
+    paths: list[str] = []
+    labels: list[int] = []
+    pids: list[str] = []
+    eye_sides: list[str] = []
+
+    for _, row in df.iterrows():
+        name = str(row["image"])
+        p = cache_path / f"{name}.png"
+        if not p.exists():
+            continue
+        paths.append(str(p))
+        labels.append(int(row["level"]))
+        pids.append(name.split("_")[0])
+        eye_sides.append("left" if "_left" in name else "right")
+
+    return paths, labels, pids, eye_sides
+
+
 def _build_patient_data(
     paths: list[str],
     labels: list[int],
@@ -223,6 +268,9 @@ def run(
     eyepacs_root = config["paths"]["eyepacs"]
     labels_csv   = str(Path(eyepacs_root) / "trainLabels.csv")
     images_root  = str(Path(eyepacs_root) / "train")
+    # Optional V5 Stage 0–4 cache (throughput fix, TASK §2). When set, the full
+    # configs (B/D) read cached PNGs and run only Stages 5–7 per epoch.
+    v5_cache_dir = config.get("paths", {}).get("v5_cache_dir")
     output_dir   = Path(config["paths"]["output_dir"]) / "exp1"
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "logs").mkdir(exist_ok=True)
@@ -267,11 +315,21 @@ def run(
               "scripts/compute_dataset_stats.py to fix.")
 
     # ── Load index once ───────────────────────────────────────────────────────
-    print(f"Loading EyePACS index from {labels_csv} …")
-    all_paths, all_labels, all_pids, all_eye_sides = _load_eyepacs_index(
-        images_root, labels_csv, subset_size=_subset_size
-    )
-    print(f"  Found {len(all_paths)} images | {len(set(all_pids))} patients")
+    cache_meta: dict[str, tuple[bool, float]] | None = None
+    if v5_cache_dir:
+        print(f"Loading V5 cache index from {v5_cache_dir} …")
+        all_paths, all_labels, all_pids, all_eye_sides = _load_cache_index(
+            v5_cache_dir, subset_size=_subset_size
+        )
+        cache_meta = load_cache_meta(v5_cache_dir)
+        print(f"  Found {len(all_paths)} cached images | {len(set(all_pids))} patients "
+              f"| {len(cache_meta)} meta rows")
+    else:
+        print(f"Loading EyePACS index from {labels_csv} …")
+        all_paths, all_labels, all_pids, all_eye_sides = _load_eyepacs_index(
+            images_root, labels_csv, subset_size=_subset_size
+        )
+        print(f"  Found {len(all_paths)} images | {len(set(all_pids))} patients")
 
     # ── Stratified patient-level subset ───────────────────────────────────────
     subset_cfg = config.get("subset", {})
@@ -376,22 +434,41 @@ def run(
             ckpt_dir.mkdir(parents=True, exist_ok=True)
 
             # ── Configs A–D: standard single-image training ────────────────
-            train_ds = EyePACSDataset(
-                image_paths=tr_paths,
-                labels=tr_labels,
-                patient_ids=tr_pids,
-                preprocessing=train_preproc,
-                augmentation=None,   # augmentation is inside V5 pipeline
-                eye_sides=tr_sides,
-            )
-            val_ds = EyePACSDataset(
-                image_paths=va_paths,
-                labels=va_labels,
-                patient_ids=va_pids,
-                preprocessing=val_preproc,
-                augmentation=None,
-                eye_sides=va_sides,
-            )
+            if v5_cache_dir and preproc_kind == "full":
+                # Throughput fix: read cached Stage 0–4 PNGs, run only 5–7.
+                train_ds = CachedEyePACSDataset(
+                    image_paths=tr_paths, labels=tr_labels, patient_ids=tr_pids,
+                    preprocessing=train_preproc, cache_meta=cache_meta,
+                    eye_sides=tr_sides,
+                )
+                val_ds = CachedEyePACSDataset(
+                    image_paths=va_paths, labels=va_labels, patient_ids=va_pids,
+                    preprocessing=val_preproc, cache_meta=cache_meta,
+                    eye_sides=va_sides,
+                )
+            elif v5_cache_dir and preproc_kind == "baseline":
+                raise ValueError(
+                    f"paths.v5_cache_dir is set but Config {cfg_key} is baseline; "
+                    "the V5 cache only covers full-pipeline configs (B/D). "
+                    "Run baseline configs (A/C) without v5_cache_dir."
+                )
+            else:
+                train_ds = EyePACSDataset(
+                    image_paths=tr_paths,
+                    labels=tr_labels,
+                    patient_ids=tr_pids,
+                    preprocessing=train_preproc,
+                    augmentation=None,   # augmentation is inside V5 pipeline
+                    eye_sides=tr_sides,
+                )
+                val_ds = EyePACSDataset(
+                    image_paths=va_paths,
+                    labels=va_labels,
+                    patient_ids=va_pids,
+                    preprocessing=val_preproc,
+                    augmentation=None,
+                    eye_sides=va_sides,
+                )
 
             train_loader = DataLoader(
                 train_ds,

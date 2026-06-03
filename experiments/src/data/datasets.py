@@ -214,6 +214,96 @@ class EyePACSDataset(BaseFundusDataset):
         return cls(image_paths, labels, patient_ids, preprocessing, augmentation, eye_sides)
 
 
+def load_cache_meta(cache_dir: str | Path) -> dict[str, tuple[bool, float]]:
+    """Load the V5 cache sidecar mapping image name → (confident, rotation_sigma_deg).
+
+    These are the only two OD/fovea scalars Stage 6 augmentation reads; they are
+    cached alongside the Stage-4 PNGs by ``scripts/precompute_v5_cache.py``.
+
+    Args:
+        cache_dir: Directory containing ``cache_meta.csv`` (columns:
+            ``image``, ``confident``, ``rotation_sigma_deg``).
+
+    Returns:
+        Dict mapping image name (no extension) → ``(confident, rotation_sigma_deg)``.
+    """
+    meta_path = Path(cache_dir) / "cache_meta.csv"
+    df = pd.read_csv(meta_path)
+    return {
+        str(row["image"]): (bool(row["confident"]), float(row["rotation_sigma_deg"]))
+        for _, row in df.iterrows()
+    }
+
+
+class CachedEyePACSDataset(EyePACSDataset):
+    """EyePACS dataset reading a precomputed V5 Stage 0–4 cache (the throughput fix).
+
+    Each sample is a 4-channel PNG written by ``scripts/precompute_v5_cache.py``
+    (RGB = Stage-4 flat-field output, alpha = binary FOV mask) plus two cached
+    OD/fovea scalars. Only the stochastic Stages 5–7 (CLAHE + augmentation +
+    normalize) run per epoch via :meth:`PreprocessingPipelineV5.finish_from_cache`,
+    so the DataLoader stops being the bottleneck and the GPU no longer starves.
+
+    The ``preprocessing`` pipeline MUST be a **full** (non-baseline)
+    :class:`PreprocessingPipelineV5`; baseline configs have no cacheable
+    Stage 0–4 and must use :class:`EyePACSDataset` on raw images instead.
+
+    Args:
+        image_paths: Absolute paths to the cached ``{name}.png`` files.
+        labels: DR grade labels (0–4).
+        patient_ids: Numeric patient strings.
+        preprocessing: Full V5 pipeline (its ``finish_from_cache`` is called).
+        cache_meta: Mapping from :func:`load_cache_meta`.
+        eye_sides: ``"left"``/``"right"`` per image (unused at read time — the
+            cache already encodes Stage-0 orientation — kept for parity).
+    """
+
+    def __init__(
+        self,
+        image_paths: list[str],
+        labels: list[int],
+        patient_ids: list[str],
+        preprocessing: Callable,
+        cache_meta: dict[str, tuple[bool, float]],
+        eye_sides: list[str] | None = None,
+    ) -> None:
+        super().__init__(
+            image_paths, labels, patient_ids,
+            preprocessing=preprocessing, augmentation=None, eye_sides=eye_sides,
+        )
+        self._cache_meta = cache_meta
+
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, int]:
+        """Load one cached sample and finish Stages 5–7.
+
+        Args:
+            idx: Sample index.
+
+        Returns:
+            Tuple of (image_tensor, label); image_tensor is float32 ``(4, H, W)``,
+            normalised exactly as the live pipeline would produce.
+        """
+        path = self.image_paths[idx]
+        bgra = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+        if bgra is None:
+            raise FileNotFoundError(f"Could not load cached image: {path}")
+        if bgra.ndim != 3 or bgra.shape[2] != 4:
+            raise ValueError(
+                f"Cached image {path} must be 4-channel BGRA, got shape {bgra.shape}"
+            )
+
+        flat_rgb = cv2.cvtColor(bgra[:, :, :3], cv2.COLOR_BGR2RGB)
+        fov_mask = bgra[:, :, 3].astype(np.float32) / 255.0  # {0,255} → {0.0,1.0}
+
+        name = Path(path).stem
+        confident, rotation_sigma_deg = self._cache_meta[name]
+
+        tensor = self.preprocessing.finish_from_cache(
+            flat_rgb, fov_mask, confident, rotation_sigma_deg
+        )
+        return tensor, self.labels[idx]
+
+
 class APTOS2019Dataset(BaseFundusDataset):
     """APTOS 2019 Blindness Detection dataset (~3,662 images, 5-class DR).
 
