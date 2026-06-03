@@ -33,12 +33,12 @@ export default function ModelArchitecture() {
           rows={[
             ['Baseline', 'ResNet-50', '25.6M', 'ImageNet (torchvision)', '3 ch, 512×512', 'Exp 1 (Config A)'],
             ['Baseline', 'EfficientNet-B3', '12.2M', 'ImageNet (timm)', '3 ch, 512×512', 'Exp 1 (Config C), Exp 4 (Grad-CAM/ALO)'],
-            ['V5 (proposed)', 'ResNet-50 / EfficientNet-B3', '25.6M / 12.2M', 'Ophthalmology-specific SSL (in-house fundus pretrain)', '4 ch, 512×512 (RGB + FOV mask)', 'Exp 1 (Config B / D)'],
+            ['Pipeline (proposed)', 'ResNet-50 / EfficientNet-B3', '25.6M / 12.2M', 'Ophthalmology-specific SSL (in-house fundus pretrain)', '4 ch, 512×512 (RGB + FOV mask)', 'Exp 1 (Config B / D)'],
           ]}
         />
         <Note>
           Baseline arm: ImageNet-pretrained weights (cross-domain transfer from natural images).
-          V5 arm: the same CNN backbones (ResNet-50 / EfficientNet-B3) initialized from ophthalmology-specific self-supervised pretraining — a CNN-compatible domain-adaptive SSL protocol (DINO / BYOL / SimCLR / MoCo family) pretrained on an unlabeled retinal fundus corpus, then fine-tuned for DR classification. This keeps the CNN architecture identical across arms, isolating the architecture factor.
+          Pipeline arm: the same CNN backbones (ResNet-50 / EfficientNet-B3) initialized from ophthalmology-specific self-supervised pretraining — a CNN-compatible domain-adaptive SSL protocol (DINO / BYOL / SimCLR / MoCo family) pretrained on an unlabeled retinal fundus corpus, then fine-tuned for DR classification. This keeps the CNN architecture identical across arms, isolating the architecture factor.
           Per CFC-2.8, observed differences are attributable only to the integrated (preprocessing × pretrain) pair, not to either factor in isolation.
           All models trained with patient-level 5-fold cross-validation.
           Mixed precision disabled for EfficientNet models; batch size 16 (EfficientNet) / 32 (ResNet-50).

@@ -61,7 +61,7 @@ export async function predictPatient(eyes) {
   return json;
 }
 
-// POST /api/visualize → { fov_mask_png_b64, v5_preview_png_b64, od_fovea }.
+// POST /api/visualize → { fov_mask_png_b64, preview_png_b64, od_fovea }.
 export async function visualizeImage(src, eye, name) {
   if (!API) throw new Error('REACT_APP_API_URL is not set');
   const fd = new FormData();

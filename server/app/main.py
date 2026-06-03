@@ -166,7 +166,7 @@ async def visualize(
     eye: str = Form(default="left"),
     password: str | None = Form(default=None),
 ) -> VisualizeResponse:
-    """V5 preview strip + FOV mask + OD/fovea payload for one image."""
+    """preview strip + FOV mask + OD/fovea payload for one image."""
     _require_password(password)
     data = await _read_validated(image)
     try:

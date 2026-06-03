@@ -37,7 +37,7 @@ export default function ExpH4() {
 
       <Sec title={t('exp.crossDataset')}>
         <Paired
-          items={GEN.map(d => ({ label: d.d, v1: d.fb, v2: d.fp }))}
+          items={GEN.map(d => ({ label: d.d, a: d.fb, b: d.fp }))}
           c2={C.blue}
           l1="Baseline"
           l2="Pipeline"

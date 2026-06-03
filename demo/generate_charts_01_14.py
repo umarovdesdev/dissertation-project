@@ -29,11 +29,11 @@ CONFIGS = {
     'A': {'f1': 0.724, 'f1s': 0.011, 'auc': 0.830, 'aucs': 0.014, 'k': 0.618, 'ks': 0.035, 'acc': 0.717,
           'lbl': 'A: Baseline + ResNet-50'},
     'B': {'f1': 0.776, 'f1s': 0.009, 'auc': 0.863, 'aucs': 0.011, 'k': 0.698, 'ks': 0.026, 'acc': 0.768,
-          'lbl': 'B: V5 + ResNet-50'},
+          'lbl': 'B: Pipeline + ResNet-50'},
     'C': {'f1': 0.727, 'f1s': 0.033, 'auc': 0.821, 'aucs': 0.019, 'k': 0.620, 'ks': 0.067, 'acc': 0.719,
           'lbl': 'C: Baseline + EfficientNet-B3'},
     'D': {'f1': 0.780, 'f1s': 0.022, 'auc': 0.865, 'aucs': 0.015, 'k': 0.700, 'ks': 0.030, 'acc': 0.770,
-          'lbl': 'D: V5 + EfficientNet-B3'},
+          'lbl': 'D: Pipeline + EfficientNet-B3'},
 }
 
 ABL = [
@@ -43,7 +43,7 @@ ABL = [
     {'n': '+Flat-field', 'f1': 0.758, 'auc': 0.848},
     {'n': '+CLAHE', 'f1': 0.772, 'auc': 0.858},
     {'n': '+Augmentation', 'f1': 0.778, 'auc': 0.863},
-    {'n': 'Full V5', 'f1': 0.780, 'auc': 0.865},
+    {'n': 'Full pipeline', 'f1': 0.780, 'auc': 0.865},
 ]
 
 ABL_INDIV = [
@@ -152,8 +152,8 @@ def chart_01():
     ax.set_title('Experiment 1: 2x2 Factorial Design -- Weighted F1', fontsize=13, fontweight='bold')
     legend_patches = [
         mpatches.Patch(color=GRAY, label='Baseline (3ch)'),
-        mpatches.Patch(color=BLUE, label='V5 Pipeline + ResNet-50'),
-        mpatches.Patch(color=TEAL, label='V5 Pipeline + EfficientNet-B3'),
+        mpatches.Patch(color=BLUE, label='Pipeline + ResNet-50'),
+        mpatches.Patch(color=TEAL, label='Pipeline + EfficientNet-B3'),
     ]
     ax.legend(handles=legend_patches, fontsize=8, loc='upper left')
     save(fig, '01_exp1_factorial_f1.png')
@@ -216,7 +216,7 @@ def chart_03():
     ax.set_xticklabels(metric_labels, fontsize=11)
     ax.set_ylabel('Improvement (percentage points)', fontsize=11)
     ax.set_ylim(-0.5, 10.5)
-    ax.set_title('Preprocessing Effect: $\\Delta$ (V5 Pipeline - Baseline)', fontsize=13, fontweight='bold')
+    ax.set_title('Preprocessing Effect: $\\Delta$ (Pipeline - Baseline)', fontsize=13, fontweight='bold')
     ax.legend(fontsize=9)
     save(fig, '03_exp1_delta.png')
 
@@ -242,7 +242,7 @@ def chart_04():
     ax.set_xticklabels(names, fontsize=8, rotation=25, ha='right')
     ax.set_ylabel('Weighted F1-Score', fontsize=11)
     ax.set_ylim(0.70, 0.82)
-    ax.set_title('Experiment 2: Cumulative Ablation -- V5 Pipeline Stages', fontsize=13, fontweight='bold')
+    ax.set_title('Experiment 2: Cumulative Ablation -- Pipeline Stages', fontsize=13, fontweight='bold')
     save(fig, '04_exp2_ablation.png')
 
 
@@ -286,7 +286,7 @@ def chart_06():
     x = np.arange(len(lesions))
     w = 0.3
     b1 = ax.bar(x - w/2, base, w, color=GRAY, label='Baseline', edgecolor='white')
-    b2 = ax.bar(x + w/2, pipe, w, color=TEAL, label='V5 Pipeline', edgecolor='white')
+    b2 = ax.bar(x + w/2, pipe, w, color=TEAL, label='Pipeline', edgecolor='white')
     for i, bar in enumerate(b2):
         ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.015,
                 pct_improve[i], ha='center', va='bottom', fontsize=9, fontweight='bold', color=CORAL)
@@ -313,7 +313,7 @@ def chart_07():
     x = np.arange(len(lesions))
     w = 0.3
     b1 = ax.bar(x - w/2, base, w, color=GRAY, label='Baseline', edgecolor='white')
-    b2 = ax.bar(x + w/2, pipe, w, color=PURPLE, label='V5 Pipeline', edgecolor='white')
+    b2 = ax.bar(x + w/2, pipe, w, color=PURPLE, label='Pipeline', edgecolor='white')
     for i, bar in enumerate(b2):
         ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.015,
                 pct_improve[i], ha='center', va='bottom', fontsize=9, fontweight='bold', color=CORAL)
@@ -341,7 +341,7 @@ def chart_08():
     fb = [g['fb'] for g in GEN]
     fp = [g['fp'] for g in GEN]
     b1 = ax1.bar(x - w/2, fb, w, color=GRAY, label='Baseline', edgecolor='white')
-    b2 = ax1.bar(x + w/2, fp, w, color=TEAL, label='V5 Pipeline', edgecolor='white')
+    b2 = ax1.bar(x + w/2, fp, w, color=TEAL, label='Pipeline', edgecolor='white')
     for bars, vals in [(b1, fb), (b2, fp)]:
         for bar, val in zip(bars, vals):
             ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
@@ -356,7 +356,7 @@ def chart_08():
     ab = [g['b'] for g in GEN_AUC]
     ap = [g['p'] for g in GEN_AUC]
     b1 = ax2.bar(x - w/2, ab, w, color=GRAY, label='Baseline', edgecolor='white')
-    b2 = ax2.bar(x + w/2, ap, w, color=TEAL, label='V5 Pipeline', edgecolor='white')
+    b2 = ax2.bar(x + w/2, ap, w, color=TEAL, label='Pipeline', edgecolor='white')
     for bars, vals in [(b1, ab), (b2, ap)]:
         for bar, val in zip(bars, vals):
             ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
@@ -407,7 +407,7 @@ def chart_10():
     x = np.arange(len(cameras))
     w = 0.3
     b1 = ax.bar(x - w/2, fb, w, color=GRAY, label='Baseline', edgecolor='white')
-    b2 = ax.bar(x + w/2, fp, w, color=CORAL, label='V5 Pipeline', edgecolor='white')
+    b2 = ax.bar(x + w/2, fp, w, color=CORAL, label='Pipeline', edgecolor='white')
     for bars, vals in [(b1, fb), (b2, fp)]:
         for bar, val in zip(bars, vals):
             ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,
@@ -453,12 +453,12 @@ def chart_11():
     ax.fill(angles, baseline, alpha=0.15, color=GRAY)
     ax.plot(angles, baseline, 'o-', color=GRAY, linewidth=1.5, markersize=5, label='Baseline')
     ax.fill(angles, pipeline, alpha=0.15, color=TEAL)
-    ax.plot(angles, pipeline, 'o-', color=TEAL, linewidth=1.5, markersize=5, label='V5 Pipeline')
+    ax.plot(angles, pipeline, 'o-', color=TEAL, linewidth=1.5, markersize=5, label='Pipeline')
     ax.set_ylim(0, 1)
     ax.set_yticks([0.25, 0.5, 0.75, 1.0])
     ax.set_yticklabels(['', '', '', ''], fontsize=7)
     ax.legend(loc='upper right', bbox_to_anchor=(1.25, 1.1), fontsize=9)
-    ax.set_title('Overall Performance: Baseline vs Full V5 Pipeline', fontsize=13, fontweight='bold', y=1.08)
+    ax.set_title('Overall Performance: Baseline vs Full Pipeline', fontsize=13, fontweight='bold', y=1.08)
     save(fig, '11_summary_radar.png')
 
 
@@ -550,7 +550,7 @@ def chart_14():
     x = np.arange(len(metrics))
     w = 0.3
     b1 = ax.bar(x - w/2, base, w, color=GRAY, label='Baseline', edgecolor='white')
-    b2 = ax.bar(x + w/2, pipe, w, color=TEAL, label='V5 Pipeline', edgecolor='white')
+    b2 = ax.bar(x + w/2, pipe, w, color=TEAL, label='Pipeline', edgecolor='white')
     for bars, vals in [(b1, base), (b2, pipe)]:
         for bar, val in zip(bars, vals):
             ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.005,

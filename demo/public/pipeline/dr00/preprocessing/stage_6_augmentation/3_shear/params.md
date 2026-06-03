@@ -5,7 +5,7 @@
 | Parameter | Value | Source |
 |-----------|-------|--------|
 | Shear range | [-2.0°, 2.0°] | `default.yaml:58` |
-| Distribution | Uniform | `augmentation_v4.py:172` |
+| Distribution | Uniform | `augmentation_unified.py:172` |
 | Probability | 0.3 (30%) | `default.yaml:59` |
 
 ## Algorithm

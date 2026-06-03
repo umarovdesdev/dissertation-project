@@ -82,7 +82,7 @@ class VisualizeResponse(BaseModel):
     """POST /api/visualize payload."""
 
     fov_mask_png_b64: str
-    v5_preview_png_b64: str
+    preview_png_b64: str
     od_fovea: ODFoveaPayload
 
 

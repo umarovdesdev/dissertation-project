@@ -1,5 +1,5 @@
 """
-Generate V5 pipeline stage images from real fundus photographs.
+Generate pipeline stage images from real fundus photographs.
 Source: demo/public/fundus-examples/dr04/right_eye.jpeg and left_eye.jpeg
 Output: demo/public/pipeline/
 """
@@ -31,7 +31,7 @@ def load_image(name):
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
-# ─── V5 Pipeline Stages ───
+# ─── Pipeline Stages ───
 
 def stage0_canonical_flip(img, is_left_eye):
     """Stage 0: Canonical flip — left eyes get flipped horizontally."""
@@ -216,7 +216,7 @@ def stage7_normalize(img, mask):
     the image looks recognisable while the colour shift from dataset-specific
     stats (vs ImageNet) is visible.
     """
-    # Dataset-specific stats (EyePACS V5 training set)
+    # Dataset-specific stats (EyePACS training set)
     mean = np.array([0.412, 0.267, 0.168])
     std = np.array([0.278, 0.189, 0.145])
     normalized = (img.astype(np.float32) / 255.0 - mean) / std
@@ -409,7 +409,7 @@ def _stage1_axis_overlay(img):
 
 
 def make_pipeline_stages_grid(right_img):
-    """Create pipeline_stages_grid.png — 3x3 grid of all V5 stages."""
+    """Create pipeline_stages_grid.png — 3x3 grid of all stages."""
     raw = right_img.copy()
     s0 = stage0_canonical_flip(raw, is_left_eye=False)
     s1_vis = _stage1_axis_overlay(s0)  # axis overlay, no rotation
@@ -436,7 +436,7 @@ def make_pipeline_stages_grid(right_img):
               '#1D9E75', '#1D9E75', '#EF9F27', '#7F77DD']
 
     fig, axes = plt.subplots(3, 3, figsize=(12, 12))
-    fig.suptitle('V5 Pipeline Stages \u2014 Patient 43199 (DR4, Proliferative DR)',
+    fig.suptitle('Pipeline Stages \u2014 Patient 43199 (DR4, Proliferative DR)',
                  fontsize=14, fontweight='bold', y=0.98)
 
     for i, (title, img) in enumerate(stages):
@@ -462,23 +462,23 @@ def make_bilateral_pair(right_img, left_img):
     """Create bilateral_pair.png — 2×3 grid: both eyes through pipeline."""
     r_s0 = stage0_canonical_flip(right_img, is_left_eye=False)
     r_s2 = stage2_fov_crop_isotropic_resize(r_s0, margin_pct=0)
-    r_v5 = stage5_clahe(stage4_flatfield(r_s2))
+    r_full = stage5_clahe(stage4_flatfield(r_s2))
 
     l_s0 = stage0_canonical_flip(left_img, is_left_eye=True)
     l_s2 = stage2_fov_crop_isotropic_resize(l_s0, margin_pct=0)
-    l_v5 = stage5_clahe(stage4_flatfield(l_s2))
+    l_full = stage5_clahe(stage4_flatfield(l_s2))
 
     fig, axes = plt.subplots(2, 3, figsize=(12, 8))
-    fig.suptitle('Bilateral Pair \u2014 Canonical Flip + Full V5 Pipeline\nPatient 43199 (DR4)',
+    fig.suptitle('Bilateral Pair \u2014 Canonical Flip + Full Pipeline\nPatient 43199 (DR4)',
                  fontsize=14, fontweight='bold', y=1.0)
 
     axes[0][0].imshow(right_img); axes[0][0].set_title('Right Eye (OD) \u2014 Raw', fontsize=10); axes[0][0].axis('off')
     axes[0][1].imshow(r_s2);      axes[0][1].set_title('Cropped 512\u00d7512', fontsize=10);       axes[0][1].axis('off')
-    axes[0][2].imshow(r_v5);      axes[0][2].set_title('Full V5 Pipeline', fontsize=10);           axes[0][2].axis('off')
+    axes[0][2].imshow(r_full);      axes[0][2].set_title('Full Pipeline', fontsize=10);           axes[0][2].axis('off')
 
     axes[1][0].imshow(left_img);  axes[1][0].set_title('Left Eye (OS) \u2014 Raw', fontsize=10);   axes[1][0].axis('off')
     axes[1][1].imshow(l_s2);      axes[1][1].set_title('Flipped + Cropped 512\u00d7512', fontsize=10); axes[1][1].axis('off')
-    axes[1][2].imshow(l_v5);      axes[1][2].set_title('Full V5 Pipeline', fontsize=10);           axes[1][2].axis('off')
+    axes[1][2].imshow(l_full);      axes[1][2].set_title('Full Pipeline', fontsize=10);           axes[1][2].axis('off')
 
     axes[0][0].text(-0.1, 0.5, 'OD', transform=axes[0][0].transAxes, fontsize=12,
                     fontweight='bold', va='center', ha='center', rotation=90)
@@ -490,7 +490,7 @@ def make_bilateral_pair(right_img, left_img):
 
 
 def make_before_after_pipeline(right_img):
-    """Create before_after_pipeline.png — baseline vs full V5 side-by-side."""
+    """Create before_after_pipeline.png — baseline vs full pipeline side-by-side."""
     bl = baseline_processing(right_img)
 
     s0 = stage0_canonical_flip(right_img, is_left_eye=False)
@@ -498,7 +498,7 @@ def make_before_after_pipeline(right_img):
     s5 = stage5_clahe(stage4_flatfield(s2))
 
     fig, axes = plt.subplots(1, 2, figsize=(10, 5))
-    fig.suptitle('Baseline Processing vs Full V5 Pipeline', fontsize=14, fontweight='bold', y=0.98)
+    fig.suptitle('Baseline Processing vs Full Pipeline', fontsize=14, fontweight='bold', y=0.98)
 
     axes[0].imshow(bl)
     axes[0].set_title('Baseline (3ch)\nStretch-resize + ImageNet norm', fontsize=10)
@@ -508,14 +508,14 @@ def make_before_after_pipeline(right_img):
                  verticalalignment='bottom')
 
     axes[1].imshow(s5)
-    axes[1].set_title('Full V5 Pipeline (4ch)\nIsotropic resize + flat-field + CLAHE', fontsize=10)
+    axes[1].set_title('Full Pipeline (4ch)\nIsotropic resize + flat-field + CLAHE', fontsize=10)
     axes[1].axis('off')
     axes[1].text(0.02, 0.02, '4ch RGBM', transform=axes[1].transAxes, fontsize=9,
                  color='white', bbox=dict(boxstyle='round,pad=0.3', facecolor='#1D9E75', alpha=0.85),
                  verticalalignment='bottom')
 
     fig.text(0.5, 0.01,
-             'V5 isotropic resize preserves circular FOV geometry; flat-field corrects illumination; CLAHE enhances vessel contrast',
+             'isotropic resize preserves circular FOV geometry; flat-field corrects illumination; CLAHE enhances vessel contrast',
              ha='center', fontsize=9, style='italic', color='#444441')
 
     plt.tight_layout(rect=[0, 0.04, 1, 0.96])
@@ -531,14 +531,14 @@ def make_baseline_vs_pipeline(right_img):
     s5 = stage5_clahe(stage4_flatfield(s2))
 
     fig, axes = plt.subplots(2, 2, figsize=(10, 10))
-    fig.suptitle('Baseline Stretch-Resize vs V5 Isotropic Resize', fontsize=14, fontweight='bold', y=0.98)
+    fig.suptitle('Baseline Stretch-Resize vs Isotropic Resize', fontsize=14, fontweight='bold', y=0.98)
 
     axes[0][0].imshow(bl)
     axes[0][0].set_title('Baseline: Stretch-Resize 512\u00d7512\n(distorts circular geometry)', fontsize=10)
     axes[0][0].axis('off')
 
     axes[0][1].imshow(s2)
-    axes[0][1].set_title('V5: Isotropic Resize 512\u00d7512\n(preserves circular FOV)', fontsize=10)
+    axes[0][1].set_title('Isotropic Resize 512\u00d7512\n(preserves circular FOV)', fontsize=10)
     axes[0][1].axis('off')
 
     axes[1][0].imshow(bl)
@@ -546,7 +546,7 @@ def make_baseline_vs_pipeline(right_img):
     axes[1][0].axis('off')
 
     axes[1][1].imshow(s5)
-    axes[1][1].set_title('V5: Flat-Field + CLAHE\n(uniform illumination, enhanced contrast)', fontsize=10)
+    axes[1][1].set_title('Flat-Field + CLAHE\n(uniform illumination, enhanced contrast)', fontsize=10)
     axes[1][1].axis('off')
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
@@ -1030,8 +1030,8 @@ def make_method_augmentation(right_img):
 
 
 def make_methods_comparison_table():
-    """methods_comparison_table.png — V5 pipeline comparison table."""
-    columns = ['Stage', 'Standard', 'Our V5', 'Innovation']
+    """methods_comparison_table.png — pipeline comparison table."""
+    columns = ['Stage', 'Standard', 'Ours', 'Innovation']
     data = [
         ['0. Canonical Flip',  'Random h-flip',            'Deterministic by\neye metadata',     'Anatomical consistency'],
         ['1. OD-Fovea Rot.',   'None / random rot.',       'Two-landmark\n+ fallback',           'Annular fovea search'],
@@ -1045,7 +1045,7 @@ def make_methods_comparison_table():
 
     fig, ax = plt.subplots(figsize=(14, 5))
     ax.axis('off')
-    fig.suptitle('V5 Pipeline \u2014 Standard vs. Fundus-Specific Adaptations',
+    fig.suptitle('Pipeline \u2014 Standard vs. Fundus-Specific Adaptations',
                  fontsize=14, fontweight='bold', y=0.96)
 
     table = ax.table(cellText=data, colLabels=columns, loc='center', cellLoc='left')
@@ -1064,7 +1064,7 @@ def make_methods_comparison_table():
         bg = '#F0F7EE' if i % 2 == 0 else 'white'
         for j in range(len(columns)):
             table[i, j].set_facecolor(bg)
-        # Tint "Our V5" column
+        # Tint "Ours" column
         table[i, 2].set_facecolor('#E6F5EF' if i % 2 == 0 else '#F0FAF5')
 
     plt.tight_layout()
@@ -1110,12 +1110,12 @@ if __name__ == '__main__':
     make_method_augmentation(right_img)
     make_methods_comparison_table()
 
-    # Remove old V4-named files
+    # Remove old stale-named files
     old_files = ['stage_2_flatfield.png', 'stage_3_clahe.png', 'stage_4_normalized.png', 'stage_1_cropped.png']
     for f in old_files:
         path = os.path.join(OUT_DIR, f)
         if os.path.exists(path):
             os.remove(path)
-            print(f"  [DEL] Removed old V4 file: {f}")
+            print(f"  [DEL] Removed old stale file: {f}")
 
     print("\n[OK] All pipeline images generated!")

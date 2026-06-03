@@ -81,7 +81,7 @@ export default function Overview() {
           <div style={{ flex: 1, minWidth: 240, padding: '10px 14px', background: C.tealBg, borderLeft: `3px solid ${C.teal}`, borderRadius: 6 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: C.tealT, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 4 }}>Paradigm P2 — model = preprocessing + CNN</div>
             <div style={{ fontSize: 11, color: C.tealT, lineHeight: 1.6 }}>
-              Preprocessing as integral model component. Operational instantiation: <strong>configs B/D</strong> in Experiment 1 (4-channel, full 8-stage V5 pipeline). The 8 stages are the engineering realisation of the P2 paradigm; the controlled factorial of Experiment 1 is its empirical test.
+              Preprocessing as integral model component. Operational instantiation: <strong>configs B/D</strong> in Experiment 1 (4-channel, full 8-stage pipeline). The 8 stages are the engineering realisation of the P2 paradigm; the controlled factorial of Experiment 1 is its empirical test.
             </div>
           </div>
         </div>

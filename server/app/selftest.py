@@ -74,7 +74,7 @@ def run_selftest(engine, n: int = 3) -> dict:
 
         try:
             v = visualize_mod.compute_visualization(engine, img, "left")
-            assert base64.b64decode(v["v5_preview_png_b64"])
+            assert base64.b64decode(v["preview_png_b64"])
             assert base64.b64decode(v["fov_mask_png_b64"])
             assert "confident" in v["od_fovea"]
         except Exception as exc:  # noqa: BLE001

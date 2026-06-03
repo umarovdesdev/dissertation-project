@@ -1,6 +1,6 @@
-"""V5 preview strip + FOV mask + OD/fovea payload (TASK-Demo §C.6/§D.2).
+"""preview strip + FOV mask + OD/fovea payload (TASK-Demo §C.6/§D.2).
 
-Reuses ``PreprocessingPipelineV5.stage_breakdown`` (experiments) so the panels
+Reuses ``PreprocessingPipeline.stage_breakdown`` (experiments) so the panels
 are the exact intermediates the model sees — the most direct visual argument
 for the P2 paradigm.
 """
@@ -70,15 +70,15 @@ def _od_payload(od, space_w: int, space_h: int, flipped: bool) -> dict:
 
 
 def compute_visualization(engine, image_bytes: bytes, eye: str) -> dict:
-    """Produce the V5 preview strip, FOV mask PNG, and OD/fovea payload.
+    """Produce the preview strip, FOV mask PNG, and OD/fovea payload.
 
     Args:
-        engine: The loaded :class:`InferenceEngine` (holds the V5 pipeline).
+        engine: The loaded :class:`InferenceEngine` (holds the pipeline).
         image_bytes: Raw image bytes.
         eye: ``"left"`` or ``"right"``.
 
     Returns:
-        Dict with ``fov_mask_png_b64``, ``v5_preview_png_b64``, ``od_fovea``.
+        Dict with ``fov_mask_png_b64``, ``preview_png_b64``, ``od_fovea``.
 
     Raises:
         imaging.BadImage / imaging.PayloadTooLarge: On bad/oversized input.
@@ -94,6 +94,6 @@ def compute_visualization(engine, image_bytes: bytes, eye: str) -> dict:
     flipped = bool(engine.pipeline.config.use_canonical_flip and eye == "left")
     return {
         "fov_mask_png_b64": imaging.png_b64_from_bgr(mask_u8),  # single-channel → PNG
-        "v5_preview_png_b64": imaging.png_b64_from_rgb(strip_rgb),
+        "preview_png_b64": imaging.png_b64_from_rgb(strip_rgb),
         "od_fovea": _od_payload(bd["od_fovea"], w0, h0, flipped),
     }

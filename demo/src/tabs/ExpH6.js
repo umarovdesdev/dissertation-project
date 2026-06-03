@@ -17,7 +17,7 @@ export default function ExpH6() {
 
       <Sec title={t('exp.deviceShift')}>
         <Paired
-          items={DEV.map(d => ({ label: d.c, v1: d.fb, v2: d.fp }))}
+          items={DEV.map(d => ({ label: d.c, a: d.fb, b: d.fp }))}
           c1={C.gray}
           c2={C.coral}
           l1="Baseline"

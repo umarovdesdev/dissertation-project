@@ -5,9 +5,9 @@
 | Parameter | Value | Source |
 |-----------|-------|--------|
 | Zoom range | [0.9, 1.1] | `default.yaml:56` |
-| Zoom distribution | Log-uniform | `augmentation_v4.py:151-155` |
+| Zoom distribution | Log-uniform | `augmentation_unified.py:151-155` |
 | Stretch range | [0.952381, 1.05] (= [1/1.05, 1.05]) | `default.yaml:57` |
-| Stretch distribution | Log-uniform | `augmentation_v4.py:159-163` |
+| Stretch distribution | Log-uniform | `augmentation_unified.py:159-163` |
 | Probability | 100% (always applied) | — |
 
 ## Algorithm

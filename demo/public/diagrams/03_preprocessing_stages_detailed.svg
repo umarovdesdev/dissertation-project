@@ -22,7 +22,7 @@
   <rect width="1900" height="1130" fill="#ffffff"/>
 
   <!-- Document header -->
-  <text x="950" y="36" text-anchor="middle" class="doc-ttl">V5 Preprocessing Pipeline — Per-Stage Specification</text>
+  <text x="950" y="36" text-anchor="middle" class="doc-ttl">Preprocessing Pipeline — Per-Stage Specification</text>
   <text x="950" y="56" text-anchor="middle" class="doc-sub">Eight ordered stages mapping raw fundus image (BGR uint8) → CNN-ready tensor (4 × 512 × 512, float32)</text>
 
   <!-- Inter-panel arrows row 1 (between panels 0→1, 1→2, 2→3) -->
@@ -168,7 +168,7 @@
     <text x="20" y="202" class="body">2.  Subtract:  I′ = I − B + 128</text>
     <text x="20" y="224" class="body">3.  Clip to valid range  [0, 255]</text>
     <text x="20" y="252" class="body-em">σ is adaptive to FOV geometry — replaces</text>
-    <text x="20" y="270" class="body-em">the fixed σ = 45 from V4.</text>
+    <text x="20" y="270" class="body-em">the previous fixed σ = 45.</text>
 
     <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
     <text x="20" y="342" class="mono">σ = 0.07 · D    (D = FOV diameter)</text>

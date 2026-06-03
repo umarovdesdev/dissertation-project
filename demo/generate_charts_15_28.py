@@ -125,7 +125,7 @@ def chart_15():
     x = np.arange(2)
     w = 0.3
     b1 = ax1.bar(x - w/2, base, w, color=GRAY, label='Baseline', edgecolor='white')
-    b2 = ax1.bar(x + w/2, pipe, w, color=PURPLE, label='V5 Pipeline', edgecolor='white')
+    b2 = ax1.bar(x + w/2, pipe, w, color=PURPLE, label='Pipeline', edgecolor='white')
     for bar, val in zip(b1, base):
         ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.003,
                  f'{val:.3f}', ha='center', va='bottom', fontsize=9)
@@ -152,7 +152,7 @@ def chart_15():
     pipeline_freq = np.clip(pipeline_freq, 0, 1)
     ax2.plot([0, 1], [0, 1], 'k--', linewidth=1, alpha=0.5, label='Perfect calibration')
     ax2.plot(bin_centers, baseline_freq, 'o-', color=GRAY, linewidth=1.5, markersize=5, label='Baseline')
-    ax2.plot(bin_centers, pipeline_freq, 's-', color=PURPLE, linewidth=1.5, markersize=5, label='V5 Pipeline')
+    ax2.plot(bin_centers, pipeline_freq, 's-', color=PURPLE, linewidth=1.5, markersize=5, label='Pipeline')
     ax2.set_xlabel('Predicted Probability', fontsize=10)
     ax2.set_ylabel('Observed Frequency', fontsize=10)
     ax2.set_title('Reliability Diagram', fontsize=11)
@@ -210,7 +210,7 @@ def chart_17():
     baseline_lat = [18.2, 24.5]
     pipeline_lat = [45.3, 51.8]
     b1 = ax.bar(x - w/2, baseline_lat, w, color=GRAY, label='CNN only', edgecolor='white')
-    b2 = ax.bar(x + w/2, pipeline_lat, w, color=CORAL, label='+ V5 pipeline', edgecolor='white')
+    b2 = ax.bar(x + w/2, pipeline_lat, w, color=CORAL, label='+ pipeline', edgecolor='white')
     ax.set_xticks(x)
     ax.set_xticklabels(['ResNet-50', 'EfficientNet-B3'], fontsize=9)
     ax.set_ylabel('ms/image', fontsize=10)
@@ -262,7 +262,7 @@ def chart_18():
     x = np.arange(len(grades))
     w = 0.3
     b1 = ax.bar(x - w/2, base, w, color=GRAY, label='Config C (Baseline)', edgecolor='white')
-    b2 = ax.bar(x + w/2, pipe, w, color=TEAL, label='Config D (V5 Pipeline)', edgecolor='white')
+    b2 = ax.bar(x + w/2, pipe, w, color=TEAL, label='Config D (Pipeline)', edgecolor='white')
     for i, (bar, val) in enumerate(zip(b2, pipe)):
         ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.015,
                 deltas[i] + 'pp', ha='center', va='bottom', fontsize=9, fontweight='bold', color=CORAL)
@@ -297,7 +297,7 @@ def chart_19():
     loss_C = 0.90 * np.exp(-0.14 * epochs) + 0.36 + np.random.normal(0, 0.008, 20)
     f1_C = 0.727 * (1 - 0.82 * np.exp(-0.18 * epochs)) + np.random.normal(0, 0.005, 20)
     f1_C[-1] = 0.727
-    # Config D (teal solid): EfficientNet-B3 + V5 (converges faster, better)
+    # Config D (teal solid): EfficientNet-B3 + pipeline (converges faster, better)
     loss_D = 0.85 * np.exp(-0.20 * epochs) + 0.30 + np.random.normal(0, 0.007, 20)
     f1_D = 0.780 * (1 - 0.80 * np.exp(-0.25 * epochs)) + np.random.normal(0, 0.005, 20)
     f1_D[-1] = 0.780
@@ -312,7 +312,7 @@ def chart_19():
     # Left: Validation loss
     ax1.plot(epochs, loss_A, '-', color=GRAY, linewidth=1.5, label='Config A (ResNet + Baseline)')
     ax1.plot(epochs, loss_C, '--', color=GRAY, linewidth=1.5, label='Config C (EffNet + Baseline)')
-    ax1.plot(epochs, loss_D, '-', color=TEAL, linewidth=2, label='Config D (EffNet + V5)')
+    ax1.plot(epochs, loss_D, '-', color=TEAL, linewidth=2, label='Config D (EffNet + pipeline)')
     ax1.set_xlabel('Epoch', fontsize=10)
     ax1.set_ylabel('Validation Loss', fontsize=10)
     ax1.set_title('Validation Loss', fontsize=11)
@@ -320,7 +320,7 @@ def chart_19():
     # Right: F1
     ax2.plot(epochs, f1_A, '-', color=GRAY, linewidth=1.5, label='Config A (ResNet + Baseline)')
     ax2.plot(epochs, f1_C, '--', color=GRAY, linewidth=1.5, label='Config C (EffNet + Baseline)')
-    ax2.plot(epochs, f1_D, '-', color=TEAL, linewidth=2, label='Config D (EffNet + V5)')
+    ax2.plot(epochs, f1_D, '-', color=TEAL, linewidth=2, label='Config D (EffNet + pipeline)')
     ax2.set_xlabel('Epoch', fontsize=10)
     ax2.set_ylabel('Weighted F1', fontsize=10)
     ax2.set_title('Weighted F1 (Validation)', fontsize=11)
@@ -353,7 +353,7 @@ def chart_20():
         [0.02, 0.04, 0.08, 0.18, 0.68],
     ])
     cm_d = cm_d / cm_d.sum(axis=1, keepdims=True)
-    for ax, cm, title in [(ax1, cm_c, 'Config C (Baseline)'), (ax2, cm_d, 'Config D (V5 Pipeline)')]:
+    for ax, cm, title in [(ax1, cm_c, 'Config C (Baseline)'), (ax2, cm_d, 'Config D (Pipeline)')]:
         im = ax.imshow(cm, cmap='Blues', vmin=0, vmax=1)
         ax.set_xticks(range(5))
         ax.set_xticklabels(labels, fontsize=8, rotation=45, ha='right')
@@ -421,7 +421,7 @@ def chart_22():
                 arrowprops=dict(arrowstyle='->', color=TEAL, lw=1.5))
     ax.text(2.5, max(vals[2], vals[3]) + 0.04, '+5.3pp', ha='center', fontsize=10,
             fontweight='bold', color=TEAL)
-    xlabels = ['A: Baseline\n+ ResNet-50', 'B: V5\n+ ResNet-50', 'C: Baseline\n+ EffNet-B3', 'D: V5\n+ EffNet-B3']
+    xlabels = ['A: Baseline\n+ ResNet-50', 'B: Pipeline\n+ ResNet-50', 'C: Baseline\n+ EffNet-B3', 'D: Pipeline\n+ EffNet-B3']
     ax.set_xticks(x)
     ax.set_xticklabels(xlabels, fontsize=9)
     ax.set_ylabel('Weighted F1-Score', fontsize=11)
@@ -502,7 +502,7 @@ def chart_24():
     ax2.plot([0, 1], [0, 1], 'k--', linewidth=0.8, alpha=0.4)
     ax2.set_xlabel('False Positive Rate', fontsize=10)
     ax2.set_ylabel('True Positive Rate', fontsize=10)
-    ax2.set_title('Config D (V5 Pipeline)', fontsize=11)
+    ax2.set_title('Config D (Pipeline)', fontsize=11)
     ax2.legend(fontsize=8, loc='lower right')
     ax2.set_xlim(0, 1)
     ax2.set_ylim(0, 1)
@@ -536,7 +536,7 @@ def chart_25():
         ('Stage 7:\nNormalize', s7_disp),
     ]
     fig, axes = plt.subplots(2, 3, figsize=(12, 8))
-    fig.suptitle('V5 Pipeline Stages -- Patient 43199 (DR4)', fontsize=14, fontweight='bold', y=0.98)
+    fig.suptitle('Pipeline Stages -- Patient 43199 (DR4)', fontsize=14, fontweight='bold', y=0.98)
     for i, (title, img) in enumerate(stages):
         row, col = i // 3, i % 3
         ax = axes[row][col]
@@ -558,20 +558,20 @@ def chart_26():
 
     r_s0 = stage0_canonical_flip(right_img, is_left_eye=False)
     r_s2 = stage2_fov_crop_isotropic_resize(r_s0, margin_pct=0)
-    r_v5 = stage5_clahe(stage4_flatfield(r_s2))
+    r_full = stage5_clahe(stage4_flatfield(r_s2))
 
     l_s0 = stage0_canonical_flip(left_img, is_left_eye=True)
     l_s2 = stage2_fov_crop_isotropic_resize(l_s0, margin_pct=0)
-    l_v5 = stage5_clahe(stage4_flatfield(l_s2))
+    l_full = stage5_clahe(stage4_flatfield(l_s2))
 
     fig, axes = plt.subplots(2, 3, figsize=(12, 8))
-    fig.suptitle('Bilateral Pair -- Canonical Flip + Full V5 Pipeline', fontsize=14, fontweight='bold', y=0.98)
+    fig.suptitle('Bilateral Pair -- Canonical Flip + Full Pipeline', fontsize=14, fontweight='bold', y=0.98)
     axes[0][0].imshow(right_img); axes[0][0].set_title('OD (Right) -- Raw', fontsize=10); axes[0][0].axis('off')
     axes[0][1].imshow(r_s2); axes[0][1].set_title('Cropped 512x512', fontsize=10); axes[0][1].axis('off')
-    axes[0][2].imshow(r_v5); axes[0][2].set_title('Full V5', fontsize=10); axes[0][2].axis('off')
+    axes[0][2].imshow(r_full); axes[0][2].set_title('Full pipeline', fontsize=10); axes[0][2].axis('off')
     axes[1][0].imshow(left_img); axes[1][0].set_title('OS (Left) -- Raw', fontsize=10); axes[1][0].axis('off')
     axes[1][1].imshow(l_s2); axes[1][1].set_title('Flipped + Cropped', fontsize=10); axes[1][1].axis('off')
-    axes[1][2].imshow(l_v5); axes[1][2].set_title('Full V5', fontsize=10); axes[1][2].axis('off')
+    axes[1][2].imshow(l_full); axes[1][2].set_title('Full pipeline', fontsize=10); axes[1][2].axis('off')
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     save(fig, '26_bilateral_pair.png')
 
@@ -593,7 +593,7 @@ def chart_27():
     bl_mask = cv2.morphologyEx(bl_mask, cv2.MORPH_CLOSE,
                                cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
 
-    # Row 2 — V5 pipeline (no Stage 1 rotation)
+    # Row 2 — pipeline (no Stage 1 rotation)
     s0 = stage0_canonical_flip(right_img, is_left_eye=False)
     s2 = stage2_fov_crop_isotropic_resize(s0, margin_pct=0)
     mask = stage3_fov_mask(s2)
@@ -665,9 +665,9 @@ def chart_27():
     axes[0][2].set_title('Baseline Heatmap', fontsize=10)
     axes[0][2].axis('off')
 
-    # Row 2: V5 Pipeline
+    # Row 2: Pipeline
     axes[1][0].imshow(processed)
-    axes[1][0].set_title('V5 Pipeline Image\n(flat-field + CLAHE)', fontsize=10)
+    axes[1][0].set_title('Pipeline Image\n(flat-field + CLAHE)', fontsize=10)
     axes[1][0].axis('off')
     overlay_p = processed.astype(np.float32) / 255
     hm_p = plt.cm.jet(pipeline_heat)[:, :, :3]
@@ -685,7 +685,7 @@ def chart_27():
     # Row labels
     axes[0][0].text(-0.08, 0.5, 'Baseline', transform=axes[0][0].transAxes, fontsize=12,
                     fontweight='bold', va='center', ha='center', rotation=90, color=GRAY)
-    axes[1][0].text(-0.08, 0.5, 'V5 Pipeline', transform=axes[1][0].transAxes, fontsize=12,
+    axes[1][0].text(-0.08, 0.5, 'Pipeline', transform=axes[1][0].transAxes, fontsize=12,
                     fontweight='bold', va='center', ha='center', rotation=90, color=TEAL)
     plt.tight_layout(rect=[0.02, 0, 1, 0.93])
     save(fig, '27_gradcam_overlay.png')
@@ -700,7 +700,7 @@ def chart_28():
     x = np.arange(len(pairs))
     w = 0.3
     b1 = ax.bar(x - w/2, base, w, color=GRAY, label='Baseline', edgecolor='white')
-    b2 = ax.bar(x + w/2, pipe, w, color=TEAL, label='V5 Pipeline', edgecolor='white')
+    b2 = ax.bar(x + w/2, pipe, w, color=TEAL, label='Pipeline', edgecolor='white')
     for bar, val in zip(b1, base):
         ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
                 f'{val:.2f}', ha='center', va='bottom', fontsize=9, fontweight='bold')

@@ -1,6 +1,6 @@
 // src/tabs/_VisionWidget.js — "what the model sees" per-image widget (TASK-Demo D.2).
 // Calls POST /api/visualize and shows: OD/fovea markers over the input, a
-// confidence chip, an expandable 6-panel V5 preprocessing strip, and a FOV-mask
+// confidence chip, an expandable 6-panel preprocessing strip, and a FOV-mask
 // toggle. This is the visual core of contributions C-1, SC-E, SC-F and works on
 // arbitrary uploads (visualize is preprocessing-only — no trained checkpoint
 // needed), so it lights up as soon as the backend is reachable.
@@ -53,7 +53,7 @@ export default function VisionWidget({ src, eye, name, enabled, t }) {
   const fvR = (od.fovea_radius || 0) * scale;
 
   const maskSrc = `data:image/png;base64,${data.fov_mask_png_b64}`;
-  const stripSrc = `data:image/png;base64,${data.v5_preview_png_b64}`;
+  const stripSrc = `data:image/png;base64,${data.preview_png_b64}`;
 
   return (
     <div style={{ marginTop: 8 }}>
@@ -99,10 +99,10 @@ export default function VisionWidget({ src, eye, name, enabled, t }) {
         </button>
       </div>
 
-      {/* V5 stage strip */}
+      {/* stage strip */}
       {showStages && (
         <div style={{ marginTop: 8, overflowX: 'auto' }}>
-          <img src={stripSrc} alt="V5 stages" style={{ height: 120, display: 'block', borderRadius: 6 }} />
+          <img src={stripSrc} alt="stages" style={{ height: 120, display: 'block', borderRadius: 6 }} />
           <div style={{ fontSize: 9, color: C.gray, marginTop: 3 }}>{t('demo.vision.stripCaption')}</div>
         </div>
       )}

@@ -1,7 +1,7 @@
 """
 Stage 7 — Normalize → 4ch tensor (RGB preview).
 
-Full V5 Stage 7:
+Pipeline Stage 7:
   1. RGB (from Stage 5) ---ToTensor---> float32 CHW in [0, 1]
   2. ImageNet normalize: (x - mean) / std
   3. Concatenate FOV mask as 4th channel → (4, H, W) tensor

@@ -5,7 +5,7 @@
 | Parameter | Value | Source |
 |-----------|-------|--------|
 | σ (sigma) | 0.1 | `default.yaml:62` |
-| Distribution | Gaussian per component | `augmentation_v4.py:272` |
+| Distribution | Gaussian per component | `augmentation_unified.py:272` |
 | Probability | 0.5 (50%) | `default.yaml:63` |
 | Components | 3 (RGB PCA) | — |
 

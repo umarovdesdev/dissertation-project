@@ -54,8 +54,8 @@ export default function ExpH7() {
       <Sec title="IDRiD CV vs Clinical Test — F1">
         <Paired
           items={[
-            { label: 'IDRiD (5-fold CV)', v1: baseline.idrid_f1, v2: pipeline.idrid_f1 },
-            { label: 'Clinical (held-out test)', v1: baseline.clinical_f1, v2: pipeline.clinical_f1 },
+            { label: 'IDRiD (5-fold CV)', a: baseline.idrid_f1, b: pipeline.idrid_f1 },
+            { label: 'Clinical (held-out test)', a: baseline.clinical_f1, b: pipeline.clinical_f1 },
           ]}
           c1={C.gray}
           c2={C.teal}

@@ -20,7 +20,7 @@ class Settings:
         norm_stats_path: Path to ``eyepacs_norm_stats.json`` (dataset-specific
             Stage 7 mean/std). Must match the stats used at training time.
         model_name: Backbone identifier for the model factory.
-        in_channels: Input channel count (4 = RGB + FOV mask for full V5).
+        in_channels: Input channel count (4 = RGB + FOV mask for full pipeline).
         num_classes: DR grade count (0–4).
         checkpoint_id: Human-readable provenance string for /api/health.
         device: ``"cuda"``, ``"cpu"``, or ``"auto"``.

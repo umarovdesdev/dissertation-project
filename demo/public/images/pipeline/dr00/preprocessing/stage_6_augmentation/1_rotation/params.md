@@ -4,7 +4,7 @@
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| Distribution | Truncated Gaussian | `augmentation_v4.py:147-148` |
+| Distribution | Truncated Gaussian | `augmentation_unified.py:147-148` |
 | σ (sigma) | 13.0° | `default.yaml:54` |
 | Clip boundary | ±40.0° | `default.yaml:55` |
 | Adaptive sigma | Enabled | `default.yaml:32` |

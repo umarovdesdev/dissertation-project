@@ -242,7 +242,9 @@
       "Bash(export KAGGLE_API_TOKEN=KGAT_2cf169764a8fd1000114f804719d04c8)",
       "Bash(unset KAGGLE_API_TOKEN)",
       "Bash(py _build_colab_notebook.py)",
-      "Bash(grep -rnE '[vV][1-6]\\([^a-zA-Z0-9]|$\\)' --include='*.py' --include='*.md' --include='*.yaml' --include='*.ipynb' .)"
+      "Bash(grep -rnE '[vV][1-6]\\([^a-zA-Z0-9]|$\\)' --include='*.py' --include='*.md' --include='*.yaml' --include='*.ipynb' .)",
+      "Bash(grep -rnE '[vV][1-6]\\([^a-zA-Z0-9.]|$\\)' demo server --include='*.py' --include='*.js' --include='*.md' --include='*.svg' --include='*.json' --include='*.txt')",
+      "PowerShell($g = Get-Command gh -ErrorAction SilentlyContinue; if \\($g\\) { Write-Output \"gh found: $\\($g.Source\\)\"; gh --version | Select-Object -First 1; gh auth status 2>&1 | Select-Object -First 3 } else { Write-Output \"gh NOT installed\" })"
     ]
   }
 }

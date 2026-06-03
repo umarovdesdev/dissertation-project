@@ -58,9 +58,9 @@ def chart_29():
     short = ['A', 'B', 'C', 'D']
     desc = {
         'A': 'Baseline\nResNet-50',
-        'B': 'V5 Pipeline\nResNet-50',
+        'B': 'Pipeline\nResNet-50',
         'C': 'Baseline\nEffNet-B3',
-        'D': 'V5 Pipeline\nEffNet-B3',
+        'D': 'Pipeline\nEffNet-B3',
     }
     colors = [GRAY, BLUE, GRAY, TEAL]
 
@@ -101,8 +101,8 @@ def chart_29():
     ax1.set_title('In-domain (EyePACS) vs Zero-shot (APTOS) F1', fontsize=11)
     legend_patches = [
         mpatches.Patch(color=GRAY, label='EyePACS / Baseline APTOS'),
-        mpatches.Patch(color=BLUE, label='APTOS — V5+ResNet'),
-        mpatches.Patch(color=TEAL, label='APTOS — V5+EffNet'),
+        mpatches.Patch(color=BLUE, label='APTOS — Pipeline+ResNet'),
+        mpatches.Patch(color=TEAL, label='APTOS — Pipeline+EffNet'),
     ]
     ax1.legend(handles=legend_patches, fontsize=8, loc='upper left')
 
@@ -167,7 +167,7 @@ def chart_30():
     b1 = ax1.bar(x - w/2, base_f1, w, yerr=base_std, capsize=4,
                  color=GRAY, label='Baseline (3ch)', edgecolor='white')
     b2 = ax1.bar(x + w/2, pipe_f1, w, yerr=pipe_std, capsize=4,
-                 color=PURPLE, label='V5 Pipeline (4ch)', edgecolor='white')
+                 color=PURPLE, label='Pipeline (4ch)', edgecolor='white')
     for bar, val, sd in zip(b1, base_f1, base_std):
         ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + sd + 0.008,
                  f'{val:.3f}', ha='center', va='bottom', fontsize=9)
@@ -191,7 +191,7 @@ def chart_30():
     auc_b_sd = B['clinical_test_auc_std']
     auc_p = P['clinical_test_auc']
     auc_p_sd = P['clinical_test_auc_std']
-    labels = ['Baseline (3ch)', 'V5 Pipeline (4ch)']
+    labels = ['Baseline (3ch)', 'Pipeline (4ch)']
     vals = [auc_b, auc_p]
     stds = [auc_b_sd, auc_p_sd]
     colors2 = [GRAY, PURPLE]

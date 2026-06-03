@@ -14,7 +14,7 @@ Contour approach (approved):
 Coordinate transform uses OpenCV convention: [cos sin; -sin cos].
 
 Output per grade/side in stage_6_augmentation/1_rotation/:
-  {side}_contours_v2.png     — smoothed iso-intensity rings only
+  {side}_contours.png     — smoothed iso-intensity rings only
   {side}_variant_A.png       — rings + tangent band fan
   {side}_variant_B.png       — rings + cone fan from midpoint
   distribution_adaptive.png  — adaptive σ vs fallback σ=13° plot
@@ -363,7 +363,7 @@ def process_grade(gr):
         vis = img.copy()
         draw_rings(vis, od_contours, fov_contours, od_512, fov_512, mid_512)
         vis[mask == 0] = 0
-        cv2.imwrite(os.path.join(out_dir, f"{side}_contours_v2.png"), vis)
+        cv2.imwrite(os.path.join(out_dir, f"{side}_contours.png"), vis)
 
         # 2. Variant A — tangent band
         vis_a = img.copy()
@@ -379,7 +379,7 @@ def process_grade(gr):
         vis_b[mask == 0] = 0
         cv2.imwrite(os.path.join(out_dir, f"{side}_variant_B.png"), vis_b)
 
-        print(f"  -> {side}: contours_v2, variant_A, variant_B")
+        print(f"  -> {side}: contours, variant_A, variant_B")
 
     # Distribution plot (use left eye sigma)
     out_dir = os.path.join(
