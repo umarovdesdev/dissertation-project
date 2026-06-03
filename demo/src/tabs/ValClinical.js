@@ -8,7 +8,7 @@ export default function ValClinical() {
     <div>
       <Sec title={t('clinical.referableDR')}>
         <Paired
-          items={CLIN.map(d => ({ label: d.m, v1: d.b, v2: d.v }))}
+          items={CLIN.map(d => ({ label: d.m, a: d.b, b: d.v }))}
           c1={C.gray}
           c2={C.teal}
           l1="Baseline"

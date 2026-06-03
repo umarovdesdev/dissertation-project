@@ -24,26 +24,26 @@ from src.data.augmentation import FundusAugmentation
 from src.data.datasets import EyePACSDataset
 from src.data.splits import PatientLevelKFold
 from src.models.factory import create_model
-from src.preprocessing.pipeline_v5 import PreprocessingPipelineV5
-from src.preprocessing.config import PreprocessingV5Config
+from src.preprocessing.pipeline import PreprocessingPipeline
+from src.preprocessing.config import PreprocessingConfig
 from src.training.checkpoint import CheckpointManager
 from src.training.trainer import Trainer
 
 
 # ── Pipeline builder ──────────────────────────────────────────────────────────
 
-def build_full_pipeline(v5_cfg: dict, is_training: bool = False) -> PreprocessingPipelineV5:
-    """Build the full V5 8-stage preprocessing pipeline from config.
+def build_full_pipeline(prep_cfg: dict, is_training: bool = False) -> PreprocessingPipeline:
+    """Build the full 8-stage preprocessing pipeline from config.
 
     Args:
-        v5_cfg: The ``preprocessing_v5`` section of the merged config dict.
+        prep_cfg: The ``preprocessing`` section of the merged config dict.
         is_training: Whether to enable stochastic augmentation.
 
     Returns:
-        Configured V5 pipeline instance.
+        Configured pipeline instance.
     """
-    pp_config = PreprocessingV5Config.from_dict(v5_cfg)
-    return PreprocessingPipelineV5(pp_config, is_training=is_training)
+    pp_config = PreprocessingConfig.from_dict(prep_cfg)
+    return PreprocessingPipeline(pp_config, is_training=is_training)
 
 
 # ── Model loading / training ──────────────────────────────────────────────────
@@ -127,8 +127,8 @@ def _train_fresh(
     splits = splitter.split(all_paths, all_labels, all_pids)
     train_idx, val_idx = splits[0]
 
-    v5_cfg   = config["preprocessing_v5"]
-    pipeline = build_full_pipeline(v5_cfg, is_training=True)
+    prep_cfg   = config["preprocessing"]
+    pipeline = build_full_pipeline(prep_cfg, is_training=True)
     aug         = FundusAugmentation(config["augmentation"])
     trainer     = Trainer(config, device="auto")
 

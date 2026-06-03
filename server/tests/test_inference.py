@@ -104,7 +104,7 @@ def test_visualize(client: TestClient) -> None:
     )
     assert r.status_code == 200, r.text
     body = r.json()
-    assert body["v5_preview_png_b64"] and body["fov_mask_png_b64"]
+    assert body["preview_png_b64"] and body["fov_mask_png_b64"]
     assert "confident" in body["od_fovea"]
 
 

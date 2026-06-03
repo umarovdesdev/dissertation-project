@@ -1,9 +1,9 @@
 """
-V5 preprocessing configuration dataclass and pipeline presets.
+preprocessing configuration dataclass and pipeline presets.
 
-All V5 pipeline stages are parameterised through :class:`PreprocessingV5Config`.
-Use :meth:`PreprocessingV5Config.from_dict` to load from a YAML-parsed dict and
-:meth:`PreprocessingV5Config.from_preset` to start from a named model preset.
+All pipeline stages are parameterised through :class:`PreprocessingConfig`.
+Use :meth:`PreprocessingConfig.from_dict` to load from a YAML-parsed dict and
+:meth:`PreprocessingConfig.from_preset` to start from a named model preset.
 """
 
 from __future__ import annotations
@@ -20,15 +20,15 @@ import cv2
 # ---------------------------------------------------------------------------
 
 @dataclass
-class PreprocessingV5Config:
+class PreprocessingConfig:
     """
-    Unified configuration for the V5 preprocessing + augmentation pipeline.
+    Unified configuration for the preprocessing + augmentation pipeline.
 
     Fields are grouped by pipeline stage.  Boolean toggles allow individual
     stages/sub-stages to be disabled (e.g. for ablation experiments).
 
     Args:
-        mode: Pipeline mode. ``"full"`` runs all V5 stages. ``"baseline"``
+        mode: Pipeline mode. ``"full"`` runs all stages. ``"baseline"``
             does simple stretch-resize + ImageNet normalize (3 channels, no mask).
         use_canonical_flip: Enable Stage 0 horizontal flip for left-eye images.
         use_od_fovea_rotation: Enable Stage 1 OD–fovea axis rotation normalization.
@@ -142,20 +142,20 @@ class PreprocessingV5Config:
     # ------------------------------------------------------------------
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "PreprocessingV5Config":
+    def from_dict(cls, d: dict[str, Any]) -> "PreprocessingConfig":
         """
-        Build a :class:`PreprocessingV5Config` from a plain dict.
+        Build a :class:`PreprocessingConfig` from a plain dict.
 
         Keys absent from *d* retain their dataclass defaults.  List values
         are coerced to tuples for tuple-annotated fields (e.g. when loading
         from a YAML file where sequences are represented as lists).
 
         Args:
-            d: Dict of field overrides, typically from a YAML ``preprocessing_v5``
+            d: Dict of field overrides, typically from a YAML ``preprocessing``
                section.
 
         Returns:
-            PreprocessingV5Config instance.
+            PreprocessingConfig instance.
         """
         kwargs: dict[str, Any] = {}
         for f in dataclasses.fields(cls):
@@ -175,9 +175,9 @@ class PreprocessingV5Config:
     # ------------------------------------------------------------------
 
     @classmethod
-    def from_preset(cls, preset_name: str) -> "PreprocessingV5Config":
+    def from_preset(cls, preset_name: str) -> "PreprocessingConfig":
         """
-        Build a :class:`PreprocessingV5Config` from a named preset.
+        Build a :class:`PreprocessingConfig` from a named preset.
 
         The preset supplies a partial dict of overrides applied on top of
         dataclass defaults; unspecified fields keep their default values.
@@ -187,7 +187,7 @@ class PreprocessingV5Config:
                 (currently ``"resnet"`` or ``"efficientnet"``).
 
         Returns:
-            PreprocessingV5Config instance.
+            PreprocessingConfig instance.
 
         Raises:
             ValueError: If *preset_name* is not found in :data:`PIPELINE_PRESETS`.

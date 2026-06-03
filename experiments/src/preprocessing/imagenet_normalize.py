@@ -1,8 +1,8 @@
 """
-Stage 7 (V5): Normalisation.
+Stage 7: Normalisation.
 
 Supports both ImageNet statistics (for baseline configs) and dataset-specific
-statistics computed from the EyePACS training set (for full V5 pipeline).
+statistics computed from the EyePACS training set (for full pipeline).
 
 Output is a ``torch.Tensor`` of shape ``(3, H, W)``, ready for CNN input.
 

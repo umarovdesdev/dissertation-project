@@ -1,4 +1,4 @@
-"""Split V5 preprocessing SVG into 8 separate stage cards and convert each to PNG.
+"""Split the preprocessing SVG into 8 separate stage cards and convert each to PNG.
 
 Reads the source diagram, extracts each stage's <g transform="translate(...)"> group,
 wraps it in a standalone SVG (with the original <defs>/styles), then renders to PNG via

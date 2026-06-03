@@ -1,12 +1,12 @@
 """
-Stage 5 (V4): Augmentation — Unified Affine + PCA Color + Brightness/Contrast.
+Stage 5: Augmentation — Unified Affine + PCA Color + Brightness/Contrast.
 
-Replaces :class:`FundusAugmentation` (V3) with a V4 augmentation pipeline that
+Replaces :class:`FundusAugmentation` with a augmentation pipeline that
 applies a single unified affine transform (rotation + zoom + stretch + shear),
 stochastic interpolation, PCA colour jitter, and brightness/contrast scaling.
 
 Applied to **RGB uint8** images *before* ImageNet normalisation (Stage 4).
-All sub-transforms are individually toggleable via :class:`PreprocessingV5Config`.
+All sub-transforms are individually toggleable via :class:`PreprocessingConfig`.
 
 References
 ----------
@@ -24,18 +24,18 @@ if TYPE_CHECKING:
 import cv2
 import numpy as np
 
-from src.preprocessing.config import PreprocessingV5Config
+from src.preprocessing.config import PreprocessingConfig
 
 
-class FundusAugmentationV4:
+class UnifiedFundusAugmentation:
     """
-    V4 augmentation: unified affine transform + PCA colour + brightness/contrast.
+    augmentation: unified affine transform + PCA colour + brightness/contrast.
 
     Applied to uint8 RGB images before ImageNet normalisation.  All
     sub-transforms are controlled by the boolean toggles in *config*.
 
     Args:
-        config: :class:`PreprocessingV5Config` controlling all augmentation
+        config: :class:`PreprocessingConfig` controlling all augmentation
             parameters and toggle flags.
         pca_eigvecs: PCA eigenvectors of shape ``(3, 3)`` computed offline
             from the training set.  ``None`` disables PCA colour jitter
@@ -46,7 +46,7 @@ class FundusAugmentationV4:
 
     def __init__(
         self,
-        config: PreprocessingV5Config,
+        config: PreprocessingConfig,
         pca_eigvecs: np.ndarray | None = None,
         pca_eigvals: np.ndarray | None = None,
     ) -> None:
@@ -64,7 +64,7 @@ class FundusAugmentationV4:
         od_fovea_result: ODFoveaResult | None = None,
     ) -> np.ndarray:
         """
-        Apply the full V4 augmentation pipeline to one image.
+        Apply the full augmentation pipeline to one image.
 
         Application order:
         1. Unified affine (rotation + zoom + stretch + shear)

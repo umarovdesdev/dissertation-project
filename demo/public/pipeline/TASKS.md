@@ -18,7 +18,7 @@ pipeline/
 │   │   ├── left.png                             OD on LEFT side
 │   │   └── right.png                            OD on RIGHT side
 │   │
-│   ├── preprocessing/                         ─── 8-stage V5 pipeline ───
+│   ├── preprocessing/                         ─── 8-stage pipeline ───
 │   │   │         │
 │   │   │         ▼ stage 0 takes input/
 │   │   ├── stage_0_canonical_flip/            Normalize eye laterality
@@ -161,7 +161,7 @@ Stage 2+ takes `image/` as input. See helpers/README.md decision D2.
 
 ---
 
-## Stage 2: Full V5 (crop + isotropic resize)
+## Stage 2: Full pipeline (crop + isotropic resize)
 
 Stage 2 performs FOV crop + isotropic resize to 512×512 + zero-padding (helpers/README.md decision D1). All subsequent stages (flat-field, CLAHE, etc.) operate on 512×512.
 
@@ -261,7 +261,7 @@ Mask is **not** rendered in the preview PNG — at training time it is concatena
 | `s5_polar_adaptive.py` | Stage 5 — polar CLAHE + 5 substeps | `stage_5_clahe/polar/...` |
 | `s5_all_grades.py` | Stage 5 — all 3 CLAHE variants | `stage_5_clahe/{,cv2/,polar/}{side}.png` |
 | `s6_augmentation.py` | Stage 6 types 1–5 — min/max + distributions + params | `stage_6_augmentation/{1..5}_*/...` |
-| `s6_rotation_vis.py` | Stage 6 type 1 — iso-intensity rings + fan variants | `1_rotation/{side}_contours_v2.png`, `{side}_variant_A/B.png`, `distribution_adaptive.png` |
+| `s6_rotation_vis.py` | Stage 6 type 1 — iso-intensity rings + fan variants | `1_rotation/{side}_contours.png`, `{side}_variant_A/B.png`, `distribution_adaptive.png` |
 | `s6_rotation_peaks.py` | Stage 6 type 1 — vertical peaks + sectors + step/normal distributions | `1_rotation/{side}_peaks.png`, `{side}_sectors.png`, `{side}_distribution_step.png`, `{side}_distribution_normal.png` |
 | `s7_normalize.py` | Stage 7 — ImageNet normalize roundtrip + mask | `stage_7_normalize/{side}.png` |
 | `s8_results.py` | Results — anomaly-based Grad-CAM + overlay + prediction | `results/{gradcam,attention_overlay,prediction}/{side}.png` |

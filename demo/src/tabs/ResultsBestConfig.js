@@ -31,7 +31,7 @@ export default function ResultsBestConfig() {
 
       <Sec title={t('results.perClassF1')}>
         <Paired
-          items={CLS.map(d => ({ label: `${d.g} (n≈${d.n.toLocaleString()})`, v1: d.b, v2: d.pp }))}
+          items={CLS.map(d => ({ label: `${d.g} (n≈${d.n.toLocaleString()})`, a: d.b, b: d.pp }))}
           c1={C.gray}
           c2={C.teal}
           l1="Baseline (C)"

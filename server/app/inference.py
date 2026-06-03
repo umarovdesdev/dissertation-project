@@ -1,6 +1,6 @@
 """Model loading + prediction.
 
-Loads the Config D EfficientNet-B3 checkpoint once and runs the full V5
+Loads the Config D EfficientNet-B3 checkpoint once and runs the full pipeline
 inference pipeline on raw upload bytes. Worst-eye aggregation gives the
 patient-level grade.
 """

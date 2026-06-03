@@ -1,8 +1,8 @@
 """
-V5 Pipeline Orchestrator.
+Pipeline Orchestrator.
 
-:class:`PreprocessingPipelineV5` chains all eight V5 stages in the correct order.
-It is the main public interface for the V5 preprocessing stack.
+:class:`PreprocessingPipeline` chains all eight stages in the correct order.
+It is the main public interface for the preprocessing stack.
 
 Stage execution order
 ---------------------
@@ -19,15 +19,14 @@ Augmentation (train only, inserted before Stage 7):
   6. Unified affine + brightness/contrast + PCA colour jitter
      (rotation σ adaptive from Stage 1)
 
-Baseline mode (``create_baseline_v5``):
+Baseline mode (``create_baseline``):
   Simple stretch-resize to 512×512 + ImageNet normalize. 3 channels (no mask).
   Replicates what most competitors do in the literature.
-
-The V3 :class:`~src.preprocessing.pipeline.PreprocessingPipeline` is left
-intact for backward compatibility with ablation experiments.
 """
 
 from __future__ import annotations
+
+from types import SimpleNamespace
 
 import cv2
 import numpy as np
@@ -35,18 +34,18 @@ import torch
 
 from .canonical_orientation import canonical_flip, canonical_orientation
 from .od_fovea_detect import ODFoveaResult
-from .config import PreprocessingV5Config
+from .config import PreprocessingConfig
 from .crop_resize import crop_and_resize
 from .flat_field import apply_flat_field
 from .imagenet_normalize import imagenet_normalize
 from .upgraded_clahe import ClaheParams, maybe_apply_clahe
-# NOTE: FundusAugmentationV4 is imported lazily inside __init__ to avoid
+# NOTE: UnifiedFundusAugmentation is imported lazily inside __init__ to avoid
 # circular imports (src.data imports from src.preprocessing and vice-versa).
 
 
-class PreprocessingPipelineV5:
+class PreprocessingPipeline:
     """
-    V5 8-stage preprocessing + augmentation pipeline.
+    8-stage preprocessing + augmentation pipeline.
 
     Preprocessing stages 0–5 and 7 are applied identically at train and
     inference (except Stage 5 CLAHE, which is stochastic at train time).
@@ -67,7 +66,7 @@ class PreprocessingPipelineV5:
     caller loads images.
 
     Args:
-        config: :class:`PreprocessingV5Config` controlling all parameters
+        config: :class:`PreprocessingConfig` controlling all parameters
             and toggle flags.
         is_training: ``True`` enables stochastic CLAHE and augmentation.
         pca_eigvecs: PCA eigenvectors of shape ``(3, 3)`` for colour
@@ -81,7 +80,7 @@ class PreprocessingPipelineV5:
 
     def __init__(
         self,
-        config: PreprocessingV5Config,
+        config: PreprocessingConfig,
         is_training: bool = False,
         pca_eigvecs: np.ndarray | None = None,
         pca_eigvals: np.ndarray | None = None,
@@ -101,8 +100,8 @@ class PreprocessingPipelineV5:
             global_threshold=config.clahe_global_threshold,
         )
         # Lazy import to break the circular dependency with src.data
-        from src.data.augmentation_v4 import FundusAugmentationV4  # noqa: PLC0415
-        self._augmentation = FundusAugmentationV4(
+        from src.data.augmentation_unified import UnifiedFundusAugmentation  # noqa: PLC0415
+        self._augmentation = UnifiedFundusAugmentation(
             config=config,
             pca_eigvecs=pca_eigvecs,
             pca_eigvals=pca_eigvals,
@@ -118,7 +117,7 @@ class PreprocessingPipelineV5:
         eye_side: str = "unknown",
     ) -> torch.Tensor:
         """
-        Apply the full V5 pipeline to one image.
+        Apply the full pipeline to one image.
 
         Args:
             image: Raw image as a uint8 NumPy array of shape ``(H, W, 3)``.
@@ -129,7 +128,7 @@ class PreprocessingPipelineV5:
 
         Returns:
             Normalised float32 tensor of shape
-            ``(4, target_size, target_size)`` for full V5 mode, or
+            ``(4, target_size, target_size)`` for full mode, or
             ``(3, target_size, target_size)`` for baseline mode.
             In full mode, channel 3 is a binary FOV mask
             (1.0 = real data, 0.0 = padding).
@@ -151,6 +150,42 @@ class PreprocessingPipelineV5:
                 std=self.config.normalize_std,
             )
 
+        # Full pipeline: deterministic Stages 0–4, then stochastic Stages 5–7.
+        # Split into two helpers so the precompute-and-cache path
+        # (precompute_deterministic + finish_from_cache) is provably identical
+        # to the live path — both finish through the same self._finish.
+        flat_rgb, fov_mask, od_fovea_result = self._precompute_rgb(image, eye_side)
+        return self._finish(flat_rgb, fov_mask, od_fovea_result)
+
+    # ------------------------------------------------------------------
+    # Stage split: deterministic 0–4  vs  stochastic 5–7
+    # ------------------------------------------------------------------
+
+    def _precompute_rgb(
+        self,
+        image: np.ndarray,
+        eye_side: str,
+    ) -> tuple[np.ndarray, np.ndarray, "ODFoveaResult | None"]:
+        """Run the **deterministic** Stages 0–4 on an already-RGB image.
+
+        These stages carry no train-time randomness, so their output is safe to
+        cache once and reuse every epoch (the throughput fix). Stage 5 CLAHE
+        is the first stochastic stage and is intentionally excluded here.
+
+        Args:
+            image: RGB uint8 array of shape ``(H, W, 3)`` (already colour-
+                converted — callers handle ``input_color_space``).
+            eye_side: ``"left"``, ``"right"``, or ``"unknown"``.
+
+        Returns:
+            Tuple of:
+              - ``flat_rgb``: RGB uint8 ``(target_size, target_size, 3)`` after
+                Stage 4 flat-field (padding zeroed).
+              - ``fov_mask``: float32 ``(target_size, target_size)`` binary mask
+                (1.0 inside FOV, 0.0 padding).
+              - ``od_fovea_result``: :class:`ODFoveaResult` from Stage 0/1, or
+                ``None`` if orientation is disabled.
+        """
         # Stage 0: canonical orientation (flip + OD–fovea rotation)
         od_fovea_result: ODFoveaResult | None = None
         if self.config.use_canonical_flip or self.config.use_od_fovea_rotation:
@@ -180,6 +215,30 @@ class PreprocessingPipelineV5:
                 mask=fov_mask if self.config.flat_field_mask_only else None,
             )
 
+        return image, fov_mask, od_fovea_result
+
+    def _finish(
+        self,
+        image: np.ndarray,
+        fov_mask: np.ndarray,
+        od_fovea_result: "ODFoveaResult | SimpleNamespace | None",
+    ) -> torch.Tensor:
+        """Run the **stochastic** Stages 5–7 on a Stage-4 (flat-field) image.
+
+        Shared by both the live :meth:`__call__` path and the cached
+        :meth:`finish_from_cache` path, guaranteeing identical train/inference
+        behaviour regardless of whether Stages 0–4 came from disk.
+
+        Args:
+            image: RGB uint8 array (Stage-4 flat-field output).
+            fov_mask: float32 binary FOV mask (Stage 2 output).
+            od_fovea_result: object exposing ``confident`` and
+                ``rotation_sigma_deg`` (only fields Stage 6 reads), or ``None``.
+
+        Returns:
+            Normalised float32 tensor ``(4, target_size, target_size)``;
+            channel 3 is the (un-augmented) FOV mask.
+        """
         # Stage 5: upgraded CLAHE (stochastic at train time)
         if self.config.use_clahe:
             image = maybe_apply_clahe(
@@ -205,9 +264,67 @@ class PreprocessingPipelineV5:
 
         rgb_tensor = imagenet_normalize(image, mean=mean, std=std)
 
-        # Append FOV mask as 4th channel
+        # Append FOV mask as 4th channel (un-augmented, mirrors live behaviour)
         mask_tensor = torch.from_numpy(fov_mask).unsqueeze(0)  # (1, H, W)
         return torch.cat([rgb_tensor, mask_tensor], dim=0)      # (4, H, W)
+
+    # ------------------------------------------------------------------
+    # Precompute-and-cache public API (throughput fix)
+    # ------------------------------------------------------------------
+
+    def precompute_deterministic(
+        self,
+        image: np.ndarray,
+        eye_side: str = "unknown",
+    ) -> tuple[np.ndarray, np.ndarray, bool, float]:
+        """Stages 0–4 for offline caching, from a raw (decoded) image.
+
+        Handles ``input_color_space`` then runs :meth:`_precompute_rgb`,
+        returning the two cacheable scalars from the OD/fovea result rather than
+        the full object (all Stage 6 needs).
+
+        Args:
+            image: Raw uint8 array matching ``input_color_space`` (``"bgr"`` for
+                :func:`cv2.imread` output).
+            eye_side: ``"left"``, ``"right"``, or ``"unknown"``.
+
+        Returns:
+            ``(flat_rgb_uint8, fov_mask_float32, confident, rotation_sigma_deg)``.
+        """
+        if self._input_color_space == "bgr":
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        flat_rgb, fov_mask, od = self._precompute_rgb(image, eye_side)
+        confident = bool(od.confident) if od is not None else False
+        rotation_sigma_deg = float(od.rotation_sigma_deg) if od is not None else 0.0
+        return flat_rgb, fov_mask, confident, rotation_sigma_deg
+
+    def finish_from_cache(
+        self,
+        flat_rgb: np.ndarray,
+        fov_mask: np.ndarray,
+        confident: bool,
+        rotation_sigma_deg: float,
+    ) -> torch.Tensor:
+        """Stages 5–7 from cached Stage-4 output — the per-epoch train path.
+
+        Equivalent to :meth:`__call__` for the full pipeline, but skips the
+        expensive deterministic Stages 0–4 by consuming a cached flat-field
+        image + FOV mask + the two OD/fovea scalars.
+
+        Args:
+            flat_rgb: cached RGB uint8 Stage-4 image.
+            fov_mask: cached float32 binary FOV mask.
+            confident: cached ``ODFoveaResult.confident``.
+            rotation_sigma_deg: cached ``ODFoveaResult.rotation_sigma_deg``.
+
+        Returns:
+            Normalised float32 tensor ``(4, target_size, target_size)``.
+        """
+        od = SimpleNamespace(
+            confident=bool(confident),
+            rotation_sigma_deg=float(rotation_sigma_deg),
+        )
+        return self._finish(flat_rgb, fov_mask, od)
 
     # ------------------------------------------------------------------
     # Stage breakdown (for the demo "what preprocessing does" panel)
@@ -222,7 +339,7 @@ class PreprocessingPipelineV5:
 
         Mirrors :meth:`__call__` up to (but excluding) augmentation and Stage 7
         normalize, returning the labelled intermediate images for the demo's
-        V5 preview strip (TASK-Demo §C.6) plus the FOV mask and OD/fovea result.
+        preview strip (TASK-Demo §C.6) plus the FOV mask and OD/fovea result.
         Deterministic (inference mode): CLAHE is applied with no stochasticity.
 
         Args:
@@ -308,22 +425,22 @@ class PreprocessingPipelineV5:
     @classmethod
     def create_for_training(
         cls,
-        config: PreprocessingV5Config,
+        config: PreprocessingConfig,
         pca_eigvecs: np.ndarray | None = None,
         pca_eigvals: np.ndarray | None = None,
         input_color_space: str = "bgr",
-    ) -> "PreprocessingPipelineV5":
+    ) -> "PreprocessingPipeline":
         """
         Create a pipeline in training mode (stochastic CLAHE + augmentation).
 
         Args:
-            config: :class:`PreprocessingV5Config` instance.
+            config: :class:`PreprocessingConfig` instance.
             pca_eigvecs: Optional PCA eigenvectors for colour jitter.
             pca_eigvals: Optional PCA eigenvalues for colour jitter.
             input_color_space: ``"bgr"`` (default) or ``"rgb"``.
 
         Returns:
-            :class:`PreprocessingPipelineV5` with ``is_training=True``.
+            :class:`PreprocessingPipeline` with ``is_training=True``.
         """
         return cls(
             config,
@@ -336,28 +453,28 @@ class PreprocessingPipelineV5:
     @classmethod
     def create_for_inference(
         cls,
-        config: PreprocessingV5Config,
+        config: PreprocessingConfig,
         input_color_space: str = "bgr",
-    ) -> "PreprocessingPipelineV5":
+    ) -> "PreprocessingPipeline":
         """
         Create a pipeline in inference mode (deterministic, no augmentation).
 
         Args:
-            config: :class:`PreprocessingV5Config` instance.
+            config: :class:`PreprocessingConfig` instance.
             input_color_space: ``"bgr"`` (default) or ``"rgb"``.
 
         Returns:
-            :class:`PreprocessingPipelineV5` with ``is_training=False``.
+            :class:`PreprocessingPipeline` with ``is_training=False``.
         """
         return cls(config, is_training=False, input_color_space=input_color_space)
 
     @classmethod
-    def create_baseline_v5(
+    def create_baseline(
         cls,
         target_size: int = 512,
         is_training: bool = False,
         input_color_space: str = "bgr",
-    ) -> "PreprocessingPipelineV5":
+    ) -> "PreprocessingPipeline":
         """Baseline: stretch-resize + ImageNet normalize (3 channels, no mask).
 
         This replicates what most competitors do in the literature.
@@ -368,9 +485,9 @@ class PreprocessingPipelineV5:
             input_color_space: ``"bgr"`` (default) or ``"rgb"``.
 
         Returns:
-            :class:`PreprocessingPipelineV5` in baseline mode.
+            :class:`PreprocessingPipeline` in baseline mode.
         """
-        config = PreprocessingV5Config(
+        config = PreprocessingConfig(
             mode="baseline",
             use_canonical_flip=False,
             use_od_fovea_rotation=False,
@@ -384,17 +501,3 @@ class PreprocessingPipelineV5:
             normalize_mode="imagenet",
         )
         return cls(config, is_training=is_training, input_color_space=input_color_space)
-
-    @classmethod
-    def create_baseline(
-        cls,
-        target_size: int = 512,
-        is_training: bool = False,
-        input_color_space: str = "bgr",
-    ) -> "PreprocessingPipelineV5":
-        """Alias for :meth:`create_baseline_v5` (backward compatibility)."""
-        return cls.create_baseline_v5(
-            target_size=target_size,
-            is_training=is_training,
-            input_color_space=input_color_space,
-        )

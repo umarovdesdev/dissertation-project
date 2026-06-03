@@ -17,7 +17,7 @@ export default function ExpH5() {
 
       <Sec title={t('exp.alo')}>
         <Paired
-          items={ALO.map(d => ({ label: d.l, v1: d.ab, v2: d.ap }))}
+          items={ALO.map(d => ({ label: d.l, a: d.ab, b: d.ap }))}
           c1={C.gray}
           c2={C.teal}
           l1="Baseline"
@@ -44,7 +44,7 @@ export default function ExpH5() {
 
       <Sec title={t('exp.iou')}>
         <Paired
-          items={IOU.map(d => ({ label: d.l, v1: d.baseline, v2: d.pipeline }))}
+          items={IOU.map(d => ({ label: d.l, a: d.baseline, b: d.pipeline }))}
           c1={C.gray}
           c2={C.purple}
           l1="Baseline"

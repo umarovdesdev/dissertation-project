@@ -1,9 +1,9 @@
 # server/ — DR-Classifier inference backend
 
-FastAPI + PyTorch backend that serves **real** Config D (Full V5 +
+FastAPI + PyTorch backend that serves **real** Config D (Full pipeline +
 EfficientNet-B3) predictions to the React demo. It imports preprocessing and
 model code directly from `../experiments/src` — no duplication, so inference
-runs the *same* V5 pipeline that was defended in the thesis.
+runs the *same* pipeline that was defended in the thesis.
 
 ## Layout
 
@@ -13,7 +13,7 @@ server/
 │   ├── __init__.py        puts experiments/ on sys.path
 │   ├── config.py          env-driven settings (paths, device, CORS)
 │   ├── schemas.py         Pydantic request/response models
-│   ├── preprocessing.py   builds the V5 inference pipeline (+ dataset stats)
+│   ├── preprocessing.py   builds the inference pipeline (+ dataset stats)
 │   ├── inference.py       model load + predict (per-eye, worst-eye patient)
 │   ├── gradcam.py         scaffold stub (→ 501) — see TASK-Demo §C.5
 │   └── main.py            FastAPI app + endpoints
@@ -31,7 +31,7 @@ server/
 | POST | `/api/auth`     | multipart `password?` | `{ok: true}` (gate open / match) or 401 |
 | POST | `/api/predict`  | multipart `left?`, `right?`, `password?` | patient-level + `per_eye` |
 | POST | `/api/gradcam`  | multipart `image`, `eye`, `password?`, `target_class?` | `{gradcam_png_b64, attention_overlay_png_b64, target_class, rationale, cam_pixel_count, cam_area_frac, cam_region}` |
-| POST | `/api/visualize`| multipart `image`, `eye`, `password?` | `{fov_mask_png_b64, v5_preview_png_b64, od_fovea}` |
+| POST | `/api/visualize`| multipart `image`, `eye`, `password?` | `{fov_mask_png_b64, preview_png_b64, od_fovea}` |
 | GET  | `/api/selftest` | query `password?` | per-op pass/fail report |
 
 - **Grad-CAM** is a self-contained torch implementation on EfficientNet's
@@ -39,8 +39,8 @@ server/
   image. It also emits a backend-generated **predicted-class rationale** (§D.3):
   a one-line sentence derived purely from CAM geometry (salient-pixel count +
   centroid region, no LLM), described in neutral image-space terms per NC-14.
-  **/api/visualize** returns the 6-panel V5 stage strip (via
-  `pipeline_v5.stage_breakdown`), the FOV mask, and the classical-CV OD/fovea
+  **/api/visualize** returns the 6-panel stage strip (via
+  `pipeline.stage_breakdown`), the FOV mask, and the classical-CV OD/fovea
   payload (`od_fovea`).
 - **Password gate (§C.2):** set `DEMO_PASSWORD` to require a `password` field on
   every endpoint except `/api/health`. Unset → gate **open** (local dev).
@@ -111,10 +111,10 @@ a checkpoint (random-init weights still give a valid softmax).
 
 ## Status / next
 
-- [x] Bootable API, real V5 preprocessing + model wiring, worst-eye aggregation.
+- [x] Bootable API, real preprocessing + model wiring, worst-eye aggregation.
 - [x] Dataset-specific normalize injection (no preprocessing drift).
 - [x] Grad-CAM (live, self-contained) + predicted-class rationale, `/api/visualize`
-      (V5 strip + FOV mask + OD/fovea), `/api/selftest`, password gate + `/api/auth`,
+      (preview strip + FOV mask + OD/fovea), `/api/selftest`, password gate + `/api/auth`,
       safety limits, health provenance (incl. `requires_password`).
 - [x] Frontend wiring of the new endpoints (per-image widget, live Grad-CAM +
       rationale, provenance footer, password screen) — TASK-Demo Part D.

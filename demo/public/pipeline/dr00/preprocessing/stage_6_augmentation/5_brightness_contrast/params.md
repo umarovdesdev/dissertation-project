@@ -6,7 +6,7 @@
 |-----------|-------|--------|
 | Contrast (α) range | [0.9, 1.1] | `default.yaml:63` |
 | Brightness (β) range | [-10.0, 10.0] | `default.yaml:64` |
-| Distribution | Uniform (both) | `augmentation_v4.py:290-291` |
+| Distribution | Uniform (both) | `augmentation_unified.py:290-291` |
 | Probability | 0.5 (50%) | `default.yaml:65` |
 
 ## Algorithm

@@ -1,8 +1,8 @@
 """Experiment 5: Clinical Degradation Resistance (H-7).
 
 Train on EyePACS. Evaluate on IDRiD and Messidor-2.
-Compute delta = F1_EyePACS_val - F1_external for baseline vs full V5 pipeline.
-H-7: Degradation is statistically smaller with V5 vs baseline.
+Compute delta = F1_EyePACS_val - F1_external for baseline vs full pipeline.
+H-7: Degradation is statistically smaller with the pipeline vs baseline.
 """
 
 from typing import Any

@@ -42,7 +42,7 @@ We need to produce **three separate diagrams** in `.svg` format (later converted
 | `CLAUDE.md` (root) | Central thesis: model = preprocessing + CNN |
 | `thesis/governance/CENTRAL_THESIS.md` | Thesis statement in one paragraph |
 | `demo/public/diagrams/system_architecture_specification.md` | Full architecture specification (Sections 1–14) |
-| `demo/public/diagrams/v5_pipeline_specification.md` | Detailed specification of the 8 preprocessing stages |
+| `demo/public/diagrams/pipeline_specification.md` | Detailed specification of the 8 preprocessing stages |
 | `demo/public/diagrams/general.png` | User's reference for Diagram №1 |
 | `demo/public/diagrams/pipeline_diagram.svg` | Existing monolith — conceptually split into №2 and №3 |
 
@@ -83,7 +83,7 @@ We need to produce **three separate diagrams** in `.svg` format (later converted
 
 - **Image** — Raw fundus photograph (a single generalized block).
 - **Baseline preprocessing** — Stretch-resize 512×512 + ImageNet normalize (3 channels).
-- **Pipeline preprocessing** — Full V5 (8 stages, 4 channels). Expanded in Diagrams №2 and №3.
+- **Pipeline preprocessing** — Full Pipeline (8 stages, 4 channels). Expanded in Diagrams №2 and №3.
 - **ResNet-50** — CNN backbone, ImageNet-pretrained, 4-channel input adapted.
 - **EfficientNet-B3** — CNN backbone, ImageNet-pretrained, 4-channel input adapted.
 - **Results** — Aggregated metrics (F1 / AUC / κ / accuracy) for all 4 configurations.
@@ -140,7 +140,7 @@ Show the full end-to-end system architecture according to `system_architecture_s
               ▼                               ▼
      ┌─────────────────┐             ┌─────────────────┐
      │  Preprocessing  │             │  Preprocessing  │
-     │   𝒫 (V5, all 8  │             │   𝒫 (V5, all 8  │
+     │   𝒫 (all 8  │             │   𝒫 (all 8  │
      │     stages)     │             │     stages)     │
      └────────┬────────┘             └────────┬────────┘
               │                               │
@@ -183,7 +183,7 @@ Show the full end-to-end system architecture according to `system_architecture_s
 ### 4.3 What we show
 
 - **Bilateral input:** pair of images (left/right eye) + laterality metadata.
-- **Preprocessing 𝒫 as a single block** per eye. Label: "V5 (8 stages, see Diagram №3)".
+- **Preprocessing 𝒫 as a single block** per eye. Label: "Pipeline (8 stages, see Diagram №3)".
 - **Output of preprocessing:** processed RGB image + FOV mask = 4-channel tensor (4×512×512, float32).
 - **CNN backbone:** shared weights for both eyes.
 - **Per-eye feature vectors** f_L, f_R.
@@ -222,7 +222,7 @@ Show the full end-to-end system architecture according to `system_architecture_s
 
 ### 5.1 Goal
 
-Open the "black box" of preprocessing 𝒫 from Diagram №2 — show all 8 V5 stages with the details of each.
+Open the "black box" of preprocessing 𝒫 from Diagram №2 — show all 8 stages with the details of each.
 
 ### 5.2 Format
 
@@ -271,7 +271,7 @@ Open the "black box" of preprocessing 𝒫 from Diagram №2 — show all 8 V5 s
 |---------|-----|-------------------|
 | Input (`Image`, raw tensor) — graphite | `#1f2937` | 14.7:1 |
 | Baseline preprocessing — slate gray | `#475569` | 8.6:1 |
-| Pipeline (V5) preprocessing — dark green | `#166534` | 8.4:1 |
+| Pipeline preprocessing — dark green | `#166534` | 8.4:1 |
 | Geometry stages (0–3) — teal | `#0d9488` | 4.7:1 |
 | Photometric stages (4–5) — orange | `#c2410c` | 5.6:1 |
 | Train-only / stochastic (6) — purple | `#6d28d9` | 7.4:1 |

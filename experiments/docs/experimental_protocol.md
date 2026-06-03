@@ -6,13 +6,13 @@ See `docs/RESEARCH_ARCHITECTURE.md` for the full experimental design.
 ```bash
 conda activate dr-classifier
 
-# Run Experiment 1 (2×2 factorial A-D, V5 pipeline)
+# Run Experiment 1 (2×2 factorial A-D, pipeline)
 python run_experiment.py --experiment exp1 --config configs/default.yaml
 
 # Run specific configs only
 python run_experiment.py --experiment exp1 --config configs/default.yaml --configs A,B
 
-# Run Experiment 2 (component ablation, V5 pipeline stages + CLAHE/flat-field sweeps)
+# Run Experiment 2 (component ablation, pipeline stages + CLAHE/flat-field sweeps)
 python run_experiment.py --experiment exp2 --config configs/default.yaml
 
 # Run Experiment 3 (cross-dataset transferability, APTOS 2019)

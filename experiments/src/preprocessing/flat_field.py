@@ -1,5 +1,5 @@
 """
-Stage 4 (V5): Flat-Field Correction.
+Stage 4: Flat-Field Correction.
 
 Reduces uneven illumination by subtracting a heavily blurred version of the
 image and re-centering at 128:
@@ -10,7 +10,7 @@ A large σ captures only the low-frequency illumination gradient, so the
 subtraction removes broad brightness variation while preserving local vessel
 and lesion detail.
 
-In V5, σ is computed adaptively as σ = 0.07 × FOV_diameter.  Correction
+σ is computed adaptively as σ = 0.07 × FOV_diameter.  Correction
 is applied only inside the FOV mask (padding pixels are left at zero).
 
 Input/output images are RGB uint8 NumPy arrays.

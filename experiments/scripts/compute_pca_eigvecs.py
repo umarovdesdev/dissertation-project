@@ -1,14 +1,14 @@
 """
-Offline PCA eigenvector computation for V4 PCA colour augmentation.
+Offline PCA eigenvector computation for PCA colour augmentation.
 
-Samples ``n_samples`` images from a dataset, applies V4 preprocessing
+Samples ``n_samples`` images from a dataset, applies preprocessing
 stages 0–3 (canonical flip, crop+resize, flat-field, CLAHE — but NOT
 normalisation or augmentation), randomly samples ``pixels_per_image``
 pixels from each preprocessed image, and computes the PCA of the resulting
 pixel distribution.
 
 The eigenvectors and eigenvalues are saved as ``.npy`` files and consumed
-by :class:`~src.data.augmentation_v4.FundusAugmentationV4` at training time.
+by :class:`~src.data.augmentation_unified.UnifiedFundusAugmentation` at training time.
 
 Usage
 -----
@@ -122,7 +122,7 @@ def preprocess_for_pca(
     clahe_params: ClaheParams,
 ) -> np.ndarray:
     """
-    Apply V4 stages 0–3 to one image.
+    Apply stages 0–3 to one image.
 
     Stages applied: canonical flip → crop+resize → flat-field → CLAHE.
     Normalisation and augmentation are intentionally excluded so that the
@@ -216,7 +216,7 @@ def compute_pca(
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Compute PCA eigenvectors for V4 colour augmentation.",
+        description="Compute PCA eigenvectors for colour augmentation.",
     )
     parser.add_argument(
         "--dataset",
@@ -297,7 +297,7 @@ def main() -> None:
         print("ERROR: No images found. Check --images-root.", file=sys.stderr)
         sys.exit(1)
 
-    # CLAHE params (defaults match PreprocessingV4Config)
+    # CLAHE params (defaults match PreprocessingConfig)
     clahe_params = ClaheParams(
         tile_grid_size=(8, 8),
         clip_factor=2.0,

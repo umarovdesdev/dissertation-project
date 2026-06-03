@@ -1,6 +1,6 @@
 """
 Stage 6: Augmentation demo — isolated min/max for each augmentation type.
-Parameters from experiments/configs/default.yaml and experiments/src/data/augmentation_v4.py.
+Parameters from experiments/configs/default.yaml and experiments/src/data/augmentation_unified.py.
 Generates left_min/max, right_min/max, distribution.png, and params.md per type.
 """
 
@@ -40,7 +40,7 @@ def masked(img, mask):
     return img * np.expand_dims(mask > 0, axis=-1).astype(np.uint8)
 
 
-# === Geometric augmentations (matching augmentation_v4.py) ===
+# === Geometric augmentations (matching augmentation_unified.py) ===
 
 def aug_rotation(img, mask, angle_deg):
     h, w = img.shape[:2]
@@ -216,7 +216,7 @@ ROTATION_MD = f"""# Rotation Augmentation
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| Distribution | Truncated Gaussian | `augmentation_v4.py:147-148` |
+| Distribution | Truncated Gaussian | `augmentation_unified.py:147-148` |
 | σ (sigma) | {ROTATION_SIGMA}° | `default.yaml:54` |
 | Clip boundary | ±{ROTATION_CLIP}° | `default.yaml:55` |
 | Adaptive sigma | Enabled | `default.yaml:32` |
@@ -256,9 +256,9 @@ SCALE_MD = f"""# Scale Augmentation (Zoom + Stretch)
 | Parameter | Value | Source |
 |-----------|-------|--------|
 | Zoom range | [{ZOOM_RANGE[0]}, {ZOOM_RANGE[1]}] | `default.yaml:56` |
-| Zoom distribution | Log-uniform | `augmentation_v4.py:151-155` |
+| Zoom distribution | Log-uniform | `augmentation_unified.py:151-155` |
 | Stretch range | [{STRETCH_RANGE[0]:.6f}, {STRETCH_RANGE[1]}] (= [1/1.05, 1.05]) | `default.yaml:57` |
-| Stretch distribution | Log-uniform | `augmentation_v4.py:159-163` |
+| Stretch distribution | Log-uniform | `augmentation_unified.py:159-163` |
 | Probability | 100% (always applied) | — |
 
 ## Algorithm
@@ -292,7 +292,7 @@ SHEAR_MD = f"""# Shear Augmentation
 | Parameter | Value | Source |
 |-----------|-------|--------|
 | Shear range | [{SHEAR_RANGE[0]}°, {SHEAR_RANGE[1]}°] | `default.yaml:58` |
-| Distribution | Uniform | `augmentation_v4.py:172` |
+| Distribution | Uniform | `augmentation_unified.py:172` |
 | Probability | {SHEAR_PROB} ({SHEAR_PROB * 100:.0f}%) | `default.yaml:59` |
 
 ## Algorithm
@@ -324,7 +324,7 @@ BC_MD = f"""# Brightness / Contrast Augmentation
 |-----------|-------|--------|
 | Contrast (α) range | [{ALPHA_RANGE[0]}, {ALPHA_RANGE[1]}] | `default.yaml:63` |
 | Brightness (β) range | [{BETA_RANGE[0]}, {BETA_RANGE[1]}] | `default.yaml:64` |
-| Distribution | Uniform (both) | `augmentation_v4.py:290-291` |
+| Distribution | Uniform (both) | `augmentation_unified.py:290-291` |
 | Probability | {BC_PROB} ({BC_PROB * 100:.0f}%) | `default.yaml:65` |
 
 ## Algorithm
@@ -358,7 +358,7 @@ def pca_params_md(eigvecs, eigvals):
 | Parameter | Value | Source |
 |-----------|-------|--------|
 | σ (sigma) | {PCA_SIGMA} | `default.yaml:62` |
-| Distribution | Gaussian per component | `augmentation_v4.py:272` |
+| Distribution | Gaussian per component | `augmentation_unified.py:272` |
 | Probability | {PCA_PROB} ({PCA_PROB * 100:.0f}%) | `default.yaml:63` |
 | Components | 3 (RGB PCA) | — |
 
@@ -427,7 +427,7 @@ def process_grade(gr, eigvecs, eigvals):
         cv2.imwrite(os.path.join(d, f"{side}_min.png"), aug_shear(img, mask, SHEAR_RANGE[0]))
         cv2.imwrite(os.path.join(d, f"{side}_max.png"), aug_shear(img, mask, SHEAR_RANGE[1]))
 
-        # 4. PCA color jitter (±1σ matching production augmentation_v4.py)
+        # 4. PCA color jitter (±1σ matching production augmentation_unified.py)
         d = os.path.join(aug_base, "4_pca_color_jitter")
         os.makedirs(d, exist_ok=True)
         cv2.imwrite(os.path.join(d, f"{side}_min.png"),

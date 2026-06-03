@@ -1,13 +1,13 @@
-"""Compute dataset-specific mean and std for V5 normalization (Stage 7).
+"""Compute dataset-specific mean and std for normalization (Stage 7).
 
 Computes channel-wise mean and std from the EyePACS training set AFTER
-applying V5 Stages 0–4 (canonical flip, OD-fovea rotation, FOV crop+resize,
+applying Stages 0–4 (canonical flip, OD-fovea rotation, FOV crop+resize,
 FOV mask, flat-field correction) — but NOT CLAHE (Stage 5) and NOT
 augmentation (Stage 6). Only pixels where the FOV mask == 1.0 are included
 (D-2 design decision). Statistics are computed in the [0, 1] scale, matching
 ``torchvision.transforms.ToTensor`` used by Stage 7.
 
-This mirrors ``PreprocessingPipelineV5.__call__`` stages 0–4 exactly (it reuses
+This mirrors ``PreprocessingPipeline.__call__`` stages 0–4 exactly (it reuses
 ``from_preset("efficientnet")`` so the flat-field/rotation parameters are
 identical to those Config D trains with).
 
@@ -39,7 +39,7 @@ import numpy as np
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 
 from src.preprocessing.canonical_orientation import canonical_orientation
-from src.preprocessing.config import PreprocessingV5Config
+from src.preprocessing.config import PreprocessingConfig
 from src.preprocessing.crop_resize import crop_and_resize
 from src.preprocessing.flat_field import apply_flat_field
 
@@ -86,9 +86,9 @@ def _discover_eyepacs(
 def _preprocess_stages_0_to_4(
     image_bgr: np.ndarray,
     eye_side: str,
-    config: PreprocessingV5Config,
+    config: PreprocessingConfig,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Apply V5 Stages 0–4 to one image (no CLAHE, no augmentation).
+    """Apply Stages 0–4 to one image (no CLAHE, no augmentation).
 
     Args:
         image_bgr: BGR uint8 array as returned by ``cv2.imread``.
@@ -132,7 +132,7 @@ def _preprocess_stages_0_to_4(
 
 def compute_stats(
     samples: list[tuple[pathlib.Path, str]],
-    config: PreprocessingV5Config,
+    config: PreprocessingConfig,
 ) -> tuple[np.ndarray, np.ndarray, int, int]:
     """Compute masked per-channel mean/std over preprocessed images.
 
@@ -186,7 +186,7 @@ def compute_stats(
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Compute EyePACS dataset-specific mean/std for V5 Stage 7.",
+        description="Compute EyePACS dataset-specific mean/std for Stage 7.",
     )
     parser.add_argument("--images-root", required=True, type=pathlib.Path,
                         help="Directory of <name>.jpeg EyePACS train images.")
@@ -206,7 +206,7 @@ def main() -> None:
     rng = np.random.default_rng(args.seed)
 
     # Use the exact config Config D trains with, so Stages 0–4 match.
-    config = PreprocessingV5Config.from_preset("efficientnet")
+    config = PreprocessingConfig.from_preset("efficientnet")
 
     print(f"Images root : {args.images_root}")
     print(f"Labels CSV  : {args.labels_csv}")

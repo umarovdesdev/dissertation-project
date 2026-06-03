@@ -232,7 +232,19 @@
       "PowerShell(try { $s = Invoke-RestMethod -Uri \"http://127.0.0.1:8000/api/selftest\" -TimeoutSec 60; Write-Output \"=== /api/selftest ===\"; $s | ConvertTo-Json -Depth 6 } catch { Write-Output \"selftest failed: $\\($_.Exception.Message\\)\"; if \\($_.ErrorDetails\\) { $_.ErrorDetails.Message } })",
       "PowerShell(npm start *)",
       "PowerShell($L = \"E:\\\\dissertation-project\\\\demo\\\\public\\\\fundus-examples\\\\left.png\"; $R = \"E:\\\\dissertation-project\\\\demo\\\\public\\\\fundus-examples\\\\right.png\"; Write-Output \"=== predict \\(browser-like, Origin localhost:3000\\) ===\"; curl.exe -s -i -X POST \"http://localhost:8000/api/predict\" -H \"Origin: http://localhost:3000\" -F \"left=@$L\" -F \"right=@$R\" 2>&1 | Select-String -Pattern \"HTTP/|access-control-allow-origin|^\\\\{|pred|probs|confidence|per_eye\")",
-      "Bash(grep -iE \"pt$|checkpoint|norm_stats|settings.local|\\\\.pt\")"
+      "Bash(grep -iE \"pt$|checkpoint|norm_stats|settings.local|\\\\.pt\")",
+      "Bash(PYTHONPATH=E:/dissertation-project/experiments python /tmp/verify_cache.py)",
+      "Bash(PYTHONPATH=E:/dissertation-project/experiments PYTHONIOENCODING=utf-8 python /tmp/verify_cache.py)",
+      "Bash(PYTHONPATH=E:/dissertation-project/experiments PYTHONIOENCODING=utf-8 python /tmp/verify_script.py)",
+      "Bash(PYTHONPATH=E:/dissertation-project/experiments PYTHONIOENCODING=utf-8 python -c ' *)",
+      "Bash(PYTHONPATH=E:/dissertation-project/experiments PYTHONIOENCODING=utf-8 python -m pytest tests/test_v5_cache.py -q)",
+      "Bash(find /e -maxdepth 2 -name \"dr-classifier\" -type d)",
+      "Bash(export KAGGLE_API_TOKEN=KGAT_2cf169764a8fd1000114f804719d04c8)",
+      "Bash(unset KAGGLE_API_TOKEN)",
+      "Bash(py _build_colab_notebook.py)",
+      "Bash(grep -rnE '[vV][1-6]\\([^a-zA-Z0-9]|$\\)' --include='*.py' --include='*.md' --include='*.yaml' --include='*.ipynb' .)",
+      "Bash(grep -rnE '[vV][1-6]\\([^a-zA-Z0-9.]|$\\)' demo server --include='*.py' --include='*.js' --include='*.md' --include='*.svg' --include='*.json' --include='*.txt')",
+      "PowerShell($g = Get-Command gh -ErrorAction SilentlyContinue; if \\($g\\) { Write-Output \"gh found: $\\($g.Source\\)\"; gh --version | Select-Object -First 1; gh auth status 2>&1 | Select-Object -First 3 } else { Write-Output \"gh NOT installed\" })"
     ]
   }
 }

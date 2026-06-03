@@ -217,5 +217,5 @@ for side in ["left", "right"]:
 
     out_dir = os.path.join(BASE, gr, "preprocessing", "stage_6_augmentation", "1_rotation")
     os.makedirs(out_dir, exist_ok=True)
-    cv2.imwrite(os.path.join(out_dir, f"{side}_contours_v2.png"), vis)
-    print(f"  -> saved {side}_contours_v2.png")
+    cv2.imwrite(os.path.join(out_dir, f"{side}_contours.png"), vis)
+    print(f"  -> saved {side}_contours.png")

@@ -54,7 +54,7 @@ export function Hbar({ items, maxV, height = 20 }) {
 }
 
 export function Paired({ items, c1 = C.gray, c2 = C.teal, l1 = 'Baseline', l2 = 'Pipeline' }) {
-  const mx = Math.max(...items.flatMap(i => [i.v1, i.v2])) * 1.12;
+  const mx = Math.max(...items.flatMap(i => [i.a, i.b])) * 1.12;
   return (
     <div>
       <div style={{ display: 'flex', gap: 14, fontSize: 10, color: 'var(--color-text-secondary,#666)', marginBottom: 6 }}>
@@ -68,7 +68,7 @@ export function Paired({ items, c1 = C.gray, c2 = C.teal, l1 = 'Baseline', l2 = 
       {items.map((it, i) => (
         <div key={i} style={{ marginBottom: 8 }}>
           <div style={{ fontSize: 10, color: 'var(--color-text-secondary,#666)', marginBottom: 2 }}>{it.label}</div>
-          {[{ v: it.v1, c: c1 }, { v: it.v2, c: c2 }].map((b, bi) => (
+          {[{ v: it.a, c: c1 }, { v: it.b, c: c2 }].map((b, bi) => (
             <div key={bi} style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 1 }}>
               <div style={{ flex: 1, height: 16, background: 'var(--color-background-secondary,#eeede9)', borderRadius: 3, position: 'relative', overflow: 'hidden' }}>
                 <div style={{ width: `${(b.v / mx) * 100}%`, height: '100%', background: b.c, borderRadius: 3, opacity: 0.8 }} />

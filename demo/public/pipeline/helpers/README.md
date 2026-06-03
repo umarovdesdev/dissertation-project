@@ -85,7 +85,7 @@ python helpers/s2_crop_resize.py
 
 - Input: `stage_1_od_fovea_rotation/image/{side}.png` (image-center rotation chosen)
 - Output: `stage_2_fov_crop_resize/{side}.png` (512x512)
-- Full V5 pipeline: FOV crop + isotropic resize + zero-padding
+- Full pipeline: FOV crop + isotropic resize + zero-padding
 
 ### Stage 3: FOV Mask
 
@@ -191,7 +191,7 @@ Stage 6 is applied on-the-fly during training (not saved to disk). For demo purp
 
 **Key novelty — adaptive rotation σ:** rotation sigma is derived from OD-fovea detection uncertainty per image, not a fixed value. Fallback σ = 13° when detection fails.
 
-**Parameters from:** `experiments/configs/default.yaml` (lines 54–70), `experiments/src/data/augmentation_v4.py`
+**Parameters from:** `experiments/configs/default.yaml` (lines 54–70), `experiments/src/data/augmentation_unified.py`
 
 #### Adaptive rotation visualization
 
@@ -214,7 +214,7 @@ Generates iso-intensity contour rings around OD and Fovea to visualize detection
 
 ```
 1_rotation/
-├── {side}_contours_v2.png      Smoothed iso-intensity rings only
+├── {side}_contours.png      Smoothed iso-intensity rings only
 ├── {side}_variant_A.png        Rings + tangent band fan (axis uncertainty)
 ├── {side}_variant_B.png        Rings + angular cone fan from midpoint
 └── distribution_adaptive.png   Adaptive σ vs fallback σ=13° comparison
@@ -235,7 +235,7 @@ Generates iso-intensity contour rings around OD and Fovea to visualize detection
 
 ### D1. Stage 2 includes resize to 512x512
 
-Initially considered crop-only (preserving original pixels) for demo. Changed to full V5 pipeline with isotropic resize to 512x512 — all subsequent stages (flat-field, CLAHE, etc.) operate on 512x512.
+Initially considered crop-only (preserving original pixels) for demo. Changed to full pipeline with isotropic resize to 512x512 — all subsequent stages (flat-field, CLAHE, etc.) operate on 512x512.
 
 ### D2. Rotation center: image center chosen for stage_2+
 
@@ -251,7 +251,7 @@ Small edge artifacts from the original camera frame are preserved — they are r
 
 ### D4. FOV detection for square images
 
-The V5 pipeline's `detect_fov_bbox()` only works for landscape images (w > 1.2h). Our demo images are square (already cropped from original landscape). Fallback: grayscale threshold (V > 15) + morphological cleanup to detect the fundus circle on black background.
+The pipeline's `detect_fov_bbox()` only works for landscape images (w > 1.2h). Our demo images are square (already cropped from original landscape). Fallback: grayscale threshold (V > 15) + morphological cleanup to detect the fundus circle on black background.
 
 ### D5. Stage 5 CLAHE: three variants compared
 

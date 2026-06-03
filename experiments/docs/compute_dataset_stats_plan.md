@@ -11,8 +11,8 @@
 ### Purpose
 
 Compute EyePACS training-set channel-wise mean and standard deviation for
-V5 Stage 7 normalization. The output is pasted into `configs/default.yaml`
-under `preprocessing_v5.dataset_mean` and `preprocessing_v5.dataset_std`.
+Stage 7 normalization. The output is pasted into `configs/default.yaml`
+under `preprocessing.dataset_mean` and `preprocessing.dataset_std`.
 
 ### Input
 
@@ -84,7 +84,7 @@ is preferred — process all masked pixels of one image as one batch.
 
 ### Why call stage functions directly, not through the pipeline
 
-`PreprocessingPipelineV5.__call__()` always runs Stage 7 (normalization).
+`PreprocessingPipeline.__call__()` always runs Stage 7 (normalization).
 There is no flag to disable it. Therefore, call the stage functions directly
 rather than constructing a pipeline object. This avoids any risk of accidentally
 including CLAHE or normalization.
@@ -96,7 +96,7 @@ including CLAHE or normalization.
 ### Script docstring
 
 ```python
-"""Compute dataset-specific mean and std for V5 normalization (Stage 7).
+"""Compute dataset-specific mean and std for normalization (Stage 7).
 
 Stats computed after deterministic Stages 0–4, before stochastic CLAHE
 (Stage 5). See INVARIANTS OD-3 and design decision D-2 for rationale.
@@ -110,7 +110,7 @@ Usage:
 
 Output:
     Prints mean and std values (float32, [0,1] range) to paste into
-    default.yaml under preprocessing_v5.dataset_mean / dataset_std.
+    default.yaml under preprocessing.dataset_mean / dataset_std.
 """
 ```
 
@@ -246,7 +246,7 @@ def process_image_stages_0_to_4(
     target_size: int,
     flat_field_sigma_factor: float,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Apply V5 Stages 0–4 to one image. Does NOT apply CLAHE, augmentation, or normalization.
+    """Apply Stages 0–4 to one image. Does NOT apply CLAHE, augmentation, or normalization.
 
     Args:
         image_bgr: BGR uint8 array from cv2.imread, shape (H, W, 3).
@@ -307,7 +307,7 @@ def extract_masked_pixels(
 def main() -> None:
     """Entry point: compute EyePACS dataset mean and std for Stage 7 normalization."""
     parser = argparse.ArgumentParser(
-        description="Compute EyePACS dataset mean/std for V5 Stage 7 normalization."
+        description="Compute EyePACS dataset mean/std for Stage 7 normalization."
     )
     parser.add_argument(
         "--config",
@@ -319,8 +319,8 @@ def main() -> None:
 
     cfg = load_config(args.config)
     eyepacs_root = Path(cfg["paths"]["eyepacs"])
-    target_size = cfg["preprocessing_v5"].get("target_size", 512)
-    sigma_factor = cfg["preprocessing_v5"].get("flat_field_sigma_factor", 0.07)
+    target_size = cfg["preprocessing"].get("target_size", 512)
+    sigma_factor = cfg["preprocessing"].get("flat_field_sigma_factor", 0.07)
 
     print(f"EyePACS root: {eyepacs_root}")
     print(f"Target size: {target_size}")
@@ -387,7 +387,7 @@ if __name__ == "__main__":
 The top-level module docstring must be exactly:
 
 ```python
-"""Compute dataset-specific mean and std for V5 normalization (Stage 7).
+"""Compute dataset-specific mean and std for normalization (Stage 7).
 
 Stats computed after deterministic Stages 0–4, before stochastic CLAHE
 (Stage 5). See INVARIANTS OD-3 and design decision D-2 for rationale.
@@ -401,7 +401,7 @@ Usage:
 
 Output:
     Prints mean and std values (float32, [0,1] range) to paste into
-    default.yaml under preprocessing_v5.dataset_mean / dataset_std.
+    default.yaml under preprocessing.dataset_mean / dataset_std.
 """
 ```
 
@@ -409,11 +409,11 @@ Output:
 
 ## 5. YAML Update Instructions
 
-After running the script successfully, locate the `preprocessing_v5` section in
+After running the script successfully, locate the `preprocessing` section in
 `configs/default.yaml` and replace the `null` placeholders with the printed values:
 
 ```yaml
-preprocessing_v5:
+preprocessing:
   # --- Stage 7: Dataset-Specific Normalize ---
   normalize_mode: dataset_specific        # "dataset_specific" or "imagenet"
   # Dataset-specific stats computed from EyePACS train set (mask=1.0 pixels only)
@@ -462,7 +462,7 @@ output by your actual run.
 
 5. Run any experiment that loads the config and check that Stage 7
    normalization picks up the dataset stats rather than the ImageNet fallback.
-   In `pipeline_v5.py`, the relevant check is:
+   In `pipeline.py`, the relevant check is:
    ```python
    if self.config.normalize_mode == "dataset_specific" and \
            self.config.dataset_mean is not None and \

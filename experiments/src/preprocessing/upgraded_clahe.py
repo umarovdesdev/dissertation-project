@@ -1,7 +1,7 @@
 """
-Stage 3 (V4): Upgraded CLAHE on the L-Channel.
+Stage 3: Upgraded CLAHE on the L-Channel.
 
-Replaces cv2.createCLAHE-based CLAHE (V3 ``clahe.py``) with a custom
+Replaces cv2.createCLAHE-based CLAHE (``clahe.py``) with a custom
 tile-by-tile implementation that enforces a *dual* clip constraint:
 
     clip_limit = min(clip_factor × tile_area / 256,

@@ -1,12 +1,12 @@
 """
-Stage 0 (V4): Canonical Orientation.
+Stage 0: Canonical Orientation.
 
 Detects left/right eye from the image filename and dataset convention, then
 horizontally flips left-eye images so all images share right-eye canonical
 orientation (optic disc on the right, macula on the left).
 
 Input/output images are RGB uint8 NumPy arrays.  Callers must convert
-BGR→RGB before entering the V4 pipeline.
+BGR→RGB before entering the pipeline.
 
 Dataset support
 ---------------

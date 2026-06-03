@@ -58,8 +58,8 @@ export default function ExpH3() {
         <Paired
           items={configs.map(k => ({
             label: `Config ${k}`,
-            v1: CONFIGS[k].f1,
-            v2: APTOS[k].f1,
+            a: CONFIGS[k].f1,
+            b: APTOS[k].f1,
           }))}
           c1={C.blue}
           c2={C.coral}

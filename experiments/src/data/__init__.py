@@ -11,7 +11,7 @@ from src.data.datasets import (
 )
 from src.data.splits import PatientLevelKFold, extract_patient_id
 from src.data.augmentation import FundusAugmentation
-from src.data.augmentation_v4 import FundusAugmentationV4
+from src.data.augmentation_unified import UnifiedFundusAugmentation
 
 __all__ = [
     # Datasets
@@ -29,5 +29,5 @@ __all__ = [
     "extract_patient_id",
     # Augmentation
     "FundusAugmentation",
-    "FundusAugmentationV4",
+    "UnifiedFundusAugmentation",
 ]

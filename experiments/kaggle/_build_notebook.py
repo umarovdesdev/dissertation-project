@@ -9,7 +9,7 @@ def code(src): return {"cell_type": "code", "metadata": {}, "execution_count": N
 cells = []
 
 cells.append(md(
-"""# Train Config D (Full V5 + EfficientNet-B3) on EyePACS
+"""# Train Config D (full pipeline + EfficientNet-B3) on EyePACS
 
 Single-fold-per-session training to fit Kaggle's 12 h limit. Change `FOLD`
 between sessions: `0 -> 1 -> 2 -> 3 -> 4`, attaching the previous session's

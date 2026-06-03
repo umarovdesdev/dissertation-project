@@ -71,7 +71,7 @@ export default function ExpH1() {
           highlightRow={(row, i) => i === 5}
         />
         <Note>
-          4 configurations (A–D). Configs A/C operationally instantiate paradigm P1 (Gulshan-paradigm baseline — end-to-end CNN, 3-channel stretch-resize + ImageNet normalize). Configs B/D operationally instantiate paradigm P2 (V5 integrated pipeline — 8-stage preprocessing as integral model component, 4-channel input including FOV mask). The A-vs-B and C-vs-D contrasts are empirical comparisons between the two paradigms under matched conditions — not numerical comparisons against Gulshan 2016 (per INVARIANTS SB-1.12, CFC-2.2).
+          4 configurations (A–D). Configs A/C operationally instantiate paradigm P1 (Gulshan-paradigm baseline — end-to-end CNN, 3-channel stretch-resize + ImageNet normalize). Configs B/D operationally instantiate paradigm P2 (integrated pipeline — 8-stage preprocessing as integral model component, 4-channel input including FOV mask). The A-vs-B and C-vs-D contrasts are empirical comparisons between the two paradigms under matched conditions — not numerical comparisons against Gulshan 2016 (per INVARIANTS SB-1.12, CFC-2.2).
         </Note>
       </Sec>
 

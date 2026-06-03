@@ -14,9 +14,9 @@
 | **Тұжырымдама** | end-to-end CNN | model = preprocessing + CNN |
 | **Препроцессинг** | қосалқы дайындау (ancillary data preparation) | модельдің ажырамас компоненті (integral model component) |
 | **Канондық өкіл / Canonical representative** | Gulshan et al. (2016, *JAMA*) | Бұл диссертация / This dissertation |
-| **Тәжірибеші өкілдер** | Pratt 2016, Rakhlin 2017, Saxena 2020, Ting 2017, Voets 2019 | V5 8-сатылы pipeline |
+| **Тәжірибеші өкілдер** | Pratt 2016, Rakhlin 2017, Saxena 2020, Ting 2017, Voets 2019 | 8-сатылы preprocessing pipeline |
 | **Әдіснамалық тәжірибе** | препроцессинг supplement-ке шығарылады | 8 кезең OD-3-те формализацияланған |
-| **Іске асырылу (Exp 1)** | A/C конфигурациялары (3-канал, stretch-resize + ImageNet normalize) | B/D конфигурациялары (4-канал, толық V5 pipeline) |
+| **Іске асырылу (Exp 1)** | A/C конфигурациялары (3-канал, stretch-resize + ImageNet normalize) | B/D конфигурациялары (4-канал, толық pipeline) |
 
 **Эксперименттік тексеру / Experimental test**
 

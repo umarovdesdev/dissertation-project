@@ -11,19 +11,19 @@ This document consolidates every original solution claimed in the dissertation, 
 
 ## 0. Central Scientific Idea
 
-`model = V5_preprocessing + CNN`
+`model = preprocessing + CNN`
 
-The 8-stage V5 preprocessing pipeline is declared an **integral component of the diagnostic model**, not ancillary data preparation. It defines the feature space available to the CNN. This framing — treating preprocessing as Stage 1 of a two-stage diagnostic system — is the organizing idea the whole dissertation is built on.
+The 8-stage preprocessing pipeline is declared an **integral component of the diagnostic model**, not ancillary data preparation. It defines the feature space available to the CNN. This framing — treating preprocessing as Stage 1 of a two-stage diagnostic system — is the organizing idea the whole dissertation is built on.
 
-The central hypothesis: the V5 pipeline reduces domain variability across fundus imaging devices and acquisition conditions while preserving diagnostically relevant retinal features, leading to improved CNN-based DR detection.
+The central hypothesis: the preprocessing pipeline reduces domain variability across fundus imaging devices and acquisition conditions while preserving diagnostically relevant retinal features, leading to improved CNN-based DR detection.
 
 ---
 
 ## 1. Primary Contributions
 
-### C-1. Cross-Device Normalization Pipeline (V5, 8 stages)
+### C-1. Cross-Device Normalization Pipeline (8 stages)
 
-Design, implementation, and experimental validation of an 8-stage V5 fundus preprocessing pipeline standardizing retinal image appearance across imaging devices and acquisition conditions while preserving diagnostic features. Output: 4-channel tensor (RGB + binary FOV mask), dataset-specific normalization.
+Design, implementation, and experimental validation of an 8-stage fundus preprocessing pipeline standardizing retinal image appearance across imaging devices and acquisition conditions while preserving diagnostic features. Output: 4-channel tensor (RGB + binary FOV mask), dataset-specific normalization.
 
 Novelty components (what together has not been published as a single integrated pipeline):
 
@@ -38,13 +38,13 @@ Novelty components (what together has not been published as a single integrated 
 
 ### C-2. Cross-Dataset Generalization Evidence
 
-Empirical demonstration that CNNs trained with V5 on EyePACS generalize zero-shot to APTOS 2019 with a pre-registered threshold G = F1_APTOS / F1_EyePACS ≥ 0.85.
+Empirical demonstration that CNNs trained with the pipeline on EyePACS generalize zero-shot to APTOS 2019 with a pre-registered threshold G = F1_APTOS / F1_EyePACS ≥ 0.85.
 
 **Novelty:** Systematic zero-shot transferability with a pre-registered generalization ratio on an independent 5-class DR dataset of mixed camera origins. **Evidence:** Exp 3.
 
 ### C-3. Lesion Feature Preservation Analysis via ALO
 
-Quantitative demonstration, via Grad-CAM explainability, that V5 preprocessing directs CNN attention toward clinically relevant lesion regions (microaneurysms, hemorrhages, hard exudates, soft exudates).
+Quantitative demonstration, via Grad-CAM explainability, that the preprocessing pipeline directs CNN attention toward clinically relevant lesion regions (microaneurysms, hemorrhages, hard exudates, soft exudates).
 
 **Novelty:** Introduction of **Attention–Lesion Overlap (ALO)** as a quantitative, asymmetric metric that directly measures lesion coverage by model attention:
 
@@ -107,7 +107,7 @@ Metric and evaluation protocol:
 Δ = F1_EyePACS_val − F1_external
 ```
 
-computed for baseline and V5 models on IDRiD and Messidor-2. Smaller Δ with V5 indicates more robust transfer. Pre-registered statistical criterion: Δ_V5 < Δ_baseline with statistical significance (paired test across folds). **Evidence:** Exp 5 (H-7).
+computed for baseline and pipeline models on IDRiD and Messidor-2. Smaller Δ with the pipeline indicates more robust transfer. Pre-registered statistical criterion: Δ_pipeline < Δ_baseline with statistical significance (paired test across folds). **Evidence:** Exp 5 (H-7).
 
 ---
 
@@ -131,14 +131,14 @@ computed for baseline and V5 models on IDRiD and Messidor-2. Smaller Δ with V5 
 
 | H | Hypothesis (condensed) | Experiment | Decision criterion |
 |---|------------------------|-----------|--------------------|
-| H-1 | Preprocessing Dominance — V5 beats baseline independently for ResNet-50 and EfficientNet-B3 | Exp 1 (2×2 factorial A–D) | Δ weighted F1 ≥ 5 pp AND Δ ROC-AUC ≥ 0.02 AND no Cohen κ degradation, for **both** architectures |
+| H-1 | Preprocessing Dominance — pipeline beats baseline independently for ResNet-50 and EfficientNet-B3 | Exp 1 (2×2 factorial A–D) | Δ weighted F1 ≥ 5 pp AND Δ ROC-AUC ≥ 0.02 AND no Cohen κ degradation, for **both** architectures |
 | H-2 | CLAHE threshold sensitivity + full component ablation | Exp 2 | Parameter-dependent per-class F1 sensitivity for DR 1 and DR 2 with at least one local optimum; flat-field σ swept 0.05–0.10·D |
 | H-4 | Cross-dataset transferability | Exp 3 (EyePACS → APTOS 2019, zero-shot) | G = F1_APTOS / F1_EyePACS ≥ 0.85 |
 | H-5 | Explainability | Exp 4 (IDRiD + Clinical, EfficientNet-B4) | ALO_preproc > ALO_baseline (primary); IoU_preproc > IoU_baseline (secondary) |
 | H-6 | Device domain shift | Exp 6 (DDR, ODIR-5K, RFMiD) | Performance maintained across Canon / Topcon / Kowa / Zeiss within acceptable variance |
-| H-7 | Clinical degradation resistance | Exp 5 (IDRiD + Messidor-2) | Δ_V5 < Δ_baseline with statistical significance (paired test across folds) |
+| H-7 | Clinical degradation resistance | Exp 5 (IDRiD + Messidor-2) | Δ_pipeline < Δ_baseline with statistical significance (paired test across folds) |
 
-H-3 was dropped in V3 of the governance; not claimed.
+H-3 was dropped in an earlier governance revision; not claimed.
 
 ---
 
@@ -146,11 +146,11 @@ H-3 was dropped in V3 of the governance; not claimed.
 
 ### Exp 1 — 2×2 Factorial with Confound Control
 
-Four configurations A–D across `{baseline, V5} × {ResNet-50, EfficientNet-B3}`, plus **Config N (normalization control)**: baseline preprocessing + dataset-specific normalization without V5 stages. Config N disambiguates the normalization-statistics effect from the pipeline-stages effect — an explicit confound-isolation design rather than a single-variable ablation.
+Four configurations A–D across `{baseline, pipeline} × {ResNet-50, EfficientNet-B3}`, plus **Config N (normalization control)**: baseline preprocessing + dataset-specific normalization without the pipeline stages. Config N disambiguates the normalization-statistics effect from the pipeline-stages effect — an explicit confound-isolation design rather than a single-variable ablation.
 
-### Exp 2 — 7-Level V5 Component Ablation
+### Exp 2 — 7-Level Pipeline Component Ablation
 
-Ordered addition of stages: baseline → +flip → +rotation → +isotropic+mask → +flat-field → +CLAHE → full V5. Plus two parameter sweeps: CLAHE (clip_factor, global_threshold) and flat-field σ (0.05–0.10·D). Image quality metrics (CNR, VVI, Entropy, SSIM) reported at each stage — originality is the combination of classification-level ablation with physical image-quality metrics on the same stages.
+Ordered addition of stages: baseline → +flip → +rotation → +isotropic+mask → +flat-field → +CLAHE → full pipeline. Plus two parameter sweeps: CLAHE (clip_factor, global_threshold) and flat-field σ (0.05–0.10·D). Image quality metrics (CNR, VVI, Entropy, SSIM) reported at each stage — originality is the combination of classification-level ablation with physical image-quality metrics on the same stages.
 
 ### Exp 3 — Pre-registered Generalization Threshold
 
@@ -162,7 +162,7 @@ Quantitative IDRiD evaluation (ALO primary, IoU secondary, 4 lesion types) **com
 
 ### Exp 5 — Δ Metric for Degradation
 
-Formal Δ = F1_val − F1_external as the degradation metric, evaluated for both baseline and V5, with paired-fold significance testing.
+Formal Δ = F1_val − F1_external as the degradation metric, evaluated for both baseline and pipeline, with paired-fold significance testing.
 
 ### Exp 6 — Four-Manufacturer Device-Shift Matrix
 
@@ -170,7 +170,7 @@ Cross-device matrix covering Canon, Topcon, Kowa, Zeiss on DDR, ODIR-5K, RFMiD. 
 
 ### Exp 7 — Small-Data Feasibility (IDRiD → Clinical)
 
-Train on IDRiD (516 images, 5-fold CV), test on the Kazakh Clinical dataset (60 images). Bootstrap CI (≥1000) required given sizes. Probes V5 trainability outside the large EyePACS regime.
+Train on IDRiD (516 images, 5-fold CV), test on the Kazakh Clinical dataset (60 images). Bootstrap CI (≥1000) required given sizes. Probes pipeline trainability outside the large EyePACS regime.
 
 ---
 
@@ -207,7 +207,7 @@ Scope boundaries enforced per INVARIANTS.md §IV and ARGUMENT_MAP.md §VII.
 
 | Solution | Governance doc | Code path |
 |----------|---------------|-----------|
-| V5 pipeline orchestration | `thesis/governance/RESEARCH_ARCHITECTURE.md §3.1` | `experiments/src/preprocessing/pipeline_v5.py` |
+| Pipeline orchestration | `thesis/governance/RESEARCH_ARCHITECTURE.md §3.1` | `experiments/src/preprocessing/pipeline_v5.py` |
 | Stage 1 OD-fovea rotation | CONTRIBUTIONS.md SC-F | `experiments/src/preprocessing/od_fovea_detect.py`, `canonical_orientation.py` |
 | Stage 4 adaptive flat-field | CONTRIBUTIONS.md SC-D | `experiments/src/preprocessing/flat_field.py` |
 | Stage 5 dual-constraint CLAHE | CONTRIBUTIONS.md SC-A | `experiments/src/preprocessing/upgraded_clahe.py` |

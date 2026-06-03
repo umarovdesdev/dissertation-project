@@ -68,7 +68,7 @@ All experiment metrics come from `src/data.js`. When experiment results update, 
 - All inline styles (CSS-in-JS). No external CSS framework.
 - No external charting library — all charts are hand-rolled divs.
 - No status badges/labels — everything presented as completed work.
-- Tab IDs: exph1, exph2, exph4, exph5, exph6 (no exph3 — H-3 dropped in V3).
+- Tab IDs: exph1, exph2, exph4, exph5, exph6 (no exph3 — H-3 dropped).
 - Images use `process.env.PUBLIC_URL` prefix for CRA compatibility.
 - Numbers: 3 decimal places for metrics, percentages as `pp`.
 
