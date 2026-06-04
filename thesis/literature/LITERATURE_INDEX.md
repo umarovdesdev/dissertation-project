@@ -4,8 +4,8 @@
 **Dissertation:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 **Candidate:** Yesmukhamedov N.S.
 **Generated from:** Literature Cards in /LITERATURE/
-**Total sources indexed:** 53
-**Version:** Updated to v3.0 — aligned with INVARIANTS v3.0 and MASTER_OUTLINE v3.0
+**Total sources indexed:** 82
+**Version:** Updated to v3.0 — aligned with INVARIANTS v3.0 and MASTER_OUTLINE v3.0 (source corpus expanded with method/architecture/explainability/domain-adaptation foundations, #54–#82)
 
 ---
 
@@ -118,6 +118,35 @@ The **Paradigm** column was added in governance v5.3 to support the paradigmatic
 | 51 🆕 | TO BE IDENTIFIED — ODIR-5K challenge dataset descriptor (Peking University) | Dataset descriptor | Multi-disease ocular dataset, Canon and Zeiss fundus cameras, ~5,000 patients | ODIR-5K | N/A | §4.1, §1.2.3, §5.3 |
 | 52 🆕 | Guo et al. (2017) "On Calibration of Modern Neural Networks" | Calibration methodology | ECE metric definition, calibration analysis of modern deep networks, Brier Score | ImageNet / CIFAR | N/A (methodology reference) | §2.6, §3.4, §5.4 |
 | 53 🆕 | Wang et al. (2004) "Image Quality Assessment: From Error Visibility to Structural Similarity" | Image quality metric | SSIM definition, structural similarity index for image quality evaluation | Various (image quality benchmarks) | N/A (methodology reference) | §2.6, §3.1 |
+| 54 🆕 | Pizer et al. (1987) "Adaptive Histogram Equalization and Its Variations" | Image enhancement method | Introduces **clipped AHE (CLAHE precursor)**; histogram clipping limits noise over-enhancement; qualitative medical-image eval | Medical images (CT/MRI/angiography, qualitative) | N/A (methodology reference) | §2.1.1, §2.1.2 |
+| 55 🆕 | Tomasi & Manduchi (1998) "Bilateral Filtering for Gray and Color Images" | Image filtering method | Bilateral filter: edge-preserving smoothing via joint geometric + photometric weighting; qualitative | None (illustrative images) | N/A (methodology reference) | §2.1.3 |
+| 56 🆕 | Buades et al. (2011) "Non-Local Means Denoising" | Image denoising method | Non-Local Means: averages non-local similar patches; patchwise PSNR gain; qualitative | None (illustrative images) | N/A (methodology reference) | §2.1.3 |
+| 57 🆕 | Zhou et al. (2016) "Learning Deep Features for Discriminative Localization" (CAM) | Explainability method | **Class Activation Mapping (CAM)** via global average pooling; weakly-supervised localization (37.1% top-5 loc error, ILSVRC) | ILSVRC / various | N/A (methodology reference) | §2.5.1, §2.5.2, §1.3.3 |
+| 58 🆕 | Chattopadhyay et al. (2018) "Grad-CAM++" | Explainability method | Grad-CAM++ improves localization & multi-instance handling over Grad-CAM (avg-drop 36.8% vs 46.6%, ImageNet) | ImageNet, VOC, CIFAR-10 | N/A (methodology reference) | §2.5.1, §2.5.2, §1.3.3, §4.5 |
+| 59 🆕 | Tjoa & Guan (2020) "A Survey on Explainable AI (XAI): towards Medical XAI" | Review / Survey (XAI) | Taxonomy of XAI methods toward medical XAI; perceptive vs mathematical-structure interpretability | None (survey) | N/A (survey) | §1.3.3, §2.5 |
+| 60 🆕 | Samek et al. (2017) "Explainable AI: Understanding, Visualizing and Interpreting Deep Learning Models" | Methodology / Review (XAI) | XAI framework; LRP > sensitivity analysis; perturbation-based explanation evaluation | ImageNet, 20 Newsgroups, HMDB51 | N/A (methodology reference) | §1.3.3, §2.5 |
+| 61 🆕 | Lundberg & Lee (2017) "A Unified Approach to Interpreting Model Predictions" (SHAP) | Explainability method | **SHAP**: unique additive feature attribution (local accuracy/missingness/consistency); Kernel & Deep SHAP | MNIST, synthetic, human study | N/A (methodology reference) | §2.5, §1.3.3 |
+| 62 🆕 | Ribeiro et al. (2016) "Why Should I Trust You?: Explaining the Predictions of Any Classifier" (LIME) | Explainability method | **LIME**: model-agnostic local surrogate explanations; >90% feature recall; SP-LIME for global view | Text + image (Inception) | N/A (methodology reference) | §2.5, §1.3.3 |
+| 63 🆕 | Rezatofighi et al. (2019) "Generalized Intersection over Union" (GIoU) | Metric / Loss (IoU) | **Generalized IoU** metric & loss; non-zero gradient for non-overlapping boxes; improves detector localization | PASCAL VOC, MS COCO | N/A (methodology reference) | §2.5.3 |
+| 64 🆕 | Everingham et al. (2010) "The PASCAL Visual Object Classes (VOC) Challenge" | Dataset descriptor / Benchmark | Defines **Average Precision** and **IoU > 0.5** detection criterion; 9,963 images, 20 classes | PASCAL VOC | N/A | §2.5.3, §3.4 |
+| 65 🆕 | Krizhevsky et al. (2012) "ImageNet Classification with Deep CNNs" (AlexNet) | CNN architecture | **AlexNet**; 8-layer CNN, ReLU + dropout + PCA color augmentation; ImageNet top-5 err 15.3% | ImageNet / ILSVRC | N/A (architecture reference) | §1.3.1, §2.2.1, §2.2.3 |
+| 66 🆕 | He et al. (2016) "Deep Residual Learning for Image Recognition" (ResNet) | CNN architecture | **ResNet** residual learning; ResNet-50/101/152 (ResNet-50 = dissertation backbone); ImageNet top-5 err 3.57% (ensemble) | ImageNet, CIFAR-10 | N/A (architecture reference) | §1.3.1, §2.2.1, §3.2 |
+| 67 🆕 | Huang et al. (2017) "Densely Connected Convolutional Networks" (DenseNet) | CNN architecture | **DenseNet** dense connectivity; feature reuse + parameter efficiency; competitive ImageNet/CIFAR | ImageNet, CIFAR, SVHN | N/A (architecture reference) | §1.3.1, §2.2.1 |
+| 68 🆕 | Tan & Le (2019) "EfficientNet: Rethinking Model Scaling for CNNs" | CNN architecture | **EfficientNet** compound scaling (B0–B7); B7 84.4% top-1; **EfficientNet-B3 = dissertation backbone** | ImageNet + 8 transfer datasets | N/A (architecture reference) | §1.3.1, §3.2 |
+| 69 🆕 | Tan & Le (2021) "EfficientNetV2: Smaller Models and Faster Training" | CNN architecture | EfficientNetV2; training-aware NAS + progressive learning; faster training; surpasses ViT-L/16(21k) | ImageNet, ImageNet21k + transfer | N/A (architecture reference) | §1.3.1, §3.2 |
+| 70 🆕 | Dosovitskiy et al. (2021) "An Image is Worth 16×16 Words" (ViT) | ViT architecture | **Vision Transformer**; pure transformer on image patches; ViT-H/14 88.55% ImageNet; "large-scale training trumps inductive bias" | ImageNet/21k, JFT-300M | N/A (architecture reference) | §1.3.1 |
+| 71 🆕 | Yosinski et al. (2014) "How Transferable Are Features in Deep Neural Networks?" | Transfer learning | Layer-wise feature transferability; lower layers general, higher task-specific; fine-tuning > training from scratch | ImageNet (A/B splits) | N/A (methodology reference) | §2.3.1, §2.3.2 |
+| 72 🆕 | Kornblith et al. (2019) "Do Better ImageNet Models Transfer Better?" | Transfer learning | ImageNet accuracy predicts transfer (r = 0.99 fixed features, 0.96 fine-tuning) across 12 datasets | 12 transfer datasets | N/A (methodology reference) | §2.3.1, §2.3.2 |
+| 73 🆕 | Cheplygina et al. (2018) "Not-so-supervised: A Survey of SSL, MIL and Transfer Learning in Medical Image Analysis" | Review / Survey (medical ML) | Survey of semi-supervised, multi-instance, and transfer learning under limited labels in medical imaging | None (survey) | N/A (survey) | §2.3.1, §2.3.2 |
+| 74 🆕 | Zhou et al. (2022) "Domain Generalization: A Survey" | Review / Survey (DG) | Taxonomy of domain-generalization methods; OOD performance degradation under domain shift | None (survey) | N/A (survey) | §1.2.3, §5.3 |
+| 75 🆕 | Wang & Deng (2018) "Deep Visual Domain Adaptation: A Survey" | Review / Survey (DA) | Deep domain-adaptation taxonomy (discrepancy / adversarial / reconstruction based) | None (survey) | N/A (survey) | §1.2.3, §5.3 |
+| 76 🆕 | Ganin et al. (2016) "Domain-Adversarial Training of Neural Networks" (DANN) | Domain adaptation method | **DANN** + gradient reversal layer; domain-invariant features; e.g. MNIST→MNIST-M 0.767 | MNIST/SVHN/GTSRB/Office, etc. | N/A (methodology reference) | §5.3, §2.3.2 |
+| 77 🆕 | Abràmoff et al. (2018) "Pivotal Trial of an Autonomous AI System for DR Detection in Primary Care" (IDx-DR) | Prospective clinical validation | Autonomous IDx-DR; sens 87.2%, spec 90.7%, imageability 96.1%; 900 patients, 10 primary-care sites; FDA pivotal | Private (prospective, 900 pts) | P1 | §1.4, §6.3, INTRO |
+| 78 🆕 | Fu et al. (2020) "Evaluation of Retinal Image Quality Assessment Networks in Different Color-spaces" (EyeQ) | Dataset descriptor + RIQA | **EyeQ** (28,792 EyePACS images, 3-level quality grading); MCF-Net 0.9175 acc; image quality affects DR detection | EyeQ (re-annotated from EyePACS) | P1 | §1.2.2, §5.3, §3.1 |
+| 79 🆕 | Chin & Shih (2021) "Concisely Indexed Multi-keyword Rank Search on Encrypted Cloud Documents" | Peripheral (encrypted search) | PCA-condensed index for encrypted multi-keyword cloud search; <1/10 storage vs MRSE | BBC text corpus | N/A | Peripheral |
+| 80 🆕 | Koch (2019) "Universal Bounds and Monotonicity Properties of Ratios of Hermite and Parabolic Cylinder Functions" | Peripheral (mathematics) | Monotonicity & optimal bounds of Hermite/parabolic-cylinder function ratios; Turán-type inequalities | None (theoretical) | N/A | Peripheral |
+| 81 🆕 | Hungerford (1999) "Comments on Proton Emission after Muon Capture" | Peripheral (nuclear physics) | Charged-particle emission after atomic muon capture (~15% in light nuclei); MECO background estimate | None (physics) | N/A | Peripheral |
+| 82 🆕 | Ostahie et al. (2015) "Electrical Manipulation of the Edge States in Graphene…" | Peripheral (condensed-matter physics) | Electrically-induced "shortcut edge states" in graphene; unconventional quantum-Hall plateaus | None (simulation) | N/A | Peripheral |
 
 ---
 
@@ -128,39 +157,39 @@ The **Paradigm** column was added in governance v5.3 to support the paradigmatic
 | §1.1.1 | #31, #32, **#33, #34, #35** |
 | §1.1.2 | #06, #10, **#22**, #34 |
 | §1.2.1 | ⚠️ GAP |
-| §1.2.2 | #05, #15, #17, **#24** |
-| §1.2.3 (NEW) | #47, #49, #50, #51 |
-| §1.3.1 | #01, #04, #05, #08, #09, #12, #15, #16, #18, #37, #38, #41, #42, #43 |
+| §1.2.2 | #05, #15, #17, **#24**, #78 |
+| §1.2.3 (NEW) | #47, #49, #50, #51, #74, #75 |
+| §1.3.1 | #01, #04, #05, #08, #09, #12, #15, #16, #18, #37, #38, #41, #42, #43, #65, #66, #67, #68, #69, #70 |
 | §1.3.2 | #02, #09, #12 |
-| §1.3.3 (NEW) | #46 ⚡ THIN |
-| §1.4 | #02, #03, #07, #11, #12, #13, #14, **#22**, #39, #43, #44, #45 |
+| §1.3.3 (NEW) | #46, #57, #58, #59, #60, #61, #62 |
+| §1.4 | #02, #03, #07, #11, #12, #13, #14, **#22**, #39, #43, #44, #45, #77 |
 | §1.5 | #17, #39 |
-| §2.1.1 | #25, #26, #27, #30, **#23** |
-| §2.1.2 | #25, #27, **#23, #24** |
-| §2.1.3 | ⚠️ GAP |
-| §2.2.1 | #08 ⚡ THIN |
+| §2.1.1 | #25, #26, #27, #30, **#23**, #54 |
+| §2.1.2 | #25, #27, **#23, #24**, #54 |
+| §2.1.3 | #55, #56 |
+| §2.2.1 | #08, #65, #66, #67 |
 | §2.2.2 | #01, **#19, #21**, #39, #40, #42 |
-| §2.2.3 | #01, **#19, #21** |
-| §2.3.1 | #04 ⚡ THIN |
-| §2.3.2 | **#19, #21** |
+| §2.2.3 | #01, **#19, #21**, #65 |
+| §2.3.1 | #04, #71, #72, #73 |
+| §2.3.2 | **#19, #21**, #71, #72, #76 |
 | §2.4.1 | **#20** ⚡ THIN |
-| §2.5.1 (NEW) | #46 ⚡ THIN |
-| §2.5.2 (NEW) | #46 ⚡ THIN |
-| §2.5.3 (NEW) | ⚠️ GAP — no source currently formalizes IoU as explainability metric |
+| §2.5.1 (NEW) | #46, #57, #58 |
+| §2.5.2 (NEW) | #46, #57, #58 |
+| §2.5.3 (NEW) | #63, #64 |
 | §2.6 (NEW) | #52, #53 ⚡ THIN |
-| §3.1 | #02, #15, #26, #27, #53, **#19, #21, #23, #24** |
+| §3.1 | #02, #15, #26, #27, #53, **#19, #21, #23, #24**, #78 |
 | §3.1.4 (NEW) | ⚠️ GAP — no external literature; methodological contribution by candidate |
-| §3.2 | #09, **#24** |
-| §3.3 | **#19, #21, #23** |
-| §3.4 | **#21**, #40, #52 |
+| §3.2 | #09, **#24**, #66, #68, #69, #70 |
+| §3.3 | **#19, #21, #23**, #71, #72 |
+| §3.4 | **#21**, #40, #52, #64 |
 | §4.1 | #06, #10, #15, #47, #48, #49, #50, #51, **#19, #21, #24**, #41 |
 | §4.2 | **#19, #21, #24** ⚡ THIN (self-only) |
 | §4.3 | #27, **#23** |
 | §4.4 | ⚠️ GAP — no external literature on robustness-to-degradation experiments (NEW v2.1 experiment) |
-| §4.5 (NEW) | #06, #10, #46 |
+| §4.5 (NEW) | #06, #10, #46, #57, #58 |
 | §5.1 (NEW — Exp 5) | #02, #04, #05, #07, #11, #12, #13, #16, #17, #38, #44, #48 |
-| §5.2 (NEW — Explainability results) | #06, #10, #16, #17, #27, #46, **#24** |
-| §5.3 (NEW — Exp 6 Device Domain Shift) | #38, #49, #50, #51 ⚡ THIN (dataset descriptors only) |
+| §5.2 (NEW — Explainability results) | #06, #10, #16, #17, #27, #46, **#24**, #57, #58 |
+| §5.3 (NEW — Exp 6 Device Domain Shift) | #38, #49, #50, #51, #74, #75, #76, #78 |
 | §5.4 (NEW — Statistical Validation) | #16, #17, #27, #52, **#24** |
 | §5.5 | #02, #05, #07, #11, #12, #13, #14, #16, **#23**, #44, #45 |
 | §5.6 (NEW) | — (populated by candidate's own experimental limitations) |
@@ -175,22 +204,26 @@ The **Paradigm** column was added in governance v5.3 to support the paradigmatic
 
 **⚠️ GAP (0 sources):**
 - §1.2.1 — Sources of Image Degradation in Clinical Practice
-- §2.1.3 — Spatial Filtering and Noise Reduction Methods
-- §2.5.3 — IoU as Metric for Explainability Evaluation (NEW v2.1 — no source currently formalizes IoU for explainability; candidate may define within §2.5 or acquire a reference)
 - §3.1.4 — External Image Ingestion Protocol (NEW v2.1 — methodological contribution by candidate; no external literature expected)
 - §4.4 — Experiment 3: Robustness to Image Degradation (NEW v2.1 — no external literature on controlled degradation experiments for DR preprocessing)
 
+**✅ GAPS RESOLVED in this update (#54–#82):**
+- §2.1.3 — Spatial Filtering and Noise Reduction Methods — RESOLVED by #55 (bilateral filtering) and #56 (non-local means).
+- §2.5.3 — IoU as Metric for Explainability Evaluation — RESOLVED by #63 (Generalized IoU metric/loss) and #64 (PASCAL VOC IoU > 0.5 criterion).
+
 **⚡ THIN (1 source or thin coverage):**
-- §1.3.3 — Explainability Methods in Medical Image Classification (#46 only — additional XAI survey literature recommended)
-- §2.2.1 — Convolution, Pooling, and Feature Extraction Operations (#08)
-- §2.3.1 — Feature Transferability Across Visual Domains (#04)
 - §2.4.1 — Coupled Thermal-Optical Model of Fundus Tissue Response (#20 🔹SELF only)
-- §2.5.1 — CAM / Grad-CAM Theory and Formalization (#46 only — Zhou et al. 2016 for CAM recommended)
-- §2.5.2 — Attention Map Interpretation (#46 only — additional XAI interpretation sources recommended)
 - §2.6 — Image Quality Metrics for Preprocessing Evaluation (#52, #53 — two sources but both are general references, not DR-specific applications)
 - §4.2 — Experiment 1: Causal Improvement (#19, #21, #24 🔹SELF only)
-- §5.3 — Experiment 6: Device Domain Shift (#38, #49, #50, #51 — dataset descriptors only; no literature on camera-induced distribution shift in retinal imaging)
 - §6.1 — System Requirements and Design Principles (#22 🔹SELF only)
+
+**⬆️ THIN STATUS UPGRADED in this update (#54–#82):**
+- §1.3.3 — Explainability Methods (was #46 only) → now #46, #57, #58, #59, #60, #61, #62. **Well-covered.**
+- §2.2.1 — Convolution, Pooling, and Feature Extraction (was #08 only) → now #08, #65, #66, #67 (AlexNet/ResNet/DenseNet foundations).
+- §2.3.1 — Feature Transferability Across Visual Domains (was #04 only) → now #04, #71, #72, #73.
+- §2.5.1 — CAM / Grad-CAM Theory (was #46 only) → now #46, #57 (CAM), #58 (Grad-CAM++).
+- §2.5.2 — Attention Map Interpretation (was #46 only) → now #46, #57, #58.
+- §5.3 — Experiment 6: Device Domain Shift (was #38, #49, #50, #51 dataset-descriptors only) → now adds #74, #75, #76 (DG/DA literature) + #78 (image-quality), supplying the previously-missing literature on distribution shift.
 
 ---
 
@@ -265,6 +298,24 @@ Per CFC-2.9 and SIR-1, no source has been attributed an explicit "preprocessing 
 41. §1.2.3 (Device-Specific Variability in Fundus Imaging) and §5.3 (Experiment 6: Device Domain Shift) are **new sections in v2.1**. Sources #49, #50, #51 provide dataset descriptors with camera model information; additional literature on camera-induced distribution shift in retinal imaging is recommended to strengthen the theoretical grounding and avoid dataset-descriptor-only coverage.
 42. The v2.1 Section Map Key **replaces v1.0 section numbers**. Existing "Maps to" entries in the Source Index have been updated to v2.1 numbering where applicable. Key remapping: v1.0 §5.3 (Comparative Analysis) → v2.1 §5.5; v1.0 §5.2 (Statistical Validation of Preprocessing Dominance) → v2.1 §5.4; v1.0 §5.1 (Cross-Database Generalization Testing) → v2.1 §5.1 (Experiment 5). Existing "Maps to" entries in individual literature cards should be verified and remapped during literature card updates.
 
+**New sources notes (#54–#82) — foundational method, architecture, explainability, and domain-shift corpus:**
+
+43. Sources #54–#82 are **foundational / methodological references** added to ground the dissertation's preprocessing, architecture, transfer-learning, explainability, and domain-shift chapters in their canonical primary literature. Most are **N/A** under the Paradigm rule (architecture papers, methodology references, surveys, dataset/benchmark descriptors) because they are not CNN/ViT-based **DR/retinal** classification studies. Only #77 (Abràmoff — autonomous DR detection) and #78 (Fu — EyeQ retinal image-quality classification) are retinal-image CNN studies and are tagged **P1**.
+44. **CLAHE provenance resolved.** Source #54 (Pizer et al., 1987) introduces *clipped* adaptive histogram equalization — the methodological origin of CLAHE. It is the **citable primary source** that replaces the non-citable Wikipedia entry (#25) flagged in note 8. The dissertation should cite #54 (and Zuiderveld, 1994, if acquired) for CLAHE rather than #25 in §2.1.1–§2.1.2.
+45. **§2.1.3 GAP resolved.** Sources #55 (Tomasi & Manduchi — bilateral filtering) and #56 (Buades et al. — non-local means) supply the previously-missing spatial-filtering / noise-reduction literature. Both are method papers with qualitative (not benchmark) evaluation; cite as algorithmic foundations, not as evidence of DR classification gains.
+46. **Explainability corpus expanded.** Source #57 (Zhou et al., 2016 — CAM) and #58 (Chattopadhyay et al., 2018 — Grad-CAM++) are the CAM/Grad-CAM lineage explicitly recommended in note 40; together with the existing #46 (Selvaraju — Grad-CAM) they ground §2.5.1–§2.5.2 and Exp 4. Sources #59 (Tjoa & Guan — medical XAI survey), #60 (Samek et al. — LRP), #61 (Lundberg & Lee — SHAP), and #62 (Ribeiro et al. — LIME) broaden §1.3.3/§2.5 to the wider XAI landscape. **Caution:** #61 (SHAP) and #62 (LIME) are feature-attribution methods not used as the dissertation's primary lesion-localization tool — cite as XAI background, not as the operational explainability metric.
+47. **§2.5.3 GAP resolved.** Source #63 (Rezatofighi et al. — Generalized IoU) and #64 (Everingham et al. — PASCAL VOC, which defines AP and the IoU > 0.5 detection criterion) provide the formal IoU grounding for explainability-overlap evaluation (ALO/IoU in Exp 4). Both are object-detection references; the dissertation must frame IoU as an *overlap metric borrowed for lesion-localization evaluation*, not as a detection benchmark (consistent with SB/CFC constraints).
+48. **CNN backbone provenance.** Sources #65 (AlexNet), #66 (ResNet), #67 (DenseNet), #68 (EfficientNet), #69 (EfficientNetV2) and #70 (ViT) are the canonical architecture papers. **#66 (ResNet-50)** and **#68 (EfficientNet-B3)** are the dissertation's two operational backbones (Exp 1, configs A–D) and should be cited at first mention in §3.2. #70 (ViT) and #69 (EfficientNetV2) support the CNN-vs-ViT discussion (§1.3.1); note that #70 argues "scale > inductive bias," a position **tangential to but not contradicting** the preprocessing-as-model-component thesis — cite with the framing already used for #16/#70-class ViT sources.
+49. **Transfer-learning theory.** Sources #71 (Yosinski et al. — layer transferability), #72 (Kornblith et al. — ImageNet-accuracy↔transfer correlation), and #73 (Cheplygina et al. — SSL/MIL/TL medical survey) ground §2.3.1–§2.3.2 (frozen vs fine-tuned), complementing the candidate's own #19/#21 frozen-vs-fine-tuned experiments.
+50. **Domain-shift literature.** Sources #74 (Zhou et al. — DG survey), #75 (Wang & Deng — DA survey), and #76 (Ganin et al. — DANN) supply the conceptual and methodological grounding for §1.2.3 and Exp 6 (§5.3 device domain shift), which was previously covered by dataset descriptors only. These are general-purpose (non-retinal) references; cite for problem framing, not as retinal-domain-shift evidence.
+51. Source #77 (Abràmoff et al., 2018 — IDx-DR pivotal trial) is a **high-impact prospective clinical-validation precedent** (FDA-authorized autonomous DR system, multi-site, masked reference standard). Strongest new support for §1.4 and §6.3 clinical-deployment arguments. **Limitation:** no preprocessing ablation and no public-benchmark comparison — it does not isolate preprocessing effects and must not be cited as evidence for the preprocessing-dominance hypothesis.
+52. Source #78 (Fu et al., 2020 — EyeQ) re-annotates **28,792 EyePACS images** into a 3-level retinal image-quality dataset and shows downstream DR-detection performance degrades with image quality. Supports §1.2.2 (image quality → performance) and §5.3 (multi-camera EyePACS acquisition). EyePACS-derived single-source; no external validation.
+53. **Off-topic / domain-mismatch cards (#79–#82).** Sources #79 (encrypted cloud search), #80 (Hermite-function mathematics), #81 (muon-capture nuclear physics), and #82 (graphene quantum-Hall physics) are **outside the medical-imaging / DR domain** and carry negligible relevance to the dissertation. They are indexed for completeness and registered in the Peripheral Sources Registry below, following the convention established for #28/#29. They should **not** appear in the dissertation literature review.
+54. **Alternate / supplementary cards for already-indexed sources (no new number assigned).** Two of the newly-supplied cards are second analytical cards for sources already in this index and therefore do **not** receive new source numbers (per the avoid-duplicates rule):
+    - `gulshan-2016-supplementary-validation.md` → maps to **#12** (Gulshan et al., 2016). This card analyses the JAMA supplementary appendix (scale-normalisation to 299 px, FOV-mask exclusion) and reinforces #12's §1.2.2/§3.1 preprocessing detail; cite under #12.
+    - `voets-2019-reproduction-study.md` → maps to **#17** (Voets et al., 2019). This card details the public-data reproduction (EyePACS AUC 0.951, Messidor-2 0.853) and reproducibility recommendations; cite under #17.
+    Both files were copied into `external/` for archival completeness but are consolidated to their canonical entries (analogous to the #06/#10 and #23/#24 duplicate-card handling).
+
 ---
 
 ### Self-Publication Registry
@@ -290,6 +341,10 @@ Per CFC-2.9 and SIR-1, no source has been attributed an explicit "preprocessing 
 | 30 | Chakka (2023) | OCT preprocessing | High school journal; no numerical metrics; low rigor |
 | 31 | Kesharwani et al. (2021) | DR pathophysiology | Multiple citation errors; questionable journal; use #32 instead |
 | 36 | Nandal (2024) | HL7/FHIR interoperability | Peripheral to DR imaging; relevant only to §6.2 infrastructure |
+| 79 | Chin & Shih (2021) | Encrypted cloud document search | Domain mismatch; PCA index compression for searchable encryption; no imaging/DR content |
+| 80 | Koch (2019) | Mathematics (special functions) | Off-topic; Hermite/parabolic-cylinder function inequalities; no ML or imaging content |
+| 81 | Hungerford (1999) | Nuclear physics (muon capture) | Off-topic; charged-particle emission spectra; no ML or imaging content |
+| 82 | Ostahie et al. (2015) | Condensed-matter physics (graphene) | Off-topic; quantum-Hall edge states; no ML or imaging content |
 
 ---
 
@@ -323,3 +378,37 @@ Per CFC-2.9 and SIR-1, no source has been attributed an explicit "preprocessing 
 | 51 🆕 | ODIR-5K descriptor (TO BE IDENTIFIED) | Dataset descriptor | Infrastructure: device domain shift dataset (Canon/Zeiss) |
 | 52 🆕 | Guo et al. (2017) | Foundational (calibration) | Methodology: ECE/Brier Score metric definitions for §3.4, §5.4 |
 | 53 🆕 | Wang et al. (2004) | Foundational (image quality) | Methodology: SSIM metric definition for §2.6, §3.1 |
+
+### Epistemic Tier Summary (New Sources #54–#82)
+
+| # | Source | Epistemic Tier | Dissertation Role |
+|---|--------|----------------|-------------------|
+| 54 🆕 | Pizer et al. (1987) | Foundational (preprocessing) | Methodology: CLAHE precursor; citable replacement for #25 in §2.1.1–§2.1.2 |
+| 55 🆕 | Tomasi & Manduchi (1998) | Foundational (preprocessing) | Methodology: bilateral filtering for §2.1.3 |
+| 56 🆕 | Buades et al. (2011) | Foundational (preprocessing) | Methodology: non-local means denoising for §2.1.3 |
+| 57 🆕 | Zhou et al. (2016) | Foundational (explainability) | Methodology: CAM origin for §2.5.1–§2.5.2 |
+| 58 🆕 | Chattopadhyay et al. (2018) | Foundational (explainability) | Methodology: Grad-CAM++ for §2.5.1–§2.5.2, Exp 4 |
+| 59 🆕 | Tjoa & Guan (2020) | Survey (medical XAI) | Framing: XAI landscape for §1.3.3, §2.5 |
+| 60 🆕 | Samek et al. (2017) | Foundational (XAI) | Methodology: LRP / perturbation evaluation for §1.3.3, §2.5 |
+| 61 🆕 | Lundberg & Lee (2017) | Foundational (XAI) | Methodology: SHAP attribution background for §2.5 |
+| 62 🆕 | Ribeiro et al. (2016) | Foundational (XAI) | Methodology: LIME attribution background for §2.5 |
+| 63 🆕 | Rezatofighi et al. (2019) | Foundational (metric) | Methodology: Generalized IoU for explainability-overlap (§2.5.3) |
+| 64 🆕 | Everingham et al. (2010) | High-impact benchmark | Methodology: AP / IoU>0.5 definition for §2.5.3, §3.4 |
+| 65 🆕 | Krizhevsky et al. (2012) | Foundational (architecture) | Background: AlexNet CNN foundations for §1.3.1, §2.2.1 |
+| 66 🆕 | He et al. (2016) | Foundational (architecture) | Backbone: ResNet-50 (operational backbone) for §1.3.1, §3.2 |
+| 67 🆕 | Huang et al. (2017) | Foundational (architecture) | Background: DenseNet for §1.3.1 |
+| 68 🆕 | Tan & Le (2019) | High-impact benchmark | Backbone: EfficientNet-B3 (operational backbone) for §1.3.1, §3.2 |
+| 69 🆕 | Tan & Le (2021) | Architecture refinement | Comparator: EfficientNetV2 for §1.3.1, §3.2 |
+| 70 🆕 | Dosovitskiy et al. (2021) | Transformer-era benchmark | Comparator: ViT for CNN-vs-ViT discussion (§1.3.1) |
+| 71 🆕 | Yosinski et al. (2014) | Foundational (transfer learning) | Methodology: layer transferability for §2.3.1–§2.3.2 |
+| 72 🆕 | Kornblith et al. (2019) | High-impact benchmark | Methodology: ImageNet↔transfer correlation for §2.3.1–§2.3.2 |
+| 73 🆕 | Cheplygina et al. (2018) | Survey (medical ML) | Framing: SSL/MIL/TL under limited labels for §2.3.1–§2.3.2 |
+| 74 🆕 | Zhou et al. (2022) | Foundational survey (DG) | Framing: domain-generalization grounding for §1.2.3, §5.3 |
+| 75 🆕 | Wang & Deng (2018) | Foundational survey (DA) | Framing: domain-adaptation taxonomy for §1.2.3, §5.3 |
+| 76 🆕 | Ganin et al. (2016) | Foundational (domain adaptation) | Methodology: DANN/gradient reversal for §5.3, §2.3.2 |
+| 77 🆕 | Abràmoff et al. (2018) | High-impact clinical validation | Core evidence: autonomous DR pivotal trial for §1.4, §6.3 |
+| 78 🆕 | Fu et al. (2020) | Dataset descriptor + RIQA | Evidence: image-quality↔DR performance (EyeQ) for §1.2.2, §5.3 |
+| 79 🆕 | Chin & Shih (2021) | Peripheral (off-domain) | Excluded: encrypted-search; no DR relevance |
+| 80 🆕 | Koch (2019) | Peripheral (off-domain) | Excluded: special-functions mathematics; no DR relevance |
+| 81 🆕 | Hungerford (1999) | Peripheral (off-domain) | Excluded: nuclear physics; no DR relevance |
+| 82 🆕 | Ostahie et al. (2015) | Peripheral (off-domain) | Excluded: condensed-matter physics; no DR relevance |
