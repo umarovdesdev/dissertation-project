@@ -14,3 +14,7 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Secrets — never commit
+kaggle.json
+**/kaggle.json
