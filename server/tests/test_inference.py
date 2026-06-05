@@ -105,7 +105,11 @@ def test_visualize(client: TestClient) -> None:
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["preview_png_b64"] and body["fov_mask_png_b64"]
+    assert body["fov_base_png_b64"]  # analysis-space base for mask/marker overlay
     assert "confident" in body["od_fovea"]
+    # OD/fovea coords are in the square analysis frame (no flip to undo).
+    assert body["od_fovea"]["space_w"] == body["od_fovea"]["space_h"]
+    assert body["od_fovea"]["flipped"] is False
 
 
 def test_selftest(client: TestClient) -> None:

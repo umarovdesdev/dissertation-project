@@ -2,7 +2,7 @@
 from .pipeline import PreprocessingPipeline
 from .config import PreprocessingConfig, PIPELINE_PRESETS
 from .canonical_orientation import detect_eye_side, canonical_flip, canonical_orientation
-from .crop_resize import crop_and_resize
+from .crop_resize import crop_and_resize, CropResizeTransform
 from .flat_field import apply_flat_field
 from .clahe import apply_clahe, apply_clahe_sweep
 from .upgraded_clahe import apply_upgraded_clahe, maybe_apply_clahe, ClaheParams
@@ -21,6 +21,7 @@ __all__ = [
     "detect_od_fovea",
     "rotate_to_horizontal",
     "crop_and_resize",
+    "CropResizeTransform",
     "apply_flat_field",
     "apply_clahe",
     "apply_clahe_sweep",

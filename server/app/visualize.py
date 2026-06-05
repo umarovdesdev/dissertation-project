@@ -48,24 +48,36 @@ def _compose_strip(stages: list[tuple[str, np.ndarray]]) -> np.ndarray:
     return np.hstack(panels)
 
 
-def _od_payload(od, space_w: int, space_h: int, flipped: bool) -> dict:
-    """Build an ODFoveaPayload dict from an ODFoveaResult (or a not-confident stub)."""
-    if od is None:
+def _od_payload(od, analysis: dict | None, space: int) -> dict:
+    """Build an ODFoveaPayload dict in **analysis space** (the cropped frame).
+
+    Coordinates are expressed in the ``space`` × ``space`` ``fov_crop_resize``
+    frame so the frontend overlays them directly on the analysis-space base
+    image (no flip/rotation to undo). ``space_w == space_h == space`` and
+    ``flipped`` is always ``False`` for this reason.
+
+    Args:
+        od: The :class:`ODFoveaResult` (for scalar fields), or ``None``.
+        analysis: ``od_fovea_analysis`` from ``stage_breakdown`` (coords already
+            projected into analysis space), or ``None`` when not confident.
+        space: Analysis-frame side length (``target_size``).
+    """
+    if od is None or analysis is None:
         return {
             "od_center": [0, 0], "od_radius": 0.0,
             "fovea_center": [0, 0], "fovea_radius": 0.0,
             "angle_deg": 0.0, "rotation_sigma_deg": 0.0, "confident": False,
-            "space_w": space_w, "space_h": space_h, "flipped": flipped,
+            "space_w": space, "space_h": space, "flipped": False,
         }
     return {
-        "od_center": [int(od.od_center[0]), int(od.od_center[1])],
-        "od_radius": float(od.od_radius),
-        "fovea_center": [int(od.fovea_center[0]), int(od.fovea_center[1])],
-        "fovea_radius": float(od.fovea_radius),
+        "od_center": [float(analysis["od_center"][0]), float(analysis["od_center"][1])],
+        "od_radius": float(analysis["od_radius"]),
+        "fovea_center": [float(analysis["fovea_center"][0]), float(analysis["fovea_center"][1])],
+        "fovea_radius": float(analysis["fovea_radius"]),
         "angle_deg": float(od.angle_deg),
         "rotation_sigma_deg": float(od.rotation_sigma_deg),
         "confident": bool(od.confident),
-        "space_w": space_w, "space_h": space_h, "flipped": flipped,
+        "space_w": space, "space_h": space, "flipped": False,
     }
 
 
@@ -78,22 +90,30 @@ def compute_visualization(engine, image_bytes: bytes, eye: str) -> dict:
         eye: ``"left"`` or ``"right"``.
 
     Returns:
-        Dict with ``fov_mask_png_b64``, ``preview_png_b64``, ``od_fovea``.
+        Dict with ``fov_mask_png_b64``, ``fov_base_png_b64``,
+        ``preview_png_b64``, ``od_fovea``. ``fov_base_png_b64`` is the
+        analysis-space (cropped/oriented 512²) RGB the mask and OD/fovea
+        markers are aligned to.
 
     Raises:
         imaging.BadImage / imaging.PayloadTooLarge: On bad/oversized input.
     """
     rgb = imaging.decode_rgb(image_bytes)
-    h0, w0 = rgb.shape[:2]
 
     bd = engine.pipeline.stage_breakdown(rgb, eye_side=eye)
     strip_rgb = _compose_strip(bd["stages"])
 
+    # Analysis-space base: the cropped/oriented RGB that the FOV mask and the
+    # projected OD/fovea markers share a coordinate frame with.
+    stage_map = dict(bd["stages"])
+    fov_base_rgb = stage_map["fov_crop_resize"]
+    space = int(fov_base_rgb.shape[0])
+
     mask_u8 = (np.clip(bd["fov_mask"], 0, 1) * 255).astype(np.uint8)
 
-    flipped = bool(engine.pipeline.config.use_canonical_flip and eye == "left")
     return {
         "fov_mask_png_b64": imaging.png_b64_from_bgr(mask_u8),  # single-channel → PNG
+        "fov_base_png_b64": imaging.png_b64_from_rgb(fov_base_rgb),
         "preview_png_b64": imaging.png_b64_from_rgb(strip_rgb),
-        "od_fovea": _od_payload(bd["od_fovea"], w0, h0, flipped),
+        "od_fovea": _od_payload(bd["od_fovea"], bd["od_fovea_analysis"], space),
     }

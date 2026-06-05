@@ -1,6 +1,6 @@
 # TABLE OF CONTENTS
 
-**Version:** 5.0 | **Binding Reference:** INVARIANTS.md v5.0
+**Version:** 6.0.0 | **Binding Reference:** INVARIANTS.md v6.0.0
 
 - NORMATIVE REFERENCES  
 - DEFINITIONS  
@@ -9,17 +9,21 @@
 # INTRODUCTION
 
 - Relevance of the Research  
-- Scientific Novelty  
 - Research Goal  
 - Research Objectives  
 - Object and Subject of Research  
 - Research Hypothesis  
-- Methodological Basis  
+- Scientific Novelty  
 - Provisions Submitted for Defense  
+- Methodological Basis  
 - Theoretical Significance  
 - Practical Significance  
+- Reliability of the Results  
+- Empirical (Experimental) Basis  
 - Approbation of Research Results  
+- Connection with Scientific Programmes  
 - Publications  
+- Structure and Length of the Dissertation  
 
 ---
 
@@ -36,7 +40,7 @@
 
 ## 1.3 Deep Learning Approaches to Retinal Image Classification
 - 1.3.1 Convolutional Neural Network Architectures for Medical Imaging  
-- 1.3.2 Transfer Learning Strategies in Ophthalmic Diagnostics  
+- 1.3.2 Transfer Learning and Self-Supervised Pretraining in Ophthalmic Diagnostics  
 - 1.3.3 Explainability Methods in Medical Image Classification  
 
 ## 1.4 Critical Analysis of Existing Automated DR Screening Systems
@@ -51,7 +55,7 @@
 
 ## 2.1 Mathematical Foundations of Image Enhancement Techniques
 - 2.1.1 Histogram Equalization and Adaptive Contrast Enhancement  
-- 2.1.2 Formalization of CLAHE with Controllable Threshold Parameters  
+- 2.1.2 Formalization of CLAHE with Dual-Constraint Clip Limit  
 - 2.1.3 Spatial Filtering and Noise Reduction Methods  
 
 ## 2.2 Theoretical Framework of Convolutional Neural Networks
@@ -59,9 +63,10 @@
 - 2.2.2 Loss Functions and Optimization for Imbalanced Medical Datasets  
 - 2.2.3 Regularization Techniques: Dropout, Batch Normalization, and Data Augmentation  
 
-## 2.3 Transfer Learning Theory and Domain Adaptation
+## 2.3 Transfer Learning and Self-Supervised Representation Learning Theory
 - 2.3.1 Feature Transferability Across Visual Domains  
 - 2.3.2 Frozen-Layer versus Progressive Fine-Tuning Strategies  
+- 2.3.3 In-Domain Self-Supervised Pretraining for Retinal Imaging  
 
 ## 2.4 Mathematical Modeling of Laser-Tissue Interaction in Retinal Therapy
 - 2.4.1 Coupled Thermal-Optical Model of Fundus Tissue Response  
@@ -88,12 +93,13 @@
 
 ## 3.2 Design of CNN Architectures for DR Classification
 - 3.2.1 ResNet-50 and EfficientNet-B3 as Primary Experimental Architectures  
-- 3.2.2 Historical v1.0 Architectures (Reference Only)  
+- 3.2.2 Historical Reference Architectures (Reference Only)  
 
-## 3.3 Transfer Learning Methodology
+## 3.3 Transfer Learning and Pretraining Methodology
 - 3.3.1 Architecture Adaptation for Five-Class DR Classification  
-- 3.3.2 Two-Stage Fine-Tuning Protocol Design  
-- 3.3.3 Weighted Loss Function Formulation for Ordinal Class Structure  
+- 3.3.2 Ophthalmology-Specific Self-Supervised Pretraining of the CNN Backbone (V5 Arm)  
+- 3.3.3 Two-Stage Fine-Tuning Protocol Design  
+- 3.3.4 Weighted Loss Function Formulation for Ordinal Class Structure  
 
 ## 3.4 Evaluation Framework and Performance Metrics
 - 3.4.1 Multi-Metric Assessment Framework  
@@ -106,19 +112,19 @@
 # 4 EXPERIMENTAL RESEARCH — PREPROCESSING IMPACT ON CNN DIAGNOSTIC PERFORMANCE
 
 ## 4.1 Datasets and Experimental Configuration
-- 4.1.1 Dataset Architecture V5
+- 4.1.1 Tiered Dataset Architecture
 - 4.1.2 Class Distribution Analysis and Data Partitioning Strategy  
 - 4.1.3 Hardware Specification and Reproducibility Protocol  
 
-## 4.2 Experiment 1: Causal Improvement — Preprocessing vs. Architecture on EyePACS (H-1)
-- 4.2.1 Factorial Design (4 Configurations A–D)
+## 4.2 Experiment 1: Integrated Pipeline Dominance — V5 Pipeline + In-Domain Pretraining vs. Baseline on EyePACS (H-1)
+- 4.2.1 Restored 2×2 Factorial Design (Configurations A–D)
 - 4.2.2 Training Dynamics and Convergence Analysis  
 - 4.2.3 Quantitative Comparison of Diagnostic Metrics  
 
 ## 4.3 Experiment 2: V5 Stage Ablation + CLAHE/σ Sweeps (H-2)
 - 4.3.1 V5 Ablation Design (Levels 0–6)
 - 4.3.2 CLAHE Threshold Sensitivity Analysis (H-2 Sub-Analysis)  
-- 4.3.3 Flat-Field σ Sweep  
+- 4.3.3 Flat-Field σ Sweep and Image Quality Metrics  
 
 ## 4.4 Experiment 3: Cross-Dataset Transferability on APTOS 2019 (H-4)
 - 4.4.1 Zero-Shot Transfer to APTOS 2019
@@ -129,9 +135,9 @@
 - 4.5.2 Quantitative ALO and IoU with IDRiD Lesion Masks
 - 4.5.3 Attention Consistency Across Datasets
 
-## 4.6 Experiment 5: Clinical Degradation Resistance (H-7)
+## 4.6 Experiment 5: Clinical Degradation Resistance on IDRiD + Messidor-2 (H-7)
 
-## 4.7 Experiment 6: Device Domain Shift (H-6)
+## 4.7 Experiment 6: Device Domain Shift on DDR + ODIR-5K + RFMiD (H-6)
 
 ## 4.8 Experiment 7: Small Data Training (IDRiD → Clinical)
 
@@ -184,7 +190,7 @@
 
 # CONCLUSION  
 
-# REFERENCES  
+# LIST OF REFERENCES USED  
 
 # APPENDICES
 

@@ -49,12 +49,13 @@ class ODFoveaPayload(BaseModel):
     """Classical-CV OD/fovea detection result (TASK-Demo §C.1).
 
     Coordinates are in the analysis-image pixel space described by
-    ``space_w``/``space_h``/``flipped``.
+    ``space_w``/``space_h``/``flipped`` — i.e. the cropped/oriented
+    ``fov_crop_resize`` frame (``space_w == space_h``, ``flipped`` False).
     """
 
-    od_center: list[int]
+    od_center: list[float]
     od_radius: float
-    fovea_center: list[int]
+    fovea_center: list[float]
     fovea_radius: float
     angle_deg: float
     rotation_sigma_deg: float
@@ -82,6 +83,7 @@ class VisualizeResponse(BaseModel):
     """POST /api/visualize payload."""
 
     fov_mask_png_b64: str
+    fov_base_png_b64: str
     preview_png_b64: str
     od_fovea: ODFoveaPayload
 

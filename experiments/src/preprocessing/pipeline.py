@@ -352,6 +352,10 @@ class PreprocessingPipeline:
                 flip → rotation → FOV crop+resize → flat-field → CLAHE.
               - ``fov_mask``: float32 ``(H, W)`` mask (1.0 inside FOV).
               - ``od_fovea``: :class:`ODFoveaResult` or ``None``.
+              - ``od_fovea_analysis``: OD/fovea centres and radii projected
+                into the ``target_size`` analysis frame (the
+                ``fov_crop_resize`` panel) so markers overlay it exactly, or
+                ``None`` when no confident detection is available.
         """
         if self._input_color_space == "bgr":
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -377,9 +381,38 @@ class PreprocessingPipeline:
             oriented = image
         stages.append(("od_fovea_rotation", oriented.copy()))
 
-        # Stage 2/3: FOV crop + isotropic resize → (image, mask).
-        cropped, fov_mask = crop_and_resize(oriented, self.config.target_size)
+        # Stage 2/3: FOV crop + isotropic resize → (image, mask, transform).
+        cropped, fov_mask, crop_tf = crop_and_resize(
+            oriented, self.config.target_size, return_transform=True
+        )
         stages.append(("fov_crop_resize", cropped.copy()))
+
+        # Project OD/fovea (detected in pre-rotation, pre-crop space) into the
+        # cropped analysis frame so the demo can overlay markers on the
+        # ``fov_crop_resize`` panel. Mirror the rotation applied inside
+        # ``canonical_orientation`` (about the flipped image centre), then the
+        # crop+resize transform. Only meaningful for confident detections.
+        od_fovea_analysis: dict | None = None
+        if od_fovea_result is not None and od_fovea_result.confident:
+            src_h, src_w = image.shape[:2]
+            rot_m = cv2.getRotationMatrix2D(
+                (src_w // 2, src_h // 2), od_fovea_result.angle_deg, 1.0
+            )
+
+            def _to_analysis(point: tuple[int, int]) -> list[float]:
+                px, py = float(point[0]), float(point[1])
+                rx = rot_m[0, 0] * px + rot_m[0, 1] * py + rot_m[0, 2]
+                ry = rot_m[1, 0] * px + rot_m[1, 1] * py + rot_m[1, 2]
+                ax, ay = crop_tf.apply(rx, ry)
+                return [ax, ay]
+
+            od_fovea_analysis = {
+                "od_center": _to_analysis(od_fovea_result.od_center),
+                "fovea_center": _to_analysis(od_fovea_result.fovea_center),
+                "od_radius": float(od_fovea_result.od_radius) * crop_tf.scale,
+                "fovea_radius": float(od_fovea_result.fovea_radius) * crop_tf.scale,
+                "space": int(self.config.target_size),
+            }
 
         # Stage 4: flat-field correction (adaptive σ).
         flat = cropped
@@ -404,7 +437,12 @@ class PreprocessingPipeline:
             )
         stages.append(("clahe", clahed.copy()))
 
-        return {"stages": stages, "fov_mask": fov_mask, "od_fovea": od_fovea_result}
+        return {
+            "stages": stages,
+            "fov_mask": fov_mask,
+            "od_fovea": od_fovea_result,
+            "od_fovea_analysis": od_fovea_analysis,
+        }
 
     # ------------------------------------------------------------------
     # State queries

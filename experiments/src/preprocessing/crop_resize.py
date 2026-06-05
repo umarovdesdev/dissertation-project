@@ -19,9 +19,47 @@ Input/output images are RGB uint8 NumPy arrays.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import cv2
 import numpy as np
 from PIL import Image, ImageFilter
+
+
+@dataclass
+class CropResizeTransform:
+    """Geometric transform applied by :func:`crop_and_resize`.
+
+    Maps a point from pre-crop (oriented) image space into the padded
+    ``target_size`` × ``target_size`` output canvas. Used to project
+    OD/fovea coordinates (detected in pre-crop space) into analysis space
+    for visualization.
+
+    Attributes:
+        bbox: ``(left, upper, right, lower)`` crop box in source pixels.
+        scale: Isotropic scale factor applied after cropping.
+        x_off: Horizontal padding offset on the output canvas.
+        y_off: Vertical padding offset on the output canvas.
+        new_w: Width of the resized (pre-pad) region.
+        new_h: Height of the resized (pre-pad) region.
+        target_size: Output canvas side length.
+    """
+
+    bbox: tuple[int, int, int, int]
+    scale: float
+    x_off: int
+    y_off: int
+    new_w: int
+    new_h: int
+    target_size: int
+
+    def apply(self, x: float, y: float) -> tuple[float, float]:
+        """Project a pre-crop point ``(x, y)`` into output-canvas pixels."""
+        left, upper = self.bbox[0], self.bbox[1]
+        return (
+            (x - left) * self.scale + self.x_off,
+            (y - upper) * self.scale + self.y_off,
+        )
 
 
 def detect_fov_bbox(image: Image.Image) -> tuple[int, int, int, int] | None:
@@ -118,7 +156,11 @@ def detect_is_cropped(image: np.ndarray) -> bool:
 def crop_and_resize(
     image: np.ndarray,
     target_size: int = 512,
-) -> tuple[np.ndarray, np.ndarray]:
+    return_transform: bool = False,
+) -> (
+    tuple[np.ndarray, np.ndarray]
+    | tuple[np.ndarray, np.ndarray, CropResizeTransform]
+):
     """Crop to the FOV region and resize to target_size × target_size.
 
     Uses isotropic scaling with centered padding to preserve the fundus
@@ -131,12 +173,17 @@ def crop_and_resize(
     Args:
         image: RGB uint8 NumPy array of shape (H, W, 3).
         target_size: Output spatial resolution in pixels (square).
+        return_transform: If ``True``, also return the
+            :class:`CropResizeTransform` describing the crop/scale/pad so
+            callers can project source-space points into the output canvas.
 
     Returns:
         Tuple of:
           - image: RGB uint8 NumPy array of shape (target_size, target_size, 3).
           - mask: float32 NumPy array of shape (target_size, target_size)
                   with 1.0 where real data exists and 0.0 for padding.
+          - transform (only when ``return_transform``): the
+            :class:`CropResizeTransform` used.
     """
     pil_img = Image.fromarray(image)
     w, h = pil_img.size  # PIL: (width, height)
@@ -171,5 +218,12 @@ def crop_and_resize(
     # Binary mask: 1.0 where real data, 0.0 where padding
     mask = np.zeros((target_size, target_size), dtype=np.float32)
     mask[y_off : y_off + new_h, x_off : x_off + new_w] = 1.0
+
+    if return_transform:
+        transform = CropResizeTransform(
+            bbox=tuple(bbox), scale=scale, x_off=x_off, y_off=y_off,
+            new_w=new_w, new_h=new_h, target_size=target_size,
+        )
+        return canvas, mask, transform
 
     return canvas, mask

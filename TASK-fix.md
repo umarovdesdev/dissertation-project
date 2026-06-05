@@ -246,11 +246,124 @@ The two conventions, for the record:
 
 ---
 
+## 4. Validate the OD/fovea detector against IDRiD ground-truth
+
+### Why
+EyePACS has **no** OD/fovea annotations (confirmed) — Stage 1 detects them
+algorithmically (`experiments/src/preprocessing/od_fovea_detect.py`). That
+detector feeds (a) the rotation normalization, (b) the OD/fovea markers in the
+demo, and (c) the **fovea centre that polar CLAHE pivots on** (fix #2). Its
+accuracy is currently unmeasured. **IDRiD provides real ground-truth centres**,
+so we can quantify detector error directly.
+
+### Ground-truth available (`E:/datasets/IDRiD/C. Localization/2. Groundtruths`)
+- **Optic Disc Center** — `a./b. IDRiD_OD_Center_{Training,Testing} Set_Markups.csv`
+- **Fovea Center** — `IDRiD_Fovea_Center_{Training,Testing} Set_Markups.csv`
+- CSV format: `Image No, X- Coordinate, Y - Coordinate` (pixel coords on the
+  original IDRiD image; one OD row + one fovea row per image).
+- (Plus `A. Segmentation` pixel masks incl. OD, already used for ALO/IoU in Exp 4.)
+
+### Plan
+1. **New script** `experiments/scripts/validate_od_fovea_idrid.py`:
+   - Load the 4 markup CSVs (note the trailing empty columns — parse only the
+     first 3 fields).
+   - For each IDRiD image, run `od_fovea_detect` (same params as Config-D:
+     `from_preset("efficientnet")`), then **map predicted centres into the same
+     coordinate frame as the GT**. GT is in *original* image pixels; the detector
+     runs pre-crop/resize, so align carefully (or transform both into a common
+     frame). This is the same coordinate-space discipline as fix #1 — get it
+     right once and reuse.
+   - Metrics per point (OD, fovea):
+     - Euclidean error in pixels and **normalized by OD radius / image diameter**
+       (scale-invariant, comparable across IDRiD's fixed 4288×2848).
+     - **Success rate** at thresholds (e.g. error < 1 OD-radius — the standard
+       localization criterion).
+     - Correlation of detector `confident` flag with low error (does the flag
+       actually gate bad detections?).
+   - Output `outputs/validation/od_fovea_idrid_metrics.json` + a scatter/overlay
+     montage (predicted vs. GT markers on a sample of images).
+2. **Report** median/mean/p90 error for OD and fovea, train + test splits.
+3. **Feed back into the pipeline:** if fovea error is large, the polar-CLAHE pivot
+   (fix #2) and the rotation are unreliable → revisit `od_blur_sigma`,
+   `fovea_*` params (`configs/default.yaml:24–32`) or the `confident` threshold /
+   fallback-to-centre policy before committing to polar CLAHE.
+4. **Optional demo payoff:** surface the validated error as a one-line credibility
+   stat (e.g. "OD localization: median 0.4 OD-radii on IDRiD"), and/or use IDRiD
+   as the worked example where markers can be checked against GT.
+
+### Acceptance
+- `od_fovea_idrid_metrics.json` exists with OD + fovea error distributions and
+  success rates for IDRiD train + test.
+- A go/no-go read on whether the fovea centre is accurate enough to pivot polar
+  CLAHE on (fix #2); detector params tuned if not.
+
+> Scope note: this validates **detector accuracy** (do the predicted centres land
+> on the real disc/fovea). It is **independent** of fix #1, which is a frontend
+> *compositing* bug (correct coords drawn in the wrong space). See "Does this make
+> Demo.js fully correct?" below.
+
+---
+
+## Does #4 make `demo/src/tabs/Demo.js` fully correct? — No, both are needed
+
+Detector validation (#4) and the demo render fix (#1) are **orthogonal**:
+
+- **#4 answers:** "are the OD/fovea coordinates *accurate*?" (do they sit on the
+  true disc/fovea — measured against IDRiD GT).
+- **#1 answers:** "are the coordinates and the FOV mask *drawn in the right
+  place*?" (a coordinate-space/compositing bug in `_VisionWidget.js`, independent
+  of detector accuracy).
+
+Consequences:
+- A perfectly validated detector **will still render wrong** in Demo.js until #1
+  lands — correct coords composited against the wrong base image (raw-upload space
+  vs. 512² flipped/rotated/cropped analysis space) still look misaligned.
+- After #1 lands, the mask/markers will **align with the displayed image**, but
+  whether they sit on the *true* disc/fovea depends on detector accuracy (#4) and,
+  on a hard upload, on the `confident` flag / centre fallback.
+
+So for Demo.js to be **fully** correct you need: **#1** (render in a common frame)
+**+** a detector that is accurate enough (**#4** confirms this) **+** the
+low-confidence fallback handled gracefully. #4 alone is not sufficient; #1 alone
+makes it *aligned* but not necessarily *on-target*.
+
+---
+
+## Implemented (2026-06-04) — IDRiD ground-truth random samples
+
+Done on `feat/v5-cache-colab`:
+- **New** `demo/scripts/prepare_idrid_samples.py` — samples IDRiD localization
+  images (per DR grade, train+test, namespaced by split to avoid id collisions),
+  resizes to 512px long side, scales the GT OD/fovea centres to the display
+  frame, generates a display-frame FOV mask PNG per image, and emits
+  `_idridSamples.js` + `samples.json`. 40 samples generated.
+- **`_VisionWidget.js`** — now accepts a `gt` payload. When present it overlays
+  **ground-truth** OD/fovea markers + the aligned FOV mask in the displayed
+  image's own frame (simple scaling — no flip/rotate/crop), and renders even when
+  the backend is offline. Detector path unchanged for arbitrary uploads.
+- **`Demo.js`** — the 🎲 Random button now loads a random **IDRiD** sample (one
+  eye, right slot) with its `gt`, replacing the EyePACS pair source. EyePACS
+  picker removed; walkthrough remains the empty-manifest fallback.
+- **`i18n.js`** — added `demo.vision.groundTruth` / `demo.vision.gtNote` (EN+KZ).
+- Verified: production build compiles; GT markers land exactly on the disc/fovea
+  on a rendered sample.
+
+This makes the **GT-marker + mask path** in Demo.js correct (the user's idea:
+mask in display frame, image shown in the same frame → they coincide). Still
+open from #1: the **arbitrary-upload / EyePACS** path, where the only mask
+available is the backend's analysis-space (flipped/rotated/cropped) mask — that
+still needs the Option-A overlay-on-oriented-image fix. #4 (offline detector
+metrics vs IDRiD GT) is unchanged; the IDRiD samples now also give a *visual*
+detector-vs-GT check surface.
+
 ## Suggested order of work
 1. **#1 FOV mask render** — self-contained, demo-only, low risk, immediate visual win.
-2. **#3 normalization decision + IDRiD stats** — unblocks Exp 3–7 planning; small code.
-3. **#2 polar CLAHE** — largest change; touches the model's feature space and forces
+2. **#4 OD/fovea detector validation** — small, read-only, and it gates #2 (tells
+   us whether the fovea pivot is trustworthy) and informs #1's coordinate mapping.
+3. **#3 normalization + IDRiD stats** — unblocks Exp 3–7 planning; small code.
+4. **#2 polar CLAHE** — largest change; touches the model's feature space and forces
    a Config-D retrain, so sequence it deliberately against the in-flight training in
-   `TASK.md`.
+   `TASK.md`. Do **after** #4 confirms the fovea centre is reliable.
 
-All open questions resolved (normalization convention confirmed 2026-06-03).
+All open questions resolved (normalization convention confirmed 2026-06-03;
+IDRiD OD/fovea ground-truth confirmed present 2026-06-04).

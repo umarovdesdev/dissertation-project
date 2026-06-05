@@ -4,6 +4,13 @@
 // toggle. This is the visual core of contributions C-1, SC-E, SC-F and works on
 // arbitrary uploads (visualize is preprocessing-only — no trained checkpoint
 // needed), so it lights up as soon as the backend is reachable.
+//
+// When a `gt` payload is supplied (IDRiD localization samples), the markers and
+// FOV mask are taken from GROUND-TRUTH instead of the detector. IDRiD markups
+// are in the displayed image's own frame, so they project by simple scaling
+// (no canonical flip / rotation / crop) and therefore align exactly. GT samples
+// render even when the backend is offline; the preprocessing strip still needs
+// the backend.
 
 import { useEffect, useState } from 'react';
 import { C } from '../data';
@@ -21,13 +28,15 @@ function project(x, y, sw, sh, flipped) {
   return [offX + dx * scale, offY + y * scale, scale];
 }
 
-export default function VisionWidget({ src, eye, name, enabled, t }) {
+export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
   const [data, setData] = useState(null);
   const [status, setStatus] = useState('idle'); // idle | loading | done | error
   const [showStages, setShowStages] = useState(false);
   const [showMask, setShowMask] = useState(false);
 
   useEffect(() => {
+    // Backend visualize is best-effort: needed for the preprocessing strip and
+    // for detector markers on non-GT images. GT samples don't depend on it.
     if (!enabled || !src) { setData(null); setStatus('idle'); return; }
     let alive = true;
     setStatus('loading'); setData(null); setShowStages(false); setShowMask(false);
@@ -37,45 +46,75 @@ export default function VisionWidget({ src, eye, name, enabled, t }) {
     return () => { alive = false; };
   }, [src, eye, name, enabled]);
 
-  if (!enabled) return null;
-  if (status === 'loading') {
+  // Nothing to show: no backend and no ground truth.
+  if (!enabled && !gt) return null;
+  // Backend-only image still waiting on / failing the visualize call.
+  if (!gt && status === 'loading') {
     return <div style={{ fontSize: 10, color: C.gray, marginTop: 6 }}>{t('demo.vision.loading')}</div>;
   }
-  if (status === 'error' || !data) {
+  if (!gt && (status === 'error' || !data)) {
     return <div style={{ fontSize: 10, color: C.amberT, marginTop: 6 }}>{t('demo.vision.unavailable')}</div>;
   }
 
-  const od = data.od_fovea || {};
-  const sw = od.space_w || BOX, sh = od.space_h || BOX, flipped = !!od.flipped;
-  const [odx, ody, scale] = od.confident ? project(od.od_center[0], od.od_center[1], sw, sh, flipped) : [0, 0, 1];
-  const [fvx, fvy] = od.confident ? project(od.fovea_center[0], od.fovea_center[1], sw, sh, flipped) : [0, 0];
-  const odR = (od.od_radius || 0) * scale;
-  const fvR = (od.fovea_radius || 0) * scale;
+  // --- Resolve markers + mask from either ground truth or the detector. ---
+  let markers = null;   // { odx, ody, odR, fvx, fvy, fvR }
+  let maskSrc = null;
+  if (gt) {
+    const sw = gt.width || BOX, sh = gt.height || BOX;
+    const [odx, ody, scale] = project(gt.odCenter[0], gt.odCenter[1], sw, sh, false);
+    const [fvx, fvy] = project(gt.foveaCenter[0], gt.foveaCenter[1], sw, sh, false);
+    markers = {
+      odx, ody, fvx, fvy,
+      odR: Math.max((gt.odRadius || 0) * scale, 4),
+      fvR: Math.max((gt.odRadius || 0) * scale * 0.4, 3),
+    };
+    maskSrc = gt.maskSrc;
+  } else {
+    const od = data.od_fovea || {};
+    const sw = od.space_w || BOX, sh = od.space_h || BOX, flipped = !!od.flipped;
+    if (od.confident) {
+      const [odx, ody, scale] = project(od.od_center[0], od.od_center[1], sw, sh, flipped);
+      const [fvx, fvy] = project(od.fovea_center[0], od.fovea_center[1], sw, sh, flipped);
+      markers = {
+        odx, ody, fvx, fvy,
+        odR: Math.max((od.od_radius || 0) * scale, 4),
+        fvR: Math.max((od.fovea_radius || 0) * scale, 3),
+      };
+    }
+    maskSrc = data ? `data:image/png;base64,${data.fov_mask_png_b64}` : null;
+  }
 
-  const maskSrc = `data:image/png;base64,${data.fov_mask_png_b64}`;
-  const stripSrc = `data:image/png;base64,${data.preview_png_b64}`;
+  const stripSrc = data ? `data:image/png;base64,${data.preview_png_b64}` : null;
+  const od = !gt && data ? (data.od_fovea || {}) : {};
 
   return (
     <div style={{ marginTop: 8 }}>
       {/* Preview with OD/fovea overlay (or FOV mask) */}
       <div style={{ position: 'relative', width: BOX, height: BOX, background: '#000', borderRadius: 8, overflow: 'hidden' }}>
         <img
-          src={showMask ? maskSrc : src}
+          src={showMask && maskSrc ? maskSrc : src}
           alt={showMask ? 'FOV mask' : 'input'}
           style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
         />
-        {!showMask && od.confident && (
+        {!showMask && markers && (
           <svg width={BOX} height={BOX} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-            <line x1={odx} y1={ody} x2={fvx} y2={fvy} stroke={C.amber} strokeWidth="1.5" strokeDasharray="3 2" />
-            <circle cx={odx} cy={ody} r={Math.max(odR, 4)} fill="none" stroke={C.teal} strokeWidth="2" />
-            <circle cx={fvx} cy={fvy} r={Math.max(fvR, 3)} fill="none" stroke={C.coral} strokeWidth="2" />
+            <line x1={markers.odx} y1={markers.ody} x2={markers.fvx} y2={markers.fvy} stroke={C.amber} strokeWidth="1.5" strokeDasharray="3 2" />
+            <circle cx={markers.odx} cy={markers.ody} r={markers.odR} fill="none" stroke={C.teal} strokeWidth="2" />
+            <circle cx={markers.fvx} cy={markers.fvy} r={markers.fvR} fill="none" stroke={C.coral} strokeWidth="2" />
           </svg>
         )}
       </div>
 
       {/* OD–fovea chip */}
       <div style={{ marginTop: 6, fontSize: 10, color: 'var(--color-text-secondary,#666)' }}>
-        {od.confident ? (
+        {gt ? (
+          <span>
+            <span style={{ color: C.teal, fontWeight: 700 }}>OD</span>
+            {' · '}
+            <span style={{ color: C.coral, fontWeight: 700 }}>{t('demo.vision.fovea')}</span>
+            {' · '}<span style={{ color: C.greenT, fontWeight: 700 }}>✓ {t('demo.vision.groundTruth')}</span>
+          </span>
+        ) : od.confident ? (
           <span>
             <span style={{ color: C.teal, fontWeight: 700 }}>OD</span>
             {' · '}
@@ -88,19 +127,26 @@ export default function VisionWidget({ src, eye, name, enabled, t }) {
           <span style={{ color: C.amberT }}>⚠ {t('demo.vision.lowConfidence')}</span>
         )}
       </div>
+      {gt && (
+        <div style={{ fontSize: 9, color: C.gray, marginTop: 2 }}>{t('demo.vision.gtNote')}</div>
+      )}
 
       {/* Toggles */}
       <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-        <button onClick={() => setShowStages(v => !v)} style={chipBtn}>
-          {showStages ? t('demo.vision.hideStages') : t('demo.vision.showStages')}
-        </button>
-        <button onClick={() => setShowMask(v => !v)} style={chipBtn}>
-          {showMask ? t('demo.vision.hideMask') : t('demo.vision.showMask')}
-        </button>
+        {stripSrc && (
+          <button onClick={() => setShowStages(v => !v)} style={chipBtn}>
+            {showStages ? t('demo.vision.hideStages') : t('demo.vision.showStages')}
+          </button>
+        )}
+        {maskSrc && (
+          <button onClick={() => setShowMask(v => !v)} style={chipBtn}>
+            {showMask ? t('demo.vision.hideMask') : t('demo.vision.showMask')}
+          </button>
+        )}
       </div>
 
       {/* stage strip */}
-      {showStages && (
+      {showStages && stripSrc && (
         <div style={{ marginTop: 8, overflowX: 'auto' }}>
           <img src={stripSrc} alt="stages" style={{ height: 120, display: 'block', borderRadius: 6 }} />
           <div style={{ fontSize: 9, color: C.gray, marginTop: 3 }}>{t('demo.vision.stripCaption')}</div>
