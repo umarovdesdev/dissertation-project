@@ -112,7 +112,6 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
             <span style={{ color: C.teal, fontWeight: 700 }}>OD</span>
             {' · '}
             <span style={{ color: C.coral, fontWeight: 700 }}>{t('demo.vision.fovea')}</span>
-            {' · '}<span style={{ color: C.greenT, fontWeight: 700 }}>✓ {t('demo.vision.groundTruth')}</span>
           </span>
         ) : od.confident ? (
           <span>
@@ -127,9 +126,6 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
           <span style={{ color: C.amberT }}>⚠ {t('demo.vision.lowConfidence')}</span>
         )}
       </div>
-      {gt && (
-        <div style={{ fontSize: 9, color: C.gray, marginTop: 2 }}>{t('demo.vision.gtNote')}</div>
-      )}
 
       {/* Toggles */}
       <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
