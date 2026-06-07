@@ -11,6 +11,13 @@
 // (no canonical flip / rotation / crop) and therefore align exactly. GT samples
 // render even when the backend is offline; the preprocessing strip still needs
 // the backend.
+//
+// For arbitrary uploads (no `gt`) the detector path renders in ANALYSIS space:
+// the base image shown is `fov_base_png_b64` (the oriented/cropped 512² RGB),
+// not the raw upload, so the FOV mask and OD/fovea markers — both produced in
+// that same flipped/rotated/cropped frame by the backend — overlay exactly
+// (TASK-fix #1, Option A). The mask is composited as a translucent teal tint on
+// top of the base rather than swapped in as a separate image.
 
 import { useEffect, useState } from 'react';
 import { C } from '../data';
@@ -84,6 +91,14 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
     maskSrc = data ? `data:image/png;base64,${data.fov_mask_png_b64}` : null;
   }
 
+  // Base image the mask + markers are aligned to. For GT it is the displayed
+  // sample (markups live in its frame). For the detector path it is the
+  // analysis-space RGB (`fov_base_png_b64`) so the analysis-space mask/markers
+  // coincide; fall back to the raw upload only if the backend omitted it.
+  const baseSrc = gt
+    ? src
+    : (data && data.fov_base_png_b64 ? `data:image/png;base64,${data.fov_base_png_b64}` : src);
+
   const stripSrc = data ? `data:image/png;base64,${data.preview_png_b64}` : null;
   const od = !gt && data ? (data.od_fovea || {}) : {};
 
@@ -92,10 +107,27 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
       {/* Preview with OD/fovea overlay (or FOV mask) */}
       <div style={{ position: 'relative', width: BOX, height: BOX, background: '#000', borderRadius: 8, overflow: 'hidden' }}>
         <img
-          src={showMask && maskSrc ? maskSrc : src}
-          alt={showMask ? 'FOV mask' : 'input'}
+          src={baseSrc}
+          alt={showMask ? 'FOV mask overlay' : 'analysis-space input'}
           style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
         />
+        {/* FOV mask as a translucent teal tint, masked to the white (FOV) region.
+            Base + mask are both 512²/display-frame and contain-fit identically,
+            so the tint lands exactly on the field of view. */}
+        {showMask && maskSrc && (
+          <div
+            aria-label="FOV mask"
+            style={{
+              position: 'absolute', inset: 0, background: C.teal, opacity: 0.4,
+              pointerEvents: 'none',
+              WebkitMaskImage: `url(${maskSrc})`, maskImage: `url(${maskSrc})`,
+              WebkitMaskMode: 'luminance', maskMode: 'luminance',
+              WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat',
+              WebkitMaskPosition: 'center', maskPosition: 'center',
+              WebkitMaskSize: 'contain', maskSize: 'contain',
+            }}
+          />
+        )}
         {!showMask && markers && (
           <svg width={BOX} height={BOX} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
             <line x1={markers.odx} y1={markers.ody} x2={markers.fvx} y2={markers.fvy} stroke={C.amber} strokeWidth="1.5" strokeDasharray="3 2" />
