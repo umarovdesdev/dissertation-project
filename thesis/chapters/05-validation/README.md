@@ -13,3 +13,23 @@
 
 ### Forbidden phrasings (Chapter 5)
 "We outperform Gulshan" — forbidden (CFC-2.2, SB-1.12). "Our AUC exceeds Gulshan's" — forbidden (incommensurable endpoints). "Gulshan's baseline is surpassed" — forbidden (conflates Gulshan with the operational baseline).
+
+## Sections (per outline/TABLE_OF_CONTENTS_EN.md, v6.0.0)
+
+> Note: the comparative-analysis section is **§5.3** in the v6.0.0 TOC (the §5.5 references in the framing notes above predate the renumbering).
+
+# 5 RELIABILITY VALIDATION AND COMPARATIVE ANALYSIS
+
+## 5.1 Explainability Results
+
+## 5.2 Statistical Validation
+- 5.2.1 Bootstrap Confidence Intervals and Mixed-Effects Model
+- 5.2.2 Final Claim Strength Classifications
+
+## 5.3 Comparative Analysis with Published Systems
+- 5.3.1 Benchmarking Against Published Results: IDx-DR, EyeNuk, DeepMind
+- 5.3.2 Performance-Complexity Trade-Off Analysis
+
+## 5.4 Limitations and Boundary Conditions of the Proposed Approach
+
+- Conclusions to Chapter 5

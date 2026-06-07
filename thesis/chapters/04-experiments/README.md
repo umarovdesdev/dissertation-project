@@ -14,3 +14,39 @@
 
 ### Cross-cutting forbidden phrasings
 "Gulshan is our baseline" / "we outperform Gulshan" / "configs A/C reproduce Gulshan." The operational baseline must always be referred to as "configs A/C" or "the baseline configuration" (operational, OD-3) — never as "Gulshan."
+
+## Sections (per outline/TABLE_OF_CONTENTS_EN.md, v6.0.0)
+
+# 4 EXPERIMENTAL RESEARCH — PREPROCESSING IMPACT ON CNN DIAGNOSTIC PERFORMANCE
+
+## 4.1 Datasets and Experimental Configuration
+- 4.1.1 Tiered Dataset Architecture
+- 4.1.2 Class Distribution Analysis and Data Partitioning Strategy
+- 4.1.3 Hardware Specification and Reproducibility Protocol
+
+## 4.2 Experiment 1: Integrated Pipeline Dominance — V5 Pipeline + In-Domain Pretraining vs. Baseline on EyePACS (H-1)
+- 4.2.1 Restored 2×2 Factorial Design (Configurations A–D)
+- 4.2.2 Training Dynamics and Convergence Analysis
+- 4.2.3 Quantitative Comparison of Diagnostic Metrics
+
+## 4.3 Experiment 2: V5 Stage Ablation + CLAHE/σ Sweeps (H-2)
+- 4.3.1 V5 Ablation Design (Levels 0–6)
+- 4.3.2 CLAHE Threshold Sensitivity Analysis (H-2 Sub-Analysis)
+- 4.3.3 Flat-Field σ Sweep and Image Quality Metrics
+
+## 4.4 Experiment 3: Cross-Dataset Transferability on APTOS 2019 (H-4)
+- 4.4.1 Zero-Shot Transfer to APTOS 2019
+- 4.4.2 Baseline vs V5 Pipeline Comparison
+
+## 4.5 Experiment 4: Grad-CAM Explainability on IDRiD + Clinical (H-5)
+- 4.5.1 Grad-CAM Generation Protocol
+- 4.5.2 Quantitative ALO and IoU with IDRiD Lesion Masks
+- 4.5.3 Attention Consistency Across Datasets
+
+## 4.6 Experiment 5: Clinical Degradation Resistance on IDRiD + Messidor-2 (H-7)
+
+## 4.7 Experiment 6: Device Domain Shift on DDR + ODIR-5K + RFMiD (H-6)
+
+## 4.8 Experiment 7: Small Data Training (IDRiD → Clinical)
+
+- Conclusions to Chapter 4
