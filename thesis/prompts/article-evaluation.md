@@ -207,12 +207,13 @@ Justify.
 
 Evaluate relevance to:
 
+* Paradigmatic positioning — does the article exemplify paradigm P1 (end-to-end CNN; preprocessing as ancillary data preparation) or paradigm P2 (integrated preprocessing-CNN; preprocessing as an integral model component)? Classify by observable methodological practice only (per SIR-9), not by attributed intent.
 * Preprocessing dominance hypothesis
 * Cross-database generalization
 * Metric hierarchy standardization
 * EyePACS/Messidor benchmarking
-* Vision Transformer comparison
 * IDRiD lesion-level analysis
+* Vision Transformer comparison (contextual / related-work only — the dissertation's V5 arm uses ophthalmology-specific self-supervised pretraining of CNN backbones, not a ViT foundation model)
 
 Rate relevance:
 
