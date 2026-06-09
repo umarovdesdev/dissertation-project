@@ -43,10 +43,17 @@ class PreprocessingConfig:
         flat_field_sigma_factor: σ = factor × FOV diameter D (used when mode=adaptive).
         flat_field_sigma: Gaussian σ for flat-field blur subtraction (fixed mode or fallback).
         flat_field_mask_only: Apply correction only inside FOV mask when ``True``.
-        clahe_tile_grid_size: CLAHE tile grid as (rows, cols).
+        clahe_mode: Stage 5 algorithm — ``"polar"`` (adaptive polar CLAHE,
+            thesis-faithful) or ``"tiles"`` (rectangular 8×8 CLAHE).
+        clahe_tile_grid_size: CLAHE tile grid as (rows, cols) (``"tiles"`` mode).
         clahe_clip_factor: Clip-limit scale factor (× tile_area / 256).
         clahe_global_threshold: Additional global clip limit (× tile_area).
         clahe_train_prob: Probability of applying CLAHE at train time.
+        clahe_radial_rings: Polar mode — number of log-spaced radial rings.
+        clahe_radial_exponent: Polar mode — radial spacing exponent ``(i/N)^exp``.
+        clahe_fine_bins: Polar mode — fine angular bins merged into sectors.
+        clahe_min_sector_area_frac: Polar mode — min ring/sector area as a
+            fraction of FOV area.
         rotation_sigma: σ of the truncated Gaussian rotation distribution (°).
         rotation_clip: Hard clip on sampled rotation angle (°).
         zoom_range: Log-uniform zoom range [min, max].
@@ -100,11 +107,23 @@ class PreprocessingConfig:
     flat_field_sigma: float = 45.0
     flat_field_mask_only: bool = True       # apply only inside FOV mask
 
-    # --- Stage 5: Upgraded CLAHE ---
+    # --- Stage 5: CLAHE ---
+    # clahe_mode selects the Stage 5 algorithm:
+    #   "polar" — fovea/centroid-centred adaptive polar CLAHE (thesis-faithful;
+    #             matches the demo static images). Set in presets + default.yaml.
+    #   "tiles" — rectangular 8×8 dual-constraint CLAHE (upgraded_clahe.py).
+    # Dataclass default is "tiles" so bare PreprocessingConfig() / existing tests
+    # keep their behaviour; the real pipelines (presets, YAML) opt into "polar".
+    clahe_mode: str = "tiles"                 # "polar" or "tiles"
     clahe_tile_grid_size: tuple[int, int] = (8, 8)
     clahe_clip_factor: float = 2.0
     clahe_global_threshold: float = 0.01
     clahe_train_prob: float = 0.8
+    # Polar-CLAHE geometry (used when clahe_mode == "polar").
+    clahe_radial_rings: int = 8
+    clahe_radial_exponent: float = 1.5
+    clahe_fine_bins: int = 72
+    clahe_min_sector_area_frac: float = 0.01
 
     # --- Stage 6: Augmentation ---
     rotation_sigma: float = 13.0
@@ -208,6 +227,7 @@ PIPELINE_PRESETS: dict[str, dict[str, Any]] = {
     "resnet": {
         "use_flat_field": True,
         "use_clahe": True,
+        "clahe_mode": "polar",
         "clahe_train_prob": 0.8,
         "use_pca_color": True,
         "pca_color_prob": 0.5,
@@ -222,6 +242,7 @@ PIPELINE_PRESETS: dict[str, dict[str, Any]] = {
     "efficientnet": {
         "use_flat_field": True,
         "use_clahe": True,
+        "clahe_mode": "polar",
         "clahe_train_prob": 0.5,
         "use_pca_color": False,
         "use_brightness_contrast": True,

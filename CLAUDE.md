@@ -9,7 +9,7 @@ Candidate: Yesmukhamedov N.S., IITU (Almaty, Kazakhstan)
 dissertation-project/
 ├── experiments/   Python/PyTorch — ML pipeline, training, 7 experiments
 ├── thesis/        Dissertation text, governance docs, literature cards
-├── demo/          React dashboard for defense presentation
+├── demo/          Defense demo bundle: web/ (React dashboard) + server/ (FastAPI inference backend)
 ├── defense/       Slides (pptx/docx) and presentation materials
 ├── CLAUDE.md      ← you are here
 └── README.md

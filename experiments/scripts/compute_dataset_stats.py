@@ -1,27 +1,41 @@
 """Compute dataset-specific mean and std for normalization (Stage 7).
 
-Computes channel-wise mean and std from the EyePACS training set AFTER
-applying Stages 0–4 (canonical flip, OD-fovea rotation, FOV crop+resize,
-FOV mask, flat-field correction) — but NOT CLAHE (Stage 5) and NOT
-augmentation (Stage 6). Only pixels where the FOV mask == 1.0 are included
-(D-2 design decision). Statistics are computed in the [0, 1] scale, matching
+Computes channel-wise mean and std from a **training set** AFTER applying
+Stages 0–4 (canonical flip, OD-fovea rotation, FOV crop+resize, FOV mask,
+flat-field correction) — but NOT CLAHE (Stage 5) and NOT augmentation
+(Stage 6). Only pixels where the FOV mask == 1.0 are included (D-2 design
+decision). Statistics are computed in the [0, 1] scale, matching
 ``torchvision.transforms.ToTensor`` used by Stage 7.
 
 This mirrors ``PreprocessingPipeline.__call__`` stages 0–4 exactly (it reuses
 ``from_preset("efficientnet")`` so the flat-field/rotation parameters are
-identical to those Config D trains with).
+identical to those the full pipeline trains with).
+
+Normalization convention (TASK-fix #3, convention (a), confirmed 2026-06-03):
+Exp 3–6 are cross-dataset *transfer* runs and reuse the **EyePACS train** stats
+the model was trained on — they do NOT recompute per-target-dataset stats (that
+would standardise away the domain shift being measured). The only train-on-X
+run needing its own stats is **Exp 7 (trains on IDRiD)** → ``--dataset idrid``.
 
 Usage:
-    python scripts/compute_dataset_stats.py \
+    # EyePACS (Exp 1–6 train stats):
+    python scripts/compute_dataset_stats.py --dataset eyepacs \
         --images-root /path/to/EyePACS/train \
         --labels-csv  /path/to/EyePACS/trainLabels.csv \
-        --output-dir  data/processed \
-        --n-samples   5000
+        --output-dir  data/processed --n-samples 5000
+
+    # IDRiD (Exp 7 train stats):
+    python scripts/compute_dataset_stats.py --dataset idrid \
+        --images-root "/path/IDRiD/B. Disease Grading/1. Original Images/a. Training Set" \
+        --labels-csv  "/path/IDRiD/B. Disease Grading/2. Groundtruths/a. IDRiD_Disease Grading_Training Labels.csv" \
+        --output-dir  data/processed --n-samples 0
 
 Output:
-    Writes ``<output-dir>/eyepacs_norm_stats.json`` with keys ``mean``/``std``
-    (consumed automatically by ``src/experiments/exp1_factorial.py``) and
-    prints the values for pasting into ``configs/default.yaml`` if desired.
+    Writes ``<output-dir>/<dataset>_norm_stats.json`` with keys ``mean``/``std``.
+    ``eyepacs_norm_stats.json`` is consumed automatically by
+    ``src/experiments/exp1_factorial.py`` (Configs B/D); ``idrid_norm_stats.json``
+    by ``src/experiments/exp7_clinical.py``. The values are also printed for
+    pasting into ``configs/default.yaml`` if desired.
 """
 
 from __future__ import annotations
@@ -81,6 +95,57 @@ def _discover_eyepacs(
         idx = rng.choice(len(rows), n_samples, replace=False)
         rows = [rows[i] for i in idx]
     return rows
+
+
+def _discover_idrid(
+    images_root: pathlib.Path,
+    labels_csv: pathlib.Path,
+    rng: np.random.Generator,
+    n_samples: int,
+) -> list[tuple[pathlib.Path, str]]:
+    """Return ``(path, eye_side)`` pairs for IDRiD disease-grading train images.
+
+    Mirrors ``IDRiDDataset.from_directory`` indexing: the grading labels CSV's
+    first column (``Image name``) gives ``IDRiD_XXX`` stems resolved to
+    ``<images_root>/<stem>.jpg``. IDRiD filenames carry no left/right marker, so
+    ``eye_side`` is always ``"unknown"`` (no canonical flip — matches Stage 0).
+
+    Args:
+        images_root: ``B. Disease Grading/1. Original Images/a. Training Set``.
+        labels_csv: ``a. IDRiD_Disease Grading_Training Labels.csv`` (trailing
+            empty columns tolerated; only the first column is read).
+        rng: NumPy generator for reproducible sampling.
+        n_samples: Max images to sample; ``0`` means use all.
+
+    Returns:
+        List of ``(image_path, "unknown")`` tuples.
+    """
+    rows: list[tuple[pathlib.Path, str]] = []
+    with open(labels_csv, newline="") as fh:
+        reader = csv.reader(fh)
+        next(reader, None)  # header: "Image name,Retinopathy grade,..."
+        for row in reader:
+            if not row:
+                continue
+            name = row[0].strip()
+            if not name.startswith("IDRiD_"):
+                continue
+            path = images_root / f"{name}.jpg"
+            if not path.exists():
+                continue
+            rows.append((path, "unknown"))
+
+    if n_samples and len(rows) > n_samples:
+        idx = rng.choice(len(rows), n_samples, replace=False)
+        rows = [rows[i] for i in idx]
+    return rows
+
+
+# Discovery dispatch keyed by --dataset. Each returns ``(path, eye_side)`` pairs.
+_DISCOVERY = {
+    "eyepacs": _discover_eyepacs,
+    "idrid": _discover_idrid,
+}
 
 
 def _preprocess_stages_0_to_4(
@@ -186,14 +251,19 @@ def compute_stats(
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Compute EyePACS dataset-specific mean/std for Stage 7.",
+        description="Compute dataset-specific mean/std for Stage 7 normalization.",
     )
+    parser.add_argument("--dataset", default="eyepacs", choices=sorted(_DISCOVERY),
+                        help="Training dataset to compute stats for "
+                             "(eyepacs for Exp 1–6, idrid for Exp 7).")
     parser.add_argument("--images-root", required=True, type=pathlib.Path,
-                        help="Directory of <name>.jpeg EyePACS train images.")
+                        help="Directory of training images "
+                             "(<name>.jpeg for eyepacs, <stem>.jpg for idrid).")
     parser.add_argument("--labels-csv", required=True, type=pathlib.Path,
-                        help="Path to trainLabels.csv (columns: image, level).")
+                        help="Training labels CSV "
+                             "(EyePACS: image,level / IDRiD: Image name,grade).")
     parser.add_argument("--output-dir", default="data/processed", type=pathlib.Path,
-                        help="Directory to write eyepacs_norm_stats.json.")
+                        help="Directory to write <dataset>_norm_stats.json.")
     parser.add_argument("--n-samples", default=5000, type=int,
                         help="Images to sample (0 = use all). A few thousand "
                              "gives a stable estimate; default 5000.")
@@ -205,16 +275,18 @@ def main() -> None:
     args = _parse_args()
     rng = np.random.default_rng(args.seed)
 
-    # Use the exact config Config D trains with, so Stages 0–4 match.
+    # Use the exact config the full pipeline trains with, so Stages 0–4 match.
     config = PreprocessingConfig.from_preset("efficientnet")
 
+    print(f"Dataset     : {args.dataset}")
     print(f"Images root : {args.images_root}")
     print(f"Labels CSV  : {args.labels_csv}")
     print(f"n_samples   : {args.n_samples if args.n_samples else 'ALL'}")
     print(f"target_size : {config.target_size}")
     print()
 
-    samples = _discover_eyepacs(args.images_root, args.labels_csv, rng, args.n_samples)
+    discover = _DISCOVERY[args.dataset]
+    samples = discover(args.images_root, args.labels_csv, rng, args.n_samples)
     print(f"Discovered {len(samples)} image(s).\n")
     if not samples:
         print("ERROR: No images found. Check paths.", file=sys.stderr)
@@ -224,8 +296,9 @@ def main() -> None:
     mean, std, n_used, n_pixels = compute_stats(samples, config)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    out_path = args.output_dir / "eyepacs_norm_stats.json"
+    out_path = args.output_dir / f"{args.dataset}_norm_stats.json"
     payload = {
+        "dataset": args.dataset,
         "mean": [float(x) for x in mean],
         "std": [float(x) for x in std],
         "n_images": int(n_used),
@@ -243,7 +316,10 @@ def main() -> None:
     print(f"images used : {n_used}  |  pixels: {n_pixels:,}")
     print(f"Saved → {out_path}")
     print("─" * 56)
-    print("exp1_factorial.py loads this file automatically for Configs B/D.")
+    if args.dataset == "eyepacs":
+        print("exp1_factorial.py loads this file automatically for Configs B/D.")
+    elif args.dataset == "idrid":
+        print("exp7_clinical.py loads this file automatically (Exp 7 trains on IDRiD).")
 
 
 if __name__ == "__main__":

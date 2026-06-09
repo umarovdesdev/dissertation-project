@@ -1,6 +1,6 @@
 # TRANSLATION DIRECTIVE
 
-**Version:** 1.0 | **Date:** 2026-03-14
+**Version:** 6.0.0 | **Date:** 2026-06-08 | **Binding Reference:** INVARIANTS.md v6.0.0
 **Usage:** Use this prompt when translating an approved English section into academic Kazakh. Attach the English section text and the full GLOSSARY_KZ.md.
 
 ---
@@ -25,7 +25,7 @@ GLOSSARY_KZ.md (attached) is the authoritative translation control document. All
 2. Preserve all table structures — translate headers and text content; keep data values, metrics, and numbers unchanged.
 3. Preserve all equation numbering and mathematical notation unchanged.
 4. Preserve all citation references ([Author, Year] or Literature Card IDs) unchanged.
-5. Preserve all governance reference codes (PC-1, SIR-4, H-1, CFC-2.2, etc.) unchanged — these are internal codes and must not be translated.
+5. Preserve all governance reference codes (PC-0, PC-1, SC-H, SIR-4, SIR-9, H-1, CFC-2.2, CFC-2.8, CFC-2.9, and the paradigm labels P1 / P2, etc.) unchanged — these are internal codes and must not be translated.
 
 ## REGISTER
 

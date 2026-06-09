@@ -1,6 +1,6 @@
 # CONTINUITY NOTE TEMPLATE
 
-**Version:** 1.0 | **Date:** 2026-03-14
+**Version:** 6.0.0 | **Date:** 2026-06-08 | **Binding Reference:** INVARIANTS.md v6.0.0
 **Usage:** This template defines the structure for Continuity Notes produced at the end of each section generation. The writing session system prompt instructs the model to output this as PART 2 of its response.
 
 ---

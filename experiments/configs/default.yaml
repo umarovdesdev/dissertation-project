@@ -44,10 +44,16 @@ preprocessing:
   flat_field_mask_only: true              # apply correction only inside FOV mask
 
   # --- Stage 5: CLAHE ---
-  clahe_tile_grid_size: [8, 8]
+  clahe_mode: polar                       # "polar" (adaptive polar, thesis-faithful) or "tiles" (8×8)
+  clahe_tile_grid_size: [8, 8]            # "tiles" mode only
   clahe_clip_factor: 2.0
   clahe_global_threshold: 0.01
   clahe_train_prob: 0.8
+  # Polar-CLAHE geometry ("polar" mode only)
+  clahe_radial_rings: 8
+  clahe_radial_exponent: 1.5
+  clahe_fine_bins: 72
+  clahe_min_sector_area_frac: 0.01
 
   # --- Stage 6: Augmentation (train only) ---
   rotation_sigma: 13.0

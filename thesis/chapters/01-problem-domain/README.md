@@ -29,3 +29,27 @@ This chapter is the **primary site** for the paradigmatic framing in the dissert
 
 ### Cross-cutting forbidden phrasings (apply to every section of Chapter 1)
 "Gulshan is our baseline" / "we outperform Gulshan" / "Gulshan claimed preprocessing is unimportant" / "the present work surpasses Gulshan numerically." See INVARIANTS v5.3 SB-1.12, CFC-2.9.
+
+## Sections (per outline/TABLE_OF_CONTENTS_EN.md, v6.0.0)
+
+# 1 PROBLEM DOMAIN ANALYSIS AND CURRENT STATE OF AUTOMATED DIABETIC RETINOPATHY DIAGNOSIS
+
+## 1.1 Medical and Epidemiological Context of Diabetic Retinopathy
+- 1.1.1 Pathophysiology and Clinical Grading Systems
+- 1.1.2 Screening Requirements in Resource-Limited Healthcare Settings
+
+## 1.2 Fundus Image Acquisition and Quality Variability
+- 1.2.1 Sources of Image Degradation in Clinical Practice
+- 1.2.2 Impact of Image Quality on Diagnostic Model Performance
+- 1.2.3 Device-Specific Variability in Fundus Imaging
+
+## 1.3 Deep Learning Approaches to Retinal Image Classification
+- 1.3.1 Convolutional Neural Network Architectures for Medical Imaging
+- 1.3.2 Transfer Learning and Self-Supervised Pretraining in Ophthalmic Diagnostics
+- 1.3.3 Explainability Methods in Medical Image Classification
+
+## 1.4 Critical Analysis of Existing Automated DR Screening Systems
+
+## 1.5 Formulation of the Research Problem and Justification of Research Direction
+
+- Conclusions to Chapter 1

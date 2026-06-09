@@ -63,6 +63,51 @@ Paths configured in `configs/default.yaml`.
 
 Class imbalance addressed via Focal Loss (γ=2, inverse-frequency α weights).
 
+## Stage 7 Normalization Stats (per-dataset)
+
+Stage 7 normalises with per-channel mean/std computed over Stages 0–4 (no CLAHE,
+FOV-mask pixels only), produced by `scripts/compute_dataset_stats.py --dataset <name>`
+into `data/processed/<name>_norm_stats.json`.
+
+**Convention (a) — train-set stats everywhere (no leakage, standard transfer
+protocol):** experiments normalise with the **training-set** mean/std the model
+was trained on, never re-centring the test set. Concretely:
+
+| Experiments | Trains on | Normalize stats used |
+|-------------|-----------|----------------------|
+| Exp 1 A/C (baseline, 3ch) | EyePACS | ImageNet mean/std |
+| Exp 1 B/D, Exp 2 (full, 4ch) | EyePACS | `eyepacs_norm_stats.json` |
+| Exp 3–6 (cross-dataset transfer) | EyePACS | `eyepacs_norm_stats.json` (test sets reuse EyePACS train stats) |
+| Exp 7 (small-data) | IDRiD | `idrid_norm_stats.json` |
+
+Exp 3–6 deliberately do **not** compute per-target-dataset stats: re-centring a
+test set with its own mean/std would standardise away the device/intensity
+domain shift those experiments (H-4/H-6/H-7) exist to measure. The only
+train-on-X run that needs its own stats is **Exp 7 (trains on IDRiD)**.
+
+```bash
+# EyePACS train stats (Exp 1–6)
+python scripts/compute_dataset_stats.py --dataset eyepacs \
+    --images-root <EyePACS/train> --labels-csv <trainLabels.csv> --n-samples 5000
+# IDRiD train stats (Exp 7)
+python scripts/compute_dataset_stats.py --dataset idrid \
+    --images-root "<IDRiD/B. Disease Grading/1. Original Images/a. Training Set>" \
+    --labels-csv  "<...2. Groundtruths/a. IDRiD_Disease Grading_Training Labels.csv>" \
+    --n-samples 0
+```
+
+## OD/fovea detector accuracy (IDRiD ground-truth)
+
+`scripts/validate_od_fovea_idrid.py` quantifies the Stage 1 detector against
+IDRiD localization GT (516 images). Result (native-resolution detection, as in
+the pipeline): **OD** median ≈0.67 OD-radii error (~65% within 1 OD-radius);
+**fovea** median ≈5 OD-radii error (~0% within 2 OD-radii) — the darkest-in-
+annulus fovea search latches onto the dark vignette at full resolution. The
+detector `confident` flag is `True` for 100% of images, so it does **not** gate
+these failures. Implication: any consumer of the fovea centre (polar CLAHE
+pivot, rotation) must default to a deterministic geometric fallback rather than
+trust the detected fovea or the `confident` flag.
+
 ## Reproducibility
 - seed: 42, deterministic=true
 - All configs committed in `configs/`

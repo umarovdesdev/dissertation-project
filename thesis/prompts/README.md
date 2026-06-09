@@ -1,6 +1,6 @@
 # Prompts Directory
 
-## Active Pipeline Templates (V5.0)
+## Active Pipeline Templates (governance v6.0.0)
 
 | Template | Purpose | Used In |
 |----------|---------|---------|
@@ -8,6 +8,7 @@
 | `writing-session-system-prompt.md` | Fixed system prompt for all writing sessions | Stage D (Generation) |
 | `revision-session-template.md` | Template for revision sessions | Stage C (Revision) |
 | `translation-directive.md` | Instructions for EN→KZ translation | Stage E (Translation) |
+| `translation-review.md` | Back-check of Kazakh translation against GLOSSARY_KZ + governance codes | Stage F (Translation Review) |
 | `verification-protocol.md` | Post-generation compliance checklist | Stage B (Review) |
 | `continuity-note-template.md` | Structure for inter-section continuity | Stage D output |
 

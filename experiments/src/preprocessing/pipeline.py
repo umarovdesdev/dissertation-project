@@ -38,6 +38,11 @@ from .config import PreprocessingConfig
 from .crop_resize import crop_and_resize
 from .flat_field import apply_flat_field
 from .imagenet_normalize import imagenet_normalize
+from .polar_clahe import (
+    PolarClaheParams,
+    apply_polar_clahe,
+    maybe_apply_polar_clahe,
+)
 from .upgraded_clahe import ClaheParams, maybe_apply_clahe
 # NOTE: UnifiedFundusAugmentation is imported lazily inside __init__ to avoid
 # circular imports (src.data imports from src.preprocessing and vice-versa).
@@ -98,6 +103,15 @@ class PreprocessingPipeline:
             tile_grid_size=config.clahe_tile_grid_size,
             clip_factor=config.clahe_clip_factor,
             global_threshold=config.clahe_global_threshold,
+        )
+        # Stage 5 polar-CLAHE params (used when config.clahe_mode == "polar").
+        self._polar_clahe_params = PolarClaheParams(
+            clip_factor=config.clahe_clip_factor,
+            global_threshold=config.clahe_global_threshold,
+            radial_rings=config.clahe_radial_rings,
+            radial_exponent=config.clahe_radial_exponent,
+            fine_bins=config.clahe_fine_bins,
+            min_sector_area_frac=config.clahe_min_sector_area_frac,
         )
         # Lazy import to break the circular dependency with src.data
         from src.data.augmentation_unified import UnifiedFundusAugmentation  # noqa: PLC0415
@@ -239,14 +253,26 @@ class PreprocessingPipeline:
             Normalised float32 tensor ``(4, target_size, target_size)``;
             channel 3 is the (un-augmented) FOV mask.
         """
-        # Stage 5: upgraded CLAHE (stochastic at train time)
+        # Stage 5: CLAHE (stochastic at train time). Polar pivots on the FOV
+        # centroid (robust — the detected fovea is unreliable, TASK-fix #4); the
+        # centroid is derived from fov_mask, which is available on both the live
+        # and cached paths, so no extra cache scalar is needed.
         if self.config.use_clahe:
-            image = maybe_apply_clahe(
-                image,
-                params=self._clahe_params,
-                is_training=self.is_training,
-                train_prob=self.config.clahe_train_prob,
-            )
+            if self.config.clahe_mode == "polar":
+                image = maybe_apply_polar_clahe(
+                    image,
+                    fov_mask,
+                    params=self._polar_clahe_params,
+                    is_training=self.is_training,
+                    train_prob=self.config.clahe_train_prob,
+                )
+            else:
+                image = maybe_apply_clahe(
+                    image,
+                    params=self._clahe_params,
+                    is_training=self.is_training,
+                    train_prob=self.config.clahe_train_prob,
+                )
 
         # Stage 6: augmentation (train only, uint8, before normalize)
         if self.is_training:
@@ -428,13 +454,19 @@ class PreprocessingPipeline:
             )
         stages.append(("flat_field", flat.copy()))
 
-        # Stage 5: CLAHE (deterministic at inference).
+        # Stage 5: CLAHE (deterministic at inference). Same dispatch as the
+        # model path so the demo panel shows exactly what the CNN sees.
         clahed = flat
         if self.config.use_clahe:
-            clahed = maybe_apply_clahe(
-                flat, params=self._clahe_params,
-                is_training=False, train_prob=self.config.clahe_train_prob,
-            )
+            if self.config.clahe_mode == "polar":
+                clahed = apply_polar_clahe(
+                    flat, fov_mask, params=self._polar_clahe_params,
+                )
+            else:
+                clahed = maybe_apply_clahe(
+                    flat, params=self._clahe_params,
+                    is_training=False, train_prob=self.config.clahe_train_prob,
+                )
         stages.append(("clahe", clahed.copy()))
 
         return {

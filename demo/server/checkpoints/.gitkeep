@@ -1,0 +1,4 @@
+# Drop the trained artifacts here (not committed):
+#   config_d_fold0.pt          ← outputs/exp1/checkpoints/D_fold{N}/best_model.pt
+#   eyepacs_norm_stats.json    ← data/processed/eyepacs_norm_stats.json
+# Both are needed so inference matches Config D training (dataset-specific Stage 7).
