@@ -10,7 +10,7 @@ PhD dissertation — Yesmukhamedov N.S., IITU, Almaty, Kazakhstan.
 |-----------|-------------|
 | `experiments/` | Python/PyTorch ML pipeline, training, 6 experiments |
 | `thesis/` | Dissertation text, governance docs, literature cards |
-| `demo/` | React dashboard for defense presentation |
+| `demo/` | Defense demo bundle: `web/` (React dashboard) + `server/` (FastAPI inference backend) |
 | `defense/` | Slides and presentation materials |
 
 See `CLAUDE.md` for detailed project documentation.

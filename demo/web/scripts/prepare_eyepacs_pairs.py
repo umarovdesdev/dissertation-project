@@ -1,0 +1,201 @@
+"""
+prepare_eyepacs_pairs.py — Build a pool of EyePACS bilateral pairs for the
+Demo tab's "Random patient" button.
+
+The Kaggle EyePACS release at E:\\datasets\\eyepacs ships every patient with
+both eyes labelled (one row per eye in trainLabels.csv) and image files named
+`{patient_id}_left.jpeg` / `{patient_id}_right.jpeg`. This script:
+
+  1. Reads trainLabels.csv and groups rows into complete left+right pairs.
+  2. Picks N pairs per ground-truth DR grade
+     (grade = max(left_eye_grade, right_eye_grade) — clinical worst-eye rule).
+  3. Resizes each chosen file to a 512-pixel-max long side (preserving aspect)
+     and writes it to demo/web/public/datasets/eyepacs/pairs/dr{grade}/.
+  4. Emits two manifests side by side:
+        - demo/web/public/datasets/eyepacs/pairs/pairs.json (canonical)
+        - demo/web/src/tabs/_eyepacsPairs.js (importable by Demo.js)
+
+Run from the project root:
+
+    python demo/web/scripts/prepare_eyepacs_pairs.py [--per-grade 8] [--max-size 512]
+
+Re-running is safe — output directories are wiped and recreated.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import shutil
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+try:
+    from PIL import Image
+except ImportError:  # pragma: no cover
+    sys.exit(
+        "Pillow is required. Install with: pip install Pillow\n"
+        "(used for resizing images so the demo bundle stays small)."
+    )
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+SCRIPT_DIR  = Path(__file__).resolve().parent
+DEMO_DIR    = SCRIPT_DIR.parent                       # demo/web/ (holds public/ + src/)
+PROJECT_DIR = DEMO_DIR.parents[1]                      # dissertation-project/
+DRIVE_ROOT  = PROJECT_DIR.parent                       # E:\
+
+DATASET_DIR = DRIVE_ROOT / "datasets" / "eyepacs"
+LABELS_CSV  = DATASET_DIR / "trainLabels.csv"
+TRAIN_DIR   = DATASET_DIR / "train"
+
+OUT_PUBLIC_DIR = DEMO_DIR / "public" / "datasets" / "eyepacs" / "pairs"
+OUT_JS_PATH    = DEMO_DIR / "src" / "tabs" / "_eyepacsPairs.js"
+OUT_JSON_PATH  = OUT_PUBLIC_DIR / "pairs.json"
+
+
+def parse_labels() -> dict[str, dict[str, int]]:
+    """Return {patient_id: {"left": grade, "right": grade}}."""
+    out: dict[str, dict[str, int]] = defaultdict(dict)
+    with LABELS_CSV.open(newline="") as f:
+        reader = csv.reader(f)
+        next(reader)  # header
+        for row in reader:
+            img_id, level = row[0], int(row[1])
+            patient_id, _, side = img_id.rpartition("_")
+            if side not in ("left", "right"):
+                continue
+            out[patient_id][side] = level
+    return out
+
+
+def pick_pairs(
+    labels: dict[str, dict[str, int]],
+    per_grade: int,
+) -> list[tuple[str, int, int, int]]:
+    """
+    Return [(patient_id, left_grade, right_grade, worst_grade)] sorted by
+    worst_grade then patient_id, with at most `per_grade` entries per worst.
+    """
+    complete = {pid: eyes for pid, eyes in labels.items()
+                if "left" in eyes and "right" in eyes}
+    by_worst: dict[int, list[tuple[str, int, int, int]]] = defaultdict(list)
+    for pid, eyes in complete.items():
+        worst = max(eyes["left"], eyes["right"])
+        by_worst[worst].append((pid, eyes["left"], eyes["right"], worst))
+
+    picked: list[tuple[str, int, int, int]] = []
+    for grade in range(5):
+        pool = sorted(by_worst.get(grade, []), key=lambda x: int(x[0]))
+        if not pool:
+            print(f"  warn: no patients with worst-grade {grade}")
+            continue
+        # Prefer pairs where left_grade != right_grade for visual variety on
+        # grades 1+ (clinically common asymmetry); fall back to symmetric.
+        asymmetric = [p for p in pool if p[1] != p[2]]
+        symmetric  = [p for p in pool if p[1] == p[2]]
+        chosen = (asymmetric[: per_grade // 2]
+                  + symmetric[: per_grade - per_grade // 2])
+        if len(chosen) < per_grade:
+            chosen += [p for p in pool if p not in chosen][: per_grade - len(chosen)]
+        picked.extend(chosen[:per_grade])
+    return picked
+
+
+def copy_and_resize(src: Path, dst: Path, max_side: int) -> tuple[int, int]:
+    """Copy src → dst, downscale so max(w, h) == max_side, JPEG quality 85."""
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    with Image.open(src) as im:
+        im = im.convert("RGB")
+        w, h = im.size
+        if max(w, h) > max_side:
+            scale = max_side / max(w, h)
+            new_size = (int(round(w * scale)), int(round(h * scale)))
+            im = im.resize(new_size, Image.LANCZOS)
+        im.save(dst, "JPEG", quality=85, optimize=True)
+        return im.size
+
+
+def write_js_manifest(entries: list[dict]) -> None:
+    OUT_JS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    header = (
+        "// Auto-generated by demo/web/scripts/prepare_eyepacs_pairs.py.\n"
+        "// Edit the script and re-run; do not modify this file by hand.\n"
+        f"// Source: EyePACS / Kaggle Diabetic Retinopathy Detection.\n"
+        f"// {len(entries)} bilateral patient pairs.\n\n"
+    )
+    body = "export const EYEPACS_PAIRS = " + json.dumps(entries, indent=2) + ";\n"
+    OUT_JS_PATH.write_text(header + body, encoding="utf-8")
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--per-grade", type=int, default=8,
+                   help="Number of patient pairs per DR grade (default: 8)")
+    p.add_argument("--max-size", type=int, default=512,
+                   help="Max image side in pixels (default: 512)")
+    args = p.parse_args()
+
+    if not LABELS_CSV.exists():
+        sys.exit(f"Labels not found: {LABELS_CSV}")
+    if not TRAIN_DIR.exists():
+        sys.exit(f"Train images not found: {TRAIN_DIR}")
+
+    print(f"Reading {LABELS_CSV}")
+    labels = parse_labels()
+    print(f"  {len(labels)} patient IDs in labels")
+
+    print(f"Selecting up to {args.per_grade} pairs per worst-grade...")
+    chosen = pick_pairs(labels, args.per_grade)
+    print(f"  {len(chosen)} pairs chosen total")
+
+    # Fresh output dir
+    if OUT_PUBLIC_DIR.exists():
+        shutil.rmtree(OUT_PUBLIC_DIR)
+    OUT_PUBLIC_DIR.mkdir(parents=True)
+
+    manifest: list[dict] = []
+    skipped = 0
+    for pid, lg, rg, worst in chosen:
+        left_src  = TRAIN_DIR / f"{pid}_left.jpeg"
+        right_src = TRAIN_DIR / f"{pid}_right.jpeg"
+        if not left_src.exists() or not right_src.exists():
+            print(f"  skip {pid}: missing source jpeg")
+            skipped += 1
+            continue
+        grade_dir = OUT_PUBLIC_DIR / f"dr{worst}"
+        left_dst  = grade_dir / f"{pid}_left.jpeg"
+        right_dst = grade_dir / f"{pid}_right.jpeg"
+        try:
+            copy_and_resize(left_src,  left_dst,  args.max_size)
+            copy_and_resize(right_src, right_dst, args.max_size)
+        except Exception as exc:  # pragma: no cover
+            print(f"  skip {pid}: {exc}")
+            skipped += 1
+            continue
+        manifest.append({
+            "patient_id":  pid,
+            "worst_grade": worst,
+            "left_grade":  lg,
+            "right_grade": rg,
+            "left":  f"datasets/eyepacs/pairs/dr{worst}/{pid}_left.jpeg",
+            "right": f"datasets/eyepacs/pairs/dr{worst}/{pid}_right.jpeg",
+        })
+        print(f"  ok {pid:>6} dr{worst}  L={lg} R={rg}")
+
+    # Write manifests
+    OUT_JSON_PATH.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    write_js_manifest(manifest)
+
+    print(f"\nDone. {len(manifest)} pairs ({skipped} skipped).")
+    print(f"  JSON:  {OUT_JSON_PATH}")
+    print(f"  JS:    {OUT_JS_PATH}")
+    print(f"  Image dir: {OUT_PUBLIC_DIR}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

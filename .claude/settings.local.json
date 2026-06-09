@@ -253,7 +253,19 @@
       "Bash(CI=true npx --no-install eslint src/tabs/Demo.js src/tabs/_VisionWidget.js)",
       "Bash(awk '{print $1}')",
       "Bash(grep -nE '^[А-ЯҚҰ. ]{4,60}$' \"E:/dissertation_council/_raw/A1_abstract_kaz.txt\")",
-      "Bash(grep -nE '^[А-ЯҚҰ][а-яқұңөәі ]{4,55}$' \"E:/dissertation_council/_raw/A2_abstract_kaz.txt\")"
+      "Bash(grep -nE '^[А-ЯҚҰ][а-яқұңөәі ]{4,55}$' \"E:/dissertation_council/_raw/A2_abstract_kaz.txt\")",
+      "PowerShell(npm run *)",
+      "Skill(run)",
+      "Bash(set BROWSER=none)",
+      "Bash(npm start *)",
+      "Bash(where cloudflared *)",
+      "Bash(cloudflared --version)",
+      "Bash(cloudflared tunnel *)",
+      "Bash(set \"BROWSER=none\")",
+      "Bash(set \"REACT_APP_API_URL=https://verification-pete-ronald-guam.trycloudflare.com\")",
+      "Bash(awk '/^## PART 1/{f=1;next} /^## PART 3/{f=0} f' 1.1.1-draft.md)",
+      "Bash(printf '%s\\\\n' '- [Chapter 3 \\(Methodology\\) drafted & APPROVED]\\(chapter3-methodology-drafted.md\\) — all 13 sections \\(§3.1.1–§3.C\\) drafted/verified 2026-06-09, PLAN tracker ✅; §2.3.3 deferred, Ch4 not started; carry-forward: CFC-2.8 composite IV, SSL arm untrained, [VERIFY] polar-CLAHE divergence, focal-loss+SSL corpus gaps')",
+      "Bash(printf '%s\\\\n' '- [Chapter 3 \\(Methodology\\) drafted & APPROVED]\\(chapter3-methodology-drafted.md\\) — all 13 sections drafted/verified 2026-06-09, PLAN tracker ✅; §2.3.3 deferred, Ch4 not started; carry-forward flags inside')"
     ]
   }
 }
