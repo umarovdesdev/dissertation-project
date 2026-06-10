@@ -87,8 +87,8 @@
 - [x] ✅ §3.C Conclusions to Chapter 3 — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; synthesis, no new claims; reproducibility + bounded commitments consolidated; ~560 w) — **Chapter 3 COMPLETE**
 
 **Chapter 6 — System Architecture (design-only)**
-- [ ] ⬜ §6.1.1 Functional and Non-Functional Requirements — ✅
-- [ ] ⬜ §6.1.2 Modular Architecture with PACS and EHR Integration — ⚠️ (DIA-6.3 UML deferred)
+- [x] ✅ §6.1.1 Functional and Non-Functional Requirements — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; design-only status fixed (SB-4.1); FR-1…7/NFR-1…8 tables synthesized from #22 + OD-6; NFR-envelope-dominance argued; no [UNSOURCED CLAIM] raised; ~897 w) — **Chapter 6 OPENED (calibration unit)**
+- [x] ✅ §6.1.2 Modular Architecture with PACS and EHR Integration — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; Table 6.3 module→FR→NFR decomposition synthesized from #22 EB-02/06; asynchronous store-and-forward PACS/EHR topology argued from OD-6/NFR-4; #36 used as external FHIR/HL7 feasibility corroboration under SIR-3; DIA-6.1 cited + DIA-6.3 UML deferred placeholder; no [UNSOURCED CLAIM] raised; ~1,155 w) — ⚠️ (DIA-6.3 UML deferred)
 - [ ] ⬜ §6.2.1 Preprocessing Engine with Configurable Pipeline — ✅
 - [ ] ⬜ §6.2.2 Inference Module with Model Selection Logic — ✅ (design-only; no Exp-6 numbers)
 - [ ] ⬜ §6.3.1 Telemedicine and Portable Device Support (incl. 6.3.1.1–6.3.1.3) — ✅
