@@ -53,21 +53,32 @@
 
 ---
 
-## 5. Exact current position
+## 5. Exact current position (updated 2026-06-10)
 
-- **§1.1.1 (Pathophysiology and Clinical Grading Systems) is written, verified ✅ APPROVED, and reviewed by the supervisor.** Quality confirmed high: argumentative spine realized, all external statistics framed as third-party context (CFC-2.3 clean), SIR-2 limitation notes at first citation, low-reliability source #31 (Kesharwani) handled with explicit caveats, PART 3 checklist with verbatim quotes. This is the **quality bar** for every subsequent section.
-- **In flight (just dispatched to the executor):** a single pass with two steps:
-  - **Step 1 — corpus fix:** rename `thesis/literature/external/schmidt-erfurth-2018.md` → `kusuhara-2018.md` (its content is actually Kusuhara et al. 2018; "Schmidt-Erfurth" is only cited inside it), update `LITERATURE_INDEX.md` #32 and the §1.1.1 draft header, grep for zero stale refs, and flag any other filename↔content mismatches found.
-  - **Step 2 — rest of Chapter 1:** run §1.1.2 → §1.2.1 → §1.2.2 → §1.2.3 → §1.3.1 → §1.3.2 → §1.3.3 → §1.4 → §1.5 → §1.C through the PLAN §10 loop. Calibration tweaks applied: **aim mid-band on word count** (§1.1.1 ran to the ceiling), keep the §1.1.1 standard exactly.
-  - Executor instructed to **STOP at end of §1.C** and return a chapter-level summary (per-section word count, verdict, sources, coverage gaps) + the Step 1 confirmation.
+> This section was rewritten 2026-06-10 to match the real state of the files on disk. The prior version described the position as "end of §1.1.1"; that is obsolete. `thesis/PLAN.md`'s progress tracker is current and authoritative — cross-check against it.
 
-**Your immediate next action when the executor reports back:** read the real files (don't just trust the summary), verify the corpus fix actually removed all stale `schmidt-erfurth-2018` refs, spot-check 2–3 of the new drafts against the §1.1.1 standard, confirm word counts came down mid-band, then report to the candidate in Russian and recommend whether to release Chapter 2.
+**Completed and verified ✅ APPROVED (drafts + briefs + continuity + reviews on disk):**
+- **Chapter 1 — Problem Domain: COMPLETE.** All 11 sections (§1.1.1 → §1.C) verified 2026-06-09. §1.1.1 remains the **quality bar** (argumentative spine realized, external stats framed as third-party context per CFC-2.3, SIR-2 limitation notes at first citation, low-reliability #31 Kesharwani caveated, PART 3 with verbatim quotes). Corpus fix from the earlier pass landed: `schmidt-erfurth-2018.md` → `kusuhara-2018.md` renamed, `LITERATURE_INDEX.md` #32 + draft header updated, zero stale refs.
+- **Chapter 2 — Theoretical Foundations: COMPLETE except deferred §2.3.3.** 14 sections verified 2026-06-09. **§2.3.3 (In-Domain SSL for Retinal Imaging) is intentionally DEFERRED** (candidate directive) until in-domain SSL cards (DINO/BYOL/SimCLR/MoCo-on-fundus) are acquired — #73 is a general survey only. It is named-only in §2.3.1/§2.3.2. FIG-2.1/2.3/2.4/2.5 inserted as `TO BE CREATED` placeholders (deferred assets, not blockers).
+- **Chapter 3 — Methodology: COMPLETE.** All 13 sections (§3.1.1 → §3.C) verified 2026-06-09. Fully unblocked chapter; every asset real and on disk.
+- **Chapter 6 — System Architecture: COMPLETE.** All 9 sections (§6.1.1 → §6.C) APPROVED on disk; committed in `4b6898f` (§6.1.1+§6.1.2) and `04fa027` (§6.2.1–§6.C + tracker sync). §6.1.2 carries the deferred DIA-6.3 UML as a `TO BE CREATED` placeholder (not a blocker).
+- **§4.1 — Datasets & Configuration: COMPLETE.** All 3 sections (§4.1.1 ~1,200 w, §4.1.2 ~1,000 w, §4.1.3 ~720 w) APPROVED 2026-06-10, verified on disk; design/setup only, no experiment metrics, per-grade counts deferred to FIG-4.1 not fabricated (SIR-1 clean). #47/#48/#49/#50/#51 cited at index-level only with missing-card status flagged; #41 cited for EyePACS scale only (its AUC/accuracy excluded). **NOT YET COMMITTED** — 12 §4.1 files + modified PLAN.md are uncommitted in the working tree on `main`.
+
+- **Appendix A (preprocessing source code) + Appendix D (certificates & publications): COMPLETE.** Both APPROVED 2026-06-10, saved under `thesis/chapters/08-appendices/`, verified on disk. App A reproduces real on-disk pipeline source (flat_field.py byte-for-byte verified against `experiments/src/preprocessing/`; stage→module map Table A.1). App D = 5 card-backed co-authored publications + the 6 real confirmation PNGs in `defense/presentation/assets/publications/`; self-works identified (SIR-4), no fabricated entries. **NOT YET COMMITTED** — `thesis/chapters/08-appendices/` (untracked) + modified PLAN.md.
+
+**▶ PHASE 1 IS COMPLETE.** All 51 writable-now sections + App A + App D are drafted and APPROVED. The only Phase-1 prose still parked is **deferred §2.3.3** (in-domain SSL — held by candidate directive until DINO/BYOL/SimCLR/MoCo-on-fundus cards are acquired; not a normal blocker).
+
+**Next action is NOT drafting — everything remaining is Phase 2, hard-blocked on experiment results.** Do NOT let §4.2–§4.8, Ch 5, Ch 0 (except the 🟨 content-writable-now front-matter items, at candidate's discretion), Ch 7, or App B/C/E/F be drafted until the real experiment artifacts exist (RES-EXP1 full, TAB-4.x, FIG-4.x — currently ❌ MISSING; demo preview JSONs are barred as results per CFC-2.x/SIR-1). App C is unblocked only by the DIA-6.3 UML asset (drawing task, not an experiment). The supervisor's job now shifts to: commit App A/D, optionally pull forward the writable-now Ch 0 front-matter (§0.FM1–3, §0.1–0.7, §0.9–0.12), and otherwise **wait on experiments**.
+
+**⚠️ State drifts in real time.** The executor writes files in a parallel chat faster than `PLAN.md`'s tracker and this handoff get updated. As of 2026-06-10 the `PLAN.md` tracker still shows Chapter 6 as mostly ⬜ even though all 9 sections are APPROVED on disk. **Trust the real files (drafts/ + reviews/ verdict), not the tracker checkboxes.** Before dispatching anything, re-glob `thesis/chapters/*/drafts/` and `reviews/` to confirm the true frontier.
+
+**Your immediate next action:** (1) ask the executor to **sync the `PLAN.md` tracker** (mark §6.1.2…§6.C ✅) and **commit** the Chapter 6 + §6.1.1 outputs under a clear message so nothing is lost; (2) spot-check 2–3 Chapter 6 drafts against the §1.1.1 standard (design-only framing held? NFR/architecture grounded in #22, not invented? word counts — several ran high, e.g. §6.1.1≈2.4k, §6.1.2≈2.6k including tables/PART2-3); (3) then dispatch §4.1.1 → §4.1.3 through the PLAN §10 loop, STOP at §4.1.3, review, then App A + App D. Aim mid-band on word count.
 
 ---
 
 ## 6. The plan from here
 
-- **Phase 1 (writable now), narrative order:** Chapter 1 → Chapter 2 → Chapter 3 (fully unblocked) → Chapter 6 (design-only) → §4.1. Release chapter-by-chapter with a review after each. After Chapter 1 proves the loop, larger blocks are fine.
+- **Phase 1 (writable now): ✅ COMPLETE** — Chapter 1 ✅ → Chapter 2 ✅ → Chapter 3 ✅ → Chapter 6 ✅ → §4.1 ✅ → App A + App D ✅. Deferred §2.3.3 is the only Phase-1 prose still parked (candidate directive). **Next supervisor action: commit App A/D, then either pull forward writable-now Ch 0 front-matter or wait on experiments.**
 - **Phase 2 (blocked, gated on experiment execution):** §4.2 (Exp 1) → §4.3–§4.8 (Exp 2–7) → Chapter 5 → Introduction (Ch 0) → Conclusion (Ch 7) → Appendices B/C/E/F. Each gate (G-1…G-19 in PLAN) names the exact MISSING Resource IDs that unblock it. **Do not let these be drafted until the real experiment results exist** — the uploaded `results/exp2…exp7` currently hold only preview PNGs and placeholder JSON, not real runs.
 - **Phase 3 (last):** concatenate all drafts per outline → resolve every `[FIG/TAB-x.x]` placeholder to its real asset → convert to a single `.docx`. Only after Phase 2 is complete.
 
@@ -76,11 +87,11 @@
 ## 7. Open watch-items (track these; none is blocking)
 
 1. **Latent ID inconsistency in governance.** `INVARIANTS.md` SIR-7/SIR-8 refer to self-works as `LC-Yesmukhamedov-2025-SELF` and `LC-2025-Yesmukhamedov-01`, while the literature cards' own §I Unique IDs use the `LC-SAPAKOVA-2025[-01]` form (Sapakova is first author). The prompts correctly quote INVARIANTS verbatim, so this is not a prompt bug — but it will bite at **bibliography assembly (Phase 3)** if not reconciled. Flag for a dedicated reconciliation pass before final citations.
-2. **Misnamed literature card** (being fixed now in Step 1). After the executor reports, confirm the rename + index update are clean and that no other card has a filename↔content mismatch (the executor was asked to flag others without fixing them — decide what to do with any it finds).
-3. **Word-count tendency to run high** — §1.1.1 hit the top of its band. Calibration instruction issued to aim mid-band; verify it took effect in the Chapter 1 batch.
+2. **Literature corpus integrity (partially resolved).** The `kusuhara-2018.md` rename is done. Still OPEN per drafting flags: cards #47/#49/#50/#51 are index-only (no card files; #51 unconfirmed), a `scopus-q2.md` ID mismatch (`LC-AlTimemy-2021` vs the EEJET citation), and #46 (Selvaraju, Grad-CAM) is index-only/absent. None blocks current prose but all bite at Phase-3 bibliography assembly. Reconcile before final citations.
+3. **Word-count tendency to run high** — calibration to aim mid-band was issued and held across Chapters 1–3. Keep enforcing it for Chapter 6 and §4.1.
 4. **`§2.4.2`** (a leaf subsection of the laser/thermal-optical model) is not enumerated in the Section Map Key but doesn't conflict with it; left as-is intentionally. Revisit only if it causes a numbering question later.
 5. **Deferred conceptual diagrams** (FIG-2.1/2.3/2.4/2.5, DIA-6.3 / UML): not experiment-gated. Prose for Ch 2/Ch 6 is writable now; these figures are queued as asset tasks and inserted as `TO BE CREATED` placeholders. Don't let a missing *conceptual* diagram block prose.
-6. **Uncommitted work.** Earlier prompt-pipeline edits were left in the working tree on a branch named `feat/render-norm-polar-validation-fixes` (unrelated name). Suggest the candidate have the executor commit infra changes under clear messages so they don't get lost.
+6. **Uncommitted work.** The §6.1.1 outputs (`thesis/chapters/06-system-architecture/{briefs,drafts,continuity,reviews}/6.1.1-*.md`) plus a modified `thesis/PLAN.md` are currently **untracked/unstaged in the working tree on `main`**. Have the executor commit each completed chapter/section under a clear message so drafts don't get lost. (Earlier prompt-pipeline infra edits were similarly left on `feat/render-norm-polar-validation-fixes`.)
 
 ---
 

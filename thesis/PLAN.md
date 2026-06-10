@@ -103,8 +103,8 @@
 - [x] ✅ §4.1.3 Hardware Specification and Reproducibility Protocol — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; design/setup only; RTX 3060 12GB/WSL2/conda framed as DGL-2-bound design parameter (batch 16 @512² ← VRAM; mixed-precision split); TAB-3.1 rendered inline (as Table 4.2); reproducibility = engineered confound-removal (seed 42/deterministic, fixed aug+schedule, versioned code App A); SB-2.2 private-data limit; OD-6 framing w/o real-time claim (CFC-2.4); #21 SIR-4; no [UNSOURCED CLAIM]; ~720 w) — **§4.1 COMPLETE; §4.2–§4.8 Phase-2 blocked**
 
 **Appendices writable now**
-- [ ] ⬜ App A — Source Code of the Preprocessing Pipeline — ✅
-- [ ] ⬜ App D — Certificates and Publication Confirmations — ✅
+- [x] ✅ App A — Source Code of the Preprocessing Pipeline — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved in `chapters/08-appendices/`; code catalogue of real on-disk `experiments/src/preprocessing/` — stage→module map Table A.1 + verbatim `flat_field.py` excerpt; no-invention rule honored, every path verified on disk; closes §4.1.3 reproducibility loop; CENTRAL_THESIS framing; SIR-4 #19/#21/#23/#24 lineage; DGL-2 carried; no [UNSOURCED CLAIM])
+- [x] ✅ App D — Certificates and Publication Confirmations — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved in `chapters/08-appendices/`; Table D.1 = 5 distinct co-authored publications (EEJET #23/#24 counted once per SIR-5; Procedia/DS2025 #19; KBTU #21; KazUTB #20; NAS RK #22) + 6 confirmation PNGs by real path; SIR-4 on every entry; EEJET "100%" named-as-not-repeated (SIR-1/CFC-2.5); `scopus-q2` ID `LC-AlTimemy-2021` anomaly flagged; no fabricated entry) — **Phase 1 COMPLETE (App A + App D were the last two writable-now items)**
 
 ### Phase 2 — blocked, gated on experiment execution
 
