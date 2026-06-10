@@ -98,9 +98,9 @@
 - [x] ✅ §6.C Conclusions to Chapter 6 — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; synthesis only, no new claim; OD-6-envelope-as-binding-driver thread consolidated; SB-4.1 design-only reaffirmed chapter-wide; reserved targets recalled (OD-5/PC-1 Phase 2, NC-9/SB-4.2, SIR-8/SB-4.3, DIA-6.3); ~495 w) — **Chapter 6 COMPLETE**
 
 **Chapter 4 — §4.1 only (Datasets & Configuration)**
-- [ ] ⬜ §4.1.1 Dataset Architecture V5 — ✅
-- [ ] ⬜ §4.1.2 Class Distribution Analysis and Data Partitioning — ✅
-- [ ] ⬜ §4.1.3 Hardware Specification and Reproducibility Protocol — ✅
+- [x] ✅ §4.1.1 Dataset Architecture V5 — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; design/setup only — NO results; tiered 8-dataset architecture (TRAINING/EXTERNAL/CLINICAL/DEVICE) rendered as TAB-4.1 inline; DGL-1 bounding + SIR-3/SB-2.3 heterogeneity; #47/#48/#49/#50/#51 index-only flagged (#51 unconfirmed); #41 scale-only (metric-inconsistency); #19/#21 one thread + #24 SIR-4/SIR-5; FIG-4.2/4.3 placeholders; no [UNSOURCED CLAIM]; ~1,200 w) — **Chapter 4 §4.1 OPENED**
+- [x] ✅ §4.1.2 Class Distribution Analysis and Data Partitioning — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; design/setup only; EyePACS imbalance = SC-1.4 lever → EH-1 metric hierarchy + inverse-freq focal loss + train-only aug (ref §3.4.1/§3.3.4/§3.1.3, not re-derived); label harmonization to 5-class ICDR + Exp-6 DR-labels-only (SB-2.3/SIR-3); patient-level grade-stratified 5-fold (reuse §3.4.2); no fabricated per-grade counts (FIG-4.1 placeholder, SIR-1); IDRiD no-class-distribution SIR-2; no [UNSOURCED CLAIM]; ~1,000 w)
+- [x] ✅ §4.1.3 Hardware Specification and Reproducibility Protocol — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; design/setup only; RTX 3060 12GB/WSL2/conda framed as DGL-2-bound design parameter (batch 16 @512² ← VRAM; mixed-precision split); TAB-3.1 rendered inline (as Table 4.2); reproducibility = engineered confound-removal (seed 42/deterministic, fixed aug+schedule, versioned code App A); SB-2.2 private-data limit; OD-6 framing w/o real-time claim (CFC-2.4); #21 SIR-4; no [UNSOURCED CLAIM]; ~720 w) — **§4.1 COMPLETE; §4.2–§4.8 Phase-2 blocked**
 
 **Appendices writable now**
 - [ ] ⬜ App A — Source Code of the Preprocessing Pipeline — ✅
