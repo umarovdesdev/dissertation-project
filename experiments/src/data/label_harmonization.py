@@ -108,7 +108,7 @@ def get_dataset_camera_groups() -> dict[str, list[str]]:
     """
     return {
         "canon":  ["eyepacs", "ddr", "odir5k"],
-        "topcon": ["messidor", "rfmid", "ddr"],
+        "topcon": ["messidor2", "rfmid", "ddr"],
         "kowa":   ["idrid", "rfmid"],
         "zeiss":  ["odir5k"],
     }

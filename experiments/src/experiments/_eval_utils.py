@@ -175,7 +175,86 @@ def _train_fresh(
     return model, best.get("val_weighted_f1", float("nan"))
 
 
+def load_baseline_model(
+    config: dict[str, Any],
+) -> tuple[nn.Module | None, float, str | None, str | None]:
+    """Load an exp1 baseline (3-channel) checkpoint for transfer comparisons.
+
+    Prefers ``C_fold0`` (EfficientNet-B3 baseline, pairs with the full-pipeline
+    EfficientNet model from :func:`load_or_train_model`) then ``A_fold0``
+    (ResNet-50 baseline). Returns ``(None, nan, None, None)`` when neither
+    checkpoint exists — callers then skip the baseline branch rather than
+    training a fresh model.
+
+    Args:
+        config: Merged config (reads ``paths.output_dir`` and ``models``).
+
+    Returns:
+        Tuple ``(model_or_None, eyepacs_val_f1, arch_name, checkpoint_tag)``.
+    """
+    exp1_root = Path(config["paths"]["output_dir"]) / "exp1" / "checkpoints"
+    for tag, arch in (("C_fold0", "efficientnet_b3"), ("A_fold0", "resnet50")):
+        ckpt_path = exp1_root / tag / "best_model.pt"
+        if ckpt_path.exists():
+            print(f"  Loading exp1 baseline checkpoint: {ckpt_path}")
+            model_cfg = {**config["models"][arch], "in_channels": 3}
+            model = create_model(arch, model_cfg)
+            ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+            model.load_state_dict(ckpt["model_state_dict"])
+            f1 = ckpt.get("metrics", {}).get("val_weighted_f1", float("nan"))
+            model.eval()
+            return model, f1, arch, tag
+    return None, float("nan"), None, None
+
+
 # ── Dataset evaluation ────────────────────────────────────────────────────────
+
+def infer_dataset(
+    model: nn.Module,
+    dataset: torch.utils.data.Dataset,
+    config: dict[str, Any],
+    device: torch.device,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, float]]:
+    """Run inference and return raw arrays plus the trainer's metric dict.
+
+    Unlike :func:`evaluate_dataset` (which returns only the metric dict), this
+    exposes per-sample predictions so callers can run paired bootstrap tests
+    (e.g. Experiment 5 degradation difference).
+
+    Args:
+        model: Trained model in eval mode.
+        dataset: Dataset returning ``(image_tensor, label)``.
+        config: Full config (reads batch_size, num_workers, mixed_precision).
+        device: Device to run inference on.
+
+    Returns:
+        Tuple ``(y_true, y_pred, y_prob, metrics)`` where ``y_prob`` has shape
+        ``(N, C)`` and ``metrics`` keys keep the trainer's ``val_`` prefix.
+    """
+    tc = config.get("training", {})
+    batch_size  = tc.get("batch_size", 16)
+    num_workers = tc.get("num_workers", 4)
+
+    loader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=(device.type == "cuda"),
+    )
+
+    trainer   = Trainer(config, device=str(device))
+    criterion = nn.CrossEntropyLoss()
+    metrics, all_preds, all_probs, all_labels = trainer.evaluate(
+        model, loader, criterion
+    )
+    return (
+        np.asarray(all_labels),
+        np.asarray(all_preds),
+        np.asarray(all_probs),
+        metrics,
+    )
+
 
 def evaluate_dataset(
     model: nn.Module,

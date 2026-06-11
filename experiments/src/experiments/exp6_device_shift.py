@@ -9,7 +9,7 @@ Camera groups (per RESEARCH_ARCHITECTURE §5.6):
   Kowa   (out-domain): IDRiD
   Mixed  (out-domain): DDR  (Canon + Topcon, no per-image metadata)
   Mixed  (out-domain): ODIR-5K (Canon + Zeiss, no per-image metadata)
-  Topcon (out-domain): Messidor — SKIPPED until loader available
+  Topcon (out-domain): Messidor-2 (5-class adjudicated DR grades)
   Mixed  (out-domain): RFMiD   — binary DR evaluation (Topcon + Kowa cameras)
 
 H-6 criterion: weighted-F1 variance across camera groups is within
@@ -30,6 +30,7 @@ import torch
 
 from src.data.datasets import DDRDataset, IDRiDDataset, ODIR5KDataset, RFMiDDataset
 from src.data.label_harmonization import get_dataset_camera_groups
+from src.data.messidor2_dataset import Messidor2Dataset
 from src.experiments._eval_utils import (
     build_full_pipeline,
     evaluate_dataset,
@@ -49,6 +50,7 @@ def run(
     fold: int | None = None,
     resume: bool = False,
     _subset_size: int | None = None,
+    _configs_to_run: list[str] | None = None,
 ) -> None:
     """Run Experiment 6: device domain shift evaluation.
 
@@ -57,6 +59,7 @@ def run(
         fold: Unused — included for CLI interface consistency.
         resume: Resume from checkpoint if training fresh.
         _subset_size: Limit dataset rows for each group (smoke test).
+        _configs_to_run: Unused — included for dispatch interface consistency.
     """
     set_seed(config.get("seed", 42))
 
@@ -117,13 +120,13 @@ def run(
         config, model, pipeline, device, _subset_size
     )
 
-    # ── Topcon — Messidor (skipped — no loader) ───────────────────────────────
-    print("\nTopcon (Messidor): SKIPPED — no DR grade file; "
-          "implement harmonize_messidor2_labels() to enable.")
-    results["cross_device"]["topcon_messidor"] = {
-        "status": "skipped",
-        "reason": "Messidor DR grades not available — see harmonize_messidor2_labels()",
-    }
+    # ── Topcon — Messidor-2 (5-class) ─────────────────────────────────────────
+    print(f"\n{'='*65}")
+    print("Evaluating camera group: Topcon (Messidor-2) …")
+    print(f"{'='*65}")
+    results["cross_device"]["topcon_messidor2"] = _eval_messidor2(
+        config, model, pipeline, device, _subset_size
+    )
 
     # ── Mixed Topcon+Kowa — RFMiD (binary DR) ────────────────────────────────
     rfmid_root = Path(config["paths"].get("rfmid", ""))
@@ -234,6 +237,29 @@ def _eval_idrid(
         return evaluate_dataset(model, ds, config, device)
     except Exception as e:
         warnings.warn(f"IDRiD evaluation failed: {e}", UserWarning)
+        return {"status": "failed", "error": str(e)}
+
+
+def _eval_messidor2(
+    config: dict,
+    model: torch.nn.Module,
+    pipeline: Any,
+    device: torch.device,
+    subset_size: int | None,
+) -> dict[str, Any]:
+    messidor_root = Path(config["paths"]["messidor2"])
+    try:
+        subset = list(range(subset_size)) if subset_size else None
+        ds = Messidor2Dataset.from_directory(
+            root=messidor_root / "IMAGES",
+            labels_csv=messidor_root / "messidor_data.csv",
+            subset_indices=subset,
+            preprocessing=pipeline,
+        )
+        print(f"  Messidor-2: {len(ds)} images")
+        return evaluate_dataset(model, ds, config, device)
+    except Exception as e:
+        warnings.warn(f"Messidor-2 evaluation failed: {e}", UserWarning)
         return {"status": "failed", "error": str(e)}
 
 

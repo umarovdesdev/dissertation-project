@@ -52,6 +52,29 @@ class BaseFundusDataset(Dataset):
     def __len__(self) -> int:
         return len(self.image_paths)
 
+    def _eye_side(self, idx: int) -> str:
+        """Return the canonical eye side (``"left"``/``"right"``/``"unknown"``).
+
+        Subclasses may expose an ``eye_sides`` list (e.g. ClinicalDataset stores
+        ``"L"``/``"R"``); normalise it to the form Stage 0 canonical flip expects.
+        Falls back to ``"unknown"`` when no per-sample side is available.
+
+        Args:
+            idx: Sample index.
+
+        Returns:
+            ``"left"``, ``"right"``, or ``"unknown"``.
+        """
+        sides = getattr(self, "eye_sides", None)
+        if not sides or idx >= len(sides):
+            return "unknown"
+        s = str(sides[idx]).strip().lower()
+        if s in ("l", "left"):
+            return "left"
+        if s in ("r", "right"):
+            return "right"
+        return "unknown"
+
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, int]:
         """Load and return one sample.
 
@@ -60,26 +83,37 @@ class BaseFundusDataset(Dataset):
 
         Returns:
             Tuple of (image_tensor, label) where image_tensor is float32
-            with shape (C, H, W) and values in [0, 1].
+            with shape (C, H, W). Values are pipeline-normalised when a
+            :class:`~src.preprocessing.pipeline.PreprocessingPipeline` is used,
+            otherwise scaled to [0, 1].
         """
         image = cv2.imread(str(self.image_paths[idx]))
         if image is None:
             raise FileNotFoundError(f"Could not load image: {self.image_paths[idx]}")
 
         if self.preprocessing is not None:
+            from src.preprocessing.pipeline import PreprocessingPipeline  # noqa: PLC0415
+            if isinstance(self.preprocessing, PreprocessingPipeline):
+                # The pipeline handles BGR→RGB, all stages, and returns a
+                # normalised (C, H, W) tensor directly.
+                tensor = self.preprocessing(image, eye_side=self._eye_side(idx))
+                return tensor, self.labels[idx]
+            # legacy callable returning a numpy array
             image = self.preprocessing(image)
 
         if self.augmentation is not None:
             image = self.augmentation(image)
 
-        # Normalise to [0, 1] float32 only if still uint8
-        if image.dtype == np.uint8:
-            image = image.astype(np.float32) / 255.0
+        # Legacy normalisation: numpy uint8 → float32 [0, 1]; pass tensors through.
+        if isinstance(image, np.ndarray):
+            if image.dtype == np.uint8:
+                image = image.astype(np.float32) / 255.0
+            else:
+                image = image.astype(np.float32)
+            tensor = torch.from_numpy(np.ascontiguousarray(image.transpose(2, 0, 1)))
         else:
-            image = image.astype(np.float32)
+            tensor = image  # already a tensor (e.g. pipeline output)
 
-        # HWC → CHW
-        tensor = torch.from_numpy(np.ascontiguousarray(image.transpose(2, 0, 1)))
         return tensor, self.labels[idx]
 
 

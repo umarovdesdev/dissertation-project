@@ -271,7 +271,20 @@
       "Bash(awk '/^## PART 1/{f=1;next} /^## PART 2/{f=0} f' thesis/chapters/06-system-architecture/drafts/6.2.2-draft.md)",
       "Bash(awk '/^## PART 1/{f=1;next} /^## PART 2/{f=0} f' thesis/chapters/06-system-architecture/drafts/6.4.1-draft.md)",
       "Bash(awk '/^## PART 1/{f=1;next} /^## PART 2/{f=0} f' thesis/chapters/06-system-architecture/drafts/6.4.2-draft.md)",
-      "Bash(awk '/^## PART 1/{f=1;next} /^## PART 2/{f=0} f' thesis/chapters/06-system-architecture/drafts/6.C-draft.md)"
+      "Bash(awk '/^## PART 1/{f=1;next} /^## PART 2/{f=0} f' thesis/chapters/06-system-architecture/drafts/6.C-draft.md)",
+      "Bash(awk -F',' '$2==\"\"')",
+      "PowerShell(conda *)",
+      "PowerShell(wsl -l -v 2>&1; Write-Output \"---- conda in wsl ----\"; wsl bash -lc \"conda env list 2>/dev/null; echo '---'; ls /mnt/e/dissertation-project/experiments >/dev/null 2>&1 && echo 'repo visible in wsl'\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"source ~/.bashrc 2>/dev/null; conda env list 2>/dev/null || ~/miniconda3/bin/conda env list 2>/dev/null || ~/anaconda3/bin/conda env list 2>/dev/null; echo '--- find conda ---'; ls -d ~/miniconda3 ~/anaconda3 /opt/conda 2>/dev/null\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"cd /mnt/e/dissertation-project/experiments && ~/miniconda3/envs/dr-classifier/bin/python scripts/smoke_imports.py\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"cd /mnt/e/dissertation-project/experiments && nohup ~/miniconda3/envs/dr-classifier/bin/python -u scripts/smoke_run.py > outputs/_smoke.log 2>&1 & echo PID=\\\\$!\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"cd /mnt/e/dissertation-project/experiments && tail -n 40 outputs/_smoke.log\")",
+      "PowerShell($log = \"E:\\\\dissertation-project\\\\experiments\\\\outputs\\\\_smoke.log\"; if \\(Test-Path $log\\) { Remove-Item $log }; $p = Start-Process -FilePath \"wsl\" -ArgumentList '-d','Ubuntu','--','/home/yesmu/miniconda3/envs/dr-classifier/bin/python','-u','/mnt/e/dissertation-project/experiments/scripts/smoke_run.py' -WorkingDirectory \"E:\\\\dissertation-project\\\\experiments\" -RedirectStandardOutput $log -RedirectStandardError \"E:\\\\dissertation-project\\\\experiments\\\\outputs\\\\_smoke.err\" -PassThru -WindowStyle Hidden; Write-Output \"Started PID $\\($p.Id\\)\")",
+      "PowerShell($log=\"E:\\\\dissertation-project\\\\experiments\\\\outputs\\\\_smoke.log\"; $err=\"E:\\\\dissertation-project\\\\experiments\\\\outputs\\\\_smoke.err\"; if\\(Test-Path $log\\){\"--- stdout \\(tail\\) ---\"; Get-Content $log -Tail 25} else {\"no stdout yet\"}; if\\(\\(Test-Path $err\\) -and \\(Get-Item $err\\).Length -gt 0\\){\"--- stderr \\(tail\\) ---\"; Get-Content $err -Tail 15})",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"ls /mnt/e/datasets/EyePACS | head; echo '--- trainLabels ---'; ls -la /mnt/e/datasets/EyePACS/trainLabels.csv 2>&1; echo '--- train dir ---'; ls /mnt/e/datasets/EyePACS/train 2>/dev/null | head -3; echo '\\(count\\)'; ls /mnt/e/datasets/EyePACS/train 2>/dev/null | wc -l\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"log=/mnt/e/dissertation-project/experiments/outputs/_smoke.log; for i in \\\\$\\(seq 1 560\\); do grep -q 'SMOKE SUMMARY' \\\\$log 2>/dev/null && break; sleep 1; done; echo '===== TAIL ====='; tail -n 50 \\\\$log\")",
+      "PowerShell(wsl -d Ubuntu -- bash -lc 'log=/mnt/e/dissertation-project/experiments/outputs/_smoke.log; for i in $\\(seq 1 560\\); do grep -q \"SMOKE SUMMARY\" \"$log\" 2>/dev/null && break; sleep 1; done; echo \"===== TAIL =====\"; tail -n 55 \"$log\"')",
+      "PowerShell(wsl -d Ubuntu -- bash /mnt/e/dissertation-project/experiments/scripts/_wait_smoke.sh)"
     ]
   }
 }
