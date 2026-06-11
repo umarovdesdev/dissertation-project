@@ -51,7 +51,10 @@ class _PipelineAdapter:
         arr = tensor.permute(1, 2, 0).cpu().numpy()   # (H, W, C) float32
         mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
         std  = np.array([0.229, 0.224, 0.225], dtype=np.float32)
-        arr  = arr * std + mean                        # undo normalisation → [0,1]
+        # Only the 3 RGB channels are ImageNet-normalised; a 4th FOV-mask
+        # channel (full pipeline) is a passthrough {0,1} plane — leave it as-is.
+        arr = arr.copy()
+        arr[..., :3] = arr[..., :3] * std + mean       # undo normalisation → [0,1]
         arr  = (arr * 255).clip(0, 255).astype(np.uint8)
         return arr
 
@@ -204,6 +207,10 @@ def _measure_quality_on_sample(
         # adapter returns numpy HWC uint8 — pass directly to quality metrics
         if isinstance(processed, torch.Tensor):
             processed = (processed.permute(1, 2, 0).cpu().numpy() * 255).clip(0, 255).astype(np.uint8)
+        # Quality metrics operate on RGB only; drop the 4th FOV-mask channel
+        # (full pipeline) so SSIM matches the 3-channel reference.
+        if processed.ndim == 3 and processed.shape[2] > 3:
+            processed = processed[:, :, :3]
         q = compute_all_quality_metrics(processed, original=raw)
         cnrs.append(q["cnr"])
         entropies.append(q["entropy"])

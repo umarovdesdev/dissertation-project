@@ -29,7 +29,6 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 
-from src.data.augmentation import FundusAugmentation
 from src.data.datasets import EyePACSDataset, IDRiDDataset
 from src.data.splits import PatientLevelKFold
 from src.explainability.gradcam import GradCAMGenerator
@@ -111,18 +110,25 @@ def _train_model(
     Returns:
         Trained nn.Module in eval mode on the trainer device.
     """
-    aug_cfg   = config["augmentation"]
     model_cfg = dict(config["models"]["efficientnet_b4"])
+    # Baseline pipeline yields 3 channels (RGB); the full pipeline adds the FOV
+    # mask as a 4th channel. The model's input conv must match.
+    in_channels = 3 if config_name == "baseline" else 4
 
     trainer = Trainer(config, device="auto")
+    # EfficientNet-B4 overflows in fp16 — honour the per-model setting (default off).
+    trainer.mixed_precision = model_cfg.get("mixed_precision", False)
 
     train_idx, val_idx = splits[0]
+    # Augmentation (Stage 6) is integrated into the training PreprocessingPipeline;
+    # EyePACSDataset routes images through the pipeline directly, so no separate
+    # augmentation callable is passed here (matches exp1's convention).
     train_ds = EyePACSDataset(
         image_paths=[all_paths[i] for i in train_idx],
         labels=[all_labels[i] for i in train_idx],
         patient_ids=[all_pids[i] for i in train_idx],
         preprocessing=pipeline,
-        augmentation=FundusAugmentation(aug_cfg),
+        augmentation=None,
     )
     val_ds = EyePACSDataset(
         image_paths=[all_paths[i] for i in val_idx],
@@ -145,7 +151,16 @@ def _train_model(
     ckpt_dir = output_dir / "checkpoints" / config_name
     ckpt_dir.mkdir(parents=True, exist_ok=True)
     ckpt_mgr = CheckpointManager(ckpt_dir, max_keep=5)
-    model    = create_efficientnet(variant="b4", **model_cfg)
+    # Pass only constructor-recognised keys (model_cfg also carries
+    # mixed_precision, which create_efficientnet does not accept).
+    model = create_efficientnet(
+        variant="b4",
+        num_classes=model_cfg.get("num_classes", 5),
+        pretrained=model_cfg.get("pretrained", True),
+        dropout=model_cfg.get("dropout", 0.4),
+        freeze_base=model_cfg.get("freeze_base", False),
+        in_channels=in_channels,
+    )
 
     trainer.train_fold(
         model=model,
@@ -212,8 +227,13 @@ def _image_to_tensor(
         device: Target device.
 
     Returns:
-        Float32 tensor of shape (1, 3, H, W) in [0, 1].
+        Float32 tensor of shape (1, C, H, W).
     """
+    # A PreprocessingPipeline returns an already-normalised (C, H, W) tensor —
+    # just add the batch dim and move to device.
+    if isinstance(image, torch.Tensor):
+        t = image if image.dim() == 4 else image.unsqueeze(0)
+        return t.to(device=device, dtype=torch.float32)
     if image.dtype == np.uint8:
         img_f = image.astype(np.float32) / 255.0
     else:
@@ -372,10 +392,18 @@ def run(
         }
         per_image_results.append(result_entry)
 
-        # Save comparison figure
+        # Save comparison figure. The pipelines return normalised (C, H, W)
+        # tensors, not displayable images; use a plain-resized copy of the
+        # original at the pipeline output resolution (BGR uint8) as the display
+        # base — it is spatially aligned with the Grad-CAM heatmaps.
+        if isinstance(img_base, torch.Tensor):
+            ph, pw = int(img_base.shape[-2]), int(img_base.shape[-1])
+        else:
+            ph, pw = img_base.shape[:2]
+        disp_img = cv2.resize(raw, (pw, ph))
         fig_path = gradcam_dir / f"{stem}_comparison.png"
         create_comparison_figure(
-            image=img_base,
+            image=disp_img,
             heatmap_baseline=hm_baseline,
             heatmap_preproc=hm_full,
             lesion_masks=masks if masks else None,

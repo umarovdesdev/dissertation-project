@@ -284,7 +284,11 @@
       "PowerShell(wsl -d Ubuntu -- bash -lc \"ls /mnt/e/datasets/EyePACS | head; echo '--- trainLabels ---'; ls -la /mnt/e/datasets/EyePACS/trainLabels.csv 2>&1; echo '--- train dir ---'; ls /mnt/e/datasets/EyePACS/train 2>/dev/null | head -3; echo '\\(count\\)'; ls /mnt/e/datasets/EyePACS/train 2>/dev/null | wc -l\")",
       "PowerShell(wsl -d Ubuntu -- bash -lc \"log=/mnt/e/dissertation-project/experiments/outputs/_smoke.log; for i in \\\\$\\(seq 1 560\\); do grep -q 'SMOKE SUMMARY' \\\\$log 2>/dev/null && break; sleep 1; done; echo '===== TAIL ====='; tail -n 50 \\\\$log\")",
       "PowerShell(wsl -d Ubuntu -- bash -lc 'log=/mnt/e/dissertation-project/experiments/outputs/_smoke.log; for i in $\\(seq 1 560\\); do grep -q \"SMOKE SUMMARY\" \"$log\" 2>/dev/null && break; sleep 1; done; echo \"===== TAIL =====\"; tail -n 55 \"$log\"')",
-      "PowerShell(wsl -d Ubuntu -- bash /mnt/e/dissertation-project/experiments/scripts/_wait_smoke.sh)"
+      "PowerShell(wsl -d Ubuntu -- bash /mnt/e/dissertation-project/experiments/scripts/_wait_smoke.sh)",
+      "PowerShell(wsl -d Ubuntu -- bash /mnt/e/dissertation-project/experiments/scripts/_wait_smoke2.sh)",
+      "PowerShell($log=\"E:\\\\dissertation-project\\\\experiments\\\\outputs\\\\_smoke2.log\"; if\\(Test-Path $log\\){ $c=Get-Content $log; $i=[array]::IndexOf\\($c,\\($c | Where-Object {$_ -match 'SMOKE SUMMARY'} | Select-Object -First 1\\)\\); if\\($i -ge 0\\){ $c[\\($i-1\\)..\\($c.Length-1\\)] } else { \"no summary yet — tail:\"; Get-Content $log -Tail 25 } })",
+      "PowerShell(wsl -d Ubuntu -- bash /mnt/e/dissertation-project/experiments/scripts/_wait_exp4.sh)",
+      "PowerShell(wsl -d Ubuntu -- bash -lc \"cd /mnt/e/dissertation-project/experiments && ~/miniconda3/envs/dr-classifier/bin/python scripts/smoke_imports.py | tail -3\")"
     ]
   }
 }
