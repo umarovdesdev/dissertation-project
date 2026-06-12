@@ -25,5 +25,5 @@ Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `
 - [Preprocessing: OD/fovea + polar CLAHE](PROJECT_MEMORY/preprocessing-od-fovea-polar.md) — detector unreliable (fovea fails); polar CLAHE now Stage-5 default pivoting on FOV centroid → checkpoints must be retrained
 
 ## Cross-cutting
-- [Strip version markers](PROJECT_MEMORY/strip-version-markers.md) — remove V5/V4/V3 outside thesis/; defense/experiments/demo/server done, root TODO
+- [Strip version markers](PROJECT_MEMORY/strip-version-markers.md) — V5 IS a version marker; remove V5/V4/V3 outside thesis/; defense/experiments/demo/server done, council export now auto-scrubbed in md2gost.py (2026-06-12), root TODO
 - [Demo stack](PROJECT_MEMORY/demo-stack.md) — launch backend (WSL) + frontend (npm) + Cloudflare tunnels for the real model; human copy `demo/RUNBOOK.md`

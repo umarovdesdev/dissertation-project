@@ -1,6 +1,6 @@
 ---
 name: strip-version-markers
-description: "User-directed cleanup removing ALL V5/V4/V3 version markers (incl. the V5 proper noun) from non-thesis dirs; defense/experiments/demo/server done 2026-06-03, root TODO"
+description: "User-directed: ALL V5/V4/V3 version markers (V5 IS a version marker, not a preserved proper noun) banned outside thesis/; defense/experiments/demo/server done, council-export scrubber added in md2gost.py 2026-06-12, root TODO"
 metadata:
   type: project
 ---
@@ -28,4 +28,6 @@ demo/ + server/ (DONE 2026-06-03):
 - API contract field renamed `v5_preview_png_b64` → `preview_png_b64` across BOTH server and demo — keep in sync.
 - Renamed `v5_pipeline_specification.md`→`pipeline_specification.md`. KEPT: cv2, IMAGENET1K_V2, package-lock.json, demo/build/ (generated).
 
-Status: `defense/` + `experiments/` + `demo/` + `server/` complete (2026-06-03). Still TODO: **root-level files only**. See [[v5-cache-throughput]].
+Council export leak fixed (2026-06-12): `thesis/output/*.md` (allowed to keep `V5`) was rendered verbatim into `defense/docs/*.docx`+`.pdf`, leaking `V5` outside `thesis/`. Fix = a scrubber **in the converter** so it can't regress: `strip_version_markers()` in `.claude/skills/council-docs/scripts/md2gost.py`, called by `convert(..., strip_versions=True)`. Removes `(V5)` parentheticals, bare tokens (`V5`/`v5.2`/`V4`/`V3`), and word forms (`version 5.x`/`версия 5`/`нұсқа 5`), each eating its adjacent space (signature spacing untouched). Source .md unchanged. Rebuilt all 5 deliverables; docx XML verified 0 `V[345]`. User restated the rule "раз и навсегда": **`V5` IS a version marker (5th version)** and must not appear in `defense/`, `demo/`, `experiments/`, or root. Documented in `REFACTORING.md §9`. See [[council-docs-skill]].
+
+Status: `defense/` + `experiments/` + `demo/` + `server/` complete; council-export scrubber added 2026-06-12. Still TODO: **root-level files only**. See [[v5-cache-throughput]].

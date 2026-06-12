@@ -138,3 +138,35 @@ This makes the store first-class context regardless of Windows user or C: path.
 - Operational facts (how to launch demo, run a Colab job, who signs a doc) → also
   update the human-facing domain doc (`demo/RUNBOOK.md`, `experiments/...`, `council/PEOPLE.md`).
 - Commit the store with the related work so all three machines converge via git + drive.
+
+---
+
+## 9. V5 leak — version markers escaping thesis/ via the council export (2026-06-12)
+
+**Rule (binding, restated so it is not lost again):** version markers must stay
+**inside `thesis/` only**. This explicitly includes **`V5`** — `V5` denotes the
+*fifth version* of the preprocessing pipeline, so it is a version marker like
+`v5.1`, `V4`, `version 5.x`, `версия 5`, `нұсқа 5`. It must **not** appear in
+`defense/`, `demo/`, `experiments/`, or any root-level file. (This supersedes the
+old CLAUDE.md/VERSIONING_POLICY carve-out that treated `V5` as a preserved proper
+noun. Outside `thesis/` the pipeline is just "the preprocessing pipeline" / "the
+8-stage pipeline" / "конвейер" / "pipeline".)
+
+**Problem found.** The council-docs skill renders `thesis/output/*.md` (where `V5`
+is allowed) verbatim into `defense/docs/*.docx`+`.pdf`. So `V5` leaked into every
+abstract and review under `defense/docs/` — outside `thesis/`.
+
+**Fix applied.** Added a version-marker scrubber to the converter itself, so the
+boundary is enforced at export time and cannot regress:
+- `.claude/skills/council-docs/scripts/md2gost.py` → `strip_version_markers()`,
+  called in `convert(...)` (default `strip_versions=True`). It removes `(V5)`
+  parentheticals, bare tokens (`V5`, `v5.2`, `V4`, `V3`), and word forms
+  (`version 5.x`, `версия 5`, `нұсқа 5`), each consuming its adjacent space so the
+  prose stays clean and unrelated spacing (e.g. signature lines) is untouched.
+- The source `thesis/output/*.md` is left unchanged — it keeps `V5`, as allowed.
+- Rebuilt all 5 deliverables; verified the `.docx` XML contains **zero** `V[345]`
+  markers (`abstract_en/ru/kz`, `supervisor_review_kz`, `foreign_consultant_review_en`).
+
+**Going forward:** any new export pathway out of `thesis/` (slides, demo copy,
+experiment docs) must apply the same scrub. When in doubt, grep the destination
+dir for `[Vv][345]` before committing.

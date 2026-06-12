@@ -1,6 +1,6 @@
 # ABSTRACT
 
-**of the dissertation work by Yesmukhamedov Nurmaganbet Seitkaliuly titled "Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification", submitted for the degree of Doctor of Philosophy (PhD) in the educational programme 8D061 — Information and Communication Technologies**
+**of the dissertation work by Yesmukhamedov Nurmaganbet Seitkaliuly titled "Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification", submitted for the degree of Doctor of Philosophy (PhD) in the educational programme 8D06104 — Computer systems and software engineering**
 
 ---
 

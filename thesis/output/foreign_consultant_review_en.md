@@ -4,7 +4,7 @@
 
 on the topic *"Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification"*, submitted for the degree of Doctor of Philosophy (PhD)
 
-**Educational programme:** 8D061 — Information and Communication Technologies
+**Educational programme:** 8D06104 — Computer systems and software engineering
 
 ---
 
@@ -38,7 +38,7 @@ The practical significance of the work is substantial. The integrated pipeline c
 
 ## 5. Conclusion
 
-The dissertation of Yesmukhamedov Nurmaganbet Seitkaliuly makes a significant, original, and scientifically substantiated contribution to the field of automated diabetic retinopathy diagnosis. The work is methodologically rigorous, experimentally thorough, and clearly delimited in its claims — the candidate explicitly states the boundaries of the work and refrains from overstated assertions. The dissertation meets the academic and methodological requirements for doctoral research and conforms to international standards for the award of a PhD degree. In my assessment, the author, Yesmukhamedov Nurmaganbet Seitkaliuly, fully deserves the degree of Doctor of Philosophy (PhD) under educational programme 8D061 — Information and Communication Technologies.
+The dissertation of Yesmukhamedov Nurmaganbet Seitkaliuly makes a significant, original, and scientifically substantiated contribution to the field of automated diabetic retinopathy diagnosis. The work is methodologically rigorous, experimentally thorough, and clearly delimited in its claims — the candidate explicitly states the boundaries of the work and refrains from overstated assertions. The dissertation meets the academic and methodological requirements for doctoral research and conforms to international standards for the award of a PhD degree. In my assessment, the author, Yesmukhamedov Nurmaganbet Seitkaliuly, fully deserves the degree of Doctor of Philosophy (PhD) under educational programme 8D06104 — Computer systems and software engineering.
 
 ---
 
