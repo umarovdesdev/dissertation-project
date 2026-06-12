@@ -337,7 +337,8 @@
       "Bash(pdftotext \"Selvaraju_Grad-CAM_Visual_Explanations_ICCV_2017_paper.pdf\" -)",
       "Bash(pdftotext \"2008.09772v3.pdf\" -)",
       "WebFetch(domain:www.nature.com)",
-      "WebFetch(domain:arxiv.org)"
+      "WebFetch(domain:arxiv.org)",
+      "Bash(grep -iE '\\\\.md$')"
     ]
   }
 }
