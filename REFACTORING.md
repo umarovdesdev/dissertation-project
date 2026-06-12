@@ -1,172 +1,221 @@
-# REFACTORING — Relocate all dissertation knowledge onto drive E:
+# REFACTORING — Dissertation monorepo audit & plan
+
+**What this is.** A progressive, checkpoint-based audit of `E:\dissertation-project\`
+with an actionable refactoring strategy. Goals: better structure, removal of
+intermediate / obsolete / duplicated / temporary files, retirement of artifacts from
+completed work, easier navigation, and stronger reproducibility + long-term
+maintainability.
+
+**How this document is built.** Work proceeds in checkpoints (~25k tokens of analysis
+each). After each checkpoint the findings are appended here, then work STOPS and asks
+permission before continuing. Nothing destructive is executed without it being recorded
+here first.
+
+**Conventions in this doc**
+- 🔴 delete/remove · 🟠 move/relocate · 🟡 consolidate/dedupe · 🟢 keep (noted for context)
+- "history rewrite" = removing a blob from all past commits (BFG / git-filter-repo), not
+  just `git rm` (which leaves the bytes in `.git`).
+
+---
+
+## Checkpoint log
+
+| # | Scope | Status | Date |
+|---|-------|--------|------|
+| 1 | Repo-wide inventory, size/bloat analysis, root-level & top-level structure | ✅ done | 2026-06-12 |
+| 2 | `demo/` deep audit (web public assets, server, build artifacts) | ⬜ pending | — |
+| 3 | `experiments/` deep audit (outputs, logs, src, colab/kaggle) | ⬜ pending | — |
+| 4 | `defense/` + `council/` deep audit (pptx, figures, docs) | ⬜ pending | — |
+| 5 | `thesis/` deep audit (chapters, literature, governance, output) | ⬜ pending | — |
+| 6 | Git history rewrite plan + `.gitignore` hardening + execution sequencing | ⬜ pending | — |
+
+> Checkpoint boundaries may shift as findings dictate; the table is updated each round.
+
+---
+
+## Checkpoint 1 — Inventory & top-level audit  ✅ 2026-06-12
+
+### 1.1 Repository at a glance
+
+- **Branch:** `main` (tracks `origin/main`). Working tree clean except
+  `.claude/settings.local.json` (local, expected).
+- **Tracked files:** 2,364.
+- **On-disk size by top dir** (includes untracked/ignored content):
+
+  | Dir | On-disk | Tracked files | Note |
+  |-----|--------:|--------------:|------|
+  | `demo` | **2,262 MB** | 1,474 | `web/node_modules` + `web/build` (untracked) + ~1 GB tracked images |
+  | `experiments` | **869 MB** | 109 | almost all in `outputs/` (gitignored checkpoints/backups) |
+  | `defense` | 142 MB | 305 | pptx decks + figures |
+  | `server` | 124 MB | 19 | `checkpoints/` holds a model artifact (gitignored `.pth`?) |
+  | `thesis` | 3.5 MB | 383 | text + literature cards (healthy) |
+  | `council` | 0.2 MB | ~50 | governance reference docs |
+  | `.claude` | 0.1 MB | 4 | skills |
+  | `PROJECT_MEMORY` | ~0 | 12 | portable memory store (see Appendix A) |
+  | **`.git`** | **927 MB** | — | ⚠️ history bloat — see §1.2 |
+
+### 1.2 The headline problem: binary bloat in git (927 MB `.git`)
+
+The repository's single biggest maintainability/reproducibility liability is **~1 GB of
+binary blobs living in git** — both in the current tree and, worse, multiplied across
+history.
+
+**Largest blobs in history** (`git rev-list --objects --all`):
+
+| Size | Path | Issue |
+|-----:|------|-------|
+| 48 / 48 / 40 MB | `defense/presentation/seminar-ready.pptx` (3 revisions) | same deck re-committed → ~136 MB of history for one file |
+| 40 MB | `defense/presentation/presentation.pptx` | current deck |
+| 31 MB | `defense/presentation/archive/presentation.pptx` | explicit *archive* of an old deck — pure dead weight |
+| 8–9 MB ×~16 | `demo/web/public/images/pipeline/dr04/preprocessing/stage_*/...png` | full-res preprocessing-stage PNGs incl. debug overlays (`od/`, `fovea/`, `midpoint/`, `image/`) |
+| 6–7 MB ×many | `demo/web/public/datasets/*/samples/*.png` | full-res fundus sample thumbnails |
+
+**Type totals in current HEAD:** images ≈ **1,002 MB**, pptx ≈ **69 MB**, docx/pdf ≈ 2 MB,
+other ≈ 10 MB. History adds repeated pptx revisions (~200 MB) on top.
+
+**Implications**
+- Every `clone`/`fetch` transfers ~1 GB; the candidate moves this repo across three
+  machines on an external drive *and* via `origin` — both are penalised.
+- The pptx files change often and never compress (binary OOXML), so each save bloats
+  history by tens of MB. Three machines × git history = the dominant cost.
+
+**Direction (to be detailed in Checkpoint 6):**
+1. Decide what binary assets *belong in git at all*. Candidate: demo sample/pipeline
+   PNGs and pptx decks are **derived/presentational**, regenerable or archivable outside
+   git. Options: (a) Git LFS, (b) keep web images but downscale + strip debug overlays,
+   (c) move pptx + large source images out of the repo onto the E: drive (untracked,
+   travels physically) with a manifest.
+2. **History rewrite** (git-filter-repo) to evict already-committed large pptx revisions
+   and the `archive/` deck — the only way to shrink `.git` from 927 MB.
+3. Harden `.gitignore` so binaries can't silently re-enter.
+
+> ⚠️ History rewrite is the one irreversible action in this whole plan. It is deliberately
+> deferred to the final checkpoint, gated behind explicit approval, and will be preceded
+> by a full `.git` backup (bundle).
+
+### 1.3 Root-level files — inventory & disposition
+
+```
+E:\dissertation-project\
+├── CLAUDE.md              🟢 keep (project instructions; recently updated)
+├── README.md             🟢 keep (622 B, thin — could grow a nav section)
+├── .gitignore            🟢 keep (audit/extend in CP6)
+├── PROJECT_MEMORY.md      🟢 keep (portable-memory index — Appendix A)
+├── PROJECT_MEMORY/        🟢 keep (12 memory facts)
+├── REFACTORING.md        🟢 keep (this file)
+├── TASK.md               🟠/🟡 28 KB operational task log (Config-D + demo launch),
+│                              "Updated 2026-06-02"; itself a consolidation of two older
+│                              task docs. Operational handoff, not dissertation content.
+│                              → audit for completed items, relocate under a docs/ or
+│                                ops/ area or archive once Config-D run closes.
+├── SUPERVISOR_HANDOFF.md 🟠 18 KB two-instance-workflow operating brief. Process doc,
+│                              not deliverable. → relocate to a docs/ or .claude/ area;
+│                              verify it isn't stale vs current workflow.
+└── download_dc.sh        🔴/🟠 one-off bash helper to scrape council docs from the IITU
+                               site; hardcoded absolute paths (`E:/dissertation_council`,
+                               Cyrillic dirs), violates the repo's "no hardcoded paths"
+                               rule. Likely already-run scaffolding. → confirm obsolete,
+                               then remove or move to council/scripts/ with a header.
+```
+
+**Root clutter assessment.** The root mixes three concerns: (a) genuine project entry
+points (`CLAUDE.md`, `README.md`, governance/memory), (b) **operational/process handoff
+docs** (`TASK.md`, `SUPERVISOR_HANDOFF.md`), and (c) a **stray utility script**
+(`download_dc.sh`). Recommendation (decide in a later CP): introduce a single `docs/` or
+`ops/` home for (b)+(c) so the root presents only entry points. This is low-risk and high
+navigability payoff.
+
+### 1.4 Top-level structure observations (to deep-dive in CP2–5)
+
+- **`demo/` vs root `server/` split.** CLAUDE.md describes the demo as `web/` + `server/`,
+  but there are **two** server trees: `demo/server/` (19 tracked files) *and* a top-level
+  `server/` (19 tracked files, 124 MB incl. a checkpoint). Strong duplication smell —
+  one is likely the live copy and the other a stale fork/mirror. **Flag for CP2** to
+  diff them and collapse to one.
+- **`experiments/outputs/`** holds `backup_exp1_abc_40pct_20260324/`, `backup_exp1_full/`,
+  `checkpoints/`, `kaggle_config_d/`, `kaggle_config_d_v2/`, `validation/` — dated backups
+  and v1/v2 duplicates (869 MB). Gitignored, so not a *git* problem, but a disk/clarity
+  problem and a reproducibility-hygiene question. **CP3.**
+- **`experiments/logs/` is tracked** and contains `*.log` and **`*.pid`** files
+  (`exp1_D_fold2.pid`, `exp1_remaining.pid`, …). PIDs are meaningless across machines and
+  logs are run residue — **🔴 these should not be in git.** Quick win, scheduled for CP3.
+- **`defense/presentation/archive/`** — an in-repo archive folder of superseded decks
+  (31 MB pptx). Archetypal "completed-stage artifact". **🔴 CP4.**
+- **`council/ru/…`** filenames are URL-escaped Cyrillic; fine functionally but worth a
+  glance for encoding/portability in CP4.
+- **`demo/web/{node_modules,build}`** present on disk (~1.1 GB, untracked/ignored).
+  Expected; just confirm both are ignored and document a clean-rebuild step (CP2).
+
+### 1.5 Quick wins identified (low-risk, high-value — staged for their CPs)
+
+1. 🔴 Untrack `experiments/logs/*.log` + `*.pid` and ignore the pattern. *(CP3)*
+2. 🔴 Remove `defense/presentation/archive/presentation.pptx` (31 MB) from tree + history. *(CP4/CP6)*
+3. 🟡 Resolve the `demo/server/` ↔ root `server/` duplication. *(CP2)*
+4. 🟠 Give `TASK.md` / `SUPERVISOR_HANDOFF.md` / `download_dc.sh` a non-root home. *(later)*
+5. 🔴 Plan history rewrite for pptx + oversized PNGs to reclaim most of the 927 MB `.git`. *(CP6)*
+
+### 1.6 Method notes (for reproducibility of this audit)
+
+- Sizes from `git ls-tree -r -l HEAD` (tracked) and PowerShell recursive `Length` sums
+  (on-disk). History blobs from
+  `git rev-list --objects --all | git cat-file --batch-check`.
+- No files changed in this checkpoint — inventory only.
+
+---
+
+> **Checkpoint 1 complete.** Continue to the next checkpoint?
+
+---
+---
+
+# Appendix A — COMPLETED: Relocate dissertation memory onto drive E:
+
+> This was the previous occupant of REFACTORING.md and is retained as a record. It is a
+> finished task (memory migration), not part of the active structural refactor above.
 
 **Status:** ✅ EXECUTED 2026-06-12 (per §7 recommendations: visible `PROJECT_MEMORY/`,
 git-tracked, no symlink, C: memory stubbed-with-redirect). 14 memory facts → 12 files on E:
 + index; CLAUDE.md wired; `council/PEOPLE.md` + `demo/RUNBOOK.md` added; C: store retired.
 **Created:** 2026-06-12
 
----
+## A.1 Problem
 
-## 1. Problem
+Persistent project knowledge ("memory") that Claude has been saving lived at
+`C:\Users\yesmu\.claude\projects\E--dissertation-project\memory\` — a **machine-local**
+path. The candidate works across **three machines** (work PC, home laptop, university)
+carrying the project on an **external drive (E:)**; the C: memory does not travel, so that
+knowledge was missing/stale elsewhere. **Goal:** every persistent dissertation fact lives
+under `E:\dissertation-project\` (travels + git-tracked), read/written there, not on C:.
 
-Persistent project knowledge ("memory") that Claude has been saving lives at:
+## A.2 Principle implemented
 
-```
-C:\Users\yesmu\.claude\projects\E--dissertation-project\memory\   ← MACHINE-LOCAL
-```
+1. Single portable store `PROJECT_MEMORY\` + `PROJECT_MEMORY.md` index on E: (git-tracked).
+2. Auto-loaded via root `CLAUDE.md` so it is in context on every machine.
+3. Domain facts also surfaced in their natural home (`demo/RUNBOOK.md`,
+   `experiments/...`, `council/PEOPLE.md`) for humans.
+4. C: harness memory retired to redirect stubs so future writes don't land back on C:.
 
-This path is inside the **per-user, per-machine** Windows profile. The candidate
-works across **three machines** (work PC, home laptop, university) and carries the
-project on an **external drive mounted as E:**. The C: memory directory does **not**
-travel with the E: drive, so on every other machine that knowledge is missing or
-stale. Anything dissertation-related must therefore live under `E:\dissertation-project\`.
+## A.3 Result
 
-**Goal:** every persistent fact about the dissertation is stored on E: (travels with
-the drive, and is git-tracked), and Claude reads/writes it there — not in C: memory.
+14 source memory files were migrated/consolidated into 12 files under `PROJECT_MEMORY/`
+(`#3+#4` → `thesis-writing-status.md`; `#11+#12` → `preprocessing-od-fovea-polar.md`),
+indexed by `PROJECT_MEMORY.md`. The C: store and its `MEMORY.md` were reduced to redirect
+pointers. CLAUDE.md gained a "Project memory — ON DRIVE E:" section.
 
-## 2. Principle (the decision this plan implements)
+## A.4 V5 leak fix (version markers escaping `thesis/`) — 2026-06-12
 
-1. **Single portable store on E:.** Create `E:\dissertation-project\PROJECT_MEMORY\`
-   (folder) + `PROJECT_MEMORY.md` (root index) — a 1:1 replacement for the harness
-   memory, but on the drive. It is git-tracked and travels physically with E:.
-2. **Auto-load via CLAUDE.md.** The root `CLAUDE.md` points Claude at this store so it
-   is in context on every machine, regardless of Windows username or C: path.
-3. **Domain facts also surfaced in their natural home** (demo runbook, experiments
-   docs, council people file) so humans — not just Claude — find them.
-4. **C: harness memory is retired** for this project: emptied down to a stub pointer
-   that redirects to the E: store, so no future writes silently land back on C:.
+**Rule (binding):** version markers stay **inside `thesis/` only**, and this includes the
+token **`V5`** (it denotes the fifth pipeline version). Outside `thesis/` the pipeline is
+"the preprocessing pipeline" / "the 8-stage pipeline" / "конвейер" / "pipeline".
 
-> Why not just symlink the C: memory dir to E:? It would have to be re-created on each
-> machine (different `C:\Users\<name>\` per box), it is not version-controlled, and a
-> broken link fails silently. The in-repo store is portable and auditable. Symlinking is
-> listed as a fallback in §7 only.
+**Problem:** the council-docs skill rendered `thesis/output/*.md` (where `V5` is allowed)
+verbatim into `defense/docs/*.docx`+`.pdf`, leaking `V5` outside `thesis/`.
 
-## 3. Inventory — 14 memory files to migrate
+**Fix:** added `strip_version_markers()` to
+`.claude/skills/council-docs/scripts/md2gost.py`, called in `convert(...)`
+(`strip_versions=True`). Removes `(V5)` parentheticals, bare tokens (`V5`, `v5.2`, `V4`,
+`V3`), and word forms (`version 5.x`, `версия 5`, `нұсқа 5`). Source `thesis/output/*.md`
+left unchanged; all 5 deliverables rebuilt and verified to contain zero `V[345]` markers.
 
-Source: `C:\Users\yesmu\.claude\projects\E--dissertation-project\memory\`
-
-| # | Memory file | Topic | Natural domain home on E: |
-|---|-------------|-------|---------------------------|
-| 1 | `dissertation-people-names.md` | Candidate/supervisor/consultant names, programme code 8D06104, supervisor regalia | `council/PEOPLE.md` |
-| 2 | `council-docs-skill.md` | MD→GOST docx/pdf skill | already self-documented in `.claude/skills/council-docs/SKILL.md` (on E:) — pointer only |
-| 3 | `phase1-writing-complete.md` | Writing phase-1 done, what's gated | `thesis/PLAN.md` / `SUPERVISOR_HANDOFF.md` (already track this) |
-| 4 | `chapter3-methodology-drafted.md` | Ch3 drafted & approved | `thesis/PLAN.md` |
-| 5 | `literature-corpus-integrity-flags.md` | Missing/мismatched lit cards | `thesis/literature/INTEGRITY_FLAGS.md` |
-| 6 | `config-d-shipped-retfound-deferred.md` | Pretraining axis RETFound→SSL, demo divergence | `experiments/docs/` |
-| 7 | `kaggle-eyepacs-source-and-adapter-fix.md` | Kaggle EyePACS source + adapter fix | `experiments/colab/` notes |
-| 8 | `colab-config-d-runner.md` | Colab Config-D runner two-mode | `experiments/colab/README.md` |
-| 9 | `v5-preprocessing-throughput-bottleneck.md` | GPU-starve fix, precompute cache | `experiments/docs/` |
-| 10 | `config-d-cache-mirror-handoff.md` | Cache work handoff, repo mirror task | `experiments/docs/` |
-| 11 | `od-fovea-detector-unreliable-polar-centroid.md` | OD/fovea detector unreliable; polar pivots on centroid | `experiments/` preprocessing notes / `thesis/methods/` |
-| 12 | `polar-clahe-now-default-retrain.md` | Stage 5 polar default → retrain | `experiments/` preprocessing notes |
-| 13 | `strip-version-markers-outside-thesis.md` | Version-marker strip directive | `thesis/governance/VERSIONING_POLICY.md` note |
-| 14 | `demo-local-stack-end-to-end.md` | Launch backend+frontend, Cloudflare tunnel | `demo/RUNBOOK.md` |
-
-Plus the index `MEMORY.md` → becomes `PROJECT_MEMORY.md` on E:.
-
-## 4. Target layout on E:
-
-```
-E:\dissertation-project\
-├── PROJECT_MEMORY.md              ← index (was MEMORY.md); one line per fact
-├── PROJECT_MEMORY\                ← portable store (the 14 facts, same frontmatter format)
-│   ├── people-and-identifiers.md
-│   ├── council-docs-skill.md
-│   ├── thesis-writing-status.md   (consolidates #3 + #4)
-│   ├── literature-integrity-flags.md
-│   ├── config-d-pretraining.md
-│   ├── config-d-kaggle-source.md
-│   ├── colab-config-d-runner.md
-│   ├── v5-cache-throughput.md
-│   ├── config-d-cache-handoff.md
-│   ├── preprocessing-od-fovea-polar.md   (consolidates #11 + #12)
-│   ├── strip-version-markers.md
-│   └── demo-runbook-pointer.md
-├── council\PEOPLE.md              ← human-facing copy of identities (Track B)
-├── demo\RUNBOOK.md                ← human-facing demo launch steps (Track B)
-└── CLAUDE.md                      ← updated to load PROJECT_MEMORY (see §5)
-```
-
-## 5. Wiring into CLAUDE.md (so it loads on every machine)
-
-Add to root `E:\dissertation-project\CLAUDE.md`:
-
-```markdown
-## Project memory — ON DRIVE E: (not C: harness memory)
-
-Persistent project facts live in `PROJECT_MEMORY/` on this drive, indexed by
-`PROJECT_MEMORY.md`. READ the index at session start and WRITE new durable facts
-there — never into the machine-local `~/.claude/.../memory/` store (it does not
-travel across the candidate's work PC / home laptop / university machines).
-```
-
-This makes the store first-class context regardless of Windows user or C: path.
-
-## 6. Execution phases (checklist)
-
-- [ ] **P0 — Snapshot.** Copy the 14 C: memory files into a temp staging area on E:
-      (`PROJECT_MEMORY/_incoming/`) so nothing is lost mid-migration.
-- [ ] **P1 — Create store.** Make `PROJECT_MEMORY\` + `PROJECT_MEMORY.md`; move each
-      fact in, consolidating #3+#4 and #11+#12; keep the YAML frontmatter format.
-- [ ] **P2 — Wire CLAUDE.md.** Add the §5 block to root `CLAUDE.md`.
-- [ ] **P3 — Track B domain copies.** Create `council/PEOPLE.md`, `demo/RUNBOOK.md`;
-      fold experiment facts into `experiments/docs/` and `experiments/colab/README.md`.
-      Cross-link each to its `PROJECT_MEMORY/` entry.
-- [ ] **P4 — Retire C: memory.** Replace every C: memory file with a one-line stub
-      "MOVED → E:\dissertation-project\PROJECT_MEMORY\…"; reduce `MEMORY.md` (C:) to a
-      single pointer line. (Do NOT delete blindly — leave the redirect.)
-- [ ] **P5 — Commit.** `git add PROJECT_MEMORY PROJECT_MEMORY.md CLAUDE.md council/PEOPLE.md demo/RUNBOOK.md …`
-      and commit so the store also syncs via git, not only the physical drive.
-- [ ] **P6 — Verify portability.** Confirm no remaining dissertation fact is C:-only;
-      `_incoming/` staging removed after parity check.
-
-## 7. Open decisions (resolve before P1)
-
-1. **Store name/visibility.** `PROJECT_MEMORY/` (visible, recommended) vs `.memory/`
-   (hidden dotfolder). Recommend visible.
-2. **Git-track the store?** Recommend YES (history + sync). If the candidate prefers the
-   store to be drive-only and not in git, add it to `.gitignore` — it still travels on E:.
-3. **Symlink fallback?** Only if a true single physical copy is wanted: per machine,
-   `mklink /D "%USERPROFILE%\.claude\projects\E--dissertation-project\memory" "E:\dissertation-project\PROJECT_MEMORY"`.
-   Not recommended as primary (per-machine setup, no version history).
-4. **Delete vs stub C: memory.** Recommend stub-with-redirect (P4), not delete.
-
-## 8. Going-forward convention (after migration)
-
-- New durable dissertation fact → write to `E:\dissertation-project\PROJECT_MEMORY\`
-  and add its index line to `PROJECT_MEMORY.md`. Never to C: harness memory.
-- Operational facts (how to launch demo, run a Colab job, who signs a doc) → also
-  update the human-facing domain doc (`demo/RUNBOOK.md`, `experiments/...`, `council/PEOPLE.md`).
-- Commit the store with the related work so all three machines converge via git + drive.
-
----
-
-## 9. V5 leak — version markers escaping thesis/ via the council export (2026-06-12)
-
-**Rule (binding, restated so it is not lost again):** version markers must stay
-**inside `thesis/` only**. This explicitly includes **`V5`** — `V5` denotes the
-*fifth version* of the preprocessing pipeline, so it is a version marker like
-`v5.1`, `V4`, `version 5.x`, `версия 5`, `нұсқа 5`. It must **not** appear in
-`defense/`, `demo/`, `experiments/`, or any root-level file. (This supersedes the
-old CLAUDE.md/VERSIONING_POLICY carve-out that treated `V5` as a preserved proper
-noun. Outside `thesis/` the pipeline is just "the preprocessing pipeline" / "the
-8-stage pipeline" / "конвейер" / "pipeline".)
-
-**Problem found.** The council-docs skill renders `thesis/output/*.md` (where `V5`
-is allowed) verbatim into `defense/docs/*.docx`+`.pdf`. So `V5` leaked into every
-abstract and review under `defense/docs/` — outside `thesis/`.
-
-**Fix applied.** Added a version-marker scrubber to the converter itself, so the
-boundary is enforced at export time and cannot regress:
-- `.claude/skills/council-docs/scripts/md2gost.py` → `strip_version_markers()`,
-  called in `convert(...)` (default `strip_versions=True`). It removes `(V5)`
-  parentheticals, bare tokens (`V5`, `v5.2`, `V4`, `V3`), and word forms
-  (`version 5.x`, `версия 5`, `нұсқа 5`), each consuming its adjacent space so the
-  prose stays clean and unrelated spacing (e.g. signature lines) is untouched.
-- The source `thesis/output/*.md` is left unchanged — it keeps `V5`, as allowed.
-- Rebuilt all 5 deliverables; verified the `.docx` XML contains **zero** `V[345]`
-  markers (`abstract_en/ru/kz`, `supervisor_review_kz`, `foreign_consultant_review_en`).
-
-**Going forward:** any new export pathway out of `thesis/` (slides, demo copy,
-experiment docs) must apply the same scrub. When in doubt, grep the destination
-dir for `[Vv][345]` before committing.
+**Going forward:** any new export pathway out of `thesis/` must apply the same scrub;
+grep the destination for `[Vv][345]` before committing.

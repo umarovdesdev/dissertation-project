@@ -4,8 +4,8 @@
 **Dissertation:** Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 **Candidate:** Yesmukhamedov N.S.
 **Generated from:** Literature Cards in /literature/
-**Total sources indexed:** 81 active (numbered 01–82; #13 retired as duplicate of #11)
-**Version:** 6.0.0 — aligned with INVARIANTS v6.0.0, RESEARCH_ARCHITECTURE v6.0.0, and the corrected TABLE_OF_CONTENTS (EN/KZ)
+**Total sources indexed:** 120 active (numbered 01–121; #13 retired as duplicate of #11)
+**Version:** 6.1.0 — extends v6.0.0 with the #83–#121 expansion (39 new sources): the FGADR benchmark plus ophthalmology-specific SSL/foundation models, fundus image-degradation & quality, foundational loss/optimisation/regularisation/augmentation methods, architecture-lineage references, transfer-learning & medical-DL surveys, and externally-validated DR/ophthalmology clinical studies. Resolves the §1.2.1 gap and the §2.3.3 / §3.3.2 SSL gaps; fills the missing card files for #46 (Grad-CAM), #47 (EyePACS) and #48 (Messidor).
 
 > **v6.0.0 amendment (navigation sync).** The Section Map Key, Source Index "Maps to" column, and
 > Coverage Matrix are re-aligned to the current chapter structure: all seven experiments now live in
@@ -124,9 +124,9 @@ The **Paradigm** column was added in governance v5.3 to support the paradigmatic
 | 43 | Ryu et al. (2021) | CNN classification + external validation (OCTA) | AUC 0.960–0.976 internal; AUC 0.938–0.962 external; ResNet101 on OCTA | Private (single-center) | P1 | §1.3.1, §1.4 |
 | 44 | Zhang et al. (2022) | Multicentre external validation (DR screening) | AUROC 0.9931 referable DR (image); 0.9848 (patient); Cohen's κ 0.86–0.93 vs experts | Private (83,465 images, 4 centres) | P1 | §1.4, §4.4, §5.3, §6.3 |
 | 45 | Ruamviboonsuk et al. (2022) | Prospective clinical validation (DR screening) | Acc 94.7%, sens 91.4% VTDR; outperformed specialists (p=0.024); 9 Thai sites | Private (7,651 patients, prospective) | P1 | §1.4, §5.3, §6.3 |
-| 46 🆕 | Selvaraju et al. (2017) "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization" | Explainability method | Grad-CAM visualization of CNN decisions; gradient-weighted class activation mapping | ImageNet / various | N/A (methodology reference) | §1.3.3, §2.5.1, §2.5.2, §4.5, §5.1 |
-| 47 🆕 | Cuadros & Bresnick (2009) "EyePACS: An Adaptable Telemedicine System for Diabetic Retinopathy Screening" — OR — Kaggle Diabetic Retinopathy Detection competition descriptor | Dataset descriptor | ~35,126 labeled fundus images (Kaggle labeled partition), 5-class DR grading (0–4), Canon CR-1 camera | EyePACS/Kaggle | N/A | §4.1, §1.2.3, INTRO |
-| 48 🆕 | Decencière et al. (2014) "Feedback on a Publicly Distributed Image Database: The Messidor Database" — OR — Messidor-2 dataset descriptor | Dataset descriptor | 1,748 images (Messidor-2), Topcon TRC NW6 camera, referable/non-referable + DR grade | Messidor / Messidor-2 | N/A | §4.1, §4.4, §4.6, INTRO |
+| 46 ✅ | Selvaraju et al. (2017) "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization" (ICCV 2017) — **card written** `selvaraju-2017-grad-cam.md` | Explainability method | Grad-CAM gradient-weighted class activation mapping; ILSVRC-15 weakly-supervised localization; AMT class-discrimination 61.23% vs 44.44% | ImageNet / VOC | N/A (methodology reference) | §1.3.3, §2.5.1, §2.5.2, §4.5, §5.1 |
+| 47 ✅ | Cuadros & Bresnick (2009) "EyePACS: An Adaptable Telemedicine System for Diabetic Retinopathy Screening" (J Diabetes Sci Technol 3(3):509–516) — **card written** `cuadros-2009-eyepacs.md` | Dataset/system descriptor | EyePACS telemedicine system; Canon CR-DGi/CR-1 nonmydriatic cameras, ETDRS-based 5-level grading; >34,100 DRS encounters. (The ~35,126-image labeled partition is a Kaggle-competition attribute.) | EyePACS/Kaggle | N/A | §4.1, §1.2.3, §6.3, INTRO |
+| 48 ✅ | Decencière et al. (2014) "Feedback on a Publicly Distributed Image Database: The Messidor Database" (Image Anal Stereol 33(3):231–234) — **card written** `decenciere-2014-messidor.md` | Dataset descriptor | Messidor: 1,200 fundus images, Topcon TRC NW6, 45° FOV (distinct from Messidor-2 = 1,748) | Messidor / Messidor-2 | N/A | §4.1, §4.4, §4.6, INTRO |
 | 49 🆕 | Pachade et al. (2021) "Retinal Fundus Multi-Disease Image Dataset (RFMiD)" | Dataset descriptor | 3,200 images, multi-disease retinal dataset, Topcon TRC-NW300 and Kowa cameras | RFMiD | N/A | §4.1, §1.2.3, §4.7 |
 | 50 🆕 | Li et al. (2019) "Diagnostic Assessment of Deep Learning Algorithms for Diabetic Retinopathy Screening" — OR — DDR dataset descriptor | Dataset descriptor | DR grading dataset, Canon and Topcon fundus cameras | DDR | N/A | §4.1, §1.2.3, §4.7 |
 | 51 🆕 | TO BE IDENTIFIED — ODIR-5K challenge dataset descriptor (Peking University) | Dataset descriptor | Multi-disease ocular dataset, Canon and Zeiss fundus cameras, ~5,000 patients | ODIR-5K | N/A | §4.1, §1.2.3, §4.7 |
@@ -161,6 +161,45 @@ The **Paradigm** column was added in governance v5.3 to support the paradigmatic
 | 80 🆕 | Koch (2019) "Universal Bounds and Monotonicity Properties of Ratios of Hermite and Parabolic Cylinder Functions" | Peripheral (mathematics) | Monotonicity & optimal bounds of Hermite/parabolic-cylinder function ratios; Turán-type inequalities | None (theoretical) | N/A | Peripheral |
 | 81 🆕 | Hungerford (1999) "Comments on Proton Emission after Muon Capture" | Peripheral (nuclear physics) | Charged-particle emission after atomic muon capture (~15% in light nuclei); MECO background estimate | None (physics) | N/A | Peripheral |
 | 82 🆕 | Ostahie et al. (2015) "Electrical Manipulation of the Edge States in Graphene…" | Peripheral (condensed-matter physics) | Electrically-induced "shortcut edge states" in graphene; unconventional quantum-Hall plateaus | None (simulation) | N/A | Peripheral |
+| 83 🆕 | Zhou et al. (2020) "A Benchmark for Studying Diabetic Retinopathy: Segmentation, Grading, and Transferability" (FGADR) | Dataset descriptor + benchmark | FGADR: 2,842 images (1,842 pixel-level lesion + 1,000 grade); joint grading; FGADR→ODIR-5K transfer | FGADR, ODIR-5K | P1 | §1.3.1, §1.3.2, §4.5, §4.1 |
+| 84 🆕 | Zhou et al. (2023) "A foundation model for generalizable disease detection from retinal images" (RETFound) | Ophthalmology SSL foundation model | MAE/ViT pretrained on 1.6M retinal images; outperforms SimCLR/SwAV/DINO/MoCo-v3; label-efficient multi-disease | Multi-cohort retinal | P1 | §2.3.3, §3.3.2, §4.4, §1.3.2 |
+| 85 🆕 | Azizi et al. (2021) "Big Self-Supervised Models Advance Medical Image Classification" (MICLe) | Medical SSL | In-domain SSL + multi-instance contrastive; +6.7% derm top-1, +1.1% CXR mAUC | Dermatology, Chest X-ray | N/A (method) | §2.3.3, §3.3.2 |
+| 86 🆕 | Chen et al. (2020) "A Simple Framework for Contrastive Learning…" (SimCLR) | SSL method | Contrastive (NT-Xent); ImageNet linear 76.5% top-1 | ImageNet | N/A (method) | §2.3.3, §3.3.2 |
+| 87 🆕 | He et al. (2020) "Momentum Contrast…" (MoCo) | SSL method | Momentum encoder + queue; SSL ≥ supervised on transfer tasks | ImageNet, COCO/VOC | N/A (method) | §2.3.3, §3.3.2 |
+| 88 🆕 | Grill et al. (2020) "Bootstrap Your Own Latent" (BYOL) | SSL method | Negative-free SSL; ImageNet linear 74.3% top-1 | ImageNet | N/A (method) | §2.3.3, §3.3.2 |
+| 89 🆕 | Caron et al. (2021) "Emerging Properties in Self-Supervised Vision Transformers" (DINO) | SSL method (ViT) | Self-distillation; emergent attention segmentation; ViT-B/8 linear 80.1% | ImageNet | N/A (method) | §2.3.3, §3.3.2, §2.5 |
+| 90 🆕 | He et al. (2022) "Masked Autoencoders Are Scalable Vision Learners" (MAE) | SSL method | 75% masking; ViT-H ImageNet-1K fine-tune 87.8%; **basis of RETFound pretraining** | ImageNet | N/A (method) | §3.3.2, §2.3.3 |
+| 91 🆕 | Chen & He (2021) "Exploring Simple Siamese Representation Learning" (SimSiam) | SSL method | Negative-free; stop-gradient prevents collapse | ImageNet | N/A (method) | §2.3.3, §3.3.2 |
+| 92 🆕 | Shurrab & Duwairi (2022) "Self-supervised learning … in medical imaging: a survey" | Review / Survey (medical SSL) | Taxonomy: predictive/contrastive/generative SSL in medical imaging | None (survey) | N/A (survey) | §2.3.3, §3.3.2 |
+| 93 🆕 | Shen et al. (2020) "Modeling and Enhancing Low-Quality Retinal Fundus Images" (cofe-Net) | Preprocessing / enhancement | Degradation model (illumination/blur/artifacts) + cofe-Net (LQA+RSA); improves downstream segmentation/detection | Fundus (synthetic + real) | P1 | §1.2.1, §3.1, §2.6, §4.7 |
+| 94 🆕 | Zago et al. (2018) "Retinal image quality assessment using deep learning" | RIQA / image quality | Inception-v3 transfer; DRIMDB AUC 99.98%, ELSA-Brasil 98.56% (inter-DB) | DRIMDB, ELSA-Brasil | P1 | §2.6, §1.2.2, §4.7 |
+| 95 🆕 | Zuiderveld (1994) "Contrast Limited Adaptive Histogram Equalization" (Graphics Gems IV) | Image enhancement method | Canonical CLAHE algorithm (clip limit + tile interpolation); citable replacement for #25 | Medical images (illustrative) | N/A (method) | §2.1.1, §2.1.2 |
+| 96 🆕 | Lin et al. (2017) "Focal Loss for Dense Object Detection" (RetinaNet) | Loss function | **Focal Loss (γ=2)** — the dissertation's training loss; COCO AP 39.1 | COCO | N/A (method) | §2.2.2, §3.4 |
+| 97 🆕 | Cui et al. (2019) "Class-Balanced Loss Based on Effective Number of Samples" | Loss function | Effective-number re-weighting (1−β^n)/(1−β); long-tailed gains | Long-tailed CIFAR/iNat/ImageNet-LT | N/A (method) | §2.2.2 |
+| 98 🆕 | Buda et al. (2018) "A systematic study of the class imbalance problem in CNNs" | Imbalance study | Oversampling best; no CNN overfitting penalty; thresholding helps | MNIST/CIFAR/ImageNet | N/A (method) | §2.2.2, §2.2.3, §3.4 |
+| 99 🆕 | Kingma & Ba (2015) "Adam: A Method for Stochastic Optimization" | Optimizer | Adaptive moment estimation; defaults β1=0.9, β2=0.999 | MNIST/CIFAR/IMDB | N/A (method) | §2.2.2, §3.2 |
+| 100 🆕 | Ioffe & Szegedy (2015) "Batch Normalization…" | Normalization | Per-batch normalization; ~14× fewer steps; intrinsic to ResNet-50 | ImageNet | N/A (method) | §2.2.3, §3.2 |
+| 101 🆕 | Srivastava et al. (2014) "Dropout…" | Regularization | Random unit dropping ≈ ensemble averaging; reduces overfitting | MNIST/CIFAR/ImageNet/TIMIT | N/A (method) | §2.2.3 |
+| 102 🆕 | Zhang et al. (2018) "mixup: Beyond Empirical Risk Minimization" | Augmentation | Convex input/label mixing; robustness + calibration gains | ImageNet/CIFAR | N/A (method) | §2.2.3 |
+| 103 🆕 | Shorten & Khoshgoftaar (2019) "A survey on Image Data Augmentation for Deep Learning" | Review / Survey | Augmentation taxonomy (geometric/color/mixing/erasing/GAN) | None (survey) | N/A (survey) | §2.2.3 |
+| 104 🆕 | Cubuk et al. (2020) "RandAugment…" | Augmentation policy | 2-parameter search-free augmentation; matches AutoAugment | ImageNet/CIFAR/COCO | N/A (method) | §2.2.3 |
+| 105 🆕 | Simonyan & Zisserman (2015) "Very Deep Convolutional Networks" (VGG) | CNN architecture | Depth via 3×3 filters; ILSVRC-14 top-5 6.8%; basis of cited DR baselines | ImageNet | N/A (architecture) | §1.3.1 |
+| 106 🆕 | Szegedy et al. (2015) "Going Deeper with Convolutions" (GoogLeNet/Inception-v1) | CNN architecture | Inception module + 1×1 bottlenecks; ILSVRC-14 top-5 6.67% | ImageNet | N/A (architecture) | §1.3.1 |
+| 107 🆕 | Szegedy et al. (2016) "Rethinking the Inception Architecture" (Inception-v3) | CNN architecture | Factorized conv + label smoothing; **backbone of Gulshan 2016 (#12)** & Esteva 2017 (#121); top-5 3.5% | ImageNet | N/A (architecture) | §1.3.1, §3.2 |
+| 108 🆕 | Liu et al. (2021) "Swin Transformer…" | ViT architecture | Hierarchical shifted-window attention; ImageNet 87.3%, COCO 58.7 AP, ADE20K 53.5 mIoU | ImageNet/COCO/ADE20K | N/A (architecture) | §1.3.1 |
+| 109 🆕 | Pan & Yang (2010) "A Survey on Transfer Learning" | Review / Survey | Canonical transfer-learning taxonomy (domain/task; what-to-transfer; negative transfer) | None (survey) | N/A (survey) | §2.3.1, §2.3.2 |
+| 110 🆕 | Litjens et al. (2017) "A survey on deep learning in medical image analysis" | Review / Survey | >300 works; CNN dominance; data-scarcity/imbalance/interpretability challenges | None (survey) | N/A (survey) | §1.3.1, §1.3.2 |
+| 111 🆕 | Quellec et al. (2017) "Deep image mining for diabetic retinopathy screening" | CNN + explainability | Referable-DR Az 0.954 (Kaggle), 0.949 (e-ophtha); weakly-supervised lesion heatmaps (DiaretDB1) | Kaggle/EyePACS, e-ophtha, DiaretDB1 | P1 | §1.3.1, §1.3.3, §4.5, §4.4 |
+| 112 🆕 | Gargeya & Leng (2017) "Automated Identification of DR Using Deep Learning" | CNN + external validation | AUC 0.97 (5-fold), 94% sens/98% spec; Messidor-2 0.94, e-ophtha 0.95 | Local (EyePACS), Messidor-2, e-ophtha | P1 | §1.3.1, §1.4, §4.4 |
+| 113 🆕 | Krause et al. (2018) "Grader Variability and the Importance of Reference Standards…" | Evaluation methodology | Adjudication reference standard; mild+ DR sens 0.970, spec 0.917, AUC 0.986 | Private (DR screening) | P1 | §1.5, §3.4, §5.3 |
+| 114 🆕 | Son et al. (2020) "…Screening Multiple Abnormal Findings in Retinal Fundus Images" | CNN + external validation | 12 findings; AUROC 96.2–99.9% in-house, 94.7–98.0% external | Private + external | P1 | §1.3.1, §4.7, §4.4 |
+| 115 🆕 | Bellemo et al. (2019) "AI … to screen for … DR in Africa" | Clinical validation (cross-population) | Referable DR AUC 0.973 (CI 0.969–0.978), sens 92.25%, spec 89.04%; Zambia | Private (Zambia, 4,504 imgs) | P1 | §1.4, §4.4, §6.3 |
+| 116 🆕 | Dai et al. (2021) "A deep learning system for detecting DR across the disease spectrum" (DeepDR) | Multi-task DR system | Quality+lesion+grading; 466,247 imgs; lesion AUC 0.901–0.967; 3 external sets | Private (China) + 3 external | P1 | §1.3.1, §1.2.2, §4.5, §4.4 |
+| 117 🆕 | De Fauw et al. (2018) "Clinically applicable deep learning … in retinal disease" | Clinical validation (device-independent) | Segmentation→classification; device-independent referral; n=997 test (OCT) | Private (Moorfields OCT) | P1 | §1.4, §4.7, §6.3, INTRO |
+| 118 🆕 | Ting et al. (2019) "Deep learning in ophthalmology: technical and clinical considerations" | Review / Survey | DL-in-ophthalmology technical + clinical-translation review | None (survey) | N/A (survey) | §1.3.1, §1.4, §6.3 |
+| 119 🆕 | Beede et al. (2020) "A Human-Centered Evaluation of a DL System … for DR" | Socio-technical field study | 11 Thai clinics; socio-environmental factors + quality gating affect deployment | Field study (Thailand) | N/A | §6.1, §6.3, §1.2.2 |
+| 120 🆕 | Burlina et al. (2017) "Automated Grading of AMD … Deep CNNs" | CNN classification (AMD) | AREDS color-fundus CNN grading via transfer learning (AMD, peripheral) | AREDS | P1 | §1.3.1 |
+| 121 🆕 | Esteva et al. (2017) "Dermatologist-level classification of skin cancer…" | CNN classification (landmark) | Inception-v3 transfer; 129,450 images; dermatologist-level; **P1 end-to-end paradigm foil** | Clinical dermatology | P1 | §1.3.1, §2.3.1, INTRO |
 
 ---
 
@@ -170,72 +209,78 @@ The **Paradigm** column was added in governance v5.3 to support the paradigmatic
 |---------------------|---------------------|
 | §1.1.1 | #31, #32, **#33, #34, #35** |
 | §1.1.2 | #06, #10, **#22**, #34 |
-| §1.2.1 | ⚠️ GAP |
-| §1.2.2 | #05, #15, #17, **#24**, #78 |
+| §1.2.1 | #93 ✅ RESOLVED (cofe-Net degradation model: illumination/blur/artifacts) |
+| §1.2.2 | #05, #15, #17, **#24**, #78, #94, #116, #119 |
 | §1.2.3 | #47, #49, #50, #51, #74, #75 |
-| §1.3.1 | #01, #04, #05, #08, #09, #12, #15, #16, #18, #37, #38, #41, #42, #43, #65, #66, #67, #68, #69, #70 |
-| §1.3.2 | #02, #09, #12, #73 |
+| §1.3.1 | #01, #04, #05, #08, #09, #12, #15, #16, #18, #37, #38, #41, #42, #43, #65, #66, #67, #68, #69, #70, #83, #105, #106, #107, #108, #110, #111, #112, #114, #116, #120, #121 |
+| §1.3.2 | #02, #09, #12, #73, #84, #110 |
 | §1.3.3 | #46, #57, #58, #59, #60, #61, #62 |
-| §1.4 | #02, #03, #07, #11, #12, #14, **#22**, #39, #43, #44, #45, #77 |
-| §1.5 | #17, #39 |
-| §2.1.1 | #25, #26, #27, #30, **#23**, #54 |
-| §2.1.2 | #25, #27, **#23, #24**, #54 |
+| §1.4 | #02, #03, #07, #11, #12, #14, **#22**, #39, #43, #44, #45, #77, #112, #113, #115, #117, #118 |
+| §1.5 | #17, #39, #113 |
+| §2.1.1 | #25, #26, #27, #30, **#23**, #54, #95 |
+| §2.1.2 | #25, #27, **#23, #24**, #54, #95 |
 | §2.1.3 | #55, #56 |
 | §2.2.1 | #08, #65, #66, #67 |
-| §2.2.2 | #01, **#19, #21**, #39, #40, #42 |
-| §2.2.3 | #01, **#19, #21**, #65 |
-| §2.3.1 | #04, #71, #72, #73 |
-| §2.3.2 | **#19, #21**, #71, #72, #76 |
-| §2.3.3 (NEW) | #73 ⚡ THIN (general SSL/TL survey; in-domain retinal SSL literature — DINO/BYOL/SimCLR/MoCo on fundus — to be acquired) |
+| §2.2.2 | #01, **#19, #21**, #39, #40, #42, #96, #97, #98, #99 |
+| §2.2.3 | #01, **#19, #21**, #65, #98, #100, #101, #102, #103, #104 |
+| §2.3.1 | #04, #71, #72, #73, #109, #121 |
+| §2.3.2 | **#19, #21**, #71, #72, #76, #109 |
+| §2.3.3 (NEW) | ✅ RESOLVED — #84 (RETFound, in-domain retinal SSL), #85 (MICLe), #86 (SimCLR), #87 (MoCo), #88 (BYOL), #89 (DINO), #90 (MAE), #91 (SimSiam), #92 (medical-SSL survey), #73 (general survey). **Well-covered.** |
 | §2.4.1 | **#20** ⚡ THIN |
 | §2.5.1 | #46, #57, #58 |
 | §2.5.2 | #46, #57, #58 |
 | §2.5.3 | #63, #64 |
-| §2.6 | #52, #53 ⚡ THIN |
+| §2.6 | #52, #53, #93, #94 |
 | §3.1 | #02, #15, #26, #27, #53, **#19, #21, #23, #24**, #78 |
 | §3.1.4 | ⚠️ GAP — no external literature; methodological contribution by candidate |
-| §3.2 | #09, **#24**, #66, #68, #69, #70 |
-| §3.3 | **#19, #21, #23**, #71, #72 |
-| §3.3.2 (NEW) | ⚠️ GAP — ophthalmology-specific self-supervised pretraining literature to be acquired; partial framing: #73 |
-| §3.4 | **#21**, #40, #52, #64 |
-| §4.1 | #06, #10, #15, #47, #48, #49, #50, #51, **#19, #21, #24**, #41 |
+| §3.2 | #09, **#24**, #66, #68, #69, #70, #99, #100, #107, #108 |
+| §3.3 | **#19, #21, #23**, #71, #72, #109 |
+| §3.3.2 (NEW) | ✅ RESOLVED — #84 (RETFound), #90 (MAE — pretraining basis), #85 (MICLe), #86–#89, #91 (SSL methods), #92 (survey). Ophthalmology-specific SSL now well-grounded. |
+| §3.4 | **#21**, #40, #52, #64, #96, #98, #113 |
+| §4.1 | #06, #10, #15, #47, #48, #49, #50, #51, **#19, #21, #24**, #41, #83 |
 | §4.2 (Exp 1, H-1) | **#19, #21, #24** ⚡ THIN (self-only) |
 | §4.3 (Exp 2, H-2) | #27, **#23** |
-| §4.4 (Exp 3 — Cross-Dataset Transferability, H-4) | #02, #04, #05, #07, #11, #12, #16, #17, #38, #44, #48 |
-| §4.5 (Exp 4 — Explainability, H-5) | #06, #10, #46, #57, #58 |
+| §4.4 (Exp 3 — Cross-Dataset Transferability, H-4) | #02, #04, #05, #07, #11, #12, #16, #17, #38, #44, #48, #84, #111, #112, #115, #116 |
+| §4.5 (Exp 4 — Explainability, H-5) | #06, #10, #46, #57, #58, #83, #111, #116 |
 | §4.6 (Exp 5 — Clinical Degradation, H-7) | #06, #10, #17, #44, #48, #78 |
-| §4.7 (Exp 6 — Device Domain Shift, H-6) | #38, #49, #50, #51, #74, #75, #76, #78 |
+| §4.7 (Exp 6 — Device Domain Shift, H-6) | #38, #49, #50, #51, #74, #75, #76, #78, #93, #94, #114, #117 |
 | §4.8 (Exp 7 — Small Data Training) | #06, #10 ⚡ THIN |
 | §5.1 (Explainability Results) | #06, #10, #16, #17, #27, #46, **#24**, #57, #58 |
 | §5.2 (Statistical Validation) | #16, #17, #27, #52, **#24** |
 | §5.3 (Comparative Analysis) | #02, #05, #07, #11, #12, #14, #16, **#23**, #44, #45 |
 | §5.4 (Limitations) | — (populated by candidate's own experimental limitations) |
-| §6.1 | **#22** ⚡ THIN |
+| §6.1 | **#22**, #119 |
 | §6.2 | **#22**, #36 |
-| §6.3 | #03, #11, #14, **#22**, #34, #44, #45 |
+| §6.3 | #03, #11, #14, **#22**, #34, #44, #45, #115, #117, #118, #119 |
 | §6.4 | — (regulatory framing; candidate's design specification) |
-| INTRO | #01, #06, #10, #12, #14, #33, #35, #47, #48 |
+| INTRO | #01, #06, #10, #12, #14, #33, #35, #47, #48, #117, #121 |
 
 ---
 
 ### Gaps Identified
 
-**⚠️ GAP (0 external sources):**
-- §1.2.1 — Sources of Image Degradation in Clinical Practice
-- §3.1.4 — External Image Ingestion Protocol (methodological contribution by candidate; no external literature expected)
-- §3.3.2 — Ophthalmology-Specific Self-Supervised Pretraining (NEW v6.0.0; in-domain retinal SSL literature — DINO/BYOL/SimCLR/MoCo on fundus corpora — must be acquired)
+**⚠️ GAP (0 external sources) — remaining after the v6.1.0 expansion:**
+- §3.1.4 — External Image Ingestion Protocol (methodological contribution by candidate; no external literature expected — by design)
+
+**✅ GAPS RESOLVED in the v6.1.0 expansion (#83–#121):**
+- §1.2.1 — Sources of Image Degradation in Clinical Practice — RESOLVED by **#93** (Shen et al. cofe-Net: explicit degradation model of uneven illumination, blur, artifacts).
+- §3.3.2 — Ophthalmology-Specific Self-Supervised Pretraining — RESOLVED by **#84 (RETFound)** + **#90 (MAE, the pretraining basis)** + **#85 (MICLe)** + the SSL method corpus **#86–#89, #91** + survey **#92**.
+- §2.3.3 — In-Domain Self-Supervised Pretraining for Retinal Imaging — RESOLVED by the same #84–#92 corpus (was ⚡ THIN on #73 only).
 
 **✅ GAPS RESOLVED previously (#54–#82):**
 - §2.1.3 — Spatial Filtering and Noise Reduction Methods — RESOLVED by #55 (bilateral filtering) and #56 (non-local means).
 - §2.5.3 — ALO and IoU as Quantitative Explainability Metrics — RESOLVED by #63 (Generalized IoU metric/loss) and #64 (PASCAL VOC IoU > 0.5 criterion).
 
-**⚡ THIN (1 source or thin coverage):**
-- §2.3.3 — In-Domain Self-Supervised Pretraining for Retinal Imaging (NEW v6.0.0; #73 general survey only)
-- §2.4.1 — Coupled Thermal-Optical Model of Fundus Tissue Response (#20 🔹SELF only)
-- §2.6 — Image Quality Metrics for Preprocessing Evaluation (#52, #53 — two general references, not DR-specific applications)
-- §4.2 — Experiment 1: Integrated Pipeline Dominance (#19, #21, #24 🔹SELF only)
-- §4.8 — Experiment 7: Small Data Training (#06, #10 dataset descriptors only)
-- §6.1 — System Requirements and Design Principles (#22 🔹SELF only)
+**⚡ THIN (1 source or thin coverage) — after v6.1.0:**
+- §2.4.1 — Coupled Thermal-Optical Model of Fundus Tissue Response (#20 🔹SELF only) — still THIN.
+- §4.2 — Experiment 1: Integrated Pipeline Dominance (#19, #21, #24 🔹SELF only; the SSL corpus #84–#92 now supports the *pretraining* arm of the composite H-1 IV, but the integrated-pipeline self-comparison remains self-only).
+- §4.8 — Experiment 7: Small Data Training (#06, #10 dataset descriptors; #84 RETFound label-efficiency is supportive context) — still THIN.
+
+**⬆️ THIN STATUS UPGRADED in the v6.1.0 expansion:**
+- §2.3.3 / §3.3.2 → **well-covered** by #84–#92 (see Gaps Resolved above).
+- §2.6 — Image Quality Metrics → adds #93 (cofe-Net) and #94 (Zago RIQA, fundus-specific) to #52, #53.
+- §6.1 — System Requirements → adds #119 (Beede et al. socio-technical deployment) to #22.
+- §2.2.2 / §2.2.3 — Loss & Regularization → adds the canonical method primaries #96 (Focal Loss, the dissertation's loss), #97, #98, #99, #100, #101, #102, #103, #104.
 
 **⬆️ THIN STATUS UPGRADED in the #54–#82 expansion (retained):**
 - §1.3.3 — Explainability Methods → #46, #57, #58, #59, #60, #61, #62. **Well-covered.**
@@ -435,3 +480,49 @@ This index was re-aligned to the corrected chapter structure. The seven experime
 | 80 🆕 | Koch (2019) | Peripheral (off-domain) | Excluded: special-functions mathematics; no DR relevance |
 | 81 🆕 | Hungerford (1999) | Peripheral (off-domain) | Excluded: nuclear physics; no DR relevance |
 | 82 🆕 | Ostahie et al. (2015) | Peripheral (off-domain) | Excluded: condensed-matter physics; no DR relevance |
+
+### Epistemic Tier Summary (New Sources #83–#121 — v6.1.0 expansion)
+
+| # | Source | Epistemic Tier | Dissertation Role |
+|---|--------|----------------|-------------------|
+| 83 🆕 | Zhou et al. (2020) — FGADR | Benchmark / dataset descriptor | Comparator: pixel-level lesion benchmark; interpretable-grading framing (not a dissertation dataset) |
+| 84 🆕 | Zhou et al. (2023) — RETFound | High-impact / foundational (ophthalmology SSL) | Core: in-domain SSL evidence; anchors §2.3.3/§3.3.2 + composite H-1 pretraining arm |
+| 85 🆕 | Azizi et al. (2021) — MICLe | Methodological precedent (medical SSL) | Support: in-domain SSL > ImageNet transfer (derm/CXR) |
+| 86 🆕 | Chen et al. (2020) — SimCLR | Foundational (contrastive SSL) | Background: SSL design space |
+| 87 🆕 | He et al. (2020) — MoCo | Foundational (contrastive SSL) | Background: SSL design space |
+| 88 🆕 | Grill et al. (2020) — BYOL | Foundational (non-contrastive SSL) | Background: SSL design space |
+| 89 🆕 | Caron et al. (2021) — DINO | Foundational (SSL for ViT) | Background: SSL + emergent attention |
+| 90 🆕 | He et al. (2022) — MAE | Foundational (masked image modeling) | Core method: pretraining basis of RETFound |
+| 91 🆕 | Chen & He (2021) — SimSiam | Foundational (SSL analysis) | Background: collapse-avoidance mechanism |
+| 92 🆕 | Shurrab & Duwairi (2022) | Survey (medical SSL) | Framing: medical-SSL landscape for §2.3.3/§3.3.2 |
+| 93 🆕 | Shen et al. (2020) — cofe-Net | High-impact empirical (preprocessing) | Core: resolves §1.2.1 degradation-sources gap; preprocessing-as-component support |
+| 94 🆕 | Zago et al. (2018) — RIQA | Empirical (image quality) | Support: fundus RIQA for §2.6/§1.2.2 |
+| 95 🆕 | Zuiderveld (1994) — CLAHE | Foundational (preprocessing) | Core method: canonical CLAHE source for §2.1.1–§2.1.2 (replaces #25) |
+| 96 🆕 | Lin et al. (2017) — Focal Loss | Foundational (loss) | Core method: the dissertation's training loss (γ=2) |
+| 97 🆕 | Cui et al. (2019) — Class-Balanced Loss | Methodological precedent (loss) | Support: imbalanced-data re-weighting |
+| 98 🆕 | Buda et al. (2018) — imbalance study | Methodological precedent | Support: imbalance-handling guidance |
+| 99 🆕 | Kingma & Ba (2015) — Adam | Foundational (optimizer) | Method: training optimizer reference |
+| 100 🆕 | Ioffe & Szegedy (2015) — BatchNorm | Foundational (normalization) | Method: intrinsic to ResNet-50; small-batch caveat |
+| 101 🆕 | Srivastava et al. (2014) — Dropout | Foundational (regularization) | Method: regularization reference |
+| 102 🆕 | Zhang et al. (2018) — mixup | Methodological precedent (augmentation) | Support: augmentation-as-regularization |
+| 103 🆕 | Shorten & Khoshgoftaar (2019) | Survey (augmentation) | Framing: augmentation taxonomy for §2.2.3 |
+| 104 🆕 | Cubuk et al. (2020) — RandAugment | Methodological precedent (augmentation) | Support: practical augmentation policy |
+| 105 🆕 | Simonyan & Zisserman (2015) — VGG | Foundational (architecture) | Background: CNN-depth lineage; cited DR baselines |
+| 106 🆕 | Szegedy et al. (2015) — GoogLeNet | Foundational (architecture) | Background: Inception lineage |
+| 107 🆕 | Szegedy et al. (2016) — Inception-v3 | Foundational (architecture) | Background: backbone of Gulshan (#12) + Esteva (#121); label smoothing |
+| 108 🆕 | Liu et al. (2021) — Swin Transformer | Foundational (ViT) | Comparator: CNN-vs-ViT discussion; cited DR/ViT hybrids |
+| 109 🆕 | Pan & Yang (2010) | Survey (transfer learning) | Framing: transfer-learning taxonomy for §2.3 |
+| 110 🆕 | Litjens et al. (2017) | Survey (medical DL) | Framing: medical-DL field landscape for §1.3 |
+| 111 🆕 | Quellec et al. (2017) | High-impact empirical (DR explainability) | Evidence: weakly-supervised lesion heatmaps (Exp 4 precedent) + cross-dataset |
+| 112 🆕 | Gargeya & Leng (2017) | High-impact empirical (DR screening) | Evidence: external validation (Messidor-2/e-ophtha) |
+| 113 🆕 | Krause et al. (2018) | High-impact methodological precedent | Evidence: reference-standard / label-quality for §3.4 |
+| 114 🆕 | Son et al. (2020) | High-impact empirical (multi-finding) | Evidence: in-house→external degradation for §4.7 |
+| 115 🆕 | Bellemo et al. (2019) | High-impact clinical validation | Core evidence: cross-population transfer (Zambia) for §4.4/§6.3 |
+| 116 🆕 | Dai et al. (2021) — DeepDR | High-impact empirical (multi-task DR) | Evidence: integrated quality+lesion+grading; external validation |
+| 117 🆕 | De Fauw et al. (2018) | High-impact clinical validation | Core evidence: device-independent representation (preprocessing-as-component) |
+| 118 🆕 | Ting et al. (2019) | Survey (ophthalmology DL) | Framing: technical + clinical-translation review |
+| 119 🆕 | Beede et al. (2020) | High-impact socio-technical study | Evidence: clinical-deployment human factors for §6.1/§6.3 |
+| 120 🆕 | Burlina et al. (2017) | Empirical (AMD CNN) | Comparator: color-fundus CNN-grading + transfer learning (AMD, peripheral) |
+| 121 🆕 | Esteva et al. (2017) | Foundational / high-impact precedent | Background: medical transfer-learning landmark; **P1 end-to-end paradigm foil** to V5 |
+
+> **⚠️ Cards still missing (carried forward):** #49 (Pachade — RFMiD), #50 (Li — DDR), #51 (ODIR-5K, descriptor still "TO BE IDENTIFIED") remain index entries **without card files**; the v6.1.0 expansion did not include these (the candidate's `litres` batch did not contain them). Write before citing at full depth (§4.1, §4.7).

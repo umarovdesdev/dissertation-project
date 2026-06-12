@@ -319,7 +319,25 @@
       "Bash(git check-ignore *)",
       "Bash(ls -d */)",
       "Bash(PYTHONIOENCODING=utf-8 python .claude/skills/council-docs/scripts/build_all.py)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(awk -F/ '{print $1}')",
+      "Bash(awk -F/ '{print $2}')",
+      "Bash(awk -F/ '{print $3}')",
+      "Bash(awk -F/ '{print $4}')",
+      "Bash(awk -F/ '{print $4\"/\"$5}')",
+      "Bash(xargs -0 du -k)",
+      "Bash(awk '$1==\"blob\"{print int\\($3/1024\\)\" KB\\\\t\"$4}')",
+      "Bash(awk '$1==\"blob\"{ if\\($4 ~ /\\\\.pptx$/\\) p+=$3; else if\\($4 ~ /\\\\.\\(png|jpg|jpeg\\)$/\\) img+=$3; else if\\($4 ~ /\\\\.\\(docx|pdf\\)$/\\) doc+=$3; else o+=$3 } END{ printf \"pptx history: %d MB\\\\nimages history: %d MB\\\\ndocx/pdf history: %d MB\\\\nother: %d MB\\\\n\", p/1048576, img/1048576, doc/1048576, o/1048576 }')",
+      "Bash(xargs -0 git cat-file --batch-check='%\\(objectsize\\) %\\(rest\\)')",
+      "Bash(awk '{ if\\($2 ~ /\\\\.pptx$/\\) p+=$1; else if\\($2 ~ /\\\\.\\(png|jpg|jpeg\\)$/\\) img+=$1; else if\\($2 ~ /\\\\.\\(docx|pdf\\)$/\\) doc+=$1; else o+=$1 } END{ printf \"pptx: %d MB\\\\nimages: %d MB\\\\ndocx/pdf: %d MB\\\\nother: %d MB\\\\n\", p/1048576, img/1048576, doc/1048576, o/1048576 }')",
+      "Bash(awk '{ size=$4; path=$5; if\\(path ~ /\\\\.pptx$/\\) p+=size; else if\\(path ~ /\\\\.\\(png|jpg|jpeg\\)$/\\) img+=size; else if\\(path ~ /\\\\.\\(docx|pdf\\)$/\\) doc+=size; else o+=size } END{ printf \"CURRENT HEAD tracked:\\\\n  pptx: %d MB\\\\n  images: %d MB\\\\n  docx/pdf: %d MB\\\\n  other: %d MB\\\\n\", p/1048576, img/1048576, doc/1048576, o/1048576 }')",
+      "Bash(awk '$5 ~ /\\\\.pptx$/ {printf \"%d MB  %s\\\\n\", $4/1048576, $5}')",
+      "Bash(pdftotext \"dst-03-0509.pdf\" -)",
+      "Bash(pdftotext \"feedback-on-a-publicly-distributed-image-database-the-jsa85l7qub.pdf\" -)",
+      "Bash(pdftotext \"Selvaraju_Grad-CAM_Visual_Explanations_ICCV_2017_paper.pdf\" -)",
+      "Bash(pdftotext \"2008.09772v3.pdf\" -)",
+      "WebFetch(domain:www.nature.com)",
+      "WebFetch(domain:arxiv.org)"
     ]
   }
 }
