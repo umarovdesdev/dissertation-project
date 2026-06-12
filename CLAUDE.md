@@ -3,6 +3,15 @@
 PhD dissertation: "Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification"
 Candidate: Yesmukhamedov N.S., IITU (Almaty, Kazakhstan)
 
+## Project memory — ON DRIVE E: (not C: harness memory)
+
+Persistent project facts live in `PROJECT_MEMORY/` on this drive, indexed by
+`PROJECT_MEMORY.md`. **READ `PROJECT_MEMORY.md` at session start, and WRITE new durable
+facts there** (one file per fact, `[[name]]` cross-links) — never into the machine-local
+`~/.claude/.../memory/` store. The candidate works across a work PC, a home laptop, and a
+university machine, carrying the project on an external drive (E:); only what lives under
+`E:\dissertation-project\` travels. See `REFACTORING.md` for the migration rationale.
+
 ## Monorepo Structure
 
 ```

@@ -1,0 +1,29 @@
+# PROJECT MEMORY — index (on drive E:)
+
+Persistent project facts for the dissertation, stored **on the external drive** so they
+travel across the candidate's work PC / home laptop / university machine. This replaces
+the machine-local `~/.claude/.../memory/` store (which does NOT travel). Read this index
+at session start; write new durable facts into `PROJECT_MEMORY/` and add a line here.
+
+Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `description`,
+`metadata.type`). Link facts with `[[name]]`. See `REFACTORING.md` for the migration plan.
+
+## People & documents
+- [People & identifiers](PROJECT_MEMORY/people-and-identifiers.md) — canonical EN/KZ/RU names (candidate Yesmukhamedov N.S., supervisor Sapakova S.Z. = к.ф.-м.н./associate prof., foreign consultant Al-Haddad), programme **8D06104 Computer systems and software engineering**; human copy `council/PEOPLE.md`
+- [council-docs skill](PROJECT_MEMORY/council-docs-skill.md) — `.claude/skills/council-docs/` exports thesis/output abstracts+reviews → GOST .docx/.pdf in `defense/docs/`
+
+## Thesis writing
+- [Thesis writing status](PROJECT_MEMORY/thesis-writing-status.md) — Phase 1 (all writable-now: Ch1/2/3/6 + §4.1 + App A/D) APPROVED 2026-06-10; §2.3.3 deferred; rest Phase-2 experiment-gated; Ch3 detail + carry-forwards
+- [Literature integrity flags](PROJECT_MEMORY/literature-integrity-flags.md) — kusuhara rename done; OPEN: #47–#51 cards missing, scopus-q2 ID mismatch
+
+## Experiments / Config-D
+- [Config-D pretraining axis](PROJECT_MEMORY/config-d-pretraining.md) — v6.0.0 drops RETFound for ophthalmology SSL; shipped demo Config-D = retired ImageNet artifact (divergence)
+- [Config-D Kaggle source](PROJECT_MEMORY/config-d-kaggle-source.md) — trains on `dreamer07/eyepacs`; adapter `is_file()` fix; Run#1 EyePACS failed (12h), Run#2 APTOS ok (interim ckpt f1=0.82)
+- [Colab Config-D runner](PROJECT_MEMORY/colab-config-d-runner.md) — `experiments/colab/` two-mode; Kaggle=APTOS test, Colab=real EyePACS; persistence on Kaggle Datasets
+- [V5 cache / throughput](PROJECT_MEMORY/v5-cache-throughput.md) — GPU-starved by per-image CPU preprocessing; fix = precompute+cache Stages 0–4 (IMPLEMENTED feat/v5-cache-colab)
+- [Config-D cache handoff](PROJECT_MEMORY/config-d-cache-handoff.md) — 2026-06-03 handoff; experiments/ mirrored to dr-classifier repo; next = the Colab run
+- [Preprocessing: OD/fovea + polar CLAHE](PROJECT_MEMORY/preprocessing-od-fovea-polar.md) — detector unreliable (fovea fails); polar CLAHE now Stage-5 default pivoting on FOV centroid → checkpoints must be retrained
+
+## Cross-cutting
+- [Strip version markers](PROJECT_MEMORY/strip-version-markers.md) — remove V5/V4/V3 outside thesis/; defense/experiments/demo/server done, root TODO
+- [Demo stack](PROJECT_MEMORY/demo-stack.md) — launch backend (WSL) + frontend (npm) + Cloudflare tunnels for the real model; human copy `demo/RUNBOOK.md`
