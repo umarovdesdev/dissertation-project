@@ -114,7 +114,7 @@ Physically motivated degradation modeling; structure/pathology preservation; dow
 | Axis | Relevance | Notes |
 | --- | --- | --- |
 | **Image degradation sources (§1.2.1)** | **Core** | Fills the §1.2.1 GAP with an explicit degradation model (illumination/blur/artifacts). |
-| **Preprocessing-dominance** | **Supporting** | Demonstrates that enhancement preserving structure improves downstream analysis — aligns with V5 preprocessing-as-model-component. |
+| **Preprocessing-dominance** | **Supporting** | Demonstrates that enhancement preserving structure improves downstream analysis — aligns with preprocessing-as-model-component. |
 | Image quality metrics (§2.6) | Supporting | Uses quality-oriented evaluation. |
 | Device domain shift | Supporting | Degradation spans acquisition conditions. |
 

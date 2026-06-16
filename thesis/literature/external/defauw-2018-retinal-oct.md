@@ -107,7 +107,7 @@ Device-independent representation; expert-level; clinically framed referral.
 
 | Axis | Relevance | Notes |
 | --- | --- | --- |
-| **Device domain shift (§4.7)** | **Supporting (conceptual)** | Demonstrates a representation engineered for device invariance — conceptually parallel to V5 preprocessing producing device-robust inputs. |
+| **Device domain shift (§4.7)** | **Supporting (conceptual)** | Demonstrates a representation engineered for device invariance — conceptually parallel to preprocessing producing device-robust inputs. |
 | **Preprocessing-as-model-component** | **Supporting** | The intermediate segmentation representation is preprocessing-as-integral-component, echoing the central thesis. |
 | Clinical deployment (§6.3) | Supporting | Referral framing. |
 
@@ -130,6 +130,6 @@ Device-independent representation; expert-level; clinically framed referral.
 
 # 18. Analytical Synthesis
 
-De Fauw et al. is a landmark demonstration that engineering an intermediate representation (tissue segmentation) makes a retinal-DL system device-independent and expert-level — conceptually the strongest external endorsement of the dissertation's central thesis that preprocessing/representation is an integral model component governing generalization. Although it operates on OCT rather than color fundus, its device-transfer result directly parallels the dissertation's V5 goal of producing device-robust inputs (§4.7, H-6) and its preprocessing-as-component framing. It does not run a preprocessing-vs-architecture ablation on fundus DR grading, so it supports the spirit rather than the specific test of preprocessing-dominance; cite for device-invariance and preprocessing-as-component arguments and clinical-deployment context.
+De Fauw et al. is a landmark demonstration that engineering an intermediate representation (tissue segmentation) makes a retinal-DL system device-independent and expert-level — conceptually the strongest external endorsement of the dissertation's central thesis that preprocessing/representation is an integral model component governing generalization. Although it operates on OCT rather than color fundus, its device-transfer result directly parallels the dissertation's goal of producing device-robust inputs (§4.7, H-6) and its preprocessing-as-component framing. It does not run a preprocessing-vs-architecture ablation on fundus DR grading, so it supports the spirit rather than the specific test of preprocessing-dominance; cite for device-invariance and preprocessing-as-component arguments and clinical-deployment context.
 
 End of Literature Card.

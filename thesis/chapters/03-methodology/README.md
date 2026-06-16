@@ -15,7 +15,7 @@
 # 3 METHODOLOGY OF INTEGRATED PREPROCESSING-CNN PIPELINE DESIGN
 
 ## 3.1 Formalization of the Unified Preprocessing Pipeline
-- 3.1.1 Pipeline Stage Specification: V5 8-Stage System
+- 3.1.1 Pipeline Stage Specification: 8-Stage System
 - 3.1.2 Modified CLAHE Algorithm with Dual-Constraint Clip Limit
 - 3.1.3 Augmentation Strategy for Class Imbalance Mitigation
 - 3.1.4 External Image Ingestion Protocol
@@ -26,7 +26,7 @@
 
 ## 3.3 Transfer Learning and Pretraining Methodology
 - 3.3.1 Architecture Adaptation for Five-Class DR Classification
-- 3.3.2 Ophthalmology-Specific Self-Supervised Pretraining of the CNN Backbone (V5 Arm)
+- 3.3.2 Ophthalmology-Specific Self-Supervised Pretraining of the CNN Backbone (integrated Arm)
 - 3.3.3 Two-Stage Fine-Tuning Protocol Design
 - 3.3.4 Weighted Loss Function Formulation for Ordinal Class Structure
 

@@ -23,7 +23,7 @@ Zuiderveld, K. (1994). Contrast Limited Adaptive Histogram Equalization. In P. S
 | Empirical study | ❌ | No benchmark experiments. |
 | Retinal/DR | ❌ | General image processing (originated for medical imaging). |
 
-**Justification:** **The canonical citable primary source for the CLAHE algorithm** used in V5 Stage 5 — replaces the non-citable Wikipedia entry (#25), alongside Pizer 1987 (#54).
+**Justification:** **The canonical citable primary source for the CLAHE algorithm** used in Stage 5 — replaces the non-citable Wikipedia entry (#25), alongside Pizer 1987 (#54).
 
 ---
 
@@ -108,8 +108,8 @@ Canonical, precise, reproducible (reference implementation); standard CLAHE defi
 
 | Axis | Relevance | Notes |
 | --- | --- | --- |
-| **CLAHE provenance (§2.1.1/§2.1.2)** | **Core (foundational method)** | Citable origin of the CLAHE algorithm formalized as V5 Stage 5 (dual-constraint clip limit); pairs with [[pizer-1987-adaptive-histogram-equalization]]. |
-| Preprocessing-dominance | Supporting | Defines the contrast-enhancement primitive central to V5. |
+| **CLAHE provenance (§2.1.1/§2.1.2)** | **Core (foundational method)** | Citable origin of the CLAHE algorithm formalized as Stage 5 (dual-constraint clip limit); pairs with [[pizer-1987-adaptive-histogram-equalization]]. |
+| Preprocessing-dominance | Supporting | Defines the contrast-enhancement primitive central to the integrated pipeline. |
 
 **Risk of contradiction:** None (the dissertation extends this algorithm).
 
@@ -130,6 +130,6 @@ Canonical, precise, reproducible (reference implementation); standard CLAHE defi
 
 # 18. Analytical Synthesis
 
-Zuiderveld (1994) is the canonical, citable primary source for the CLAHE algorithm that the dissertation formalizes and extends as V5 Stage 5 (dual-constraint clip limit). It precisely defines clip-limited per-tile equalization with bilinear interpolation and provides a reference implementation, making it the correct replacement for the non-citable Wikipedia entry (#25) alongside Pizer et al. (1987). It is a methodology reference with no benchmark data, neutral to preprocessing-dominance as an empirical question, but foundational to the dissertation's enhancement primitive; its reliance on user-set clip-limit/tile parameters directly motivates the adaptive, dual-constraint formulation claimed as a V5 contribution. Cite at first mention of CLAHE in §2.1.1–§2.1.2.
+Zuiderveld (1994) is the canonical, citable primary source for the CLAHE algorithm that the dissertation formalizes and extends as Stage 5 (dual-constraint clip limit). It precisely defines clip-limited per-tile equalization with bilinear interpolation and provides a reference implementation, making it the correct replacement for the non-citable Wikipedia entry (#25) alongside Pizer et al. (1987). It is a methodology reference with no benchmark data, neutral to preprocessing-dominance as an empirical question, but foundational to the dissertation's enhancement primitive; its reliance on user-set clip-limit/tile parameters directly motivates the adaptive, dual-constraint formulation claimed as a contribution. Cite at first mention of CLAHE in §2.1.1–§2.1.2.
 
 End of Literature Card.

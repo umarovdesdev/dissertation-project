@@ -57,10 +57,10 @@
 **Chapter 2 — Theoretical Foundations**
 - [x] ✅ §2.1.1 Histogram Equalization and Adaptive Contrast Enhancement — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; FIG-2.1 deferred → asset queue; #23 card integrity flag noted)
 - [x] ✅ §2.1.2 Formalization of CLAHE with Dual-Constraint Clip Limit — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; TAB-2.1 inline; Eqs. 2.1–2.3; resolves glossary clip-limit/tile-grid flags)
-- [x] ✅ §2.1.3 Spatial Filtering and Noise Reduction Methods — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; bilateral/NLM as backdrop, V5 non-adoption framed)
+- [x] ✅ §2.1.3 Spatial Filtering and Noise Reduction Methods — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; bilateral/NLM as backdrop, non-adoption framed)
 - [x] ✅ §2.2.1 Convolution, Pooling, and Feature Extraction Operations — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; FIG-2.2 referenced; CFC-2.8 pre-honored via #08 counter-position)
 - [x] ✅ §2.2.2 Loss Functions and Optimization for Imbalanced Medical Datasets — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; SIR-5 #19/#21 one thread, SIR-7 honored; focal-loss source gap flagged → §3.3.4)
-- [x] ✅ §2.2.3 Regularization Techniques — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; augmentation dual-role → V5 Stage 6/OD-3; SIR-5/SIR-7 honored)
+- [x] ✅ §2.2.3 Regularization Techniques — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; augmentation dual-role → Stage 6/OD-3; SIR-5/SIR-7 honored)
 - [x] ✅ §2.3.1 Feature Transferability Across Visual Domains — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; DGL-6 two regimes; §2.3.3 SSL theory named-only/deferred; CFC-2.8 neutrality)
 - [x] ✅ §2.3.2 Frozen-Layer vs Progressive Fine-Tuning Strategies — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; glossary fine-tuning disambiguation; SIR-5/SIR-7/CFC-2.8; hands off to §2.4.1)
 - [ ] ⏸️ §2.3.3 In-Domain Self-Supervised Pretraining for Retinal Imaging (NEW v6.0.0) — **DEFERRED (candidate directive 2026-06-09): hold until in-domain SSL cards (DINO/BYOL/SimCLR/MoCo-on-fundus) are acquired; #73 general survey only.** Named-only in §2.3.1/§2.3.2; to be drafted after SSL acquisition.
@@ -72,7 +72,7 @@
 - [x] ✅ §2.C Conclusions to Chapter 2 — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; experimentally-grounded vs simulation-only partition; §2.3.3 deferral noted) — **Chapter 2 COMPLETE except deferred §2.3.3**
 
 **Chapter 3 — Methodology (fully unblocked)**
-- [x] ✅ §3.1.1 Pipeline Stage Specification: V5 8-Stage System — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; Stage-1 RES-VAL honesty disclosure + Stage-7 RES-NORM grounded; P2/P1 framing; ~2,030 w)
+- [x] ✅ §3.1.1 Pipeline Stage Specification: 8-Stage System — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; Stage-1 RES-VAL honesty disclosure + Stage-7 RES-NORM grounded; P2/P1 framing; ~2,030 w)
 - [x] ✅ §3.1.2 Upgraded CLAHE with Dual-Constraint Clip Limit — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; realizes §2.1.2 rule; FIG-3.7 polar variant tied to §3.1.1 fovea finding; [VERIFY] Stage-5 governance divergence; ~1,010 w)
 - [x] ✅ §3.1.3 Augmentation Strategy for Class Imbalance Mitigation — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; real RES-PCA basis interpreted; dual role SC-1.4 one of two levers; ~915 w)
 - [x] ✅ §3.1.4 External Image Ingestion Protocol — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; lit-GAP candidate contribution; NC-15 bound, 1 intentional [UNSOURCED CLAIM]; ~790 w) — **§3.1 COMPLETE**
@@ -98,7 +98,7 @@
 - [x] ✅ §6.C Conclusions to Chapter 6 — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; synthesis only, no new claim; OD-6-envelope-as-binding-driver thread consolidated; SB-4.1 design-only reaffirmed chapter-wide; reserved targets recalled (OD-5/PC-1 Phase 2, NC-9/SB-4.2, SIR-8/SB-4.3, DIA-6.3); ~495 w) — **Chapter 6 COMPLETE**
 
 **Chapter 4 — §4.1 only (Datasets & Configuration)**
-- [x] ✅ §4.1.1 Dataset Architecture V5 — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; design/setup only — NO results; tiered 8-dataset architecture (TRAINING/EXTERNAL/CLINICAL/DEVICE) rendered as TAB-4.1 inline; DGL-1 bounding + SIR-3/SB-2.3 heterogeneity; #47/#48/#49/#50/#51 index-only flagged (#51 unconfirmed); #41 scale-only (metric-inconsistency); #19/#21 one thread + #24 SIR-4/SIR-5; FIG-4.2/4.3 placeholders; no [UNSOURCED CLAIM]; ~1,200 w) — **Chapter 4 §4.1 OPENED**
+- [x] ✅ §4.1.1 Dataset Architecture — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; design/setup only — NO results; tiered 8-dataset architecture (TRAINING/EXTERNAL/CLINICAL/DEVICE) rendered as TAB-4.1 inline; DGL-1 bounding + SIR-3/SB-2.3 heterogeneity; #47/#48/#49/#50/#51 index-only flagged (#51 unconfirmed); #41 scale-only (metric-inconsistency); #19/#21 one thread + #24 SIR-4/SIR-5; FIG-4.2/4.3 placeholders; no [UNSOURCED CLAIM]; ~1,200 w) — **Chapter 4 §4.1 OPENED**
 - [x] ✅ §4.1.2 Class Distribution Analysis and Data Partitioning — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; design/setup only; EyePACS imbalance = SC-1.4 lever → EH-1 metric hierarchy + inverse-freq focal loss + train-only aug (ref §3.4.1/§3.3.4/§3.1.3, not re-derived); label harmonization to 5-class ICDR + Exp-6 DR-labels-only (SB-2.3/SIR-3); patient-level grade-stratified 5-fold (reuse §3.4.2); no fabricated per-grade counts (FIG-4.1 placeholder, SIR-1); IDRiD no-class-distribution SIR-2; no [UNSOURCED CLAIM]; ~1,000 w)
 - [x] ✅ §4.1.3 Hardware Specification and Reproducibility Protocol — ✅ verified (APPROVED 2026-06-10; brief/draft/continuity/review saved; design/setup only; RTX 3060 12GB/WSL2/conda framed as DGL-2-bound design parameter (batch 16 @512² ← VRAM; mixed-precision split); TAB-3.1 rendered inline (as Table 4.2); reproducibility = engineered confound-removal (seed 42/deterministic, fixed aug+schedule, versioned code App A); SB-2.2 private-data limit; OD-6 framing w/o real-time claim (CFC-2.4); #21 SIR-4; no [UNSOURCED CLAIM]; ~720 w) — **§4.1 COMPLETE; §4.2–§4.8 Phase-2 blocked**
 
@@ -112,11 +112,11 @@
 - [ ] ⬜ §4.2.1 Factorial Design (Configs A–D) — 🟨 design-writable; grouped under Exp 1 (see §5.1)
 - [ ] ⬜ §4.2.2 Training Dynamics and Convergence Analysis — ⛔ blocked-by RES-EXP1(full), FIG-4.5, TAB-4.3
 - [ ] ⬜ §4.2.3 Quantitative Comparison of Diagnostic Metrics — ⛔ blocked-by TAB-4.2, FIG-4.4, FIG-4.6, FIG-4.7, FIG-4.8
-- [ ] ⬜ §4.3.1 V5 Ablation Design (Levels 0–6) — ⛔ blocked-by TAB-4.4
+- [ ] ⬜ §4.3.1 Ablation Design (Levels 0–6) — ⛔ blocked-by TAB-4.4
 - [ ] ⬜ §4.3.2 CLAHE Threshold Sensitivity Analysis (H-2) — ⛔ blocked-by FIG-4.9
 - [ ] ⬜ §4.3.3 Feature Preservation + σ Sweep + Image Quality — ⛔ blocked-by FIG-4.10, TAB-4.5
 - [ ] ⬜ §4.4.1 Zero-Shot Transfer to APTOS 2019 — ⛔ blocked-by TAB-4.6
-- [ ] ⬜ §4.4.2 Baseline vs V5 Pipeline Comparison — ⛔ blocked-by FIG-4.11
+- [ ] ⬜ §4.4.2 Baseline vs Pipeline Comparison — ⛔ blocked-by FIG-4.11
 - [ ] ⬜ §4.5.1 Grad-CAM Generation Protocol — ⛔ blocked-by FIG-4.12
 - [ ] ⬜ §4.5.2 Quantitative ALO and IoU with IDRiD Lesion Masks — ⛔ blocked-by TAB-4.7, FIG-4.14
 - [ ] ⬜ §4.5.3 Attention Consistency Across Datasets — ⛔ blocked-by FIG-4.13
@@ -184,7 +184,7 @@ Order (as instructed): **§4.2 → §4.3–§4.8 → Ch 5 → Ch 0 → Ch 7 → 
 | Gate | Section(s) | Unblocking experiment | Missing Resource IDs that must become real |
 |------|-----------|------------------------|--------------------------------------------|
 | G-1 | §4.2.2, §4.2.3 (+ §4.C dependency) | **Exp 1** full A–D × 5-fold @100% incl. ophthalmology-SSL B/D arm + per-sample prediction dumps | TAB-4.2, FIG-4.4, FIG-4.5(full), FIG-4.6, FIG-4.7, FIG-4.8, TAB-4.3; RES-EXP1 upgraded ⏳→✅ |
-| G-2 | §4.3.1–§4.3.3 | **Exp 2** (V5 ablation + CLAHE sweep + σ sweep + image-quality) | TAB-4.4, FIG-4.9, FIG-4.10, TAB-4.5 |
+| G-2 | §4.3.1–§4.3.3 | **Exp 2** (ablation + CLAHE sweep + σ sweep + image-quality) | TAB-4.4, FIG-4.9, FIG-4.10, TAB-4.5 |
 | G-3 | §4.4.1, §4.4.2 | **Exp 3** (APTOS 2019 zero-shot transfer, G ratio) | TAB-4.6, FIG-4.11 |
 | G-4 | §4.5.1–§4.5.3 | **Exp 4** (Grad-CAM ALO/IoU on IDRiD + Clinical) | FIG-4.12, TAB-4.7, FIG-4.13, FIG-4.14 |
 | G-5 | §4.6 | **Exp 5** (clinical degradation, IDRiD + Messidor-2) | TAB-4.8, FIG-4.15 |
@@ -203,7 +203,7 @@ Order (as instructed): **§4.2 → §4.3–§4.8 → Ch 5 → Ch 0 → Ch 7 → 
 | G-18 | App E | Exp 4 | FIG-5.1, FIG-4.12 |
 | G-19 | App F | Exp 6 | TAB-4.9 + per-camera matrices |
 
-> **Note on Exp 1 partial data:** `RES-EXP1` is `⏳ PENDING` — real per-epoch metrics exist for Config A f0, A/B/C f0–2 @40%, and a clean Config D f0 (EyePACS). These are **not** sufficient for §4.2: the headline 2×2 factorial table (TAB-4.2) and the EH-3 dominance verdict require the full 100% A–D × 5-fold run, and the v6.0.0 ophthalmology-SSL initialization for the V5 arm (B/D) has not been trained at all. Confusion matrices / ROC / calibration (FIG-4.6/4.7, TAB-4.3) are *not derivable* from current outputs because per-sample predictions were not saved (`ASSET_INVENTORY.md §3 note 3`). §4.2 therefore stays blocked.
+> **Note on Exp 1 partial data:** `RES-EXP1` is `⏳ PENDING` — real per-epoch metrics exist for Config A f0, A/B/C f0–2 @40%, and a clean Config D f0 (EyePACS). These are **not** sufficient for §4.2: the headline 2×2 factorial table (TAB-4.2) and the EH-3 dominance verdict require the full 100% A–D × 5-fold run, and the v6.0.0 ophthalmology-SSL initialization for the integrated arm (B/D) has not been trained at all. Confusion matrices / ROC / calibration (FIG-4.6/4.7, TAB-4.3) are *not derivable* from current outputs because per-sample predictions were not saved (`ASSET_INVENTORY.md §3 note 3`). §4.2 therefore stays blocked.
 
 ### Phase 3 — final assembly (LAST step, depends on Phase 2 completion)
 
@@ -219,7 +219,7 @@ See §11.
 
 - **No fabricated metrics.** No number may be written into a results table/figure unless it comes from a real, machine-produced artifact verified in `ASSET_INVENTORY.md §3`.
 - **No demo-dashboard previews as if real.** The files in `demo/web/public/results/` and the preview JSONs (`exp3_aptos_transfer.json` G=0.890, `exp5_degradation.json`, `exp7_small_data.json`, `exp2_ff_sweep.json`) carry placeholder numbers authored for the dashboard. They are **demo assets**, not results, and must not be cited as evidence (per **CFC-2.x / SIR-1**, and the §0 Provenance Policy of the inventory).
-- **CFC-2.8 reminder for §4.2 / H-1:** the V5 arm uses ophthalmology-SSL pretraining and the baseline uses ImageNet; once results exist, any difference is attributed to the **integrated configuration**, never to "preprocessing alone."
+- **CFC-2.8 reminder for §4.2 / H-1:** the integrated arm uses ophthalmology-SSL pretraining and the baseline uses ImageNet; once results exist, any difference is attributed to the **integrated configuration**, never to "preprocessing alone."
 
 ### 3.2 Conceptual / UML diagrams are *deferred assets*, not blockers
 
@@ -284,14 +284,14 @@ This is the **only** relaxation of the hard rule. It applies to non-result diagr
 
 | § | Title | Words | Governance bindings | Lit cards | Resource IDs |
 |---|-------|-------|---------------------|-----------|--------------|
-| 3.1.1 | V5 8-Stage Pipeline Specification | 1,800–2,200 | OD defs; SIR-4/5 (self); model = preprocessing + CNN (CENTRAL_THESIS) | #19, #21, #23, #24, #02, #15, #26, #27, #53, #78 | FIG-3.1, FIG-3.2…FIG-3.9, FIG-3.10, FIG-3.14, RES-NORM, RES-VAL ✅ |
+| 3.1.1 | 8-Stage Pipeline Specification | 1,800–2,200 | OD defs; SIR-4/5 (self); model = preprocessing + CNN (CENTRAL_THESIS) | #19, #21, #23, #24, #02, #15, #26, #27, #53, #78 | FIG-3.1, FIG-3.2…FIG-3.9, FIG-3.10, FIG-3.14, RES-NORM, RES-VAL ✅ |
 | 3.1.2 | Upgraded CLAHE (Dual-Constraint) | 900–1,100 | DGL-5; SIR-3 | #23, #24 | FIG-3.7 ✅ |
 | 3.1.3 | Augmentation Strategy | 800–1,000 | OD-3; SC-1.4 (class dist.) | #19 (LC-CONF) | FIG-3.8, RES-PCA ✅ |
 | 3.1.4 | External Image Ingestion Protocol | 700–900 | NC-15 (bound to Kazakh data); SIR-1 (candidate contribution) | *(GAP — candidate methodological contribution)* | — |
 | 3.2.1 | ResNet-50 & EfficientNet-B3 | 900–1,100 | SB-3.1, NC-6, DGL-6 | #66, #68, #24, #09, #69, #70 | FIG-3.11, FIG-3.14 ✅ |
 | 3.2.2 | Historical v1.0 Architectures (reference) | 500–700 | OD-2 (low/high-complexity reference); SIR-4 (#19) | #19 | — |
 | 3.3.1 | Architecture Adaptation (5-class) | 600–800 | DGL-6; EH-4 (replication ≥ 2 architectures) | #19, #21, #23 | — |
-| 3.3.2 | Ophthalmology-Specific SSL Pretraining (NEW) | 900–1,100 | DGL-6 (V5 arm = ophthalmology-SSL); CFC-2.8 (composite IV); SIR-1 (GAP) | #73 *(GAP — acquire SSL primary sources)* | — |
+| 3.3.2 | Ophthalmology-Specific SSL Pretraining (NEW) | 900–1,100 | DGL-6 (integrated arm = ophthalmology-SSL); CFC-2.8 (composite IV); SIR-1 (GAP) | #73 *(GAP — acquire SSL primary sources)* | — |
 | 3.3.3 | Two-Stage Fine-Tuning Protocol | 600–800 | SIR-4/5; H-3 dropped (training method only) | #19, #21 | — |
 | 3.3.4 | Weighted Loss Function Formulation | 600–800 | SC-1.4 (imbalance) | #21, #40 | FIG-3.12 ✅ |
 | 3.4.1 | Multi-Metric Assessment Framework | 1,100–1,300 | EH-1, EH-2, OD-4, OD-5 | #21, #40, #52, #64 | TAB-3.2, TAB-3.3 ✅ |
@@ -324,7 +324,7 @@ This is the **only** relaxation of the hard rule. It applies to non-result diagr
 
 | § | Title | Words | Governance bindings | Lit cards | Resource IDs |
 |---|-------|-------|---------------------|-----------|--------------|
-| 4.1.1 | Dataset Architecture V5 | 1,100–1,300 | SIR-3 (dataset/taxonomy context); DGL-1 | #06/#10, #15, #47, #48, #49, #50, #51, #19, #21, #24, #41 | TAB-4.1, FIG-4.2, FIG-4.3 ✅ |
+| 4.1.1 | Dataset Architecture | 1,100–1,300 | SIR-3 (dataset/taxonomy context); DGL-1 | #06/#10, #15, #47, #48, #49, #50, #51, #19, #21, #24, #41 | TAB-4.1, FIG-4.2, FIG-4.3 ✅ |
 | 4.1.2 | Class Distribution & Data Partitioning | 900–1,100 | SC-1.4 (imbalance → weighted F1/κ); label harmonization | #06/#10, #24 | FIG-4.1 ✅ |
 | 4.1.3 | Hardware & Reproducibility Protocol | 600–800 | DGL-2 (hardware-specific); fixed seeds/versioned code | #21 | TAB-3.1 ✅ |
 
@@ -341,11 +341,11 @@ This is the **only** relaxation of the hard rule. It applies to non-result diagr
 | 4.2.1 | Factorial Design (A–D) | 800–1,000 | EH-3; CFC-2.8 (composite IV) | #19, #21, #24 | *design-writable*; grouped under Exp 1 |
 | 4.2.2 | Training Dynamics & Convergence | 900–1,100 | EH-3; calibration (ECE/Brier) | #19, #21, #24 | RES-EXP1(full), FIG-4.5(full), TAB-4.3 |
 | 4.2.3 | Quantitative Diagnostic Metrics | 1,100–1,300 | EH-3, EH-4; CFC-2.8; CFC-2.1/2.2; VCR-3 (report falsification) | #19, #21, #24 | TAB-4.2, FIG-4.4, FIG-4.6, FIG-4.7, FIG-4.8 |
-| 4.3.1 | V5 Ablation Design (Levels 0–6) | 900–1,100 | NC-17 (≠ universally optimal); PC-8 | #27, #23 | TAB-4.4 |
+| 4.3.1 | Ablation Design (Levels 0–6) | 900–1,100 | NC-17 (≠ universally optimal); PC-8 | #27, #23 | TAB-4.4 |
 | 4.3.2 | CLAHE Threshold Sensitivity (H-2) | 800–1,000 | H-2; DGL-5; CFC-1.2 (no extrapolation); VCR-3; SIR-3 | #27, #23 | FIG-4.9 |
 | 4.3.3 | Feature Preservation + σ Sweep + IQ | 800–1,000 | DGL-5; SIR-3 | #27, #23 | FIG-4.10, TAB-4.5 |
 | 4.4.1 | Zero-Shot Transfer to APTOS (H-4) | 700–900 | OD-4 (G ratio); DGL-1; H-4 (G ≥ 0.85) | #02, #04, #05, #07, #11, #12, #16, #17, #38, #44, #48 | TAB-4.6 |
-| 4.4.2 | Baseline vs V5 Comparison | 600–800 | OD-4; CFC-2.8 | (same as 4.4.1) | FIG-4.11 |
+| 4.4.2 | Baseline vs Comparison | 600–800 | OD-4; CFC-2.8 | (same as 4.4.1) | FIG-4.11 |
 | 4.5.1 | Grad-CAM Generation Protocol | 700–900 | NC-14 | #06/#10, #46, #57, #58 | FIG-4.12 |
 | 4.5.2 | ALO (primary) & IoU (secondary) | 900–1,100 | H-5 (ALO primary); NC-14 | #06/#10, #46, #63, #64 | TAB-4.7, FIG-4.14 |
 | 4.5.3 | Attention Consistency Across Datasets | 600–800 | NC-14 | #46, #57, #58 | FIG-4.13 |

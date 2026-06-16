@@ -103,7 +103,7 @@ Comprehensive taxonomy; practical guidance.
 
 | Axis | Relevance | Notes |
 | --- | --- | --- |
-| **Augmentation (§2.2.3)** | **Supporting (survey)** | Frames the V5 Stage-6 augmentation choices; complements [[zhang-2018-mixup]], [[cubuk-2020-randaugment]], [[krizhevsky-2012-alexnet]] (PCA color). |
+| **Augmentation (§2.2.3)** | **Supporting (survey)** | Frames the Stage-6 augmentation choices; complements [[zhang-2018-mixup]], [[cubuk-2020-randaugment]], [[krizhevsky-2012-alexnet]] (PCA color). |
 | Preprocessing-dominance | Supporting | Positions augmentation within the preprocessing/feature-space argument. |
 
 **Risk of contradiction:** None.
@@ -125,6 +125,6 @@ Comprehensive taxonomy; practical guidance.
 
 # 18. Analytical Synthesis
 
-This survey supplies the organizing taxonomy for the dissertation's augmentation discussion in §2.2.3 and contextualizes the V5 Stage-6 design (unified affine geometric + PCA color + brightness/contrast). It frames augmentation as a regularizer that expands the effective training distribution, consistent with the dissertation's view of preprocessing/augmentation as shaping the feature space available to the CNN. It contributes no primary metrics and is preprocessing-method background rather than evidence; cite alongside the mixup, RandAugment, and AlexNet (PCA color) primaries.
+This survey supplies the organizing taxonomy for the dissertation's augmentation discussion in §2.2.3 and contextualizes the Stage-6 design (unified affine geometric + PCA color + brightness/contrast). It frames augmentation as a regularizer that expands the effective training distribution, consistent with the dissertation's view of preprocessing/augmentation as shaping the feature space available to the CNN. It contributes no primary metrics and is preprocessing-method background rather than evidence; cite alongside the mixup, RandAugment, and AlexNet (PCA color) primaries.
 
 End of Literature Card.

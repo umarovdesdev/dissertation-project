@@ -25,7 +25,7 @@ For each empirical claim in the draft:
 - [ ] **CFC-2.5 scan:** No perfect performance generalizations ("achieves 100% accuracy")
 - [ ] **CFC-2.6 scan:** No amplified source claims — no conclusion attributed to a source stronger than its literature card explicitly states (cross-check §D / SIR-1)
 - [ ] **CFC-2.7 scan:** No retroactive re-characterization of self-publications
-- [ ] **CFC-2.8 scan:** No attribution of the H-1 effect to preprocessing alone — phrases "the preprocessing pipeline produces the observed improvement" or "preprocessing dominates" absent in the context of H-1 results; only integrated-pipeline framing used ("the integrated V5 + ophthalmology-SSL configuration outperforms the baseline + ImageNet configuration")
+- [ ] **CFC-2.8 scan:** No attribution of the H-1 effect to preprocessing alone — phrases "the preprocessing pipeline produces the observed improvement" or "preprocessing dominates" absent in the context of H-1 results; only integrated-pipeline framing used ("the integrated preprocessing + ophthalmology-SSL configuration outperforms the baseline + ImageNet configuration")
 - [ ] **CFC-2.9 scan:** No false attribution of a "preprocessing is unimportant" theoretical claim to Gulshan et al. (2016) or any P1 source; no "Gulshan is our baseline" / "we outperform Gulshan" framing (permitted vs. forbidden phrasings checked in §F)
 - [ ] **NC-x scan:** Each non-claim listed in Section Brief verified absent — including NC-14 (Grad-CAM ≠ clinical localization of pathology), NC-15 (dirty-data ingestion protocol bound to Kazakh medical-center data), NC-16 (device domain shift ≠ device certification/regulatory compliance), NC-17 (component ablation ≠ universally optimal preprocessing configuration)
 
@@ -58,7 +58,7 @@ For each empirical claim in the draft:
 ## F. SCOPE & PARADIGM
 
 - [ ] **SB-1.12:** Gulshan et al. (2016) not treated as an experimental control or numerical benchmark; the experimental baseline (configs A/C, OD-3) and the paradigmatic representative kept terminologically distinct
-- [ ] **DGL-6:** Pretraining regimes correctly stated — baseline arm = ImageNet; V5 arm = ophthalmology-specific self-supervised pretraining of the same CNN backbone (ResNet-50 / EfficientNet-B3); no claim of guaranteed transfer
+- [ ] **DGL-6:** Pretraining regimes correctly stated — baseline arm = ImageNet; integrated arm = ophthalmology-specific self-supervised pretraining of the same CNN backbone (ResNet-50 / EfficientNet-B3); no claim of guaranteed transfer
 - [ ] **P1/P2 attribution:** Only permitted Gulshan/P1 phrasings used; forbidden phrasings absent (CFC-2.9, SIR-9):
   - Permitted: "treat preprocessing as ancillary data preparation," "defer preprocessing details to the supplement," "exemplify the methodological practice that this dissertation identifies as paradigm P1"
   - Forbidden: "Gulshan claims preprocessing is unimportant," "rejects preprocessing," "argued that preprocessing does not matter," "Gulshan is our baseline," "we outperform Gulshan"

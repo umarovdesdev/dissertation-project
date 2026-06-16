@@ -103,7 +103,7 @@ Simple, cheap, improves robustness/calibration.
 
 | Axis | Relevance | Notes |
 | --- | --- | --- |
-| **Augmentation (§2.2.3)** | **Supporting** | Augmentation-as-regularization grounding; the V5 pipeline includes unified affine + PCA color augmentation (Stage 6). |
+| **Augmentation (§2.2.3)** | **Supporting** | Augmentation-as-regularization grounding; the pipeline includes unified affine + PCA color augmentation (Stage 6). |
 | Preprocessing-dominance | Supporting | Frames augmentation's contribution to the feature space. |
 
 **Risk of contradiction:** None.
@@ -125,6 +125,6 @@ Simple, cheap, improves robustness/calibration.
 
 # 18. Analytical Synthesis
 
-mixup grounds the augmentation-as-regularization argument in §2.2.3, complementing the dissertation's V5 Stage-6 augmentation (unified affine + PCA color + brightness/contrast). Its evidence that interpolating examples/labels improves generalization, robustness to label noise, and calibration supports treating augmentation as a contributor to the learned feature space rather than incidental. It is non-medical and its label-mixing may be less natural for ordinal DR grades, so it is cited as augmentation-method background rather than a prescribed component; neutral-to-supportive for preprocessing-dominance.
+mixup grounds the augmentation-as-regularization argument in §2.2.3, complementing the dissertation's Stage-6 augmentation (unified affine + PCA color + brightness/contrast). Its evidence that interpolating examples/labels improves generalization, robustness to label noise, and calibration supports treating augmentation as a contributor to the learned feature space rather than incidental. It is non-medical and its label-mixing may be less natural for ordinal DR grades, so it is cited as augmentation-method background rather than a prescribed component; neutral-to-supportive for preprocessing-dominance.
 
 End of Literature Card.

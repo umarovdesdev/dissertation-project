@@ -103,7 +103,7 @@ Simplicity, no proxy task, strong results.
 
 | Axis | Relevance | Notes |
 | --- | --- | --- |
-| **Augmentation (§2.2.3)** | **Supporting** | Practical augmentation-policy reference; informs the V5 unified-augmentation design; complements [[shorten-2019-augmentation-survey]], [[zhang-2018-mixup]]. |
+| **Augmentation (§2.2.3)** | **Supporting** | Practical augmentation-policy reference; informs the unified-augmentation design; complements [[shorten-2019-augmentation-survey]], [[zhang-2018-mixup]]. |
 | Preprocessing-dominance | Supporting | Augmentation as feature-space shaping. |
 
 **Risk of contradiction:** None.
@@ -125,6 +125,6 @@ Simplicity, no proxy task, strong results.
 
 # 18. Analytical Synthesis
 
-RandAugment provides a practical, search-free augmentation-policy reference for §2.2.3 and is representative of the augmentation regimes used to train EfficientNet-class models like the dissertation's EfficientNet-B3 backbone. Its two-parameter design is directly relevant when justifying the V5 unified-augmentation stage, though its generic transform set must be curated to avoid medically-inappropriate operations on fundus images. It is non-medical and cited as augmentation-method background; neutral-to-supportive for the preprocessing/feature-space thesis.
+RandAugment provides a practical, search-free augmentation-policy reference for §2.2.3 and is representative of the augmentation regimes used to train EfficientNet-class models like the dissertation's EfficientNet-B3 backbone. Its two-parameter design is directly relevant when justifying the unified-augmentation stage, though its generic transform set must be curated to avoid medically-inappropriate operations on fundus images. It is non-medical and cited as augmentation-method background; neutral-to-supportive for the preprocessing/feature-space thesis.
 
 End of Literature Card.

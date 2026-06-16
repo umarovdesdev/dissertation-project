@@ -48,7 +48,7 @@
 | §2.5.2 | Attention Map Interpretation |
 | §2.5.3 | ALO and IoU as Quantitative Explainability Metrics |
 | §2.6   | Image Quality Metrics for Preprocessing Evaluation: CNR, VVI, Entropy, SSIM |
-| §3.1   | Formalization of the Unified Preprocessing Pipeline (V5 8-stage) |
+| §3.1   | Formalization of the Unified Preprocessing Pipeline (8-stage) |
 | §3.1.4 | External Image Ingestion Protocol (methodological contribution) |
 | §3.2   | Design of ResNet-50 / EfficientNet-B3 Architectures |
 | §3.3   | Transfer Learning and Pretraining Methodology |
@@ -56,7 +56,7 @@
 | §3.4   | Evaluation Framework and Performance Metrics (clinical, calibration, image quality) |
 | §4.1   | Datasets and Experimental Configuration (EyePACS, APTOS 2019, IDRiD, Messidor-2, RFMiD, DDR, ODIR-5K, Clinical) |
 | §4.2   | Experiment 1: Integrated Pipeline Dominance (H-1) |
-| §4.3   | Experiment 2: V5 Stage Ablation + CLAHE/σ Sweeps (H-2) |
+| §4.3   | Experiment 2: Stage Ablation + CLAHE/σ Sweeps (H-2) |
 | §4.4   | Experiment 3: Cross-Dataset Transferability on APTOS 2019 (H-4) |
 | §4.5   | Experiment 4: Grad-CAM Explainability on IDRiD + Clinical (H-5) |
 | §4.6   | Experiment 5: Clinical Degradation Resistance on IDRiD + Messidor-2 (H-7) |
@@ -101,8 +101,8 @@ The **Paradigm** column was added in governance v5.3 to support the paradigmatic
 | **20** | **Sapakova et al. (2024)** 🔹SELF | **Mathematical modeling** | **Thermal model of laser-fundus interaction, FDM simulation, qualitative** | **None (simulation)** | **N/A** | **§2.4.1** |
 | **21** | **Yesmukhamedov et al. (2025a)** 🔹SELF | **Transfer learning** | **Precision 75% fine-tuned vs 65% frozen, EfficientNetB0, 5-class DR** | **APTOS 2019, Private clinical** | **P1 (prior self-work)** | **§2.3.2, §3.3, §4.2, §3.1, §3.4, §2.2.2, §2.2.3** |
 | **22** | **Yesmukhamedov et al. (2025b)** 🔹SELF | **System architecture** | **Modular AI diagnostic architecture for Kazakhstan, physician-in-the-loop** | **None (design study)** | **N/A** | **§6.1, §6.2, §6.3, §1.4, §1.1.2** |
-| **23** | **Sapakova, Yesmukhamedov & Sapakov (2025a)** 🔹SELF | **CLAHE / Enhancement** | **100% acc/sens/spec, upgraded CLAHE T/80 + ResNet50, 5-class retinal** | **STARE** | **P2-tending (prior self-work toward V5)** | **§2.1.2, §3.1, §3.3, §4.3, §5.3, §2.1.1** |
-| **24** | **Sapakova, Yesmukhamedov & Sapakov (2025b)** 🔹SELF | **Preprocessing study** | **Val acc 71%→86% with preprocessing, ROC-AUC 0.9638, 4-layer CNN** | **APTOS 2019, Private clinical** | **P2-tending (prior self-work toward V5)** | **§3.1, §3.2, §4.2, §4.1, §2.1.2, §5.2, §1.2.2** |
+| **23** | **Sapakova, Yesmukhamedov & Sapakov (2025a)** 🔹SELF | **CLAHE / Enhancement** | **100% acc/sens/spec, upgraded CLAHE T/80 + ResNet50, 5-class retinal** | **STARE** | **P2-tending (prior self-work toward the integrated pipeline)** | **§2.1.2, §3.1, §3.3, §4.3, §5.3, §2.1.1** |
+| **24** | **Sapakova, Yesmukhamedov & Sapakov (2025b)** 🔹SELF | **Preprocessing study** | **Val acc 71%→86% with preprocessing, ROC-AUC 0.9638, 4-layer CNN** | **APTOS 2019, Private clinical** | **P2-tending (prior self-work toward the integrated pipeline)** | **§3.1, §3.2, §4.2, §4.1, §2.1.2, §5.2, §1.2.2** |
 | 25 | Wikipedia — Adaptive Histogram Equalization | Background reference | Algorithmic description of AHE/CLAHE; clip limit 3–4, 8×8 tile grid | N/A | §2.1.1, §2.1.2 |
 | 26 | Shaout & Han (2025) | Preprocessing study | FCE+CLAHE 59% preference, 88% combined; fuzzy logic + CLAHE blending | DRIVE | N/A (preprocessing method, no CNN comparison) | §2.1.1, §3.1 |
 | 27 | Hayati et al. (2023) | CLAHE / Enhancement | CLAHE improved 3/4 CNNs; EfficientNetB4 97.83% acc; ResNet34 −12.02% | APTOS 2019 | P1 (preprocessing varied but treated as exogenous factor) | §2.1.1, §2.1.2, §3.1, §4.3, §5.2 |
@@ -298,7 +298,7 @@ The **Paradigm** column was added in governance v5.3 to support the paradigmatic
 Per INVARIANTS SIR-9, every CNN-based or ViT-based DR/retinal-image classification source has been tagged as **P1** (end-to-end CNN paradigm; preprocessing as auxiliary step), **P2-tending** (preprocessing explicitly formalised as model component), or **N/A** (methodology reference, dataset descriptor, clinical/pathophysiology review, mathematical model, system architecture, or survey). Tag rationale:
 - **P1** — backbone-centric study in which preprocessing is either unreported, reported as a fixed exogenous step, or varied but treated as a tuning input rather than as a formalised model component. The dominant class in the literature corpus.
 - **P1 (canonical representative)** — reserved for Gulshan et al. (2016) per SB-1.12 / SIR-9; see gulshan-2016.md §15 Paradigmatic Role for the methodological-practice grounds.
-- **P2-tending (prior self-work toward V5)** — the candidate's prior preprocessing studies (#23, #24) that move toward the V5 formalisation but predate the integrated-preprocessing-CNN paradigm as formally defined in this dissertation. Per CFC-2.7 they must be cited as prior own work and as evolutionary precursors of the V5 pipeline, not as full P2 instantiations.
+- **P2-tending (prior self-work toward the integrated pipeline)** — the candidate's prior preprocessing studies (#23, #24) that move toward the formalisation but predate the integrated-preprocessing-CNN paradigm as formally defined in this dissertation. Per CFC-2.7 they must be cited as prior own work and as evolutionary precursors of the pipeline, not as full P2 instantiations.
 - **N/A** — the source does not have a paradigmatic position in the P1/P2 dichotomy: dataset descriptors, methodology references (Grad-CAM, SSIM, calibration), pathophysiology reviews, mathematical models, system architectures, surveys.
 
 Per CFC-2.9 and SIR-1, no source has been attributed an explicit "preprocessing is unimportant" claim. P1 tagging is a claim about *observable methodological practice*, not about authorial intent. Per CFC-2.2, no Paradigm tag licenses a head-to-head numerical comparison with the source. Per SB-1.12, the Paradigm column does not redefine the dissertation's operational experimental baseline (configs A/C, OD-3).
@@ -523,6 +523,6 @@ This index was re-aligned to the corrected chapter structure. The seven experime
 | 118 🆕 | Ting et al. (2019) | Survey (ophthalmology DL) | Framing: technical + clinical-translation review |
 | 119 🆕 | Beede et al. (2020) | High-impact socio-technical study | Evidence: clinical-deployment human factors for §6.1/§6.3 |
 | 120 🆕 | Burlina et al. (2017) | Empirical (AMD CNN) | Comparator: color-fundus CNN-grading + transfer learning (AMD, peripheral) |
-| 121 🆕 | Esteva et al. (2017) | Foundational / high-impact precedent | Background: medical transfer-learning landmark; **P1 end-to-end paradigm foil** to V5 |
+| 121 🆕 | Esteva et al. (2017) | Foundational / high-impact precedent | Background: medical transfer-learning landmark; **P1 end-to-end paradigm foil** to the integrated pipeline |
 
 > **⚠️ Cards still missing (carried forward):** #49 (Pachade — RFMiD), #50 (Li — DDR), #51 (ODIR-5K, descriptor still "TO BE IDENTIFIED") remain index entries **without card files**; the v6.1.0 expansion did not include these (the candidate's `litres` batch did not contain them). Write before citing at full depth (§4.1, §4.7).

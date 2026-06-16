@@ -303,7 +303,7 @@ These four features jointly satisfy the operational definition of paradigm P1 us
 
 - *Classification task:* Gulshan 2016 performs **binary** referable-DR detection (moderate-or-worse DR and/or referable DME vs. not); this dissertation performs **five-class** DR staging (DR 0–4).
 - *Backbone architecture:* Gulshan 2016 uses an ensemble of 10 Inception-v3 networks (~22M parameters each); this dissertation uses ResNet-50 and EfficientNet-B3 in the H-1 factorial (single networks, no ensemble for the H-1 comparison).
-- *Pretraining source:* Gulshan 2016 uses ImageNet weights for both arms; the dissertation's V5 arm uses ophthalmology-specific self-supervised pretraining of the same CNN backbone per INVARIANTS v6.0.0 (the v5.1/v5.2 RETFound adoption was reversed).
+- *Pretraining source:* Gulshan 2016 uses ImageNet weights for both arms; the dissertation's integrated arm uses ophthalmology-specific self-supervised pretraining of the same CNN backbone per INVARIANTS v6.0.0 (the v5.1/v5.2 RETFound adoption was reversed).
 - *Dataset partition:* Gulshan 2016 uses a private composite development set (EyePACS + 3 Indian hospitals) and private clinical-validation sets (EyePACS-1; Messidor-2); the dissertation trains and tests on a different EyePACS partition.
 - *Reference standard:* Gulshan 2016 uses majority vote of 7–8 board-certified ophthalmologists; the dissertation uses the public five-class labels supplied with each dataset.
 - *Validation protocol:* Gulshan 2016 reports operating-point sensitivity/specificity and AUC for a binary endpoint; the dissertation reports weighted F1, ROC-AUC, Cohen's Kappa, and per-class metrics for a five-class endpoint.
@@ -331,7 +331,7 @@ P-2. The present dissertation does not perform a direct numerical comparison wit
 
 P-3. The experimental baseline of Experiment 1 (stretch-resize + ImageNet normalize, 3 channels) operationally instantiates the paradigm represented by Gulshan 2016 but is not itself Gulshan's system. The two referents are distinct: "the baseline" refers to the OD-3 construct; "Gulshan 2016" refers to the cited paper.
 
-P-4. The paradigmatic shift from P1 to P2 is the principal conceptual contribution of this dissertation. The 8-stage V5 preprocessing pipeline is the engineering operationalisation of P2; the controlled factorial design of Experiment 1 is its empirical test. The result of Experiment 1 is interpreted, under matched conditions, as evidence consistent with P2 — not as a universal refutation of P1, which is forbidden by CFC-2.1.
+P-4. The paradigmatic shift from P1 to P2 is the principal conceptual contribution of this dissertation. The 8-stage preprocessing pipeline is the engineering operationalisation of P2; the controlled factorial design of Experiment 1 is its empirical test. The result of Experiment 1 is interpreted, under matched conditions, as evidence consistent with P2 — not as a universal refutation of P1, which is forbidden by CFC-2.1.
 
 ### Performance and Methodology
 

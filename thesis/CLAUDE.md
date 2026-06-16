@@ -40,7 +40,7 @@ outline/
   TABLE_OF_CONTENTS_KZ.md
 
 methods/
-  preprocessing-pipeline.md   V5 pipeline full specification
+  preprocessing-pipeline.md   pipeline full specification
   implementation.md           implementation details
 
 prompts/              AI writing session templates
@@ -100,8 +100,8 @@ INVARIANTS.md is the supreme authority. If any document conflicts with INVARIANT
 
 ## Hypotheses
 
-- H-1: Integrated Pipeline Dominance (Exp 1, EyePACS 100%; V5 arm = ophthalmology-SSL, composite IV, CFC-2.8)
-- H-2: V5 Component Ablation + CLAHE/σ sweeps (Exp 2, EyePACS)
+- H-1: Integrated Pipeline Dominance (Exp 1, EyePACS 100%; integrated arm = ophthalmology-SSL, composite IV, CFC-2.8)
+- H-2: Component Ablation + CLAHE/σ sweeps (Exp 2, EyePACS)
 - H-3: DROPPED in V3
 - H-4: Cross-Dataset Transferability on APTOS 2019 (Exp 3, G ≥ 0.85)
 - H-5: Explainability — Grad-CAM ALO/IoU (Exp 4, IDRiD + Clinical)

@@ -6,7 +6,7 @@ The preprocessing pipeline is defined as an integral component of the diagnostic
 
 ---
 
-## V5 Pipeline Stages (8-Stage V5 Pipeline — Canonical)
+## Pipeline Stages (8-Stage Pipeline — Canonical)
 
 ### Stage 0 — Canonical Flip (always on)
 
@@ -70,10 +70,10 @@ The preprocessing pipeline is defined as an integral component of the diagnostic
 
 ---
 
-## V5 Pipeline Active/Absent Definition
+## Pipeline Active/Absent Definition
 
-- **Pipeline ACTIVE (full V5):** All 8 stages applied. Stage 6 active during training only. Output: 4-channel tensor (3 RGB + 1 FOV mask).
-- **Pipeline ABSENT (V5 baseline):** Stretch-resize to 512×512 + ImageNet normalize (mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]). Output: 3-channel tensor. No FOV mask. No preprocessing stages applied.
+- **Pipeline ACTIVE (full pipeline):** All 8 stages applied. Stage 6 active during training only. Output: 4-channel tensor (3 RGB + 1 FOV mask).
+- **Pipeline ABSENT (baseline):** Stretch-resize to 512×512 + ImageNet normalize (mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]). Output: 3-channel tensor. No FOV mask. No preprocessing stages applied.
 
 ---
 

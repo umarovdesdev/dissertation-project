@@ -213,7 +213,7 @@ Evaluate relevance to:
 * Metric hierarchy standardization
 * EyePACS/Messidor benchmarking
 * IDRiD lesion-level analysis
-* Vision Transformer comparison (contextual / related-work only — the dissertation's V5 arm uses ophthalmology-specific self-supervised pretraining of CNN backbones, not a ViT foundation model)
+* Vision Transformer comparison (contextual / related-work only — the dissertation's integrated arm uses ophthalmology-specific self-supervised pretraining of CNN backbones, not a ViT foundation model)
 
 Rate relevance:
 
@@ -254,9 +254,9 @@ Strictly analytical.
 
 ---
 
-### V5 Relevance Dimensions
+### Relevance Dimensions
 
-Assess article relevance to V5 dissertation scope:
+Assess article relevance to dissertation scope:
 1. Preprocessing pipeline comparison (especially multi-stage pipelines)
 2. Device domain shift across camera manufacturers
 3. FOV mask or geometry-preserving resize approaches

@@ -17,20 +17,23 @@ A "version marker" is any string matching the STRIP patterns in §3.
 
 **Rationale.** `thesis/` is the living working journal of the dissertation, where iterative governance is documented and version history matters. Everything outside `thesis/` is a delivered artifact and represents the current authoritative state. Version archaeology of artifacts is recoverable via git tags (§5).
 
-## 2. Proper noun exception
+## 2. No pipeline proper-noun (V5 retired as a name)
 
-`V5` (uppercase V, no decimal following) is the proper noun for the 8-stage preprocessing pipeline defined in the root `CLAUDE.md`. It is NOT a version marker and is preserved in all locations.
+Earlier revisions treated `V5` (uppercase V, no decimal) as a proper noun for the 8-stage preprocessing pipeline, preserved in all locations. **This exception is retired.** `V5` is a version token, never a name. The preprocessing pipeline is named descriptively and carries no version-derived alias:
 
-Preserved:
-- "V5 preprocessing pipeline"
-- "V5 arm"
-- "V5 model"
-- "the V5 baseline"
+- the pipeline → "the preprocessing pipeline" / "the 8-stage preprocessing pipeline" / "the integrated pipeline"
+- the full-pipeline experimental condition → "the integrated arm" (contrasted with "the baseline arm")
+- the 4-channel output → "the 4-channel tensor"; an enumerated stage → "Stage N"
 
-Not preserved (these are version markers):
-- "V5.2", "V5.3"
-- "v5", "v5.2"
-- "version 5.3"
+Rewritten (these were the old proper-noun preserves; they are now descriptive, not preserved):
+- "V5 preprocessing pipeline" → "preprocessing pipeline"
+- "V5 arm" → "integrated arm"
+- "V5 model" / "the V5 baseline" → descriptive form
+
+A bare `V5` (or `v5`, `V3`, …) is permitted **only** as a reference to version N of the governance corpus, and then only inside `thesis/`, like every other version marker (§1). It must never label the pipeline, an arm, a tensor, a stage, or any other artifact — neither in `thesis/` nor anywhere else.
+
+Version markers (unchanged — STRIP per §3, confined to `thesis/`):
+- "V5.2", "V5.3", "v5", "v5.2", "version 5.3"
 
 ## 3. Detection patterns
 
@@ -43,13 +46,12 @@ Not preserved (these are version markers):
 - `\(v?[0-9]+\.[0-9]+(?:/v?[0-9]+\.[0-9]+)*\)`
 
 ### PRESERVE
-- `\bV[0-9]+\b` NOT followed by `.`
 - `\bStage\s+[0-9]+\b`
 - Numerical literals (`1.0e-5`, dataset IDs).
 
 ### MANUAL
 - Matches inside code identifiers, config keys, i18n keys, or import paths.
-- Standalone `V1`/`V2`/`V3`/`V4` (no decimal) in non-thesis files.
+- Bare `V[0-9]+` (no decimal), e.g. `V3`, `V5` — a version reference, not a proper noun (§2). Permitted only inside `thesis/`; never used as a name. Anywhere it labels an artifact (pipeline/arm/tensor/stage), rewrite it descriptively.
 
 ## 4. Version scheme (MAJOR.MINOR.PATCH)
 

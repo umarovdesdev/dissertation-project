@@ -257,7 +257,7 @@ End of Literature Card.
 
 ---
 
-### V5-Era Evaluation Axes
+### Evaluation Axes
 
 When evaluating articles, additionally assess relevance along these axes:
 - **Device domain shift:** Does the paper address cross-device generalization or camera-specific artifacts?

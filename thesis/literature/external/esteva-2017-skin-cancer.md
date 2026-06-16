@@ -98,7 +98,7 @@ Scale, expert comparison, high-impact demonstration of transfer learning in medi
 
 # 14. Limitations
 
-**Implicit:** Dermatology not fundus; minimal preprocessing (contrast to V5 thesis); single test institution.
+**Implicit:** Dermatology not fundus; minimal preprocessing (contrast to thesis); single test institution.
 
 ---
 
@@ -109,7 +109,7 @@ Scale, expert comparison, high-impact demonstration of transfer learning in medi
 | **Transfer learning / medical CNN (§1.3.1/§2.3)** | **Supporting (foundational precedent)** | Canonical evidence that ImageNet-transfer CNNs reach clinician-level medical classification; uses Inception-v3 [[szegedy-2016-inception-v3]]. |
 | Preprocessing-dominance | **Contrast case** | Achieves expert-level results with minimal preprocessing — a P1-paradigm exemplar the dissertation positions against (preprocessing-as-exogenous). |
 
-**Risk of contradiction:** Low-moderate — it exemplifies the end-to-end paradigm (minimal preprocessing) that the dissertation contrasts with V5; frame as paradigm context, not as refutation (no preprocessing ablation performed).
+**Risk of contradiction:** Low-moderate — it exemplifies the end-to-end paradigm (minimal preprocessing) that the dissertation contrasts with the integrated pipeline; frame as paradigm context, not as refutation (no preprocessing ablation performed).
 
 ---
 
@@ -128,6 +128,6 @@ Scale, expert comparison, high-impact demonstration of transfer learning in medi
 
 # 18. Analytical Synthesis
 
-Esteva et al. is the canonical demonstration that an ImageNet-pretrained Inception-v3, fine-tuned on a large clinical corpus, can reach clinician-level medical-image classification — a foundational transfer-learning precedent for §1.3.1/§2.3 and the introduction. Methodologically it exemplifies the end-to-end, minimal-preprocessing (P1) paradigm that the dissertation deliberately contrasts with its preprocessing-as-integral-component (V5) thesis, making it valuable as paradigm context. Because it performs no preprocessing ablation and addresses dermatology rather than DR, it should be cited as feasibility/precedent and as a paradigmatic foil, not as evidence for or against preprocessing-dominance.
+Esteva et al. is the canonical demonstration that an ImageNet-pretrained Inception-v3, fine-tuned on a large clinical corpus, can reach clinician-level medical-image classification — a foundational transfer-learning precedent for §1.3.1/§2.3 and the introduction. Methodologically it exemplifies the end-to-end, minimal-preprocessing (P1) paradigm that the dissertation deliberately contrasts with its preprocessing-as-integral-component thesis, making it valuable as paradigm context. Because it performs no preprocessing ablation and addresses dermatology rather than DR, it should be cited as feasibility/precedent and as a paradigmatic foil, not as evidence for or against preprocessing-dominance.
 
 End of Literature Card.

@@ -1,11 +1,11 @@
 ---
 name: strip-version-markers
-description: "User-directed: ALL V5/V4/V3 version markers (V5 IS a version marker, not a preserved proper noun) banned outside thesis/; defense/experiments/demo/server done, council-export scrubber added in md2gost.py 2026-06-12, root TODO"
+description: "User-directed: ALL V5/V4/V3 version markers (V5 IS a version marker, not a preserved proper noun) banned outside thesis/; defense/experiments/demo/server done, council-export scrubber added md2gost.py 2026-06-12. 2026-06-16: V5-as-NAME also purged INSIDE thesis/ (arm='integrated arm'), VERSIONING_POLICY §2 + root CLAUDE.md reconciled; remaining root TODO = TASK.md, SUPERVISOR_HANDOFF.md, defense figure-script labels"
 metadata:
   type: project
 ---
 
-User wants every version marker (`V5`, `_V5`, `v5`, `V4`, `V3`, …) removed from all directories **outside `thesis/`**, preserving meaning. This **reverses** `thesis/governance/VERSIONING_POLICY.md` (which says the `V5` proper noun is "preserved in all locations") — that policy doc needs updating to stay consistent.
+User wants every version marker (`V5`, `_V5`, `v5`, `V4`, `V3`, …) removed from all directories **outside `thesis/`**, preserving meaning. This **reverses** the old `thesis/governance/VERSIONING_POLICY.md` proper-noun exception (which said the `V5` proper noun was "preserved in all locations"). **UPDATED 2026-06-16:** §2 of that policy is rewritten to retire the exception (`V5` is a version token, never a name); §3 PRESERVE no longer preserves bare `Vn`; root `CLAUDE.md` versioning note reconciled.
 
 Agreed replacement convention (confirmed by user):
 - `V5 pipeline` / `Full V5` / `V5 препроцессинг` → **"pipeline"** / **"preprocessing pipeline"** / **"full pipeline"**; the only two comparison terms are **baseline** and **pipeline**.
@@ -30,4 +30,10 @@ demo/ + server/ (DONE 2026-06-03):
 
 Council export leak fixed (2026-06-12): `thesis/output/*.md` (allowed to keep `V5`) was rendered verbatim into `defense/docs/*.docx`+`.pdf`, leaking `V5` outside `thesis/`. Fix = a scrubber **in the converter** so it can't regress: `strip_version_markers()` in `.claude/skills/council-docs/scripts/md2gost.py`, called by `convert(..., strip_versions=True)`. Removes `(V5)` parentheticals, bare tokens (`V5`/`v5.2`/`V4`/`V3`), and word forms (`version 5.x`/`версия 5`/`нұсқа 5`), each eating its adjacent space (signature spacing untouched). Source .md unchanged. Rebuilt all 5 deliverables; docx XML verified 0 `V[345]`. User restated the rule "раз и навсегда": **`V5` IS a version marker (5th version)** and must not appear in `defense/`, `demo/`, `experiments/`, or root. Documented in `REFACTORING.md §9`. See [[council-docs-skill]].
 
-Status: `defense/` + `experiments/` + `demo/` + `server/` complete; council-export scrubber added 2026-06-12. Still TODO: **root-level files only**. See [[v5-cache-throughput]].
+Thesis-internal V5-as-NAME removal (2026-06-16): inside `thesis/`, `V5` was used overwhelmingly as a **name** (V5 pipeline / V5 arm / V5 Stage N / 4-channel V5 tensor / V5 configuration), not as a version. Per user, the name is removed and `V5` kept only as a bare version reference. Applied across ~120 thesis `.md` files (~615 edits, case-sensitive `V5` only, version markers `v5.x`/`V5.x`/`version 5` guarded):
+- `V5 arm` / `V5 configuration` → **`integrated arm`** / **`integrated configuration`** (user-chosen name); shorthand `V5 ⟹` / `Performance(V5+SSL)` / `baseline vs V5` → `integrated …`.
+- `V5 pipeline` / `8-stage V5 preprocessing` / `V5 Stage N` / `4-channel V5 tensor` → drop `V5` (descriptive form); `full V5` → `full pipeline`; CLAHE clip-limit subscript `CL_{V5}` → `CL_{DC}`.
+- Verified: 0 `V5`-as-name left in `thesis/` (only `VERSIONING_POLICY.md` discusses it); no duplicate-word artifacts.
+- NB terminology split: **inside thesis** the full-pipeline arm = "integrated arm"; **outside thesis** comparison terms stay "baseline" vs "pipeline" (root CLAUDE.md uses both: pipeline for the contrast, "integrated arm" as the named arm).
+
+Status: `thesis/` (names) + `defense/` + `experiments/` + `demo/` + `server/` complete; council-export scrubber added 2026-06-12; `VERSIONING_POLICY.md`/root `CLAUDE.md` reconciled 2026-06-16. Still TODO: remaining **root-level docs** (`TASK.md`, `SUPERVISOR_HANDOFF.md`) and a few `defense/figures/scripts/*.py` panel labels still say "V5 Pipeline" — note some root files contain immutable identifiers (branch `feat/v5-cache-colab`, filenames) that must stay. See [[v5-cache-throughput]].

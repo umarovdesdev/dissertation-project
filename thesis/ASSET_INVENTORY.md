@@ -94,7 +94,7 @@ This inventory distinguishes three things that are easy to conflate:
 
 | ID | Type | Description / caption | Target § | Source | File path | Status |
 |----|------|----------------------|----------|--------|-----------|--------|
-| FIG-3.1 | diagram | V5 8-stage preprocessing pipeline overview (vertical) | §3.1.1 | defense | `defense/presentation/assets/preprocessing/10_input/04_preprocessing_pipeline_vertical.png` | ✅ AVAILABLE |
+| FIG-3.1 | diagram | 8-stage preprocessing pipeline overview (vertical) | §3.1.1 | defense | `defense/presentation/assets/preprocessing/10_input/04_preprocessing_pipeline_vertical.png` | ✅ AVAILABLE |
 | FIG-3.2 | figure | Stage 0 — Canonical flip (L→R) | §3.1.1 | defense / demo | `defense/presentation/assets/preprocessing/11_canonical_flip/stage0_canonical_flip.png`; `demo/web/public/pipeline/dr04/preprocessing/stage_0_canonical_flip/` | ✅ AVAILABLE |
 | FIG-3.3 | figure | Stage 1 — OD-fovea rotation normalization | §3.1.1 | defense / demo | `defense/presentation/assets/preprocessing/12_od_fovea_rotation/stage1_od_fovea_rotation.png`; `demo/web/public/pipeline/dr04/preprocessing/stage_1_od_fovea_rotation/` | ✅ AVAILABLE |
 | FIG-3.4 | figure | Stage 2 — FOV crop + isotropic resize | §3.1.1 | defense / demo | `defense/presentation/assets/preprocessing/13_crop_resize/stage2_fov_crop_resize.png` | ✅ AVAILABLE |
@@ -131,27 +131,27 @@ This inventory distinguishes three things that are easy to conflate:
 | FIG-4.7 | figure | Exp 1 ROC curves (per config) | §4.2.3 | Exp 1 | demo dashboard: `…/results/exp1/24_roc_curves.png` | ❌ MISSING |
 | FIG-4.8 | figure | Exp 1 per-class F1 under class imbalance | §4.2.3 | Exp 1 | demo dashboard: `…/results/exp1/18_per_class_f1.png` | ❌ MISSING |
 | TAB-4.3 | table | Exp 1 calibration (ECE, Brier) per config | §4.2.2 | Exp 1 | demo dashboard: `…/results/general/15_calibration.png` | ❌ MISSING |
-| TAB-4.4 | table | **Exp 2 V5 ablation (Levels 0–6)** — weighted F1 per level | §4.3.1 | Exp 2 | demo dashboard: `…/results/exp2/04_exp2_ablation.png`, `…/05_exp2_per_stage.png` | ❌ MISSING |
+| TAB-4.4 | table | **Exp 2 ablation (Levels 0–6)** — weighted F1 per level | §4.3.1 | Exp 2 | demo dashboard: `…/results/exp2/04_exp2_ablation.png`, `…/05_exp2_per_stage.png` | ❌ MISSING |
 | FIG-4.9 | figure | Exp 2 CLAHE clip-limit sensitivity curve | §4.3.2 | Exp 2 | demo dashboard: `…/results/exp2/13_exp2_clahe_sensitivity.png` | ❌ MISSING |
 | FIG-4.10 | figure | Exp 2 flat-field σ sweep | §4.3.3 | Exp 2 | demo dashboard: `…/results/exp2/exp2_ff_sweep.json` | ❌ MISSING |
 | TAB-4.5 | table | Exp 2 image-quality metrics per stage (CNR/VVI/Entropy/SSIM) | §4.3.3 | Exp 2 | demo dashboard: `…/results/general/16_image_quality.png` | ❌ MISSING |
 | TAB-4.6 | table | **Exp 3 APTOS transfer** — G = F1_APTOS/F1_EyePACS per config | §4.4 | Exp 3 | demo dashboard: `…/results/exp3/exp3_aptos_transfer.json` (preview G=0.890) | ❌ MISSING |
 | FIG-4.11 | figure | Exp 3 cross-dataset transfer chart | §4.4 | Exp 3 | demo dashboard: `…/results/exp3/29_exp3_aptos_transfer.png` | ❌ MISSING |
-| FIG-4.12 | figure | **Exp 4 Grad-CAM overlays** per DR class, baseline vs V5 (IDRiD) | §4.5.1 / App E | Exp 4 | demo dashboard: `…/results/exp4/27_gradcam_overlay.png` | ❌ MISSING |
+| FIG-4.12 | figure | **Exp 4 Grad-CAM overlays** per DR class, baseline vs integrated (IDRiD) | §4.5.1 / App E | Exp 4 | demo dashboard: `…/results/exp4/27_gradcam_overlay.png` | ❌ MISSING |
 | TAB-4.7 | table | **Exp 4 ALO (primary) + IoU (secondary)** per lesion type | §4.5.2 | Exp 4 | demo dashboard: `…/results/exp4/06_exp4_alo.png`, `…/07_exp4_iou.png` | ❌ MISSING |
 | FIG-4.13 | figure | Exp 4 attention-consistency across datasets | §4.5.3 | Exp 4 | demo dashboard: `…/results/exp4/28_attention_consistency.png` | ❌ MISSING |
 | FIG-4.14 | figure | Exp 4 lesion-overlay reference (IDRiD masks) | §4.5.2 | Exp 4 | demo asset: `defense/figures/figures_mine/fig2_lesion_overlays.png` | ❌ MISSING |
 | TAB-4.8 | table | **Exp 5 clinical degradation** Δ=F1_val−F1_ext (IDRiD, Messidor-2) | §4.6 | Exp 5 | demo dashboard: `…/results/exp5/exp5_degradation.json` | ❌ MISSING |
 | FIG-4.15 | figure | Exp 5 degradation / generalization chart | §4.6 | Exp 5 | demo dashboard: `…/results/exp5/08_exp5_generalization.png`, `…/09_exp5_G_ratio.png` | ❌ MISSING |
 | TAB-4.9 | table | **Exp 6 device domain shift** — per-camera F1/AUC (Canon/Topcon/Kowa/Zeiss) | §4.7 / App F | Exp 6 | demo dashboard: `…/results/exp6/10_exp6_device_shift.png` | ❌ MISSING |
-| TAB-4.10 | table | **Exp 7 small-data** 5-fold IDRiD→Clinical (baseline vs V5) | §4.8 | Exp 7 | demo dashboard: `…/results/exp7/exp7_small_data.json` | ❌ MISSING |
+| TAB-4.10 | table | **Exp 7 small-data** 5-fold IDRiD→Clinical (baseline vs integrated) | §4.8 | Exp 7 | demo dashboard: `…/results/exp7/exp7_small_data.json` | ❌ MISSING |
 | FIG-4.16 | figure | Exp 7 small-data performance chart | §4.8 | Exp 7 | demo dashboard: `…/results/exp7/30_exp7_small_data.png` | ❌ MISSING |
 
 ### 2.5 Chapter 5 — Reliability Validation
 
 | ID | Type | Description / caption | Target § | Source | File path | Status |
 |----|------|----------------------|----------|--------|-----------|--------|
-| FIG-5.1 | figure | Grad-CAM gallery (representative per class, baseline vs V5) | §5.1 / App E | Exp 4 | — | ❌ MISSING |
+| FIG-5.1 | figure | Grad-CAM gallery (representative per class, baseline vs integrated) | §5.1 / App E | Exp 4 | — | ❌ MISSING |
 | TAB-5.1 | table | Statistical tests (McNemar, DeLong, bootstrap 95% CI, mixed-effects) | §5.2.1 | Exp 1–7 | demo dashboard: `…/results/general/21_statistical_tests.png` | ❌ MISSING |
 | TAB-5.2 | table | Final claim-strength classification PC-1…PC-10 (STRONG/MODERATE/CONDITIONAL) | §5.2.2 | governance + results | derivable once results exist | ⏳ PENDING |
 | TAB-5.3 | table | Comparative analysis vs published systems (IDx-DR, EyeNuk, DeepMind, Gulshan — contextual only) | §5.3.1 | literature cards | text (numbers pending own results) | ⏳ PENDING |
@@ -201,7 +201,7 @@ experiments/logs/exp1_*.log, smoke_test_*.log, exp2_remaining_smoke.log  # train
 ```
 
 **Key honesty notes carried into the PLAN:**
-1. **Exp 1 is the only experiment with any real metrics, and it is incomplete** — no complete A–D × 5-fold at 100% data; the v6.0.0 design (ophthalmology-SSL initialization for the V5 arm B/D) has **not** been trained at all (current Config-D checkpoints are the retired ImageNet artifact, per project memory). The clean Config-D fold-0 run reports strong numbers (e.g. weighted F1 ≈ 0.82, ROC-AUC ≈ 0.93 at epoch 4) but is a **single fold**.
+1. **Exp 1 is the only experiment with any real metrics, and it is incomplete** — no complete A–D × 5-fold at 100% data; the v6.0.0 design (ophthalmology-SSL initialization for the integrated arm B/D) has **not** been trained at all (current Config-D checkpoints are the retired ImageNet artifact, per project memory). The clean Config-D fold-0 run reports strong numbers (e.g. weighted F1 ≈ 0.82, ROC-AUC ≈ 0.93 at epoch 4) but is a **single fold**.
 2. **Exp 2–7 have produced no real result artifacts yet.** The corresponding figures/JSONs in `demo/` and `defense/` are **demo-dashboard preview assets** (catalogued in §4) and carry placeholder numbers until the experiments are run, so they are not citable as results.
 3. **Confusion matrices, ROC curves, calibration, and statistical tests** cannot be derived even for Exp 1 from current outputs, because **per-sample predictions/probabilities were not saved** — only per-epoch aggregate metrics. Producing TAB-4.2 / FIG-4.6 / FIG-4.7 requires re-running inference with prediction dumps.
 4. **Chapter 3 and §4.1 are the safe starting points** — every asset they need is real and on disk.

@@ -34,13 +34,13 @@
 - **Boundary:** Projected deployment benefits (20–30% late-stage DR reduction; 15–20% cost reduction) are third-party projections, not dissertation findings (INVARIANTS SB-1.6; ARGUMENT_MAP NC-3; SIR-8).
 
 ### Scientific Novelty
-1. Integration of an 8-stage V5 preprocessing pipeline — comprising canonical flip (Stage 0), OD-fovea rotation normalization (Stage 1), FOV crop + isotropic resize + zero-padding (Stage 2), FOV mask generation (Stage 3), adaptive flat-field correction (Stage 4), upgraded CLAHE with dual-constraint clip limit in LAB color space (Stage 5), augmentation (Stage 6), and dataset-specific normalization (Stage 7) — into a CNN-based DR classification pipeline as a unified framework, not isolated techniques (LC-SQOPUS_Q3, p. 81; LC-SQOPUS_Q2, §1).
+1. Integration of an 8-stage preprocessing pipeline — comprising canonical flip (Stage 0), OD-fovea rotation normalization (Stage 1), FOV crop + isotropic resize + zero-padding (Stage 2), FOV mask generation (Stage 3), adaptive flat-field correction (Stage 4), upgraded CLAHE with dual-constraint clip limit in LAB color space (Stage 5), augmentation (Stage 6), and dataset-specific normalization (Stage 7) — into a CNN-based DR classification pipeline as a unified framework, not isolated techniques (LC-SQOPUS_Q3, p. 81; LC-SQOPUS_Q2, §1).
 2. Two-stage fine-tuning protocol for EfficientNetB0 tailored to fundus image variability (LC-CONF, p. 497; LC-KBTU, §II.1) [V3: retained as training strategy; H-3 dropped].
 3. Mathematical modeling of laser-tissue interaction for retinal therapy with qualitative simulation (LC-KazUTB, §II.1) — bounded as theoretical contribution only (INVARIANTS SB-1.5; ARGUMENT_MAP PC-4).
 4. Modular AI-driven system architecture for DR screening in resource-limited environments (LC-NAN_RK, §II.1) — bounded as design specification only (INVARIANTS SB-4.1; ARGUMENT_MAP PC-5).
 5. Cross-dataset transferability validation on APTOS 2019 without retraining, with generalization ratio metric (G = F1_APTOS / F1_EyePACS, target G ≥ 0.85) — demonstrating pipeline robustness beyond the training domain (ARGUMENT_MAP PC-6).
 6. Grad-CAM explainability analysis with quantitative ALO (primary metric: Attention–Lesion Overlap, `ALO = area(GradCAM ∩ lesion) / area(lesion)`) and IoU (secondary metric) against IDRiD pixel-level lesion masks (microaneurysms, hemorrhages, hard exudates, soft exudates) — providing causal evidence that preprocessing redirects CNN attention to clinically relevant structures (ARGUMENT_MAP PC-7).
-7. Component-level ablation of the 8-stage V5 preprocessing pipeline (7 levels: baseline → +canonical flip → +OD-fovea rotation normalization → +isotropic resize + FOV mask → +adaptive flat-field correction → +dual-constraint CLAHE → full V5) identifying a ranked contribution hierarchy among the stages (ARGUMENT_MAP PC-8).
+7. Component-level ablation of the 8-stage preprocessing pipeline (7 levels: baseline → +canonical flip → +OD-fovea rotation normalization → +isotropic resize + FOV mask → +adaptive flat-field correction → +dual-constraint CLAHE → full pipeline) identifying a ranked contribution hierarchy among the stages (ARGUMENT_MAP PC-8).
 8. Device domain shift evaluation across 4 camera manufacturers (Canon, Topcon, Kowa, Zeiss) on RFMiD, DDR, ODIR-5K — quantifying cross-device performance variability for deployment readiness assessment (ARGUMENT_MAP PC-9).
 
 ### Research Goal
@@ -49,7 +49,7 @@
 ### Research Objectives
 1. Analyze the current state of automated DR diagnosis, fundus image quality variability, device-specific acquisition challenges, and deep learning approaches to retinal image classification (→ Chapter 1).
 2. Formalize the mathematical foundations of image enhancement techniques, CNN-based classification, transfer learning theory, explainability methods (CAM, Grad-CAM), and image quality metrics (CNR, VVI, SSIM, Entropy) (→ Chapter 2).
-3. Design the 8-stage V5 preprocessing pipeline (canonical flip [Stage 0] → OD-fovea rotation normalization [Stage 1] → FOV crop + isotropic resize + zero-padding [Stage 2] → FOV mask generation [Stage 3] → adaptive flat-field correction [Stage 4] → upgraded CLAHE [Stage 5] → augmentation [Stage 6] → dataset-specific normalization [Stage 7]) and integrate it with ResNet-50, EfficientNet-B3, and EfficientNet-B4 architectures (→ Chapter 3).
+3. Design the 8-stage preprocessing pipeline (canonical flip [Stage 0] → OD-fovea rotation normalization [Stage 1] → FOV crop + isotropic resize + zero-padding [Stage 2] → FOV mask generation [Stage 3] → adaptive flat-field correction [Stage 4] → upgraded CLAHE [Stage 5] → augmentation [Stage 6] → dataset-specific normalization [Stage 7]) and integrate it with ResNet-50, EfficientNet-B3, and EfficientNet-B4 architectures (→ Chapter 3).
 4. Experimentally validate the integrated pipeline dominance hypothesis (H-1) via 2×2 factorial ablation on EyePACS (100%, ~35,126 images) with ResNet-50 and EfficientNet-B3, 4 configurations A–D, 5-fold CV (→ Chapter 4, Experiment 1).
 5. Validate the preprocessing component contribution hierarchy via component-level ablation on EyePACS (→ Chapter 4, Experiment 2) and CLAHE threshold sensitivity (H-2) as a sub-analysis, plus flat-field σ sweep.
 6. Validate cross-dataset transferability to APTOS 2019 without retraining, generalization ratio G ≥ 0.85 (H-4) (→ Chapter 4, Experiment 3).
@@ -65,13 +65,13 @@
 
 ### Research Hypothesis
 - Verbatim from HYPOTHESIS.md, mapped to INVARIANTS §II:
-  - **H-1 (Primary — Integrated Pipeline Dominance):** See INVARIANTS §II, H-1. The independent variable is the composite *(preprocessing × pretraining source)* pair (baseline ⟹ ImageNet, V5 ⟹ ophthalmology-SSL). Dependent variables: Accuracy, F1-score, ROC-AUC, Cohen's Kappa. Tested on ResNet-50 and EfficientNet-B3 on EyePACS 100% (4 configs A–D, 5-fold CV). Empirical dominance criterion: EH-3 (weighted F1 Δ ≥ 5 pp; ROC-AUC Δ ≥ 0.02; no Cohen's Kappa degradation). Attribution of the observed effect to preprocessing alone, pretraining alone, or their interaction is **forbidden** under CFC-2.8; permissible claims are restricted to the integrated pipeline as a whole.
-  - **H-2 (Secondary — V5 Component Ablation + CLAHE/σ Sweeps):** See INVARIANTS §II, H-2. Bounded to tested parameter range on EyePACS/IDRiD; no extrapolation permissible.
+  - **H-1 (Primary — Integrated Pipeline Dominance):** See INVARIANTS §II, H-1. The independent variable is the composite *(preprocessing × pretraining source)* pair (baseline ⟹ ImageNet, integrated ⟹ ophthalmology-SSL). Dependent variables: Accuracy, F1-score, ROC-AUC, Cohen's Kappa. Tested on ResNet-50 and EfficientNet-B3 on EyePACS 100% (4 configs A–D, 5-fold CV). Empirical dominance criterion: EH-3 (weighted F1 Δ ≥ 5 pp; ROC-AUC Δ ≥ 0.02; no Cohen's Kappa degradation). Attribution of the observed effect to preprocessing alone, pretraining alone, or their interaction is **forbidden** under CFC-2.8; permissible claims are restricted to the integrated pipeline as a whole.
+  - **H-2 (Secondary — Component Ablation + CLAHE/σ Sweeps):** See INVARIANTS §II, H-2. Bounded to tested parameter range on EyePACS/IDRiD; no extrapolation permissible.
   - **H-3 [DROPPED V3]:** H-3 is not tested. Empirical reference from LC-CONF / LC-KBTU cited as prior self-publications only (SIR-4).
-  - **H-4 (Cross-Dataset Transferability — APTOS 2019):** Models trained on EyePACS with V5 pipeline generalize to APTOS 2019 without retraining, achieving generalization ratio G ≥ 0.85 (G = F1_APTOS / F1_EyePACS).
+  - **H-4 (Cross-Dataset Transferability — APTOS 2019):** Models trained on EyePACS with pipeline generalize to APTOS 2019 without retraining, achieving generalization ratio G ≥ 0.85 (G = F1_APTOS / F1_EyePACS).
   - **H-5 (Explainability):** Preprocessing shifts CNN attention toward clinically relevant lesion regions: ALO between Grad-CAM activation maps and IDRiD lesion masks is higher for preprocessed models than baseline (ALO_preproc > ALO_baseline) — ALO is the PRIMARY metric. IoU_preproc > IoU_baseline is the secondary condition.
   - **H-6 (Device Domain Shift):** Preprocessed models maintain classification performance across images from different fundus camera domains (Canon, Topcon, Kowa, Zeiss), as evaluated on DDR, ODIR-5K, RFMiD.
-  - **H-7 (Clinical Degradation Resistance):** V5 preprocessing reduces cross-dataset performance drop compared to baseline, evaluated on IDRiD + Messidor-2.
+  - **H-7 (Clinical Degradation Resistance):** preprocessing reduces cross-dataset performance drop compared to baseline, evaluated on IDRiD + Messidor-2.
 
 ### Methodological Basis
 - Experimental comparison with controlled conditions (matched dataset, hardware, training budget).
@@ -86,14 +86,14 @@
 
 ### Provisions Submitted for Defense
 0. **Paradigmatic framing (methodological, non-empirical):** The integrated preprocessing-CNN paradigm (P2) is positioned as conceptually more productive than the end-to-end CNN paradigm (P1) for five-class DR classification across heterogeneous fundus conditions — argued discursively in §1.4–§1.5, feeds the central thesis IT-1 (ARGUMENT_MAP PC-0; codes P1/P2, SIR-9, CFC-2.9, SB-1.12). [Spec stub — full PC-0 prose belongs to the §1.4/§1.5 writing loop.]
-1. The integrated 8-stage V5 preprocessing pipeline (canonical flip, OD-fovea rotation normalization, FOV crop + isotropic resize + zero-padding, FOV mask generation, adaptive flat-field correction, upgraded CLAHE, augmentation, dataset-specific normalization) produces statistically measurable improvement in five-class DR classification independently for both ResNet-50 and EfficientNet-B3 on EyePACS 100% (ARGUMENT_MAP PC-1).
+1. The integrated 8-stage preprocessing pipeline (canonical flip, OD-fovea rotation normalization, FOV crop + isotropic resize + zero-padding, FOV mask generation, adaptive flat-field correction, upgraded CLAHE, augmentation, dataset-specific normalization) produces statistically measurable improvement in five-class DR classification independently for both ResNet-50 and EfficientNet-B3 on EyePACS 100% (ARGUMENT_MAP PC-1).
 2. CLAHE clip limit parameter exhibits a parameter-dependent sensitivity profile with identifiable local optimum on IDRiD (ARGUMENT_MAP PC-2).
 3. Two-stage fine-tuning of EfficientNetB0 outperforms frozen-only strategy (ARGUMENT_MAP PC-3) [V3 DEMOTED: PC-3 is no longer a primary provision; cited as prior work only].
 4. Coupled thermal-optical mathematical model provides theoretical grounding for laser-tissue interaction (ARGUMENT_MAP PC-4; theoretical claim only).
 5. Modular system architecture specification for DR screening in resource-limited environments (ARGUMENT_MAP PC-5; design specification only).
-6. Models trained on EyePACS with the 8-stage V5 preprocessing pipeline generalize to APTOS 2019 without retraining, achieving generalization ratio G ≥ 0.85 (G = F1_APTOS / F1_EyePACS) (ARGUMENT_MAP PC-6).
+6. Models trained on EyePACS with the 8-stage preprocessing pipeline generalize to APTOS 2019 without retraining, achieving generalization ratio G ≥ 0.85 (G = F1_APTOS / F1_EyePACS) (ARGUMENT_MAP PC-6).
 7. Grad-CAM analysis demonstrates that preprocessing redirects CNN attention toward clinically relevant lesion regions: ALO_preproc > ALO_baseline on IDRiD lesion masks (ALO is the PRIMARY metric; IoU_preproc > IoU_baseline is secondary) (ARGUMENT_MAP PC-7).
-8. Component-level ablation (V5 Levels 0–6) identifies a ranked contribution hierarchy among the V5 pipeline stages, measured by incremental weighted F1 improvement on EyePACS (ARGUMENT_MAP PC-8).
+8. Component-level ablation (Levels 0–6) identifies a ranked contribution hierarchy among the pipeline stages, measured by incremental weighted F1 improvement on EyePACS (ARGUMENT_MAP PC-8).
 9. Preprocessed models maintain classification performance across images from different fundus camera manufacturers (Canon, Topcon, Kowa, Zeiss), as evaluated on RFMiD, DDR, ODIR-5K (ARGUMENT_MAP PC-9).
 
 ### Theoretical Significance
@@ -236,7 +236,7 @@
 #### 2.3.3 In-Domain Self-Supervised Pretraining for Retinal Imaging
 - Ophthalmology-specific self-supervised pretraining (DINO / BYOL / SimCLR / MoCo family, selected empirically) on an unlabeled retinal fundus corpus without DR labels, producing retina-aware initialization weights for the CNN backbone (HYPOTHESIS H-1 v6.0.0; INVARIANTS Section X).
 - In-domain (retinal) initialization vs. natural-image (ImageNet) initialization: expected sample-efficiency and clinical-generalization benefit; transferability is not theoretically guaranteed and is evaluated empirically (DGL-6).
-- Composite-IV note: the V5 arm of H-1 combines this SSL initialization with V5 preprocessing; per CFC-2.8 it is reported only as part of the integrated configuration, never as an independently attributable factor.
+- Composite-IV note: the integrated arm of H-1 combines this SSL initialization with preprocessing; per CFC-2.8 it is reported only as part of the integrated configuration, never as an independently attributable factor.
 - Literature: #73 (THIN — DINO/BYOL/SimCLR/MoCo-on-fundus primary sources to be acquired).
 
 ### 2.4 Mathematical Modeling of Laser-Tissue Interaction in Retinal Therapy
@@ -292,9 +292,9 @@
 
 ### 3.1 Formalization of the Unified Preprocessing Pipeline
 
-#### 3.1.1 Pipeline Stage Specification: V5 8-Stage System
+#### 3.1.1 Pipeline Stage Specification: 8-Stage System
 
-- V5 pipeline definition (8 stages, all always-on except Stage 6 train-only):
+- pipeline definition (8 stages, all always-on except Stage 6 train-only):
   - **(Stage 0) Canonical Flip** (always on): Left→right eye horizontal flip to canonical right-eye orientation.
   - **(Stage 1) OD-Fovea Rotation Normalization** (always on): Classical CV detection of OD (brightest) and fovea (darkest); rotates image so OD→fovea axis is horizontal.
   - **(Stage 2) FOV Crop + Isotropic Resize + Zero-Padding** (always on): Detect FOV circle radius R, crop, scale isotropically to 512×512, zero-pad to preserve geometry. Preserves fundus circle shape (contrast with baseline stretch-resize).
@@ -304,7 +304,7 @@
   - **(Stage 6) Augmentation** (train only): Unified affine + brightness/contrast + PCA color jitter.
   - **(Stage 7) Dataset-Specific Normalization** (always on, always last): `(x − μ_dataset)/σ_dataset → tensor`; mean/std computed from training set per dataset.
 - Baseline (Exp 1 A/C): stretch-resize 512×512 + ImageNet normalize (3 channels).
-- Full V5 (Exp 1 B/D): all 8 stages (4 channels: RGB + FOV mask).
+- Full pipeline (Exp 1 B/D): all 8 stages (4 channels: RGB + FOV mask).
 
 #### 3.1.2 Upgraded CLAHE Algorithm with Dual-Constraint Clip Limit
 - Adaptation of T/80 formulation (LC-SQOPUS_Q2) — now applied in LAB color space with dual-constraint clip limit.
@@ -318,7 +318,7 @@
 
 #### 3.1.4 External Image Ingestion Protocol
 - Methodological contribution for integrating clinical data from Kazakh medical centers.
-- Five-stage protocol: (1) Quality Gate — automated quality assessment and rejection of unusable images, (2) Geometric Standardization — alignment to standard FOV and resolution, (3) Preprocessing Pipeline — application of the 8-stage V5 system, (4) Label Harmonization — mapping institutional labels to standard 5-class DR taxonomy, (5) Distribution Analysis — statistical comparison of ingested data with training distribution.
+- Five-stage protocol: (1) Quality Gate — automated quality assessment and rejection of unusable images, (2) Geometric Standardization — alignment to standard FOV and resolution, (3) Preprocessing Pipeline — application of the 8-stage system, (4) Label Harmonization — mapping institutional labels to standard 5-class DR taxonomy, (5) Distribution Analysis — statistical comparison of ingested data with training distribution.
 - Boundary: The ingestion protocol is validated only for specific Kazakh medical center data; generalization to other clinical data sources requires independent validation (ARGUMENT_MAP NC-15).
 
 ### 3.2 Design of CNN Architectures for DR Classification
@@ -344,9 +344,9 @@
 - Note: Replication is now conducted on EyePACS (primary dataset), in addition to prior APTOS 2019 self-publication results.
 
 #### 3.3.2 Ophthalmology-Specific Self-Supervised Pretraining of the CNN Backbone
-- V5-arm initialization: the CNN backbone (ResNet-50 or EfficientNet-B3) is initialized from ophthalmology-specific self-supervised pretraining (DINO / BYOL / SimCLR / MoCo family, selected empirically) on an unlabeled retinal fundus corpus without DR labels; the baseline arm uses ImageNet weights (HYPOTHESIS H-1 v6.0.0; INVARIANTS Section X).
-- SSL pretraining is performed on the 4-channel V5 input (AOQ-2 resolved v6.0.0); both backbones are used in both arms, preserving the 2×2 (preprocessing × architecture) factorial symmetry.
-- Composite-IV boundary: per CFC-2.8, the SSL initialization is reported as part of the integrated V5 configuration and is not independently attributable.
+- integrated-arm initialization: the CNN backbone (ResNet-50 or EfficientNet-B3) is initialized from ophthalmology-specific self-supervised pretraining (DINO / BYOL / SimCLR / MoCo family, selected empirically) on an unlabeled retinal fundus corpus without DR labels; the baseline arm uses ImageNet weights (HYPOTHESIS H-1 v6.0.0; INVARIANTS Section X).
+- SSL pretraining is performed on the 4-channel input (AOQ-2 resolved v6.0.0); both backbones are used in both arms, preserving the 2×2 (preprocessing × architecture) factorial symmetry.
+- Composite-IV boundary: per CFC-2.8, the SSL initialization is reported as part of the integrated configuration and is not independently attributable.
 - Literature: #73 (GAP — ophthalmology-SSL primary sources to be acquired).
 
 #### 3.3.3 Two-Stage Fine-Tuning Protocol Design
@@ -391,7 +391,7 @@
 
 ### 4.1 Datasets and Experimental Configuration
 
-#### 4.1.1 Dataset Architecture V5
+#### 4.1.1 Dataset Architecture
 - **EyePACS (Primary Training):** ~35,126 labeled images (100%), five-class DR staging (DR 0–4), Canon CR-1 camera. Primary dataset for Experiments 1, 2, 3, 4, 5, 6. Public dataset.
 - **APTOS 2019 (Cross-Dataset Transferability):** ~3,662 labeled samples. Five-class DR staging. Mixed camera models. External test dataset for Experiment 3 (zero-shot transfer from EyePACS, G ≥ 0.85).
 - **IDRiD (Explainability + CLAHE Sweep + Small Data):** Five-class DR staging with pixel-level lesion annotations. Kowa camera. Datasets for Experiments 2 (CLAHE sweep), 4 (explainability), 5 (clinical degradation), 7 (small data training). Public dataset.
@@ -417,16 +417,16 @@
 
 #### 4.2.1 Factorial Design (4 Configurations A–D)
 - A 2×2 factorial experimental design to isolate the independent effects of preprocessing vs. architecture:
-  - Factor A: Preprocessing (baseline 3ch stretch-resize + ImageNet normalize vs. full V5 8-stage pipeline 4ch)
+  - Factor A: Preprocessing (baseline 3ch stretch-resize + ImageNet normalize vs. full 8-stage pipeline 4ch)
   - Factor B: Architecture (ResNet-50 vs. EfficientNet-B3)
 - Four controlled experimental configurations:
   - **Config A:** baseline (3ch) + ResNet-50
-  - **Config B:** full V5 pipeline (4ch) + ResNet-50
+  - **Config B:** full pipeline (4ch) + ResNet-50
   - **Config C:** baseline (3ch) + EfficientNet-B3
-  - **Config D:** full V5 pipeline (4ch) + EfficientNet-B3
+  - **Config D:** full pipeline (4ch) + EfficientNet-B3
 - All experiments conducted under matched dataset partitions (5-fold CV with patient-level split), hardware configuration, optimizer settings, and training budgets.
 - Statistical analysis: Mixed-effects model across folds; McNemar test for paired comparison; DeLong test for ROC-AUC comparison; Bootstrap 95% CI.
-- Integrated Pipeline Dominance (H-1) is considered supported only if the V5 arm outperforms the baseline arm satisfying EH-3 criteria independently for both ResNet-50 (B > A) and EfficientNet-B3 (D > C) (attribution to preprocessing alone is forbidden, CFC-2.8).
+- Integrated Pipeline Dominance (H-1) is considered supported only if the integrated arm outperforms the baseline arm satisfying EH-3 criteria independently for both ResNet-50 (B > A) and EfficientNet-B3 (D > C) (attribution to preprocessing alone is forbidden, CFC-2.8).
 
 #### 4.2.2 Training Dynamics and Convergence Analysis
 - Training/validation loss and accuracy curves for all four configurations (A–D).
@@ -443,15 +443,15 @@
 - **Tests:** Preprocessing component contribution hierarchy; H-2 (CLAHE Threshold Sensitivity) as sub-analysis
 - **Evidence target:** ARGUMENT_MAP PC-8 (component hierarchy); ARGUMENT_MAP PC-2 (CLAHE sensitivity)
 
-#### 4.3.1 V5 Ablation Design (Levels 0–6)
-- Sequential addition of V5 pipeline stages to isolate individual contributions:
+#### 4.3.1 Ablation Design (Levels 0–6)
+- Sequential addition of pipeline stages to isolate individual contributions:
   - Level 0: Baseline (3ch stretch-resize + ImageNet normalize)
   - Level 1: + Canonical flip (Stage 0)
   - Level 2: + OD-fovea rotation normalization (Stage 1)
   - Level 3: + Isotropic resize + FOV mask (Stages 2+3+7, 4ch)
   - Level 4: + Adaptive flat-field correction (Stage 4)
   - Level 5: + Upgraded CLAHE (Stage 5)
-  - Level 6: Full V5 pipeline (all stages incl. augmentation Stage 6)
+  - Level 6: Full pipeline (all stages incl. augmentation Stage 6)
 - Also: CLAHE parameter sweep (clip_factor × global_threshold grid on IDRiD) and flat-field σ sweep.
 - Weighted F1 and image quality metrics (CNR, VVI, Entropy, SSIM) at each level.
 
@@ -471,24 +471,24 @@
 - **Evidence target:** ARGUMENT_MAP PC-6
 
 #### 4.4.1 Zero-Shot Transfer to APTOS 2019
-- Models trained on EyePACS with full V5 pipeline applied directly to APTOS 2019 without retraining.
+- Models trained on EyePACS with full pipeline applied directly to APTOS 2019 without retraining.
 - Generalization ratio G = F1_APTOS / F1_EyePACS per OD-4. Target: G ≥ 0.85.
 
-#### 4.4.2 Baseline vs V5 Pipeline Comparison
-- Compare G for baseline (3ch) vs V5 pipeline (4ch) to show preprocessing improves cross-dataset generalization.
+#### 4.4.2 Baseline vs Pipeline Comparison
+- Compare G for baseline (3ch) vs pipeline (4ch) to show preprocessing improves cross-dataset generalization.
 
 ### 4.5 Experiment 4: Grad-CAM Explainability on IDRiD + Clinical (H-5)
 - **Tests:** H-5 (Explainability — preprocessing shifts CNN attention toward lesion regions)
 - **Evidence target:** ARGUMENT_MAP PC-7
 
 #### 4.5.1 Grad-CAM Generation Protocol
-- Model: EfficientNet-B4 pre-trained on ImageNet, fine-tuned on EyePACS with V5 pipeline.
+- Model: EfficientNet-B4 pre-trained on ImageNet, fine-tuned on EyePACS with pipeline.
 - IDRiD: 10 images per DR class (50 total). Clinical: qualitative Grad-CAM overlays.
-- Two conditions: baseline (3ch) vs V5 pipeline (4ch).
+- Two conditions: baseline (3ch) vs pipeline (4ch).
 
 #### 4.5.2 Quantitative ALO and IoU with IDRiD Lesion Masks
-- **ALO (primary):** `ALO = area(GradCAM ∩ lesion_mask) / area(lesion_mask)`. Hypothesis: ALO(V5) > ALO(baseline).
-- **IoU (secondary):** `IoU = area(GradCAM ∩ lesion_mask) / area(GradCAM ∪ lesion_mask)`. Hypothesis: IoU(V5) > IoU(baseline).
+- **ALO (primary):** `ALO = area(GradCAM ∩ lesion_mask) / area(lesion_mask)`. Hypothesis: ALO(integrated) > ALO(baseline).
+- **IoU (secondary):** `IoU = area(GradCAM ∩ lesion_mask) / area(GradCAM ∪ lesion_mask)`. Hypothesis: IoU(integrated) > IoU(baseline).
 - Per lesion type: microaneurysms, hemorrhages, hard exudates, soft exudates.
 - Boundary: Grad-CAM activation is interpretability, not diagnostic localization (ARGUMENT_MAP NC-14).
 
@@ -496,9 +496,9 @@
 - Cosine similarity of Grad-CAM distributions across dataset pairs.
 
 ### 4.6 Experiment 5: Clinical Degradation Resistance (H-7)
-- **Tests:** H-7 (V5 preprocessing reduces cross-dataset performance drop)
+- **Tests:** H-7 (preprocessing reduces cross-dataset performance drop)
 - **Datasets:** EyePACS → IDRiD + Messidor-2
-- V5 pipeline should narrow cross-dataset performance gap compared to baseline.
+- pipeline should narrow cross-dataset performance gap compared to baseline.
 
 ### 4.7 Experiment 6: Device Domain Shift (H-6)
 - **Tests:** H-6 (Device Robustness)
@@ -508,7 +508,7 @@
 
 ### 4.8 Experiment 7: Small Data Training (IDRiD → Clinical)
 - **Datasets:** IDRiD (5-fold CV training) → Clinical dataset evaluation
-- Small data training with V5 pipeline; qualitative Grad-CAM on Clinical images.
+- Small data training with pipeline; qualitative Grad-CAM on Clinical images.
 
 ### Conclusions to Chapter 4
 - State H-1, H-2, H-4, H-5, H-6, H-7 outcomes explicitly.
@@ -590,7 +590,7 @@
 ### 6.2 AI Processing Module Design
 
 #### 6.2.1 Preprocessing Engine with Configurable Pipeline Parameters
-- Configurable pipeline parameters based on the validated 8-stage V5 preprocessing pipeline (§3.1): canonical flip (Stage 0), OD-fovea rotation normalization (Stage 1), FOV crop + isotropic resize (Stage 2), FOV mask generation (Stage 3), adaptive flat-field correction (σ = 0.07 × FOV diameter, Stage 4), dual-constraint CLAHE on the LAB L-channel (Stage 5), integrated augmentation (Stage 6), and dataset-specific normalization (Stage 7).
+- Configurable pipeline parameters based on the validated 8-stage preprocessing pipeline (§3.1): canonical flip (Stage 0), OD-fovea rotation normalization (Stage 1), FOV crop + isotropic resize (Stage 2), FOV mask generation (Stage 3), adaptive flat-field correction (σ = 0.07 × FOV diameter, Stage 4), dual-constraint CLAHE on the LAB L-channel (Stage 5), integrated augmentation (Stage 6), and dataset-specific normalization (Stage 7).
 - Link to PC-1: the preprocessing-CNN pipeline validated experimentally constitutes the AI processing module core.
 
 #### 6.2.2 Inference Module with Model Selection Logic
@@ -650,7 +650,7 @@
 ## APPENDICES
 
 ### Appendix A — Source Code of the Preprocessing Pipeline
-- Complete implementation code for the 8-stage V5 preprocessing pipeline.
+- Complete implementation code for the 8-stage preprocessing pipeline.
 
 ### Appendix B — Supplementary Experimental Results and Confusion Matrices
 - Per-class confusion matrices for all experiments (Chapters 4–5).
@@ -664,7 +664,7 @@
 
 ### Appendix E — Grad-CAM Visualization Gallery
 - Representative Grad-CAM overlay images per DR class (0–4), with and without preprocessing.
-- Visual comparison of attention maps between baseline (stretch-resize + ImageNet normalize) and full 8-stage V5 preprocessing pipeline.
+- Visual comparison of attention maps between baseline (stretch-resize + ImageNet normalize) and full 8-stage preprocessing pipeline.
 - Selected examples from EyePACS, Messidor, and IDRiD to demonstrate attention consistency across datasets.
 
 ### Appendix F — Device Domain Shift Supplementary Tables
@@ -695,5 +695,5 @@
 
 *End of MASTER_OUTLINE.md*
 *Binding references: INVARIANTS.md v6.0.0 | ARGUMENT_MAP.md v6.0.0 | HYPOTHESIS.md v6.0.0 | CENTRAL_THESIS.md v6.0.0 | CONTRIBUTIONS.md v6.0.0 | RESEARCH_ARCHITECTURE.md v6.0.0 | GLOSSARY_EN.md*
-*Document Version: 6.0.0 — v6.0.0 sync: 8-stage V5 pipeline (canonical flip → OD-fovea rotation normalization → FOV crop + isotropic resize → FOV mask → adaptive flat-field correction σ=0.07·D → dual-constraint CLAHE → augmentation → dataset-specific normalization); Experiment 1 = 2×2 factorial, 4 configs A–D (ResNet-50 A/B, EfficientNet-B3 C/D), 5-fold CV; H-1 = Integrated Pipeline Dominance (composite preprocessing × pretraining IV, baseline⟹ImageNet vs V5⟹ophthalmology-SSL, CFC-2.8); all seven experiments in Chapter 4 (§4.2–§4.8), Chapter 5 = Reliability Validation (§5.1 Explainability, §5.2 Statistical, §5.3 Comparative, §5.4 Limitations); added §2.3.3 and §3.3.2 SSL sections; PC-0 paradigmatic framing + PC-10 clinical degradation; H-3 dropped, ALO primary / IoU secondary.*
+*Document Version: 6.0.0 — v6.0.0 sync: 8-stage pipeline (canonical flip → OD-fovea rotation normalization → FOV crop + isotropic resize → FOV mask → adaptive flat-field correction σ=0.07·D → dual-constraint CLAHE → augmentation → dataset-specific normalization); Experiment 1 = 2×2 factorial, 4 configs A–D (ResNet-50 A/B, EfficientNet-B3 C/D), 5-fold CV; H-1 = Integrated Pipeline Dominance (composite preprocessing × pretraining IV, baseline⟹ImageNet vs integrated⟹ophthalmology-SSL, CFC-2.8); all seven experiments in Chapter 4 (§4.2–§4.8), Chapter 5 = Reliability Validation (§5.1 Explainability, §5.2 Statistical, §5.3 Comparative, §5.4 Limitations); added §2.3.3 and §3.3.2 SSL sections; PC-0 paradigmatic framing + PC-10 clinical degradation; H-3 dropped, ALO primary / IoU secondary.*
 *All structural decisions traceable to the governing source corpus.*

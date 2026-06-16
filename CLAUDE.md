@@ -28,7 +28,7 @@ Each sub-directory has its own CLAUDE.md with detailed context.
 
 ## Central Thesis
 
-model = preprocessing + CNN. The 8-stage V5 preprocessing pipeline is an integral model component, not ancillary data preparation. It defines the feature space available to the CNN.
+model = preprocessing + CNN. The 8-stage preprocessing pipeline is an integral model component, not ancillary data preparation. It defines the feature space available to the CNN.
 
 ## Governance — Single Source of Truth
 
@@ -43,7 +43,7 @@ All governance documents live in `thesis/governance/`. These are the authoritati
 
 `experiments/docs/` contains only `experimental_protocol.md` (quick-start guide for running experiments). All other governance references point to `thesis/governance/`.
 
-## V5 Preprocessing Pipeline (8 stages)
+## Preprocessing Pipeline (8 stages)
 
 Stage 0: Canonical flip (left→right eye) — always on
 Stage 1: OD-fovea rotation normalization — always on
@@ -55,14 +55,14 @@ Stage 6: Augmentation (unified affine + PCA color + brightness/contrast) — tra
 Stage 7: Dataset-specific normalize → tensor — always last
 
 Baseline (Exp 1 A/C) = stretch-resize 512×512 + ImageNet normalize (3 channels).
-Full V5 (Exp 1 B/D) = all 8 stages (4 channels: RGB + FOV mask).
+Full pipeline (Exp 1 B/D) = all 8 stages (4 channels: RGB + FOV mask).
 
 ## Experiments
 
 | Exp | Hypothesis | Dataset | What |
 |-----|-----------|---------|------|
-| 1   | H-1       | EyePACS (100%, ~35,126) | 2×2 factorial: ResNet-50 vs EfficientNet-B3 × baseline(3ch) vs V5(4ch). Configs A–D. |
-| 2   | H-2       | EyePACS | V5 stage ablation (7 levels) + CLAHE sweep + flat-field σ sweep |
+| 1   | H-1       | EyePACS (100%, ~35,126) | 2×2 factorial: ResNet-50 vs EfficientNet-B3 × baseline(3ch) vs pipeline(4ch). Configs A–D. |
+| 2   | H-2       | EyePACS | pipeline stage ablation (7 levels) + CLAHE sweep + flat-field σ sweep |
 | 3   | H-4       | EyePACS → APTOS 2019 | Cross-dataset transfer (G ≥ 0.85) |
 | 4   | H-5       | EyePACS → IDRiD + Clinical | Explainability: IDRiD quantitative (ALO/IoU), Clinical qualitative (Grad-CAM) |
 | 5   | H-7       | EyePACS → IDRiD + Messidor-2 | Clinical degradation resistance |
@@ -107,6 +107,6 @@ npm run build # production build
 
 Version markers (`v5.X`, `V5.X`, `version 5.X`, etc.) appear **only inside `thesis/`**. `defense/`, `demo/`, `experiments/`, and root-level files reflect the current authoritative state of `thesis/` without explicit version references.
 
-`V5` (uppercase, no decimal) is the proper noun for the 8-stage preprocessing pipeline and is preserved everywhere.
+`V5` is a version marker (the fifth pipeline version), **not** a proper noun, and must not appear as a name anywhere. Outside `thesis/` it is removed entirely; inside `thesis/` only bare version references are kept (never as a name). The pipeline is named descriptively — "preprocessing pipeline" / "full pipeline"; the full-pipeline experimental arm is the "integrated arm" (vs. the "baseline arm"). See `thesis/governance/VERSIONING_POLICY.md` §2.
 
 Version bumps follow semantic versioning: `MAJOR.MINOR.PATCH`. See `thesis/governance/VERSIONING_POLICY.md` for the full scheme, detection regexes, and workflow. Containment outside `thesis/` is enforced by the version-marker scan in §6 of that policy.

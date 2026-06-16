@@ -86,7 +86,7 @@
 # 3 METHODOLOGY OF INTEGRATED PREPROCESSING-CNN PIPELINE DESIGN
 
 ## 3.1 Formalization of the Unified Preprocessing Pipeline
-- 3.1.1 Pipeline Stage Specification: V5 8-Stage System
+- 3.1.1 Pipeline Stage Specification: 8-Stage System
 - 3.1.2 Modified CLAHE Algorithm with Dual-Constraint Clip Limit
 - 3.1.3 Augmentation Strategy for Class Imbalance Mitigation  
 - 3.1.4 External Image Ingestion Protocol  
@@ -97,7 +97,7 @@
 
 ## 3.3 Transfer Learning and Pretraining Methodology
 - 3.3.1 Architecture Adaptation for Five-Class DR Classification  
-- 3.3.2 Ophthalmology-Specific Self-Supervised Pretraining of the CNN Backbone (V5 Arm)  
+- 3.3.2 Ophthalmology-Specific Self-Supervised Pretraining of the CNN Backbone (integrated Arm)  
 - 3.3.3 Two-Stage Fine-Tuning Protocol Design  
 - 3.3.4 Weighted Loss Function Formulation for Ordinal Class Structure  
 
@@ -116,19 +116,19 @@
 - 4.1.2 Class Distribution Analysis and Data Partitioning Strategy  
 - 4.1.3 Hardware Specification and Reproducibility Protocol  
 
-## 4.2 Experiment 1: Integrated Pipeline Dominance — V5 Pipeline + In-Domain Pretraining vs. Baseline on EyePACS (H-1)
+## 4.2 Experiment 1: Integrated Pipeline Dominance — Pipeline + In-Domain Pretraining vs. Baseline on EyePACS (H-1)
 - 4.2.1 Restored 2×2 Factorial Design (Configurations A–D)
 - 4.2.2 Training Dynamics and Convergence Analysis  
 - 4.2.3 Quantitative Comparison of Diagnostic Metrics  
 
-## 4.3 Experiment 2: V5 Stage Ablation + CLAHE/σ Sweeps (H-2)
-- 4.3.1 V5 Ablation Design (Levels 0–6)
+## 4.3 Experiment 2: Pipeline Stage Ablation + CLAHE/σ Sweeps (H-2)
+- 4.3.1 Ablation Design (Levels 0–6)
 - 4.3.2 CLAHE Threshold Sensitivity Analysis (H-2 Sub-Analysis)  
 - 4.3.3 Flat-Field σ Sweep and Image Quality Metrics  
 
 ## 4.4 Experiment 3: Cross-Dataset Transferability on APTOS 2019 (H-4)
 - 4.4.1 Zero-Shot Transfer to APTOS 2019
-- 4.4.2 Baseline vs V5 Pipeline Comparison
+- 4.4.2 Baseline vs Pipeline Comparison
 
 ## 4.5 Experiment 4: Grad-CAM Explainability on IDRiD + Clinical (H-5)
 - 4.5.1 Grad-CAM Generation Protocol
