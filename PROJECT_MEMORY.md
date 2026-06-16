@@ -14,8 +14,10 @@ Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `
 
 ## Thesis writing
 - [Thesis writing status](PROJECT_MEMORY/thesis-writing-status.md) — Phase 1 (all writable-now: Ch1/2/3/6 + §4.1 + App A/D) APPROVED 2026-06-10; §2.3.3 deferred; rest Phase-2 experiment-gated; Ch3 detail + carry-forwards
-- [Literature integrity flags](PROJECT_MEMORY/literature-integrity-flags.md) — kusuhara rename done; #46/#47/#48 cards now written (2026-06-12); OPEN: #49–#51 cards missing, scopus-q2 ID mismatch
+- [Literature integrity flags](PROJECT_MEMORY/literature-integrity-flags.md) — kusuhara rename done; #46/#47/#48 cards (2026-06-12) + #49/#50/#51 cards (2026-06-16) now written; OPEN: DDR full-PDF upgrade, scopus-q2 ID mismatch
+- [Thesis assembly](PROJECT_MEMORY/thesis-assembly.md) — `thesis/assembly/_assemble_en.py` concatenates approved PART-1 bodies in TOC order → intermediate EN manuscript (2026-06-16: 53 sections, ~51.5k words); citations unconverted; Ch 1/2/3/6/§4.1 content-complete (§2.3.3 drafted, §2.4.2 consolidated)
 - [Literature corpus → 120](PROJECT_MEMORY/literature-corpus-120.md) — LITERATURE_INDEX v6.1.0 (2026-06-12): 81→120 sources; litres PDFs carded (#46/#47/#48 + FGADR #83) + 38 web sources #84–#121; resolves §1.2.1, §2.3.3, §3.3.2 gaps
+- [Citation style convention](PROJECT_MEMORY/citation-style-convention.md) — drafts use author-year (working, card-tied); GOST `[N]` numbering deferred to a single citation-assembly pass at final assembly (decided 2026-06-16)
 
 ## Experiments / Config-D
 - [Config-D pretraining axis](PROJECT_MEMORY/config-d-pretraining.md) — v6.0.0 drops RETFound for ophthalmology SSL; shipped demo Config-D = retired ImageNet artifact (divergence)

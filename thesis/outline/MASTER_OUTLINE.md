@@ -248,10 +248,12 @@
 - Finite difference method (explicit scheme) for numerical solution.
 - Source: LC-KazUTB, §II.3 (Equations 1–8).
 - Findings: Surface layers (cornea) exhibit faster temperature rise; deep layers (choroid, retina) stabilize after continued exposure (ARGUMENT_MAP SC-4.1).
-
-#### 2.4.2 Implications for Diagnostic Image Feature Interpretation
-- Qualitative support for understanding thermal effects on retinal features visible in fundus images.
+- **Implications for diagnostic image feature interpretation (consolidated — formerly §2.4.2; folded into this subsection's closing, see drafts/2.4.1-draft.md):** Qualitative support for understanding thermal effects on retinal features visible in fundus images; framed as epistemically independent of the diagnostic preprocessing–CNN system (reflected in §0.9 theoretical significance, PC-4).
 - **Critical boundary:** No quantitative clinical validation; computational simulation only (INVARIANTS SB-1.5; SIR-6). Model omits blood perfusion term; tissue properties treated as static (LC-KazUTB, §II.7). The claim that simulation "confirms effectiveness of laser therapy" is the source's claim, not the dissertation's validated finding (SIR-6; CFC-2.4).
+
+> **Structure note (2026-06-16):** §2.4 is a single consolidated subsection (§2.4.1). The
+> originally planned §2.4.2 was folded into §2.4.1's closing during drafting; TOC_EN/TOC_KZ and
+> this outline were synced to match the as-written structure. §2.5 is not renumbered.
 
 ### 2.5 Explainability in Deep Learning for Medical Imaging
 

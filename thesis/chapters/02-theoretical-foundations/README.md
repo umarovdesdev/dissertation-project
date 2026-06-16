@@ -26,8 +26,7 @@
 - 2.3.3 In-Domain Self-Supervised Pretraining for Retinal Imaging
 
 ## 2.4 Mathematical Modeling of Laser-Tissue Interaction in Retinal Therapy
-- 2.4.1 Coupled Thermal-Optical Model of Fundus Tissue Response
-- 2.4.2 Implications for Diagnostic Image Feature Interpretation
+- 2.4.1 Coupled Thermal-Optical Model of Fundus Tissue Response (incl. implications for diagnostic image feature interpretation — §2.4.2 consolidated here, 2026-06-16)
 
 ## 2.5 Explainability in Deep Learning for Medical Imaging
 - 2.5.1 Class Activation Mapping (CAM) and Grad-CAM Mathematical Formulation

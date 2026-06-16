@@ -11,7 +11,7 @@ Consolidates the former `phase1-writing-complete` + `chapter3-methodology-drafte
 
 All writable-now sections drafted and APPROVED on disk (each with brief/draft/continuity/review):
 - **Ch 1** Problem Domain — 11/11 ✅
-- **Ch 2** Theoretical Foundations — 14/15 ✅ (**§2.3.3** in-domain SSL DEFERRED by candidate directive until DINO/BYOL/SimCLR/MoCo-on-fundus cards acquired)
+- **Ch 2** Theoretical Foundations — **14/14 ✅ COMPLETE** (2026-06-16). **§2.3.3** in-domain SSL DRAFTED & APPROVED 2026-06-16 (deferral lifted: SSL-on-fundus corpus #84–#92 now present; brief/draft/continuity/review saved; DGL-6 + CFC-2.8 composite-IV; CNN-vs-ViT nuance; CNN-native-on-4ch-V5 kept spec-not-result → §3.3.2/§4.2). **§2.4.2 was consolidated into §2.4.1** (phantom TOC/outline entry removed 2026-06-16; the earlier "14/15" wrongly assumed §2.4.2 existed). Ch 2 = 14 numbered subsections + §2.C, all drafted. See [[thesis-assembly]].
 - **Ch 3** Methodology — 13/13 ✅
 - **Ch 6** System Architecture — 9/9 ✅ (committed 4b6898f, 04fa027; §6.1.2 carries deferred DIA-6.3 UML placeholder)
 - **§4.1** Datasets & Configuration — 3/3 ✅ (commit 71723a5)

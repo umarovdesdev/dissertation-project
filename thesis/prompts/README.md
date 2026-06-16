@@ -28,3 +28,4 @@ F. Translation Review (Claude Opus) → Verified Kazakh text
 | `literature-card-review.md` | Direct literature card creation from articles |
 | `literature-index-update.md` | Literature index regeneration protocol |
 | `article-evaluation.md` | Structured article evaluation protocol |
+| `citation-assembly.md` | Stage G — convert draft author-year citations to GOST `[N]` + build "List of references used" (run once on the assembled manuscript) |

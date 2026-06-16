@@ -63,7 +63,7 @@
 - [x] ✅ §2.2.3 Regularization Techniques — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; augmentation dual-role → Stage 6/OD-3; SIR-5/SIR-7 honored)
 - [x] ✅ §2.3.1 Feature Transferability Across Visual Domains — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; DGL-6 two regimes; §2.3.3 SSL theory named-only/deferred; CFC-2.8 neutrality)
 - [x] ✅ §2.3.2 Frozen-Layer vs Progressive Fine-Tuning Strategies — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; glossary fine-tuning disambiguation; SIR-5/SIR-7/CFC-2.8; hands off to §2.4.1)
-- [ ] ⏸️ §2.3.3 In-Domain Self-Supervised Pretraining for Retinal Imaging (NEW v6.0.0) — **DEFERRED (candidate directive 2026-06-09): hold until in-domain SSL cards (DINO/BYOL/SimCLR/MoCo-on-fundus) are acquired; #73 general survey only.** Named-only in §2.3.1/§2.3.2; to be drafted after SSL acquisition.
+- [x] ✅ §2.3.3 In-Domain Self-Supervised Pretraining for Retinal Imaging (NEW v6.0.0) — ✅ verified (APPROVED 2026-06-16; brief/draft/continuity/review saved; **deferral lifted** — SSL-on-fundus corpus #84–#92 now present, LITERATURE_INDEX §2.3.3 ✅ RESOLVED). In-domain SSL design space (#86–#91) + in-domain>ImageNet evidence (#85 non-retinal, #84 RETFound keystone); CNN-vs-ViT nuance explicit; DGL-6 + CFC-2.8 (composite IV) central; SIR-2/3/5 honored; CNN-native-on-4ch-V5 kept spec-not-result → §3.3.2/§4.2; ~951 w. Closes the last Ch-2 content gap.
 - [x] ✅ §2.4.1 Coupled Thermal-Optical Model of Fundus Tissue Response — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; Eqs. 2–5,7,8; simulation-only bounding SB-1.5/SIR-6/CFC-2.4; THIN #20-self; FIG-2.4 deferred → asset queue)
 - [x] ✅ §2.5.1 CAM / Grad-CAM Theory and Formalization — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; CAM/Grad-CAM/Grad-CAM++ eqs; NC-14 central; FIG-2.3 deferred; #46 Selvaraju card absent/index-only — flagged)
 - [x] ✅ §2.5.2 Attention Map Interpretation — ✅ verified (APPROVED 2026-06-09; brief/draft/continuity/review saved; NC-14 reinforced; interpretation bounded to attention-plausibility)
@@ -268,7 +268,7 @@ This is the **only** relaxation of the hard rule. It applies to non-result diagr
 | 2.2.3 | Regularization Techniques | 700–900 | OD-3 (augmentation operational def); SIR-4/5/7 | #01, #19, #21, #65 | — |
 | 2.3.1 | Feature Transferability Across Domains | 700–900 | DGL-6 (transfer not guaranteed) | #04, #71, #72, #73 | — |
 | 2.3.2 | Frozen-Layer vs Progressive Fine-Tuning | 700–900 | GLOSSARY (canonical fine-tuning terms); SIR-4/5 | #19, #21, #71, #72, #76 | — |
-| 2.3.3 | In-Domain SSL for Retinal Imaging (NEW) | 800–1,000 | DGL-6; SIR-1 (lit-THIN → flag where primary SSL sources absent) | #73 *(THIN — acquire DINO/BYOL/SimCLR/MoCo-on-fundus)* | — |
+| 2.3.3 | In-Domain SSL for Retinal Imaging (NEW) | 800–1,000 | DGL-6; CFC-2.8 (composite IV); SIR-2/3/5 | #84 RETFound, #85 MICLe, #86–#91 SSL methods, #90 MAE, #92+#73 surveys | ✅ APPROVED 2026-06-16 |
 | 2.4.1 | Coupled Thermal-Optical Model | 1,100–1,300 | SB-1.5, SIR-6, CFC-2.4 (simulation only, not clinical validation); SIR-4 (#20 self). Eq.1–8 | #20 *(self, THIN)* | ⚠️ FIG-2.4 (deferred) |
 | 2.5.1 | CAM / Grad-CAM Formalization | 900–1,100 | NC-14. Grad-CAM eq. | #46, #57, #58 | ⚠️ FIG-2.3 (deferred) |
 | 2.5.2 | Attention Map Interpretation | 600–800 | NC-14 | #46, #57, #58 | — |
