@@ -21,6 +21,7 @@ from pathlib import Path
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.section import WD_SECTION
+from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
@@ -200,30 +201,232 @@ def _list_item(doc: Document, marker: str, text: str):
     return p
 
 
+def _add_table(doc: Document, rows: list[list[str]]) -> None:
+    """Render a Markdown pipe-table as a bordered Word table (TNR, header bold).
+
+    `rows` is the list of cell-text rows (the `|---|` separator already removed).
+    Backward-compatible: only invoked when the source contains pipe tables, which
+    council deliverables do not, so their rendering is unaffected.
+    """
+    if not rows:
+        return
+    ncols = max(len(r) for r in rows)
+    table = doc.add_table(rows=len(rows), cols=ncols)
+    table.style = "Table Grid"
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for i, row in enumerate(rows):
+        for j in range(ncols):
+            cell = table.cell(i, j)
+            cell.paragraphs[0].text = ""  # clear default empty run
+            p = cell.paragraphs[0]
+            p.paragraph_format.first_line_indent = Mm(0)
+            p.paragraph_format.line_spacing = 1.0
+            text = row[j] if j < len(row) else ""
+            _add_runs(p, text, bold=(i == 0))
+    # spacing paragraph after the table
+    doc.add_paragraph()
+
+
+def _add_code_block(doc: Document, code_lines: list[str]) -> None:
+    """Render a fenced code block as left-aligned monospace lines (no indent)."""
+    for ln in code_lines:
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        p.paragraph_format.first_line_indent = Mm(0)
+        p.paragraph_format.line_spacing = 1.0
+        r = p.add_run(ln if ln else " ")
+        r.font.name = "Consolas"
+        r.font.size = Pt(FONT_SIZE - 2)
+        rpr = r._element.get_or_add_rPr()
+        rfonts = rpr.find(qn("w:rFonts"))
+        if rfonts is None:
+            rfonts = OxmlElement("w:rFonts")
+            rpr.append(rfonts)
+        for attr in ("w:ascii", "w:hAnsi", "w:cs"):
+            rfonts.set(qn(attr), "Consolas")
+
+
 _NUM = re.compile(r"^(\d+)\.\s+(.*)$")
 _BUL = re.compile(r"^[-*]\s+(.*)$")
 _HDR = re.compile(r"^(#{1,6})\s+(.*)$")
+_TBL_ROW = re.compile(r"^\s*\|.*\|\s*$")
+_TBL_SEP = re.compile(r"^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$")
+_FENCE = re.compile(r"^\s*```")
+
+# --- Figure placeholders ------------------------------------------------------
+# Drafts carry figures as inline text markers `[FIG-3.1: caption — path/img.png]`
+# (and `[TAB-…]`). This converter resolves each to an embedded image with a GOST
+# caption below it ("Figure N – Title" / KZ "Сурет N – Атауы"), replacing the
+# inline marker with a cross-reference. `pre`("…in ") / `post`(" …суретінде")
+# are absorbed so the reference reads naturally in either language.
+_FIG = re.compile(
+    r"(?P<pre>\b[Ii]n\s+)?"
+    r"\[(?:FIG|FIGURE)-(?P<num>[0-9]+(?:\.[0-9]+)?):\s*(?P<body>[^\]]*)\]"
+    r"(?P<post>\s+сурет\w*)?"
+)
+_DASH = re.compile(r"\s+[—–-]\s+")  # caption — target separator (em/en/hyphen)
 
 
-def convert(md_path: Path, docx_path: Path, *, strip_versions: bool = True) -> None:
+def _png_size(p: Path):
+    """Return (w, h) in pixels for a PNG, else None."""
+    try:
+        with open(p, "rb") as f:
+            head = f.read(26)
+        if head[:8] == b"\x89PNG\r\n\x1a\n" and head[12:16] == b"IHDR":
+            return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
+    except OSError:
+        pass
+    return None
+
+
+def _fit_width_mm(p: Path, maxw: float = 165.0, maxh: float = 215.0) -> float:
+    """Width (mm) that fits the image inside the text box, preserving aspect."""
+    sz = _png_size(p)
+    if not sz:
+        return maxw * 0.9
+    w, h = sz
+    return min(maxw, maxh * w / h)
+
+
+def _parse_fig_body(body: str, base: Path):
+    """Split '[caption — target]' into (caption, resolved_image_path_or_None)."""
+    segs = _DASH.split(body)
+    if len(segs) >= 2:
+        caption = " – ".join(s.strip() for s in segs[:-1]).strip()
+        target = segs[-1].strip()
+    else:
+        caption, target = body.strip(), ""
+    target = target.strip(" `").replace("/…/", "/").replace("…/", "").replace("/…", "")
+    img = None
+    if re.search(r"\.(png|jpe?g)$", target, re.I):
+        cand = (base / target).resolve()
+        if cand.is_file():
+            img = cand
+    return caption, img
+
+
+def _insert_figure(doc: Document, label: str, num: str, caption: str, img: Path | None):
+    if img is not None:
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.first_line_indent = Mm(0)
+        p.paragraph_format.space_before = Pt(6)
+        p.paragraph_format.keep_with_next = True
+        p.add_run().add_picture(str(img), width=Mm(_fit_width_mm(img)))
+    c = doc.add_paragraph()
+    c.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    c.paragraph_format.first_line_indent = Mm(0)
+    c.paragraph_format.space_after = Pt(6)
+    text = f"{label} {num} – {caption}"
+    if img is None:
+        text += " [ресурс дайындалуда]" if label == "Сурет" else " [asset to be created]"
+    _add_runs(c, text)
+
+
+def _parse_table_row(line: str) -> list[str]:
+    s = line.strip()
+    if s.startswith("|"):
+        s = s[1:]
+    if s.endswith("|"):
+        s = s[:-1]
+    return [c.strip() for c in s.split("|")]
+
+
+def convert(
+    md_path: Path,
+    docx_path: Path,
+    *,
+    strip_versions: bool = True,
+    lang: str | None = None,
+    base_dir: Path | None = None,
+) -> None:
     text = md_path.read_text(encoding="utf-8")
     if strip_versions:
         text = strip_version_markers(text)
+    if lang is None:
+        lang = "kz" if "_KZ_" in md_path.name else "en"
+    fig_label = "Сурет" if lang == "kz" else "Figure"
+    if base_dir is None:  # repo root: walk up until a dir containing defense/
+        base_dir = md_path.resolve().parent
+        while base_dir.parent != base_dir and not (base_dir / "defense").is_dir():
+            base_dir = base_dir.parent
     lines = text.splitlines()
     doc = Document()
     _configure_styles(doc)
     _configure_page(doc)
 
+    figs: dict[str, dict] = {}  # num -> {caption, img, placed}
+
+    def _fig_inline(m: re.Match) -> str:
+        """Register the figure and return its inline cross-reference text."""
+        num = m.group("num")
+        if num not in figs:
+            caption, img = _parse_fig_body(m.group("body"), base_dir)
+            figs[num] = {"caption": caption, "img": img, "placed": False}
+        if lang == "kz":
+            post = (m.group("post") or "").strip()
+            return f"{num}-{post}" if post else f"({num}-сурет)"
+        pre = m.group("pre") or ""
+        return f"{pre}Figure {num}" if pre else f"(Figure {num})"
+
+    def _emit_figs(order: list[str]) -> None:
+        for num in order:
+            f = figs[num]
+            if f["placed"]:
+                continue
+            _insert_figure(doc, fig_label, num, f["caption"], f["img"])
+            f["placed"] = True
+
     buf: list[str] = []
 
     def flush_paragraph() -> None:
-        if buf:
-            _body(doc, " ".join(buf).strip())
-            buf.clear()
+        if not buf:
+            return
+        raw = " ".join(buf).strip()
+        buf.clear()
+        order = [m.group("num") for m in _FIG.finditer(raw)]
+        cleaned = _FIG.sub(_fig_inline, raw)
+        _body(doc, cleaned)
+        _emit_figs(order)
+
+    tbl_buf: list[list[str]] = []
+
+    def flush_table() -> None:
+        if tbl_buf:
+            _add_table(doc, tbl_buf)
+            tbl_buf.clear()
+
+    in_code = False
+    code_buf: list[str] = []
 
     for raw in lines:
         line = raw.rstrip()
         stripped = line.strip()
+
+        # fenced code block: collect raw lines verbatim until the closing fence
+        if _FENCE.match(stripped):
+            if in_code:
+                _add_code_block(doc, code_buf)
+                code_buf.clear()
+                in_code = False
+            else:
+                flush_paragraph()
+                flush_table()
+                in_code = True
+            continue
+        if in_code:
+            code_buf.append(raw.rstrip("\n"))
+            continue
+
+        # pipe table: accumulate consecutive table rows, skip the |---| separator
+        if _TBL_ROW.match(line):
+            flush_paragraph()
+            if _TBL_SEP.match(line):
+                continue
+            tbl_buf.append(_parse_table_row(line))
+            continue
+        else:
+            flush_table()
 
         if not stripped:
             flush_paragraph()
@@ -253,6 +456,9 @@ def convert(md_path: Path, docx_path: Path, *, strip_versions: bool = True) -> N
 
         buf.append(stripped)
 
+    if in_code and code_buf:
+        _add_code_block(doc, code_buf)
+    flush_table()
     flush_paragraph()
     _add_page_numbers(doc)
     docx_path.parent.mkdir(parents=True, exist_ok=True)

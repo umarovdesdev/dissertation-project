@@ -338,7 +338,32 @@
       "Bash(pdftotext \"2008.09772v3.pdf\" -)",
       "WebFetch(domain:www.nature.com)",
       "WebFetch(domain:arxiv.org)",
-      "Bash(grep -iE '\\\\.md$')"
+      "Bash(grep -iE '\\\\.md$')",
+      "Read(//d/d/dissertation-project/thesis/literature/**)",
+      "WebFetch(domain:www.mdpi.com)",
+      "WebFetch(domain:www.sciencedirect.com)",
+      "WebFetch(domain:hal.science)",
+      "WebFetch(domain:huggingface.co)",
+      "WebFetch(domain:www.kaggle.com)",
+      "WebFetch(domain:odir2019.grand-challenge.org)",
+      "WebFetch(domain:europepmc.org)",
+      "WebFetch(domain:ideas.repec.org)",
+      "Bash(awk '/## PART 1/{f=1;next} /## PART 3/{f=0} f' drafts/2.4.1-draft.md)",
+      "Bash(awk '/## PART 1/{f=1;next} /## PART 3/{f=0} f' drafts/2.3.3-draft.md)",
+      "Bash(grep -v '^---$')",
+      "WebFetch(domain:www.cns.nyu.edu)",
+      "Bash(awk '/## PART 1/{f=1;next} /## PART 3/{f=0} f' drafts/2.2.3-draft.md)",
+      "Bash(echo \"=== exit $? ===\")",
+      "PowerShell(python -c \"import docx; print\\('python-docx OK', docx.__version__\\)\" 2>&1; python -c \"import docx2pdf; print\\('docx2pdf OK'\\)\" 2>&1)",
+      "PowerShell(python -m pip install python-docx docx2pdf --quiet 2>&1 | Select-Object -Last 5; python -c \"import docx; print\\('docx', docx.__version__\\)\")",
+      "PowerShell(cd D:\\\\dissertation-project; $w = Get-Command winword.exe -ErrorAction SilentlyContinue; if \\(-not $w\\) { $w = Test-Path \"C:\\\\Program Files\\\\Microsoft Office\\\\root\\\\Office16\\\\WINWORD.EXE\" }; if \\($w\\) { \"Word detected — attempting PDF\"; try { python -c \"from docx2pdf import convert; convert\\(r'defense\\\\docs\\\\DISSERTATION_KZ_partial_2026-06-17.docx', r'defense\\\\docs\\\\DISSERTATION_KZ_partial_2026-06-17.pdf'\\)\"; if \\(Test-Path 'defense\\\\docs\\\\DISSERTATION_KZ_partial_2026-06-17.pdf'\\) { Get-Item 'defense\\\\docs\\\\DISSERTATION_KZ_partial_2026-06-17.pdf' | Select-Object Name, Length } } catch { \"PDF failed: $_\" } } else { \"MS Word NOT detected — skipping PDF \\(DOCX is ready; PDF can be made on a machine with Word\\)\" })",
+      "Bash(awk -F'\\\\t' 'NR<=2{print \"COLS=\"NF\" | [\"$1\"] => [\"substr\\($2,1,90\\)\"]\"}' _card_bib.tsv)",
+      "Bash(grep -oE '\\(Сапақова|Есмұхамедов\\)[^.]{0,40}\\\\\\([0-9]{4}\\\\\\)' DISSERTATION_KZ_partial_2026-06-17.md)",
+      "Bash(grep -oE '[A-Za-zӘ-әҚ-қ][^\\(\\)]{0,30}\\\\\\(\\(19|20\\)[0-9]{2}[a-z]?[,\\)]' DISSERTATION_KZ_GOST_2026-06-17.md)",
+      "Bash(sed -n '/## UNKNOWN/,/## Self-citations/p' _citation_resolution_final_2026-06-17.md)",
+      "Bash(sed -n '/## Self-citations/,/## Reference list/p' _citation_resolution_final_2026-06-17.md)",
+      "Bash(grep -oE '.{40}\\\\[0, 1\\\\].{20}' DISSERTATION_EN_partial_2026-06-17.md)",
+      "Bash(grep -oE '.{30}\\\\[FIG-3\\\\.1:[^]]*\\\\][^.]{0,40}' thesis/assembly/DISSERTATION_EN_GOST_2026-06-17.md)"
     ]
   }
 }

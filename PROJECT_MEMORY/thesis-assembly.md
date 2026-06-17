@@ -70,3 +70,36 @@ Stage-G extractor artifact, not a gap — it is "Krizhevsky, Sutskever, and Hint
 See [[literature-integrity-flags]]. **Preview only** — numbers are
 provisional (shift when Ch 4/5/0/7 are added); the convention stays: working drafts keep author-year,
 the real `[N]` pass runs ONCE at final assembly (see [[citation-style-convention]]).
+
+## Stage-G citation conversion — APPLIED to EN+KZ partial assemblies (2026-06-17)
+
+Candidate flagged that the assembled Phase-1 docs still carried author-year citations (KZ DOCX/PDF
+in `defense/docs/`). Ran the real Stage-G pass with a new self-contained script
+`thesis/assembly/_finalize_citations.py` (supersedes the preview `_apply_citations.py`):
+- One **shared numbering** assigned by first appearance in the **EN** body; the SAME card→[N] map
+  applied to **KZ** (citation-assembly.md rule #7, language invariance). Reference list reused, KZ
+  heading "ПАЙДАЛАНЫЛҒАН ӘДЕБИЕТТЕР ТІЗІМІ".
+- Resolution is **surname-based + language-agnostic**: `surnames_of()` folds accents via NFKD
+  (González-Díaz→gonzalez-diaz) and drops all Cyrillic (so KZ connectors "X және әріптестері(нің/не)",
+  "X пен/мен Y" fall away), then `resolve()` tries candidate keys full-join→first-author→pairs→singles.
+  This fixed the KZ-only gaps the preview's EN-tuned regex missed (KZ declensions, Latin "et al." kept
+  in some KZ sections, accented names, comma-separated author lists like "Krizhevsky, Sutskever және Hinton").
+- **Result: 102 external sources [1]–[102]** (preview's 101 + **González-Díaz 2024**, previously
+  carded-but-uncited, now cited in §2.4.1 → numbers shifted +1 vs the preview). **0 BLOCKING, 0 UNKNOWN.**
+  Brackets placed: EN ~219, KZ ~223. Self-citations + App-D records still **author-year by policy**
+  (per-section disambiguation pending; SIR-4 prose preserved) — noted in a pending-entries blockquote in each doc.
+
+**Outputs:** `thesis/assembly/DISSERTATION_{EN,KZ}_GOST_2026-06-17.md` (+ `_citation_resolution_final_2026-06-17.md`
+QA, exhaustive: flags every remaining `(YYYY)` regardless of card map). Re-rendered **GOST deliverables**
+via `md2gost.py`: `defense/docs/DISSERTATION_{EN,KZ}_GOST_2026-06-17.{docx,pdf}`.
+
+**Pipeline:** chapters → `_assemble_{en,kz}.py` → `DISSERTATION_*_partial_*.md` (author-year intermediate)
+→ `_finalize_citations.py` (reads those partials as `SRC_EN`/`SRC_KZ`) → `*_GOST_*.md` → `md2gost.py` → docx/pdf.
+**The superseded author-year `partial` .md intermediates + the 06-16 preview + the old KZ-partial docx/pdf were
+DELETED on candidate request (2026-06-17)** — they are regenerable by re-running `_assemble_*.py`. So to re-run
+the citation pass (e.g. for self-citation numbering), **re-assemble the partials first**; `_finalize_citations.py`
+still points at the `DISSERTATION_*_partial_2026-06-17.md` paths.
+
+Known minor: a citation page given in a *separate* trailing paren ("… (p. 370)" / "(370-б.)") is left
+as-is, not merged into `[N, p. 370]` (only "(year, page)" same-paren forms merge) — final-typesetting refinement.
+Numbers remain provisional until experiment-gated Ch 4/5/0/7 join the assembly.
