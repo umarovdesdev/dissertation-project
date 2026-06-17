@@ -33,8 +33,16 @@ to the text box via a PNG-IHDR size read) with a GOST caption below ("Figure N �
 and replaces the marker with a cross-reference ("in Figure N"/"(Figure N)"; KZ "N-суретінде"/"(N-сурет)").
 Dedup by figure number (FIG-3.7/3.8/3.13/3.14 referenced twice → placed once). Repo root auto-found (walks up
 to the dir containing `defense/`); lang from `_KZ_`/`_EN_` in filename. The `…` path-ellipsis is normalized.
-**19 images embedded**, 6 captioned **pending slots** (4 "ASSET TO BE CREATED" diagrams §2.1/2.3/2.4/2.5 +
-2 multi-image glob dirs FIG-1.1/4.2 `samples/dr{0..4}/`).
+**All 25 figures embedded, 0 pending** (2026-06-17). Two figure-generation scripts in
+`defense/figures/figures_mine/` (matplotlib, serif/print-friendly), kept in-repo, reproducible:
+- `_make_ch2_figures.py` → the 4 conceptual diagrams formerly "ASSET TO BE CREATED": FIG-2.1 CLAHE lineage
+  §2.1.1, FIG-2.3 Grad-CAM §2.5.1, FIG-2.4 laser thermal-optical §2.4.1, FIG-2.5 quality-metrics §2.6
+  → `fig2_{1,3,4,5}_*.png`. (mathtext-safe: `\left/\right`, `\frac`, no `\Big/\dfrac/\text`.)
+- `_make_dataset_montages.py` → the 2 sample-dir montages: FIG-1.1 EyePACS DR 0–4 row §1.1.1,
+  FIG-4.2 6-dataset×5-grade matrix §4.1.1 (reads `demo/web/public/datasets/<ds>/samples/dr{0..4}/`,
+  center-crops to square) → `fig1_1_dr_grades_eyepacs.png`, `fig4_2_dataset_grade_matrix.png`.
+All six paths were wired into the source drafts + KZ translations (token replaced INSIDE the `[FIG-…]`
+bracket only, never the PART-3 checklist text).
 
 Latest deliverables (with GOST `[N]` citations AND embedded figures): `defense/docs/DISSERTATION_{EN,KZ}_GOST_2026-06-17.{docx,pdf}`
 (docx ~4.6 MB, pdf ~6.4 MB). Installed `python-docx`+`docx2pdf`. Version-marker scrub runs by default (deliverable
