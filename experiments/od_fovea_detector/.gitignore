@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+# Trained weights / eval artifacts (keep the dirs via .gitkeep):
+weights/*.pt
+outputs/*.json
+outputs/*.png

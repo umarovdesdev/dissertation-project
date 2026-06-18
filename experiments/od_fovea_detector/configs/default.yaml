@@ -1,0 +1,80 @@
+# OD / Fovea heatmap-regression detector — default configuration.
+# All knobs live here; no hardcoded paths anywhere in src/.
+
+seed: 42
+
+# ---------------------------------------------------------------------------
+# Data
+# ---------------------------------------------------------------------------
+data:
+  # IDRiD "C. Localization" root on the maintainer's machine. Absent here.
+  idrid_root: "E:/datasets/IDRiD/C. Localization"
+  input_size: 512          # FOV-cropped square frame fed to the network
+  heatmap_size: 128        # decoder output grid (square)
+  sigma_frac: 0.02         # Gaussian target sigma as fraction of heatmap side
+                           # (sigma_px = sigma_frac * heatmap_size = 2.56 px @128)
+  val_fraction: 0.15       # held-out slice of the 413-image TRAIN split
+                           # (used for early stopping + threshold calibration).
+                           # The 103-image TEST split is NEVER touched here.
+
+# ---------------------------------------------------------------------------
+# Model
+# ---------------------------------------------------------------------------
+model:
+  backbone: "resnet18"     # timm encoder; "efficientnet_b0" also supported
+  pretrained: true         # ImageNet-pretrained encoder weights
+  out_channels: 2          # OD, fovea
+  decoder_channels: [256, 128, 64, 32, 16]
+
+# ---------------------------------------------------------------------------
+# Loss
+# ---------------------------------------------------------------------------
+loss:
+  type: "dsnt"             # "dsnt" (euclidean + JS reg) | "heatmap" (BCE/MSE baseline)
+  js_weight: 1.0           # weight on Jensen-Shannon regularization (dsnt only)
+  heatmap_loss: "mse"      # "mse" | "bce" (heatmap baseline only)
+
+# ---------------------------------------------------------------------------
+# Training
+# ---------------------------------------------------------------------------
+train:
+  epochs: 800              # FundusPosNet recipe; reduce for quick runs
+  batch_size: 8
+  lr: 0.001
+  weight_decay: 0.0001
+  optimizer: "adam"
+  num_workers: 4
+  early_stopping_patience: 60   # epochs without val improvement
+  amp: false               # mixed precision; off by default for stability
+  augmentation:
+    rotation_deg: 25.0
+    scale_min: 0.85
+    scale_max: 1.15
+    translate_frac: 0.10
+    hflip: true
+    brightness: 0.2
+    contrast: 0.2
+    gamma_min: 0.8
+    gamma_max: 1.2
+    color_jitter: 0.1
+    blur_prob: 0.3
+    blur_sigma_max: 1.5
+    vignette_prob: 0.3
+    vignette_strength: 0.6
+
+# ---------------------------------------------------------------------------
+# Confidence (see brief §7)
+# ---------------------------------------------------------------------------
+confidence:
+  sigma_ref_frac: 0.05     # sigma_ref as fraction of heatmap side in
+                           # confidence = exp(-sigma_eff / sigma_ref)
+  threshold: 0.5           # below this -> ODFoveaResult.confident = False
+  max_rotation_sigma_deg: 15.0
+
+# ---------------------------------------------------------------------------
+# I/O
+# ---------------------------------------------------------------------------
+io:
+  weights_path: "weights/od_fovea_unet.pt"
+  output_dir: "outputs"
+  device: "auto"           # "auto" | "cpu" | "cuda"

@@ -1,0 +1,20 @@
+# OD / Fovea heatmap-regression detector — pinned dependencies.
+#
+# Install into the monorepo conda env `dr-classifier` (PyTorch 2.5 + timm).
+# The detector decodes heatmaps with Kornia's DSNT; `dsntnn` is an optional
+# alternative (the code uses a vendored DSNT implementation by default, so
+# neither kornia nor dsntnn is strictly required to run — see src/dsnt.py).
+
+torch==2.5.1
+torchvision==0.20.1
+timm==1.0.11
+kornia==0.7.4          # optional: provides kornia.geometry.dsnt
+opencv-python==4.10.0.84
+numpy==2.0.2
+pandas==2.2.3
+pyyaml==6.0.2
+scikit-learn==1.5.2    # Spearman correlation in eval (also available via scipy)
+matplotlib==3.9.2
+
+# Test-only (lightweight; torch-free tests use stdlib unittest):
+pytest==8.3.3
