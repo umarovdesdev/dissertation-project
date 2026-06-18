@@ -1,11 +1,25 @@
 ---
 name: preprocessing-od-fovea-polar
-description: "OD/fovea detector unreliable (fovea fails); polar CLAHE is now the Stage-5 default, pivots on FOV centroid not detected fovea → checkpoints must be retrained"
+description: "OD/fovea classical detector unreliable (fovea fails); DECIDED 2026-06-18 to replace it with a learned heatmap detector (see [[od-fovea-heatmap-detector-plan]]); polar CLAHE is Stage-5 default, pivots on FOV centroid until the new detector lands"
 metadata:
   type: project
 ---
 
 Consolidates the former `od-fovea-detector-unreliable-polar-centroid` + `polar-clahe-now-default-retrain` memories. TASK-fix.md #4 + #2 resolved 2026-06-07 on `feat/v5-cache-colab`.
+
+## DECISION 2026-06-18 — replace classical detector with a learned heatmap detector
+
+The classical detector below is being retired. Approach chosen: a **pre-trained, frozen
+heatmap-regression detector** (U-Net timm encoder + DSNT head, 2 channels OD/fovea, trained
+on IDRiD localization GT) producing **probability heatmaps** + sub-pixel coords + a **real
+confidence** from heatmap peak/spread. Reference: FundusPosNet (IEEE Access 2021), DSNT
+(anibali/dsntnn / Kornia), berenslab/fundus_image_toolbox (MIT) as baseline. Full build
+spec for the standalone Codex project: `experiments/docs/od_fovea_heatmap_detector_brief.md`.
+Integration contract keeps `detect_od_fovea(image_rgb) -> ODFoveaResult` stable (+ new
+`od_confidence`/`fovea_confidence`/heatmap fields). Pending governance edit (apply after
+implementation): see [[od-fovea-heatmap-detector-plan]]. **Once it lands, polar CLAHE will
+pivot on the detected fovea when confidence is high**, falling back to FOV centroid otherwise
+— so the divergence noted in #2 below closes for high-confidence images.
 
 ## #4 — OD/fovea detector is unreliable (IDRiD-validated)
 

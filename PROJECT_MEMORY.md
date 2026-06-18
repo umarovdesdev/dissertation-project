@@ -28,7 +28,8 @@ Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `
 - [Colab Config-D runner](PROJECT_MEMORY/colab-config-d-runner.md) — `experiments/colab/` two-mode; Kaggle=APTOS test, Colab=real EyePACS; persistence on Kaggle Datasets
 - [V5 cache / throughput](PROJECT_MEMORY/v5-cache-throughput.md) — GPU-starved by per-image CPU preprocessing; fix = precompute+cache Stages 0–4 (IMPLEMENTED feat/v5-cache-colab)
 - [Config-D cache handoff](PROJECT_MEMORY/config-d-cache-handoff.md) — 2026-06-03 handoff; experiments/ mirrored to dr-classifier repo; next = the Colab run
-- [Preprocessing: OD/fovea + polar CLAHE](PROJECT_MEMORY/preprocessing-od-fovea-polar.md) — detector unreliable (fovea fails); polar CLAHE now Stage-5 default pivoting on FOV centroid → checkpoints must be retrained
+- [Preprocessing: OD/fovea + polar CLAHE](PROJECT_MEMORY/preprocessing-od-fovea-polar.md) — classical detector unreliable (fovea fails); polar CLAHE now Stage-5 default pivoting on FOV centroid → checkpoints must be retrained; **2026-06-18 decided to replace with learned heatmap detector**
+- [OD/fovea heatmap detector plan](PROJECT_MEMORY/od-fovea-heatmap-detector-plan.md) — learned U-Net+DSNT heatmap detector (FundusPosNet ref); build spec in `experiments/docs/od_fovea_heatmap_detector_brief.md`; holds the **PENDING INVARIANTS OD-3 edit** — apply only after the detector is implemented & validated
 
 ## Cross-cutting
 - [Strip version markers](PROJECT_MEMORY/strip-version-markers.md) — V5 IS a version marker; remove V5/V4/V3 outside thesis/; defense/experiments/demo/server done, council export now auto-scrubbed in md2gost.py (2026-06-12), root TODO
