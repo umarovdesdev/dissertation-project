@@ -19,7 +19,7 @@ import re
 from pathlib import Path
 
 from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.enum.section import WD_SECTION
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import OxmlElement
@@ -30,7 +30,7 @@ FONT_NAME = "Times New Roman"
 FONT_SIZE = 14  # pt
 FIRST_LINE_INDENT_CM = 1.25
 
-_INLINE = re.compile(r"(\*\*.+?\*\*|\*[^*].*?\*|`.+?`)")
+_INLINE = re.compile(r"(\*\*.+?\*\*|\*[^*].*?\*|`.+?`|\$[^$\n]+\$)")
 
 # --- Version-marker scrubbing -------------------------------------------------
 # Council deliverables are rendered OUTSIDE thesis/ (into defense/docs/). Per the
@@ -91,8 +91,226 @@ def _set_cell_font(run, *, bold=False, italic=False) -> None:
     run.italic = italic
 
 
+# --- LaTeX math rendering -----------------------------------------------------
+# The dissertation source carries math as LaTeX, inline (`$…$`) and display
+# (`$$…$$`, optionally with `\tag{N}`). Word here has no equation engine, so this
+# converter renders math as clean Unicode text with real super/subscript runs:
+# `\beta\,A/L` → "βA/L", `$T/80$` → "T/80", `\frac{T}{80}` → "T/80",
+# `p_t` → p with a subscript t, `A^k` → A with a superscript k. This removes the
+# stray `$`, backslash commands and braces that otherwise leak into the .docx/.pdf.
+
+_TEX_CMD = re.compile(r"\\([a-zA-Z]+)")
+
+# Control symbols after a backslash (non-letter): spacing, escapes, line break.
+_TEX_CTRL = {
+    ",": "", "!": "", ";": " ", ":": " ", " ": " ", "\\": " ",
+    "_": "_", "{": "{", "}": "}", "%": "%", "#": "#", "&": "&", "$": "$",
+}
+
+# Symbol commands → Unicode (Greek lower/upper, operators, relations, brackets).
+_TEX_SYM = {
+    # Greek (lowercase)
+    "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "ε",
+    "varepsilon": "ε", "zeta": "ζ", "eta": "η", "theta": "θ", "vartheta": "ϑ",
+    "iota": "ι", "kappa": "κ", "lambda": "λ", "mu": "μ", "nu": "ν", "xi": "ξ",
+    "pi": "π", "rho": "ρ", "sigma": "σ", "tau": "τ", "upsilon": "υ", "phi": "φ",
+    "varphi": "φ", "chi": "χ", "psi": "ψ", "omega": "ω",
+    # Greek (uppercase)
+    "Gamma": "Γ", "Delta": "Δ", "Theta": "Θ", "Lambda": "Λ", "Xi": "Ξ",
+    "Pi": "Π", "Sigma": "Σ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω",
+    # Operators / relations
+    "cdot": "·", "times": "×", "div": "÷", "pm": "±", "mp": "∓", "ast": "∗",
+    "ge": "≥", "geq": "≥", "le": "≤", "leq": "≤", "ne": "≠", "neq": "≠",
+    "approx": "≈", "equiv": "≡", "sim": "∼", "propto": "∝",
+    "cap": "∩", "cup": "∪", "subset": "⊂", "subseteq": "⊆", "supset": "⊃",
+    "in": "∈", "notin": "∉", "forall": "∀", "exists": "∃",
+    "sum": "Σ", "prod": "∏", "int": "∫", "partial": "∂", "nabla": "∇",
+    "infty": "∞", "to": "→", "rightarrow": "→", "leftarrow": "←",
+    "Rightarrow": "⇒", "leftrightarrow": "↔", "top": "⊤", "perp": "⊥",
+    "angle": "∠", "lceil": "⌈", "rceil": "⌉", "lfloor": "⌊", "rfloor": "⌋",
+    "cdots": "⋯", "ldots": "…", "dots": "…", "quad": "  ", "qquad": "    ",
+}
+
+# Operator/function names rendered upright (as the word itself).
+_TEX_FUNC = {
+    "min", "max", "log", "ln", "exp", "sin", "cos", "tan", "det", "lim",
+    "deg", "gcd", "arg", "dim", "ker", "sup", "inf",
+}
+
+# One-argument commands whose content is rendered upright (drop the wrapper).
+_TEX_WRAP = {
+    "text", "mathrm", "mathbf", "mathit", "mathsf", "mathcal", "mathbb",
+    "operatorname", "texttt", "boldsymbol", "mathtt", "textbf", "textit",
+}
+
+# Commands that render to nothing (delimiter sizing, style directives): the
+# surrounding bracket/character they qualify is kept verbatim.
+_TEX_DROP = {
+    "left", "right", "big", "Big", "bigg", "Bigg", "bigl", "bigr",
+    "Bigl", "Bigr", "biggl", "biggr", "Biggl", "Biggr", "displaystyle",
+    "textstyle", "scriptstyle", "limits", "nolimits",
+}
+
+
+def _read_braces(s: str, i: int) -> tuple[str, int]:
+    """Given s[i] == '{', return (inner_text, index_after_matching_'}')."""
+    depth, j, n = 0, i, len(s)
+    while j < n:
+        if s[j] == "{":
+            depth += 1
+        elif s[j] == "}":
+            depth -= 1
+            if depth == 0:
+                return s[i + 1:j], j + 1
+        j += 1
+    return s[i + 1:], n  # unbalanced: take the rest
+
+
+def _read_script_arg(s: str, i: int) -> tuple[str, int]:
+    """Read the argument of a `_`/`^` at index i: `{group}`, `\\command`, or one char."""
+    n = len(s)
+    if i >= n:
+        return "", i
+    if s[i] == "{":
+        return _read_braces(s, i)
+    if s[i] == "\\":
+        m = _TEX_CMD.match(s, i)
+        if m:
+            return m.group(0), m.end()
+        return s[i:i + 2], min(i + 2, n)
+    return s[i], i + 1
+
+
+def _tex_runs(s: str) -> list[tuple[str, str]]:
+    """Parse a LaTeX math fragment into (text, script) runs.
+
+    `script` is "" (baseline), "sub", or "sup". Commands, Greek letters and
+    operators are mapped to Unicode; `\\frac{a}{b}` becomes "a/b"; sub/superscripts
+    become tagged runs so the caller can apply real Word run formatting.
+    """
+    runs: list[tuple[str, str]] = []
+    buf: list[str] = []
+    n = len(s)
+
+    def flush() -> None:
+        if buf:
+            runs.append(("".join(buf), ""))
+            buf.clear()
+
+    i = 0
+    while i < n:
+        c = s[i]
+        if c == "\\":
+            if i + 1 < n and not s[i + 1].isalpha():
+                buf.append(_TEX_CTRL.get(s[i + 1], s[i + 1]))
+                i += 2
+                continue
+            m = _TEX_CMD.match(s, i)
+            name = m.group(1)
+            i = m.end()
+            if name in _TEX_DROP:
+                pass  # sizing/style directive: render nothing, keep what follows
+            elif name in _TEX_WRAP:
+                inner, i = (_read_braces(s, i) if i < n and s[i] == "{" else ("", i))
+                flush()
+                runs.extend(_tex_runs(inner))
+            elif name in ("frac", "dfrac", "tfrac"):
+                a, b = "", ""
+                if i < n and s[i] == "{":
+                    a, i = _read_braces(s, i)
+                while i < n and s[i] == " ":
+                    i += 1
+                if i < n and s[i] == "{":
+                    b, i = _read_braces(s, i)
+                flush()
+                runs.extend(_frac_runs(a, b))
+            elif name in _TEX_SYM:
+                buf.append(_TEX_SYM[name])
+            elif name in _TEX_FUNC:
+                flush()
+                runs.append((name, ""))
+            else:
+                buf.append(name)  # unknown: best-effort, drop the backslash
+        elif c == "{":
+            inner, i = _read_braces(s, i)
+            flush()
+            runs.extend(_tex_runs(inner))
+        elif c == "}":
+            i += 1  # stray closing brace
+        elif c in "_^":
+            script = "sub" if c == "_" else "sup"
+            i += 1
+            while i < n and s[i] == " ":
+                i += 1
+            arg, i = _read_script_arg(s, i)
+            flush()
+            runs.append((_tex_plain(arg), script))
+        else:
+            buf.append(c)
+            i += 1
+    flush()
+    return runs
+
+
+def _tex_plain(s: str) -> str:
+    """Flatten a LaTeX fragment to plain text (used for script arguments/tags)."""
+    return "".join(t for t, _ in _tex_runs(s))
+
+
+def _frac_runs(a: str, b: str) -> list[tuple[str, str]]:
+    """Render `\\frac{a}{b}` as a/b runs, parenthesising compound numerator/denominator."""
+    return _maybe_paren(a) + [("/", "")] + _maybe_paren(b)
+
+
+def _maybe_paren(group: str) -> list[tuple[str, str]]:
+    runs = _tex_runs(group)
+    plain = "".join(t for t, _ in runs).strip()
+    if len(plain) > 1 and re.search(r"[+\-−·×/ ]", plain):
+        return [("(", "")] + runs + [(")", "")]
+    return runs
+
+
+def _add_math_runs(paragraph, latex: str, *, bold=False, italic=False) -> None:
+    """Render a LaTeX math fragment into `paragraph` as formatted runs."""
+    for text, script in _tex_runs(latex):
+        if not text:
+            continue
+        r = paragraph.add_run(text)
+        _set_cell_font(r, bold=bold, italic=italic)
+        if script == "sub":
+            r.font.subscript = True
+        elif script == "sup":
+            r.font.superscript = True
+
+
+def _split_tag(latex: str) -> tuple[str, str | None]:
+    """Split a display equation's body from its `\\tag{…}` number, if any."""
+    m = re.search(r"\\tag\{([^}]*)\}", latex)
+    if not m:
+        return latex, None
+    return (latex[:m.start()] + latex[m.end():]).strip(), m.group(1)
+
+
+def _add_equation(doc: Document, latex: str) -> None:
+    """Render a display equation centred, with any `\\tag{}` number flush right (GOST)."""
+    inner, tag = _split_tag(latex)
+    usable = 170.0  # A4 text width: 210 − 30 (left) − 10 (right) mm
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p.paragraph_format.first_line_indent = Mm(0)
+    p.paragraph_format.space_before = Pt(6)
+    p.paragraph_format.space_after = Pt(6)
+    p.paragraph_format.tab_stops.add_tab_stop(Mm(usable / 2), WD_TAB_ALIGNMENT.CENTER)
+    if tag:
+        p.paragraph_format.tab_stops.add_tab_stop(Mm(usable), WD_TAB_ALIGNMENT.RIGHT)
+    _set_cell_font(p.add_run("\t"))
+    _add_math_runs(p, inner.strip())
+    if tag:
+        _set_cell_font(p.add_run("\t(" + _tex_plain(tag).strip() + ")"))
+
+
 def _add_runs(paragraph, text: str, *, bold=False, italic=False) -> None:
-    """Add inline-formatted runs (**bold**, *italic*, `code`) to a paragraph."""
+    """Add inline-formatted runs (**bold**, *italic*, `code`, `$math$`) to a paragraph."""
     for token in _INLINE.split(text):
         if not token:
             continue
@@ -104,6 +322,8 @@ def _add_runs(paragraph, text: str, *, bold=False, italic=False) -> None:
             r.font.name = "Consolas"
             r._element.get_or_add_rPr().find(qn("w:rFonts")).set(qn("w:ascii"), "Consolas")
             r._element.get_or_add_rPr().find(qn("w:rFonts")).set(qn("w:hAnsi"), "Consolas")
+        elif token.startswith("$") and token.endswith("$") and len(token) >= 2:
+            _add_math_runs(paragraph, token[1:-1], bold=bold, italic=italic)
         elif token.startswith("*") and token.endswith("*"):
             _set_cell_font(paragraph.add_run(token[1:-1]), bold=bold, italic=True)
         else:
@@ -332,28 +552,25 @@ def _parse_table_row(line: str) -> list[str]:
     return [c.strip() for c in s.split("|")]
 
 
-def convert(
-    md_path: Path,
-    docx_path: Path,
+def render_into(
+    doc,
+    text: str,
     *,
-    strip_versions: bool = True,
-    lang: str | None = None,
+    lang: str = "en",
     base_dir: Path | None = None,
 ) -> None:
-    text = md_path.read_text(encoding="utf-8")
-    if strip_versions:
-        text = strip_version_markers(text)
-    if lang is None:
-        lang = "kz" if "_KZ_" in md_path.name else "en"
+    """Render Markdown `text` into an existing (already-configured) document.
+
+    Contains the full Markdown parsing loop but performs no page setup, footer,
+    or save — so callers can compose several Markdown bodies into one document
+    (e.g. the front-matter + manuscript bundle). `convert()` wraps this for the
+    single-file case. Version-marker scrubbing is the caller's responsibility
+    here (convert() still does it).
+    """
     fig_label = "Сурет" if lang == "kz" else "Figure"
-    if base_dir is None:  # repo root: walk up until a dir containing defense/
-        base_dir = md_path.resolve().parent
-        while base_dir.parent != base_dir and not (base_dir / "defense").is_dir():
-            base_dir = base_dir.parent
+    if base_dir is None:
+        base_dir = Path(".")
     lines = text.splitlines()
-    doc = Document()
-    _configure_styles(doc)
-    _configure_page(doc)
 
     figs: dict[str, dict] = {}  # num -> {caption, img, placed}
 
@@ -436,6 +653,13 @@ def convert(
             _add_hrule(doc)
             continue
 
+        # display equation on its own line: $$ … $$  (optionally with \tag{N})
+        if stripped.startswith("$$") and stripped.endswith("$$") and len(stripped) >= 4:
+            flush_paragraph()
+            flush_table()
+            _add_equation(doc, stripped[2:-2])
+            continue
+
         m = _HDR.match(stripped)
         if m:
             flush_paragraph()
@@ -460,6 +684,29 @@ def convert(
         _add_code_block(doc, code_buf)
     flush_table()
     flush_paragraph()
+
+
+def convert(
+    md_path: Path,
+    docx_path: Path,
+    *,
+    strip_versions: bool = True,
+    lang: str | None = None,
+    base_dir: Path | None = None,
+) -> None:
+    text = md_path.read_text(encoding="utf-8")
+    if strip_versions:
+        text = strip_version_markers(text)
+    if lang is None:
+        lang = "kz" if "_KZ_" in md_path.name else "en"
+    if base_dir is None:  # repo root: walk up until a dir containing defense/
+        base_dir = md_path.resolve().parent
+        while base_dir.parent != base_dir and not (base_dir / "defense").is_dir():
+            base_dir = base_dir.parent
+    doc = Document()
+    _configure_styles(doc)
+    _configure_page(doc)
+    render_into(doc, text, lang=lang, base_dir=base_dir)
     _add_page_numbers(doc)
     docx_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(docx_path))

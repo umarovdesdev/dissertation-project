@@ -11,6 +11,7 @@ Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `
 ## People & documents
 - [People & identifiers](PROJECT_MEMORY/people-and-identifiers.md) — canonical EN/KZ/RU names (candidate Yesmukhamedov N.S., supervisor Sapakova S.Z. = к.ф.-м.н./associate prof., foreign consultant Al-Haddad), programme **8D06104 Computer systems and software engineering**; human copy `council/PEOPLE.md`
 - [council-docs skill](PROJECT_MEMORY/council-docs-skill.md) — `.claude/skills/council-docs/` exports thesis/output abstracts+reviews → GOST .docx/.pdf in `defense/docs/`
+- [Abstract/annotation alignment](PROJECT_MEMORY/abstract-annotation-alignment.md) — trilingual аннотация restructured to REAL IITU peer samples (2026-06-18): no "(АВТОРЕФЕРАТ)"/umbrella/separate CONCLUSION; publications folded into body; ends on Structure; +state-programmes, +author-contribution; KZ "pipeline"→"конвейер"
 
 ## Thesis writing
 - [Thesis writing status](PROJECT_MEMORY/thesis-writing-status.md) — Phase 1 (all writable-now: Ch1/2/3/6 + §4.1 + App A/D) APPROVED 2026-06-10; §2.3.3 deferred; rest Phase-2 experiment-gated; Ch3 detail + carry-forwards
@@ -19,6 +20,7 @@ Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `
 - [Thesis KZ translation](PROJECT_MEMORY/thesis-kz-translation.md) — all 53 Phase-1 sections translated EN→KZ → `chapters/**/translations/`; `_assemble_kz.py` → KZ manuscript (53 secs, ~41.2k words); md2gost extended for tables/code → GOST `.docx`+`.pdf` in `defense/docs/` (2026-06-17)
 - [Literature corpus → 120](PROJECT_MEMORY/literature-corpus-120.md) — LITERATURE_INDEX v6.1.0 (2026-06-12): 81→120 sources; litres PDFs carded (#46/#47/#48 + FGADR #83) + 38 web sources #84–#121; resolves §1.2.1, §2.3.3, §3.3.2 gaps
 - [Citation style convention](PROJECT_MEMORY/citation-style-convention.md) — drafts use author-year (working, card-tied); GOST `[N]` numbering deferred to a single citation-assembly pass at final assembly (decided 2026-06-16)
+- [Front-matter deliverables](PROJECT_MEMORY/front-matter-deliverables.md) — TITLE PAGE + NORMATIVE REFERENCES → DESIGNATIONS & ABBREVIATIONS → DEFINITIONS, EN/KZ GOST docx+pdf in `defense/docs/`; **verified & aligned to real IITU samples** (`D:/dissertation_council/Образцы документов/авторы`): house order, exact shared normative-refs list, sample title-page format; built by `build_title.py` + `build_frontmatter.py`
 
 ## Experiments / Config-D
 - [Config-D pretraining axis](PROJECT_MEMORY/config-d-pretraining.md) — v6.0.0 drops RETFound for ophthalmology SSL; shipped demo Config-D = retired ImageNet artifact (divergence)

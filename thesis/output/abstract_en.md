@@ -1,8 +1,12 @@
 # ABSTRACT
 
-**of the dissertation work by Yesmukhamedov Nurmaganbet Seitkaliuly titled "Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification", submitted for the degree of Doctor of Philosophy (PhD) in the educational programme 8D06104 — Computer systems and software engineering**
+**of the PhD thesis by Yesmukhamedov Nurmaganbet Seitkaliuly on «Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification», submitted for the degree of Doctor of Philosophy (PhD) in the educational programme (EP) 8D06104 — Computer systems and software engineering**
 
 ---
+
+## General characteristics of the research
+
+This dissertation investigates and formalises the integration of fundus image enhancement (preprocessing) with convolutional-neural-network (CNN) classification for automated multi-stage diabetic retinopathy (DR) diagnosis. Its central idea is that preprocessing is an integral component of the diagnostic model rather than ancillary data preparation, because it defines the feature space available to the network. To operationalise this idea, an 8-stage preprocessing pipeline is specified and embedded in the model, and its effect is placed under a controlled experimental contrast against an equivalent baseline trained without the pipeline. The approach is validated across eight public and clinical fundus datasets acquired with cameras of four manufacturers, covering diagnostic dominance, component ablation, cross-dataset transfer, explainability, clinical degradation resistance, and device domain shift, and is oriented towards automated DR screening in resource-limited settings, including the healthcare infrastructure of Kazakhstan.
 
 ## Relevance of the research topic
 
@@ -37,6 +41,10 @@ Methods and models for integrating fundus image preprocessing (enhancement) with
 
 The research methodology combines image-processing theory, deep-learning theory, and an experimentally controlled validation framework. The methods used include: classical computer-vision detection (optic disc and fovea localisation for rotation normalisation), adaptive flat-field illumination correction, dual-constraint Contrast-Limited Adaptive Histogram Equalisation (CLAHE) in the LAB colour space, CNN classification with ResNet-50 and EfficientNet-B3 backbones, transfer learning from ImageNet, ophthalmology-specific self-supervised pretraining (DINO / BYOL / SimCLR / MoCo family) on an unlabelled retinal fundus corpus, Focal Loss for class imbalance, Grad-CAM explainability analysis, and a statistical validation framework based on 5-fold patient-level stratified cross-validation, McNemar and DeLong tests, mixed-effects modelling, bootstrap confidence intervals, and Bonferroni/Holm correction for multiple comparisons.
 
+## Empirical (experimental) basis
+
+Eight datasets organised into functional tiers: EyePACS (~35,126 images, primary training and ablation, Canon CR-1); APTOS 2019 (~3,662, cross-dataset transfer); IDRiD (516 images, 81 with pixel-level lesion masks, clinical validation and explainability, Kowa); Messidor-2 (~1,748, clinical degradation, Topcon); DDR (~13,673, device shift, Canon/Topcon); ODIR-5K (~5,000, device shift, Canon/Zeiss); RFMiD (~3,200, device shift, Topcon/Kowa); and a Kazakh clinical dataset (60 images, 30 patients × 2 eyes, balanced, qualitative validation). Image quality is evaluated with CNR, VVI, entropy, and SSIM.
+
 ## Scientific novelty
 
 1. An 8-stage integrated fundus preprocessing pipeline is formalised as a binding component of the diagnostic model (operationalisation of paradigm P2), comprising canonical flip, OD-fovea rotation normalisation, FOV crop with isotropic resize and centred zero-padding, FOV mask generation as a 4th input channel, adaptive flat-field correction (σ = 0.07 × FOV diameter), dual-constraint stochastic CLAHE on the LAB L-channel, augmentation, and dataset-specific channel-wise normalisation.
@@ -46,15 +54,6 @@ The research methodology combines image-processing theory, deep-learning theory,
 5. An explicit binary FOV mask is introduced as a dedicated pipeline stage and appended as the 4th input channel, informing the CNN of valid pixel regions and preventing padding artefacts from being learned as features.
 6. Attention–Lesion Overlap (ALO) is introduced as a primary, asymmetric explainability metric that directly measures the fraction of a lesion covered by model attention, complemented by Intersection-over-Union (IoU) as a secondary metric, evaluated against IDRiD pixel-level lesion masks.
 7. The integrated pipeline is validated across a multi-dataset, multi-device architecture (EyePACS, APTOS 2019, IDRiD, Messidor-2, DDR, ODIR-5K, RFMiD, and a Kazakh clinical dataset), including cross-dataset transfer, clinical degradation resistance, and device domain shift across four camera manufacturers (Canon, Topcon, Kowa, Zeiss).
-
-## Statements submitted for defense
-
-1. Preprocessing is an integral component of the diagnostic model, not ancillary data preparation: the integrated configuration (8-stage pipeline + in-domain pretraining) achieves statistically significant dominance in five-class DR classification over an equivalent baseline configuration (stretch-resize + ImageNet normalisation), satisfying the pre-registered dominance criterion for both ResNet-50 and EfficientNet-B3 (H-1).
-2. The contribution of individual pipeline stages can be quantified by component ablation, and the dual-constraint CLAHE clip-limit and the flat-field σ exhibit identifiable sensitivity profiles with a local optimum within the tested range (H-2).
-3. A model trained on EyePACS with the pipeline transfers to APTOS 2019 without retraining, achieving a generalisation ratio G = F1_APTOS / F1_EyePACS ≥ 0.85 (H-4).
-4. The pipeline redirects CNN attention toward clinically relevant lesion regions, demonstrated quantitatively by higher ALO (primary) and IoU (secondary) against IDRiD lesion masks and qualitatively by Grad-CAM overlays on a Kazakh clinical dataset (H-5).
-5. The pipeline reduces cross-dataset performance degradation Δ = F1_EyePACS_val − F1_external on IDRiD and Messidor-2 relative to the baseline (H-7).
-6. The pipeline maintains classification performance across images from different fundus camera manufacturers (Canon, Topcon, Kowa, Zeiss) within acceptable bounds relative to in-domain performance (H-6).
 
 ## Main results of the research
 
@@ -66,6 +65,15 @@ The research methodology combines image-processing theory, deep-learning theory,
 6. Grad-CAM explainability analysis, using the proposed Attention–Lesion Overlap (ALO, primary) and IoU (secondary) against IDRiD pixel-level lesion masks and qualitative overlays on a Kazakh clinical dataset, characterised the alignment of model attention with clinically relevant lesion structures (Experiment 4).
 7. The clinical degradation resistance of the pipeline (IDRiD, Messidor-2; Experiment 5), its device robustness across four camera manufacturers (DDR, ODIR-5K, RFMiD; Experiment 6), and its trainability on small clinical data (Experiment 7) were evaluated.
 8. A modular architecture for an automated DR screening system suitable for resource-limited environments, with telemedicine and eHealth integration applicable to Kazakhstan healthcare infrastructure, was designed.
+
+## Statements submitted for defense
+
+1. Preprocessing is an integral component of the diagnostic model, not ancillary data preparation: the integrated configuration (8-stage pipeline + in-domain pretraining) achieves statistically significant dominance in five-class DR classification over an equivalent baseline configuration (stretch-resize + ImageNet normalisation), satisfying the pre-registered dominance criterion for both ResNet-50 and EfficientNet-B3 (H-1).
+2. The contribution of individual pipeline stages can be quantified by component ablation, and the dual-constraint CLAHE clip-limit and the flat-field σ exhibit identifiable sensitivity profiles with a local optimum within the tested range (H-2).
+3. A model trained on EyePACS with the pipeline transfers to APTOS 2019 without retraining, achieving a generalisation ratio G = F1_APTOS / F1_EyePACS ≥ 0.85 (H-4).
+4. The pipeline redirects CNN attention toward clinically relevant lesion regions, demonstrated quantitatively by higher ALO (primary) and IoU (secondary) against IDRiD lesion masks and qualitatively by Grad-CAM overlays on a Kazakh clinical dataset (H-5).
+5. The pipeline reduces cross-dataset performance degradation Δ = F1_EyePACS_val − F1_external on IDRiD and Messidor-2 relative to the baseline (H-7).
+6. The pipeline maintains classification performance across images from different fundus camera manufacturers (Canon, Topcon, Kowa, Zeiss) within acceptable bounds relative to in-domain performance (H-6).
 
 ## Theoretical significance
 
@@ -79,56 +87,15 @@ The integrated pipeline constitutes a transferable, interpretable, and device-ro
 
 Reliability is ensured by: the use of large-scale and multiple public datasets (~35,126 EyePACS training images and seven additional datasets); 5-fold patient-level stratified cross-validation with strict leakage control; reporting of all primary metrics as mean ± standard deviation; a multi-metric assessment (weighted F1, ROC-AUC, Cohen's Kappa with quadratic weights, accuracy); statistical hypothesis testing (McNemar, DeLong), mixed-effects modelling across folds, bootstrap confidence intervals (≥ 1000 resamples), and Bonferroni/Holm correction; pre-registered success criteria; and comparison with published systems (IDx-DR, Eyenuk, DeepMind).
 
-## Empirical (experimental) basis
-
-Eight datasets organised into functional tiers: EyePACS (~35,126 images, primary training and ablation, Canon CR-1); APTOS 2019 (~3,662, cross-dataset transfer); IDRiD (516 images, 81 with pixel-level lesion masks, clinical validation and explainability, Kowa); Messidor-2 (~1,748, clinical degradation, Topcon); DDR (~13,673, device shift, Canon/Topcon); ODIR-5K (~5,000, device shift, Canon/Zeiss); RFMiD (~3,200, device shift, Topcon/Kowa); and a Kazakh clinical dataset (60 images, 30 patients × 2 eyes, balanced, qualitative validation). Image quality is evaluated with CNR, VVI, entropy, and SSIM.
-
 ## Approbation of the results and connection with scientific programmes
 
-The results of the research were reported and discussed at international scientific forums, including the 3rd International Workshop on Digital Society (DS 2025, Istanbul, Türkiye, 28–30 October 2025), and published in international peer-reviewed journals. The research direction corresponds to the priorities of the digitalisation of healthcare and the development of artificial-intelligence technologies of the Republic of Kazakhstan (in accordance with subpara. 2, para. 3, art. 20 of the Law of the Republic of Kazakhstan "On Science").
+The results of the research were reported and discussed at international scientific forums, including the 3rd International Workshop on Digital Society (DS 2025, Istanbul, Türkiye, 28–30 October 2025), and published in international peer-reviewed journals.
+
+The research direction corresponds to the state priorities of healthcare digitalisation and the development of artificial-intelligence technologies of the Republic of Kazakhstan, in particular: the Concept for the Development of Artificial Intelligence for 2024–2029; the Address of the President of the Republic of Kazakhstan «Kazakhstan in the Era of Artificial Intelligence» (8 September 2025); and the Law of the Republic of Kazakhstan «On Artificial Intelligence» (No. 230-VIII, 17 November 2025). The work is carried out in accordance with subpara. 2, para. 3, art. 20 of the Law of the Republic of Kazakhstan «On Science».
 
 ## Publications
 
-The main results of the dissertation are published in 5 scientific works, including: articles in journals indexed by Scopus / Web of Science — 1 (*Eastern-European Journal of Enterprise Technologies*, Q3); a paper in international conference proceedings indexed by Scopus — 1 (*Procedia Computer Science*, DS 2025); and articles in journals recommended by the Committee for Quality Assurance in Science and Higher Education (KKSON) of the Republic of Kazakhstan — 3 (*News of the NAS RK, Physico-Mathematical Series*; *Herald of the Kazakh-British Technical University*; *Herald of KazUTB*). See the List of published works below.
-
-## Structure and length of the dissertation
-
-The dissertation consists of an introduction, six chapters, a conclusion, a list of references used, and appendices. The work is supplemented with tables, figures, and the source code of the preprocessing pipeline.
-
----
-
-# MAIN CONTENT OF THE WORK
-
-**The introduction** substantiates the relevance of the topic, formulates the aim, objectives, object and subject of the research, the central hypothesis, the scientific novelty, the statements submitted for defense, the methodological basis, the theoretical and practical significance, the reliability of the results, the empirical basis, the approbation, the connection with scientific programmes, and the publications, and describes the structure and length of the dissertation.
-
-**Chapter 1 — "Problem Domain Analysis and Current State of Automated Diabetic Retinopathy Diagnosis"** examines the medical and epidemiological context of DR and its clinical grading, the screening requirements of resource-limited settings, the sources of fundus image quality degradation and device-specific variability, deep-learning approaches to retinal image classification (CNN architectures, transfer and self-supervised pretraining, explainability), and provides a critical analysis of existing automated DR screening systems, concluding with the formulation of the research problem and the justification of the research direction.
-
-**Chapter 2 — "Theoretical Foundations of Image Preprocessing and Deep Learning for Fundus Image Analysis"** establishes the mathematical foundations of image enhancement (histogram equalisation, dual-constraint CLAHE, spatial filtering), the theoretical framework of CNNs (convolution, pooling, loss functions for imbalanced data, regularisation), transfer and in-domain self-supervised representation learning, the mathematical modelling of laser-tissue interaction in retinal therapy, explainability (CAM, Grad-CAM, ALO, IoU), and image quality metrics for preprocessing evaluation.
-
-**Chapter 3 — "Methodology of Integrated Preprocessing-CNN Pipeline Design"** formalises the unified 8-stage preprocessing pipeline and the modified dual-constraint CLAHE algorithm, the augmentation strategy, and the external image ingestion protocol; specifies the CNN architectures (ResNet-50 and EfficientNet-B3); details the transfer-learning and ophthalmology-specific self-supervised pretraining methodology, the architecture adaptation for five-class classification, and the weighted (Focal) loss formulation; and defines the multi-metric evaluation and statistical reliability framework.
-
-**Chapter 4 — "Experimental Research — Preprocessing Impact on CNN Diagnostic Performance"** presents the tiered dataset architecture and the seven experiments: Experiment 1 (integrated-pipeline dominance via a restored 2×2 factorial, configs A–D), Experiment 2 (stage ablation across 7 levels, CLAHE threshold and flat-field σ sweeps with image-quality metrics), Experiment 3 (zero-shot cross-dataset transfer to APTOS 2019), Experiment 4 (Grad-CAM explainability with quantitative ALO/IoU on IDRiD and qualitative overlays on the Clinical dataset), Experiment 5 (clinical degradation resistance on IDRiD and Messidor-2), Experiment 6 (device domain shift on DDR, ODIR-5K, RFMiD), and Experiment 7 (small-data training on IDRiD with the Clinical dataset held out).
-
-**Chapter 5 — "Reliability Validation and Comparative Analysis"** consolidates the explainability results, the statistical validation (bootstrap confidence intervals and mixed-effects modelling, final claim-strength classifications), the comparative analysis against published systems (IDx-DR, Eyenuk, DeepMind) and the performance-complexity trade-off, and states the limitations and boundary conditions of the proposed approach.
-
-**Chapter 6 — "Architecture of an Automated DR Screening System for Resource-Limited Environments"** specifies the functional and non-functional requirements, the modular architecture with PACS and EHR integration, the AI processing module (configurable preprocessing engine and inference module), clinical workflow integration (telemedicine, portable-device and national eHealth-platform support, physician-in-the-loop decision support), and the data security and regulatory-compliance framework (GDPR/HIPAA-aligned), with its applicability to Kazakhstan healthcare infrastructure.
-
----
-
-# CONCLUSION
-
-1. Preprocessing was formalised as an integral component of the diagnostic model (paradigm P2) through an 8-stage pipeline, and the hypothesis of integrated-pipeline dominance was placed under controlled experimental contrast against the baseline (paradigm P1) on EyePACS, providing an empirical comparison of the two paradigms under otherwise matched conditions.
-2. A component-ablation analysis quantified the contribution of the individual pipeline stages, and the dual-constraint CLAHE and adaptive flat-field correction were characterised by parameter sweeps with identifiable optima, supported by image-quality metrics (CNR, VVI, entropy, SSIM).
-3. The cross-dataset transferability of the integrated pipeline was evaluated on APTOS 2019 against the pre-registered generalisation criterion G ≥ 0.85.
-4. Grad-CAM explainability analysis, using the proposed ALO metric (primary) and IoU (secondary) against IDRiD pixel-level lesion masks and qualitative overlays on a Kazakh clinical dataset, characterised the alignment of model attention with clinically relevant lesion structures.
-5. The clinical degradation resistance of the pipeline was evaluated on IDRiD and Messidor-2, and its device robustness across four camera manufacturers was evaluated on DDR, ODIR-5K, and RFMiD.
-6. An architecture for an automated DR screening system for resource-limited environments was designed, with telemedicine and eHealth integration applicable to the healthcare infrastructure of the Republic of Kazakhstan.
-
-The dissertation thus delivers a transferable, interpretable, and device-robust integrated preprocessing-CNN regime for automated diabetic retinopathy diagnosis under constrained computational conditions. The work does not claim global state-of-the-art, clinical device certification, replacement of the ophthalmologist, or cross-modality transfer; these boundaries are stated explicitly.
-
----
-
-# LIST OF PUBLISHED WORKS ON THE DISSERTATION TOPIC
+The main results of the dissertation are published in 5 scientific works, including: articles in journals indexed by Scopus / Web of Science — 1 (*Eastern-European Journal of Enterprise Technologies*, Q3); a paper in international conference proceedings indexed by Scopus — 1 (*Procedia Computer Science*, DS 2025); and articles in journals recommended by the Committee for Quality Assurance in Science and Higher Education (KKSON) of the Republic of Kazakhstan — 3 (*News of the NAS RK, Physico-Mathematical Series*; *Herald of the Kazakh-British Technical University*; *Herald of KazUTB*).
 
 **Articles in journals indexed by Scopus / Web of Science:**
 
@@ -145,3 +112,27 @@ The dissertation thus delivers a transferable, interpretable, and device-robust 
 4. Yesmukhamedov N.S., Sapakova S.Z., Kozhamkulova Zh.Zh., Daniyarova D.R., Armankyzy R. Methods for preprocessing and analysis of fundus images for diabetic retinopathy detection // Herald of the Kazakh-British Technical University. — 2025. — No. 4(75). — Vol. 22. — P. 119–130. https://doi.org/10.55452/1998-6688-2025-22-4-119-130
 
 5. Sapakova S.Z., Daniyarova D.R., Yesmukhamedov N.S., Armankyzy R., Yemberdiyeva A.B., Kaldybaeva A.S. Mathematical modeling of laser exposure on fundus tissues in the treatment of diabetic retinopathy // Herald of KazUTB. — 2024. — Vol. 2, No. 27-740. https://doi.org/10.58805/kazutb.v.2.27-740
+
+## Main content of the work
+
+**The introduction** substantiates the relevance of the topic, formulates the aim, objectives, object and subject of the research, the central hypothesis, the scientific novelty, the statements submitted for defense, the methodological basis, the theoretical and practical significance, the reliability of the results, the empirical basis, the approbation, the connection with scientific programmes, and the publications, and describes the structure and length of the dissertation.
+
+**Chapter 1 — "Problem Domain Analysis and Current State of Automated Diabetic Retinopathy Diagnosis"** examines the medical and epidemiological context of DR and its clinical grading, the screening requirements of resource-limited settings, the sources of fundus image quality degradation and device-specific variability, deep-learning approaches to retinal image classification (CNN architectures, transfer and self-supervised pretraining, explainability), and provides a critical analysis of existing automated DR screening systems, concluding with the formulation of the research problem and the justification of the research direction.
+
+**Chapter 2 — "Theoretical Foundations of Image Preprocessing and Deep Learning for Fundus Image Analysis"** establishes the mathematical foundations of image enhancement (histogram equalisation, dual-constraint CLAHE, spatial filtering), the theoretical framework of CNNs (convolution, pooling, loss functions for imbalanced data, regularisation), transfer and in-domain self-supervised representation learning, the mathematical modelling of laser-tissue interaction in retinal therapy, explainability (CAM, Grad-CAM, ALO, IoU), and image quality metrics for preprocessing evaluation.
+
+**Chapter 3 — "Methodology of Integrated Preprocessing-CNN Pipeline Design"** formalises the unified 8-stage preprocessing pipeline and the modified dual-constraint CLAHE algorithm, the augmentation strategy, and the external image ingestion protocol; specifies the CNN architectures (ResNet-50 and EfficientNet-B3); details the transfer-learning and ophthalmology-specific self-supervised pretraining methodology, the architecture adaptation for five-class classification, and the weighted (Focal) loss formulation; and defines the multi-metric evaluation and statistical reliability framework.
+
+**Chapter 4 — "Experimental Research — Preprocessing Impact on CNN Diagnostic Performance"** presents the tiered dataset architecture and the seven experiments: Experiment 1 (integrated-pipeline dominance via a restored 2×2 factorial, configs A–D), Experiment 2 (stage ablation across 7 levels, CLAHE threshold and flat-field σ sweeps with image-quality metrics), Experiment 3 (zero-shot cross-dataset transfer to APTOS 2019), Experiment 4 (Grad-CAM explainability with quantitative ALO/IoU on IDRiD and qualitative overlays on the Clinical dataset), Experiment 5 (clinical degradation resistance on IDRiD and Messidor-2), Experiment 6 (device domain shift on DDR, ODIR-5K, RFMiD), and Experiment 7 (small-data training on IDRiD with the Clinical dataset held out).
+
+**Chapter 5 — "Reliability Validation and Comparative Analysis"** consolidates the explainability results, the statistical validation (bootstrap confidence intervals and mixed-effects modelling, final claim-strength classifications), the comparative analysis against published systems (IDx-DR, Eyenuk, DeepMind) and the performance-complexity trade-off, and states the limitations and boundary conditions of the proposed approach.
+
+**Chapter 6 — "Architecture of an Automated DR Screening System for Resource-Limited Environments"** specifies the functional and non-functional requirements, the modular architecture with PACS and EHR integration, the AI processing module (configurable preprocessing engine and inference module), clinical workflow integration (telemedicine, portable-device and national eHealth-platform support, physician-in-the-loop decision support), and the data security and regulatory-compliance framework (GDPR/HIPAA-aligned), with its applicability to Kazakhstan healthcare infrastructure.
+
+## Author's personal contribution
+
+The principal results of the dissertation were obtained by the author personally: the conceptual reframing of preprocessing as an integral component of the diagnostic model (paradigm P2); the design and formal specification of the 8-stage preprocessing pipeline, including the dual-constraint stochastic CLAHE, the adaptive flat-field correction, and the FOV-mask input channel; the Attention–Lesion Overlap (ALO) explainability metric; the controlled experimental design and statistical validation framework; and the architecture of the automated DR screening system. In the joint publications the author developed the fundus image preprocessing and analysis methods and prepared the corresponding parts of the manuscripts.
+
+## Structure and length of the dissertation
+
+The dissertation consists of an introduction, six chapters, a conclusion, a list of references used, and appendices. The work is supplemented with tables, figures, and the source code of the preprocessing pipeline.

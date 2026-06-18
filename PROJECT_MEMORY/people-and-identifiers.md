@@ -17,7 +17,7 @@ Canonical identities for all council/defense documents (abstracts, reviews, titl
 - EN: Sapakova Saya Zamanbekovna
 - KZ: Сапакова Сая Заманбековна
 - RU: Сапакова Сая Заманбековна
-- Degree: Candidate of Physical and Mathematical Sciences (к.ф.-м.н. / физика-математика ғылымдарының кандидаты). Title: Associate Professor (қауымдастырылған профессор / доцент). Position: Associate Professor at IITU. Email: s.sapakova@edu.iitu.kz. (Candidate supplied 2026-06-12; note he also wrote "Assistant professor" alongside "associate professor" — filled as associate; reconfirm if position should be assistant professor.)
+- Degree: Candidate of Physical and Mathematical Sciences (к.ф.-м.н. / физика-математика ғылымдарының кандидаты). Title: Associate Professor (қауымдастырылған профессор / доцент). Position: Associate Professor at IITU. Email: s.sapakova@edu.iitu.kz. (Position CONFIRMED **associate professor** by candidate 2026-06-18 — the earlier "assistant professor" ambiguity is resolved; use associate professor on the title page and all council docs.)
 - The stale `defense/presentation/slides/01_TITLE.md` shows "PhD, доцент" but is UNTRUSTWORTHY: wrong dissertation topic (laser coagulation), wrong candidate patronymic ("Сейсенұлы" vs canonical Сейтқалиұлы), different supervisor name form ("Замaнбекқызы") — do NOT use it as a source.
 
 **Foreign scientific consultant:**
