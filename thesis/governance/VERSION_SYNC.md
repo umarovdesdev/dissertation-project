@@ -1,6 +1,12 @@
 # VERSION SYNCHRONIZATION REGISTER
 
-**Version:** 6.0.0 | **Date:** 2026-06-01
+**Version:** 6.1.0 | **Date:** 2026-06-23
+
+## v6.1.0 Amendment Scope
+
+**OD-3 Stage-1 detector: classical CV → pre-trained, frozen learned detector.** The Stage-1 OD/fovea detector is replaced by a pre-trained, **frozen** heatmap-regression detector (U-Net encoder + DSNT head, trained on IDRiD localization ground-truth) that predicts OD/fovea probability heatmaps on the FOV-cropped frame with sub-pixel centers and a genuine per-landmark confidence. It meets the held-out IDRiD-test acceptance bar (OD median 0.066 R / 100 % within 1 R; fovea median 0.107 R / 99 % within 1 R; informative fovea confidence, Spearman ρ ≈ 0.44). The fallback rotation **σ is reconciled to 15.0°** (the code/eval value; the prior 13.0° text is corrected). The detector is **pre-trained and frozen — not co-trained with the DR classifier** — so preprocessing remains a fixed transform and `model = preprocessing + CNN` holds. **Adds a new substantive entity (the learned Stage-1 detector), reverses no binding → MINOR bump** per VERSIONING_POLICY §4. No hypothesis, scope boundary, factorial design, or other operational definition (Stages 0, 2–7) changes.
+
+In-repo integration (Phase 2): the learned detector lives at `experiments/src/preprocessing/od_fovea_net/` behind the unchanged `detect_od_fovea(image_rgb) → ODFoveaResult` facade (additive confidence/heatmap fields); the live pipeline pivots Stage-5 polar CLAHE on the detected fovea when confident (else FOV centroid), with the pivot cached for the training path. `scripts/validate_od_fovea_idrid.py` reproduces the acceptance numbers on the IDRiD test split inside the monorepo. **Pending downstream (narrative) sync:** chapter drafts (3.1.1, 3.1.3, 1.1.1, 2.2.1), assembled dissertation bundles, abstracts, and glossary entries that still describe the classical Stage-1 detector are regenerated artifacts and remain a separate documentation pass (they do not gate this governance bump).
 
 ## v6.0.0 Amendment Scope
 
@@ -24,10 +30,10 @@ Pretraining source amendment: integrated arm of Experiment 1 uses RETFound; base
 
 | File | Version | Synced |
 |------|---------|--------|
-| governance/INVARIANTS.md | 6.0.0 | ✅ — v6.0.0: RETFound→ophthalmology-SSL in H-1/DGL-6/CFC-2.8; Section X AOQ-1/3/4 resolved, AOQ-2 simplified — completed 2026-06-01 |
-| governance/HYPOTHESIS.md | 6.0.0 | ✅ — v6.0.0: H-1 RETFound clause replaced with ophthalmology-SSL; AOQ references marked resolved — completed 2026-06-01 |
-| governance/RESEARCH_ARCHITECTURE.md | 6.0.0 | ✅ — v6.0.0: §4.1/4.2/4.2bis rewritten; Exp-1 A/B/C/D factorial restored, B′ retired; §7 ablation table updated; EH-4 reinstated — completed 2026-06-01 |
-| governance/VERSION_SYNC.md | 6.0.0 | ✅ |
+| governance/INVARIANTS.md | 6.1.0 | ✅ — v6.1.0: OD-3 Stage-1 classical CV → pre-trained frozen learned heatmap detector; fallback σ reconciled to 15.0° — completed 2026-06-23 |
+| governance/HYPOTHESIS.md | 6.0.0 | ✅ — unaffected by v6.1.0 (H-1/Premise-3 name Stage 1 generically, no classical-detector reference; H-2 ablation does not reference the detector implementation) |
+| governance/RESEARCH_ARCHITECTURE.md | 6.1.0 | ✅ — v6.1.0: Stage-1 detector description updated to the frozen learned detector (σ = 15.0°); no factorial/design change — completed 2026-06-23 |
+| governance/VERSION_SYNC.md | 6.1.0 | ✅ |
 | governance/ARGUMENT_MAP.md | 6.0.0 | ✅ — v6.0.0: binding-ref bump only (no RETFound/pretraining node in this file) — completed 2026-06-01 |
 | governance/CONTRIBUTIONS.md | 6.0.0 | ✅ — v6.0.0: SC-H (ophthalmology-SSL initialization, CFC-2.8-bounded) added; header amendment note — completed 2026-06-01 |
 | governance/CENTRAL_THESIS.md | 6.0.0 | ✅ — v6.0.0: binding-ref bump only (no pretraining reference in body) — completed 2026-06-01 |
@@ -60,7 +66,7 @@ Pretraining source amendment: integrated arm of Experiment 1 uses RETFound; base
 | literature/LITERATURE_INDEX.md | 5.0 | ❌ — v6.0.0: SSL-family cards (DINO/BYOL/SimCLR/MoCo) for the integrated-arm pretraining; Zhou et al. 2023 (RETFound) demoted to historical/contrast; Paradigm column (v5.3) |
 | literature/external/gulshan-2016.md | 5.0 | ❌ — Paradigmatic Role block required in §15 (v5.3) — see Task 1.1 |
 | experiments/experimental-protocol.md | 5.0 | ❌ — v6.0.0: Exp 1 protocol must reflect the restored A/B/C/D factorial (integrated arm = ophthalmology-SSL); AOQ-1/3/4 resolved, AOQ-2 simplified |
-| methods/preprocessing-pipeline.md | 5.0 | ⚠️ — preprocessing stages unchanged; review for pretrain references |
+| methods/preprocessing-pipeline.md | 6.1.0 (Stage 1) | ✅ — v6.1.0: Stage-1 description updated to the frozen learned heatmap detector (σ = 15.0°); other stages still pending the v6.0.0 pretrain-reference review |
 | methods/implementation.md | 5.0 | ❌ — v6.0.0: model loading code paths must load an in-house ophthalmology-SSL CNN checkpoint (no RETFound/ViT-Large loader needed) |
 
 ## Downstream Code Status (not part of governance, listed for completeness)

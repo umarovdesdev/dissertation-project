@@ -45,10 +45,12 @@ od_fovea_detector/
     infer.py                  detect_od_fovea(image_rgb) -> ODFoveaResult  (the §6 API)
     eval.py                   metrics JSON (monorepo shape) + Spearman + montage
     utils.py                  config load + device resolution
-  scripts/smoke_test.py       synthetic train->infer->eval (no dataset)
+  scripts/smoke_test.py            synthetic train->infer->eval (no dataset)
+  scripts/export_corrections.py    Phase 4: demo correction store -> training samples (torch-free)
+  scripts/finetune_corrections.py  Phase 4: fine-tune from corrections + acceptance gate
   tests/                      pytest/unittest; torch-free tests + torch-gated contract test
-  weights/                    trained weights land here (od_fovea_unet.pt)
-  outputs/                    eval_report.json + montage.png
+  weights/                    trained weights land here (od_fovea_unet.pt, fine-tunes od_fovea_unet_vN.pt)
+  outputs/                    eval_report.json + montage.png + corrections_manifest.jsonl
 ```
 
 ## Install
@@ -96,6 +98,44 @@ with `error_px` {median,mean,p90,max,n}, `error_od_radii`,
 **Acceptance (test split only):** fovea median < 1.0 OD-radius and ≥ 90% within
 1 OD-radius; OD median ≤ 0.5 OD-radius and ≥ 95% within 1 OD-radius; positive,
 significant Spearman between `sigma_eff` and error.
+
+## Fine-tune from clinician corrections (Phase 4 — human-in-the-loop)
+
+The demo lets a clinician drag the OD/fovea markers and save the fix; each
+correction is persisted (JSONL + the original image, content-addressed by
+SHA-256) under `demo/server/data/od_fovea_corrections/`. This offline loop turns
+those corrections into new training signal **without co-training with the
+DR-CNN** — the detector stays a frozen preprocessing component.
+
+```bash
+conda activate dr-classifier
+cd experiments/od_fovea_detector
+
+# 1. Inspect what the store holds (deduped, test-leakage-filtered).
+python scripts/export_corrections.py \
+    --idrid-root "E:/datasets/IDRiD/C. Localization" \
+    --out outputs/corrections_manifest.jsonl
+
+# 2. Fine-tune from the frozen base weights, then gate on IDRiD-test acceptance.
+python scripts/finetune_corrections.py --config configs/default.yaml
+```
+
+Behavior and guarantees:
+
+* **No test leakage.** The 103 IDRiD test images are SHA-256-hashed and any
+  correction made on one is dropped before fine-tuning. Early stopping uses the
+  held-out IDRiD-train slice; the test split is only ever read by the post-hoc
+  acceptance gate.
+* **Mixing.** IDRiD-train + corrections oversampled by
+  `finetune.correction_repeat` (corrections are the scarce, high-value signal).
+* **Versioned, gated weights.** The candidate is saved as `weights/od_fovea_unet_vN.pt`
+  with a sidecar `.json` logging the base weights, the exact correction image
+  hashes that went in, and the IDRiD-test acceptance result. The script exits
+  `0` (promotable, met the Phase-1 bar), `2` (regressed — do NOT promote), or
+  `1` (no corrections). Promote by pointing `io.weights_path` / `OD_FOVEA_WEIGHTS`
+  at the new file — the frozen base weights are never overwritten in place.
+
+All Phase-4 knobs live in the `finetune:` block of `configs/default.yaml`.
 
 ## Inference API (binding contract — §6)
 

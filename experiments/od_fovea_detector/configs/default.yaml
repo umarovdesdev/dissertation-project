@@ -63,6 +63,30 @@ train:
     vignette_strength: 0.6
 
 # ---------------------------------------------------------------------------
+# Fine-tune from clinician corrections (Phase 4 — offline human-in-the-loop)
+# ---------------------------------------------------------------------------
+# Starts from the frozen base weights (io.weights_path), mixes IDRiD-train with
+# the exported correction samples (oversampled by correction_repeat), trains a
+# few epochs at a small lr, and early-stops on the held-out IDRiD-train slice.
+# The IDRiD TEST split is never used for fitting — only for the post-hoc
+# acceptance gate. Fine-tuned weights are versioned (od_fovea_unet_vN.pt) and
+# only promoted if they do not regress the Phase-1 acceptance bar.
+finetune:
+  epochs: 40
+  lr: 0.0001              # 10x smaller than the from-scratch lr
+  weight_decay: 0.0001
+  early_stopping_patience: 15
+  correction_repeat: 10   # oversample corrections vs the 413 IDRiD images
+  # Corrections store (relative to this config's repo). Override on the CLI.
+  corrections_dir: "../../demo/server/data/od_fovea_corrections"
+  # Phase-1 acceptance bar (IDRiD test) the fine-tuned weights must still meet.
+  acceptance:
+    od_median_radii_max: 0.5
+    od_within_1r_min: 0.95
+    fovea_median_radii_max: 1.0
+    fovea_within_1r_min: 0.90
+
+# ---------------------------------------------------------------------------
 # Confidence (see brief §7)
 # ---------------------------------------------------------------------------
 confidence:

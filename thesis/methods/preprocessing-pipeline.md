@@ -16,11 +16,12 @@ The preprocessing pipeline is defined as an integral component of the diagnostic
 
 ### Stage 1 — OD-Fovea Rotation Normalization (always on)
 
-- Classical CV: bright-region percentile thresholding for OD detection; darkest region with distance prior from OD for fovea detection
+- Pre-trained, frozen heatmap-regression detector (U-Net encoder + DSNT head, trained on IDRiD localization ground-truth): predicts OD and fovea probability heatmaps on the FOV-cropped frame, with sub-pixel centers and genuine per-landmark confidence (from heatmap peak sharpness and spatial spread)
 - Rotate image so OD→fovea axis is horizontal
-- Fallback: skip rotation on low confidence (fallback rotation σ = 13.0°)
-- Augmentation rotation σ is adaptive per-image from OD/fovea detection uncertainty
-- Implementation: `od_fovea_detect.py`, `canonical_orientation.py`
+- Fallback: skip rotation on low confidence (fallback rotation σ = 15.0°), and pivot Stage-5 polar CLAHE on the FOV-mask centroid rather than the detected fovea
+- Augmentation rotation σ is adaptive per-image from heatmap-derived OD/fovea localization uncertainty
+- The detector is pre-trained and **frozen — not co-trained with the DR classifier** — so the pipeline remains a fixed transform (`model = preprocessing + CNN` preserved). Operationally it runs on the FOV-cropped frame produced by Stage 2's crop/resize; the Stage-1 numbering is retained
+- Implementation: `od_fovea_detect.py` (facade) → `od_fovea_net/` (learned detector); `canonical_orientation.py`
 
 ### Stage 2 — FOV Crop + Isotropic Resize (always on)
 

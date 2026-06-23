@@ -35,7 +35,7 @@ import torch
 from .canonical_orientation import canonical_flip, canonical_orientation
 from .od_fovea_detect import ODFoveaResult
 from .config import PreprocessingConfig
-from .crop_resize import crop_and_resize
+from .crop_resize import crop_and_resize, CropResizeTransform
 from .flat_field import apply_flat_field
 from .imagenet_normalize import imagenet_normalize
 from .polar_clahe import (
@@ -46,6 +46,84 @@ from .polar_clahe import (
 from .upgraded_clahe import ClaheParams, maybe_apply_clahe
 # NOTE: UnifiedFundusAugmentation is imported lazily inside __init__ to avoid
 # circular imports (src.data imports from src.preprocessing and vice-versa).
+
+
+def _project_to_analysis(
+    point: tuple[float, float],
+    angle_deg: float,
+    src_w: int,
+    src_h: int,
+    crop_tf: "CropResizeTransform",
+) -> tuple[float, float]:
+    """Project a pre-crop (post-flip) point into the cropped analysis frame.
+
+    Mirrors the rotation applied inside :func:`canonical_orientation` (about the
+    flipped-image centre) followed by the FOV crop+resize transform, so a point
+    detected in pre-rotation/pre-crop space lands exactly on the
+    ``target_size`` analysis canvas. Used for the Stage-5 polar-CLAHE fovea pivot
+    and the demo overlay so both agree with what the CNN sees.
+
+    Args:
+        point: ``(x, y)`` in pre-crop (post-flip) image pixels.
+        angle_deg: Rotation angle applied by Stage 1 (``ODFoveaResult.angle_deg``).
+        src_w: Width of the (rotation-preserved) pre-crop image.
+        src_h: Height of the pre-crop image.
+        crop_tf: The :class:`CropResizeTransform` from Stage 2's crop+resize.
+
+    Returns:
+        ``(x, y)`` in the padded ``target_size`` analysis canvas.
+    """
+    rot_m = cv2.getRotationMatrix2D((src_w // 2, src_h // 2), angle_deg, 1.0)
+    px, py = float(point[0]), float(point[1])
+    rx = rot_m[0, 0] * px + rot_m[0, 1] * py + rot_m[0, 2]
+    ry = rot_m[1, 0] * px + rot_m[1, 1] * py + rot_m[1, 2]
+    return crop_tf.apply(rx, ry)
+
+
+def _warp_heatmap_to_analysis(
+    heatmap: np.ndarray,
+    angle_deg: float,
+    src_w: int,
+    src_h: int,
+    crop_tf: "CropResizeTransform",
+) -> np.ndarray:
+    """Warp a flipped-frame probability heatmap into the analysis canvas.
+
+    Applies the *same* geometric chain :func:`_project_to_analysis` applies to a
+    point — rotation about the flipped-image centre followed by the FOV
+    crop+resize — but to a full heatmap image, so the demo can overlay the
+    detector's probability map on the ``fov_crop_resize`` panel exactly where
+    the markers land.
+
+    Args:
+        heatmap: float32 ``(src_h, src_w)`` probability map in the flipped
+            (pre-rotation, pre-crop) input frame.
+        angle_deg: Rotation angle applied by Stage 1 (``angle_deg``).
+        src_w: Width of the flipped/pre-crop image.
+        src_h: Height of the flipped/pre-crop image.
+        crop_tf: The :class:`CropResizeTransform` from Stage 2's crop+resize.
+
+    Returns:
+        float32 ``(target_size, target_size)`` heatmap on the analysis canvas.
+    """
+    rot_m = cv2.getRotationMatrix2D((src_w // 2, src_h // 2), angle_deg, 1.0)
+    left, upper = crop_tf.bbox[0], crop_tf.bbox[1]
+    # Affine for crop_tf.apply: (x - left) * scale + x_off, (y - upper) * scale + y_off.
+    crop_m = np.array(
+        [
+            [crop_tf.scale, 0.0, crop_tf.x_off - left * crop_tf.scale],
+            [0.0, crop_tf.scale, crop_tf.y_off - upper * crop_tf.scale],
+        ],
+        dtype=np.float64,
+    )
+    # Compose crop_m ∘ rot_m (apply rotation first, then crop) in homogeneous form.
+    rot_h = np.vstack([rot_m, [0.0, 0.0, 1.0]])
+    combined = (np.vstack([crop_m, [0.0, 0.0, 1.0]]) @ rot_h)[:2, :]
+    size = int(crop_tf.target_size)
+    return cv2.warpAffine(
+        heatmap.astype(np.float32), combined, (size, size),
+        flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0.0,
+    )
 
 
 class PreprocessingPipeline:
@@ -168,8 +246,10 @@ class PreprocessingPipeline:
         # Split into two helpers so the precompute-and-cache path
         # (precompute_deterministic + finish_from_cache) is provably identical
         # to the live path — both finish through the same self._finish.
-        flat_rgb, fov_mask, od_fovea_result = self._precompute_rgb(image, eye_side)
-        return self._finish(flat_rgb, fov_mask, od_fovea_result)
+        flat_rgb, fov_mask, od_fovea_result, fovea_pivot = self._precompute_rgb(
+            image, eye_side
+        )
+        return self._finish(flat_rgb, fov_mask, od_fovea_result, fovea_pivot)
 
     # ------------------------------------------------------------------
     # Stage split: deterministic 0–4  vs  stochastic 5–7
@@ -179,7 +259,7 @@ class PreprocessingPipeline:
         self,
         image: np.ndarray,
         eye_side: str,
-    ) -> tuple[np.ndarray, np.ndarray, "ODFoveaResult | None"]:
+    ) -> tuple[np.ndarray, np.ndarray, "ODFoveaResult | None", "tuple[float, float] | None"]:
         """Run the **deterministic** Stages 0–4 on an already-RGB image.
 
         These stages carry no train-time randomness, so their output is safe to
@@ -199,6 +279,10 @@ class PreprocessingPipeline:
                 (1.0 inside FOV, 0.0 padding).
               - ``od_fovea_result``: :class:`ODFoveaResult` from Stage 0/1, or
                 ``None`` if orientation is disabled.
+              - ``fovea_pivot``: detected fovea centre projected into the
+                ``target_size`` analysis frame for the Stage-5 polar-CLAHE pivot,
+                or ``None`` when detection is absent / not confident (→ centroid
+                pivot).
         """
         # Stage 0: canonical orientation (flip + OD–fovea rotation)
         od_fovea_result: ODFoveaResult | None = None
@@ -209,8 +293,29 @@ class PreprocessingPipeline:
                 enable_rotation=self.config.use_od_fovea_rotation,
             )
 
-        # Stage 2: FOV crop + isotropic resize (always) — returns (image, mask)
-        image, fov_mask = crop_and_resize(image, self.config.target_size)
+        # Pre-crop (rotation-preserved) dims, needed to project the detected
+        # fovea into analysis space below.
+        src_h, src_w = image.shape[:2]
+
+        # Stage 2: FOV crop + isotropic resize (always) — keep the transform so
+        # the fovea pivot can be mapped into the cropped analysis frame.
+        image, fov_mask, crop_tf = crop_and_resize(
+            image, self.config.target_size, return_transform=True
+        )
+
+        # Stage-5 polar-CLAHE pivot: the detected fovea, projected to analysis
+        # space, only when the learned detector is confident (TASK-fix #4).
+        fovea_pivot: tuple[float, float] | None = None
+        if (
+            self.config.use_od_fovea_rotation
+            and od_fovea_result is not None
+            and od_fovea_result.confident
+        ):
+            fovea_pivot = _project_to_analysis(
+                od_fovea_result.fovea_center,
+                od_fovea_result.angle_deg,
+                src_w, src_h, crop_tf,
+            )
 
         # Compute FOV diameter from mask for adaptive flat-field
         fov_rows = np.any(fov_mask > 0, axis=1)
@@ -229,13 +334,14 @@ class PreprocessingPipeline:
                 mask=fov_mask if self.config.flat_field_mask_only else None,
             )
 
-        return image, fov_mask, od_fovea_result
+        return image, fov_mask, od_fovea_result, fovea_pivot
 
     def _finish(
         self,
         image: np.ndarray,
         fov_mask: np.ndarray,
         od_fovea_result: "ODFoveaResult | SimpleNamespace | None",
+        fovea_pivot: "tuple[float, float] | None" = None,
     ) -> torch.Tensor:
         """Run the **stochastic** Stages 5–7 on a Stage-4 (flat-field) image.
 
@@ -248,15 +354,19 @@ class PreprocessingPipeline:
             fov_mask: float32 binary FOV mask (Stage 2 output).
             od_fovea_result: object exposing ``confident`` and
                 ``rotation_sigma_deg`` (only fields Stage 6 reads), or ``None``.
+            fovea_pivot: detected fovea centre in analysis-frame pixels for the
+                Stage-5 polar-CLAHE pivot, or ``None`` → FOV-centroid pivot. Must
+                be supplied identically on the live and cached paths so the two
+                stay bit-identical.
 
         Returns:
             Normalised float32 tensor ``(4, target_size, target_size)``;
             channel 3 is the (un-augmented) FOV mask.
         """
-        # Stage 5: CLAHE (stochastic at train time). Polar pivots on the FOV
-        # centroid (robust — the detected fovea is unreliable, TASK-fix #4); the
-        # centroid is derived from fov_mask, which is available on both the live
-        # and cached paths, so no extra cache scalar is needed.
+        # Stage 5: CLAHE (stochastic at train time). When the learned detector
+        # is confident, polar CLAHE pivots on the detected fovea (TASK-fix #4);
+        # otherwise it falls back to the robust FOV-mask centroid
+        # (``resolve_pivot`` also re-checks the pivot lands inside the FOV).
         if self.config.use_clahe:
             if self.config.clahe_mode == "polar":
                 image = maybe_apply_polar_clahe(
@@ -265,6 +375,7 @@ class PreprocessingPipeline:
                     params=self._polar_clahe_params,
                     is_training=self.is_training,
                     train_prob=self.config.clahe_train_prob,
+                    fovea_xy=fovea_pivot,
                 )
             else:
                 image = maybe_apply_clahe(
@@ -302,12 +413,14 @@ class PreprocessingPipeline:
         self,
         image: np.ndarray,
         eye_side: str = "unknown",
-    ) -> tuple[np.ndarray, np.ndarray, bool, float]:
+    ) -> tuple[np.ndarray, np.ndarray, bool, float, "tuple[float, float] | None"]:
         """Stages 0–4 for offline caching, from a raw (decoded) image.
 
         Handles ``input_color_space`` then runs :meth:`_precompute_rgb`,
-        returning the two cacheable scalars from the OD/fovea result rather than
-        the full object (all Stage 6 needs).
+        returning the cacheable scalars from the OD/fovea result rather than the
+        full object: ``confident`` and ``rotation_sigma_deg`` (Stage 6) plus the
+        analysis-frame ``fovea_pivot`` (Stage 5 polar pivot). Caching the pivot
+        keeps the cached training path bit-identical to live inference.
 
         Args:
             image: Raw uint8 array matching ``input_color_space`` (``"bgr"`` for
@@ -315,14 +428,16 @@ class PreprocessingPipeline:
             eye_side: ``"left"``, ``"right"``, or ``"unknown"``.
 
         Returns:
-            ``(flat_rgb_uint8, fov_mask_float32, confident, rotation_sigma_deg)``.
+            ``(flat_rgb_uint8, fov_mask_float32, confident, rotation_sigma_deg,
+            fovea_pivot)`` where ``fovea_pivot`` is ``(x, y)`` in analysis-frame
+            pixels or ``None``.
         """
         if self._input_color_space == "bgr":
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        flat_rgb, fov_mask, od = self._precompute_rgb(image, eye_side)
+        flat_rgb, fov_mask, od, fovea_pivot = self._precompute_rgb(image, eye_side)
         confident = bool(od.confident) if od is not None else False
         rotation_sigma_deg = float(od.rotation_sigma_deg) if od is not None else 0.0
-        return flat_rgb, fov_mask, confident, rotation_sigma_deg
+        return flat_rgb, fov_mask, confident, rotation_sigma_deg, fovea_pivot
 
     def finish_from_cache(
         self,
@@ -330,18 +445,22 @@ class PreprocessingPipeline:
         fov_mask: np.ndarray,
         confident: bool,
         rotation_sigma_deg: float,
+        fovea_pivot: "tuple[float, float] | None" = None,
     ) -> torch.Tensor:
         """Stages 5–7 from cached Stage-4 output — the per-epoch train path.
 
         Equivalent to :meth:`__call__` for the full pipeline, but skips the
         expensive deterministic Stages 0–4 by consuming a cached flat-field
-        image + FOV mask + the two OD/fovea scalars.
+        image + FOV mask + the cached OD/fovea scalars.
 
         Args:
             flat_rgb: cached RGB uint8 Stage-4 image.
             fov_mask: cached float32 binary FOV mask.
             confident: cached ``ODFoveaResult.confident``.
             rotation_sigma_deg: cached ``ODFoveaResult.rotation_sigma_deg``.
+            fovea_pivot: cached analysis-frame fovea pivot ``(x, y)`` or ``None``
+                (older caches without the column read as ``None`` → centroid
+                pivot, matching pre-Phase-2 behaviour).
 
         Returns:
             Normalised float32 tensor ``(4, target_size, target_size)``.
@@ -350,7 +469,7 @@ class PreprocessingPipeline:
             confident=bool(confident),
             rotation_sigma_deg=float(rotation_sigma_deg),
         )
-        return self._finish(flat_rgb, fov_mask, od)
+        return self._finish(flat_rgb, fov_mask, od, fovea_pivot)
 
     # ------------------------------------------------------------------
     # Stage breakdown (for the demo "what preprocessing does" panel)
@@ -360,6 +479,7 @@ class PreprocessingPipeline:
         self,
         image: np.ndarray,
         eye_side: str = "unknown",
+        with_heatmaps: bool = False,
     ) -> dict:
         """Run preprocessing Stages 0–5 capturing each intermediate.
 
@@ -371,6 +491,10 @@ class PreprocessingPipeline:
         Args:
             image: Raw uint8 array matching ``input_color_space``.
             eye_side: ``"left"``, ``"right"``, or ``"unknown"``.
+            with_heatmaps: If ``True``, request the learned detector's OD/fovea
+                probability heatmaps and warp them into analysis space (added to
+                ``od_fovea_analysis`` as ``od_heatmap``/``fovea_heatmap``). Used
+                by the demo overlay (Phase 3).
 
         Returns:
             Dict with:
@@ -381,7 +505,13 @@ class PreprocessingPipeline:
               - ``od_fovea_analysis``: OD/fovea centres and radii projected
                 into the ``target_size`` analysis frame (the
                 ``fov_crop_resize`` panel) so markers overlay it exactly, or
-                ``None`` when no confident detection is available.
+                ``None`` when no confident detection is available. When
+                ``with_heatmaps`` and confident, also carries float32
+                ``od_heatmap``/``fovea_heatmap`` on the analysis canvas.
+              - ``transform``: dict with ``angle_deg``, ``crop_tf``, ``flipped``,
+                ``src_w``, ``src_h``, ``space`` — the Stage 0/1/2 geometry needed
+                to invert analysis-space coordinates back to input-image pixels
+                (used by the demo correction endpoint), or ``None``.
         """
         if self._input_color_space == "bgr":
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -402,6 +532,7 @@ class PreprocessingPipeline:
                 image,
                 eye_side=eye_side if self.config.use_canonical_flip else "unknown",
                 enable_rotation=self.config.use_od_fovea_rotation,
+                return_heatmaps=with_heatmaps,
             )
         else:
             oriented = image
@@ -419,26 +550,41 @@ class PreprocessingPipeline:
         # ``canonical_orientation`` (about the flipped image centre), then the
         # crop+resize transform. Only meaningful for confident detections.
         od_fovea_analysis: dict | None = None
+        fovea_pivot: tuple[float, float] | None = None
         if od_fovea_result is not None and od_fovea_result.confident:
             src_h, src_w = image.shape[:2]
-            rot_m = cv2.getRotationMatrix2D(
-                (src_w // 2, src_h // 2), od_fovea_result.angle_deg, 1.0
-            )
 
             def _to_analysis(point: tuple[int, int]) -> list[float]:
-                px, py = float(point[0]), float(point[1])
-                rx = rot_m[0, 0] * px + rot_m[0, 1] * py + rot_m[0, 2]
-                ry = rot_m[1, 0] * px + rot_m[1, 1] * py + rot_m[1, 2]
-                ax, ay = crop_tf.apply(rx, ry)
+                ax, ay = _project_to_analysis(
+                    point, od_fovea_result.angle_deg, src_w, src_h, crop_tf
+                )
                 return [ax, ay]
 
+            fovea_center_analysis = _to_analysis(od_fovea_result.fovea_center)
+            fovea_pivot = (fovea_center_analysis[0], fovea_center_analysis[1])
             od_fovea_analysis = {
                 "od_center": _to_analysis(od_fovea_result.od_center),
-                "fovea_center": _to_analysis(od_fovea_result.fovea_center),
+                "fovea_center": fovea_center_analysis,
                 "od_radius": float(od_fovea_result.od_radius) * crop_tf.scale,
                 "fovea_radius": float(od_fovea_result.fovea_radius) * crop_tf.scale,
                 "space": int(self.config.target_size),
             }
+
+            # Warp the detector's probability heatmaps (flipped pre-crop frame)
+            # into the analysis canvas so the demo overlays them on the markers.
+            if (
+                with_heatmaps
+                and od_fovea_result.od_heatmap is not None
+                and od_fovea_result.fovea_heatmap is not None
+            ):
+                od_fovea_analysis["od_heatmap"] = _warp_heatmap_to_analysis(
+                    od_fovea_result.od_heatmap,
+                    od_fovea_result.angle_deg, src_w, src_h, crop_tf,
+                )
+                od_fovea_analysis["fovea_heatmap"] = _warp_heatmap_to_analysis(
+                    od_fovea_result.fovea_heatmap,
+                    od_fovea_result.angle_deg, src_w, src_h, crop_tf,
+                )
 
         # Stage 4: flat-field correction (adaptive σ).
         flat = cropped
@@ -461,6 +607,7 @@ class PreprocessingPipeline:
             if self.config.clahe_mode == "polar":
                 clahed = apply_polar_clahe(
                     flat, fov_mask, params=self._polar_clahe_params,
+                    fovea_xy=fovea_pivot,
                 )
             else:
                 clahed = maybe_apply_clahe(
@@ -469,11 +616,29 @@ class PreprocessingPipeline:
                 )
         stages.append(("clahe", clahed.copy()))
 
+        # Geometry needed to invert analysis-space coordinates back to
+        # input-image pixels (demo correction endpoint). ``angle_deg`` is the
+        # Stage-1 rotation (0 when no confident detection drove a rotation).
+        src_h, src_w = image.shape[:2]
+        transform = {
+            "angle_deg": (
+                float(od_fovea_result.angle_deg)
+                if (od_fovea_result is not None and od_fovea_result.confident)
+                else 0.0
+            ),
+            "crop_tf": crop_tf,
+            "flipped": bool(self.config.use_canonical_flip and eye_side == "left"),
+            "src_w": int(src_w),
+            "src_h": int(src_h),
+            "space": int(self.config.target_size),
+        }
+
         return {
             "stages": stages,
             "fov_mask": fov_mask,
             "od_fovea": od_fovea_result,
             "od_fovea_analysis": od_fovea_analysis,
+            "transform": transform,
         }
 
     # ------------------------------------------------------------------

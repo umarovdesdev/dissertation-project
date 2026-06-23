@@ -50,7 +50,7 @@ def _config() -> PreprocessingConfig:
 def test_mask_png_roundtrip_is_lossless():
     """The binary FOV mask survives the 0↔255 alpha round-trip exactly."""
     pipe = PreprocessingPipeline.create_for_inference(_config())
-    flat, mask, _, _ = pipe.precompute_deterministic(_make_synthetic_fundus(), "left")
+    flat, mask, _, _, _ = pipe.precompute_deterministic(_make_synthetic_fundus(), "left")
     _, mask2 = _png_roundtrip(flat, mask)
     assert set(np.unique(mask)).issubset({0.0, 1.0})
     assert np.array_equal(mask, mask2)
@@ -61,9 +61,9 @@ def test_cache_matches_live_inference():
     pipe = PreprocessingPipeline.create_for_inference(_config())
     img = _make_synthetic_fundus()
     t_live = pipe(img.copy(), eye_side="left")
-    flat, mask, conf, rot = pipe.precompute_deterministic(img.copy(), "left")
+    flat, mask, conf, rot, fovea = pipe.precompute_deterministic(img.copy(), "left")
     flat2, mask2 = _png_roundtrip(flat, mask)
-    t_cache = pipe.finish_from_cache(flat2, mask2, conf, rot)
+    t_cache = pipe.finish_from_cache(flat2, mask2, conf, rot, fovea)
     assert t_live.shape == t_cache.shape == (4, 512, 512)
     assert torch.allclose(t_live, t_cache, atol=1e-6)
 
@@ -80,10 +80,10 @@ def test_cache_matches_live_training_seeded():
     np.random.seed(0)
     t_live = pipe(img.copy(), eye_side="left")
 
-    flat, mask, conf, rot = pipe.precompute_deterministic(img.copy(), "left")
+    flat, mask, conf, rot, fovea = pipe.precompute_deterministic(img.copy(), "left")
     flat2, mask2 = _png_roundtrip(flat, mask)
 
     np.random.seed(0)
-    t_cache = pipe.finish_from_cache(flat2, mask2, conf, rot)
+    t_cache = pipe.finish_from_cache(flat2, mask2, conf, rot, fovea)
 
     assert torch.allclose(t_live, t_cache, atol=1e-6)

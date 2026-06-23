@@ -80,6 +80,7 @@ def canonical_orientation(
     image: np.ndarray,
     eye_side: str = "unknown",
     enable_rotation: bool = True,
+    return_heatmaps: bool = False,
 ) -> tuple[np.ndarray, ODFoveaResult | None]:
     """
     Apply full canonical orientation: flip + OD–fovea rotation.
@@ -95,6 +96,10 @@ def canonical_orientation(
         image: RGB uint8 NumPy array of shape ``(H, W, 3)``.
         eye_side: ``"left"``, ``"right"``, or ``"unknown"``.
         enable_rotation: If ``False``, skip OD–fovea rotation entirely.
+        return_heatmaps: If ``True``, request the learned detector's OD/fovea
+            probability heatmaps (attached to ``od_fovea_result`` in the
+            **flipped** input frame, i.e. pre-rotation, pre-crop). Used by the
+            demo overlay (Phase 3); off by default to skip two full-res resizes.
 
     Returns:
         Tuple of ``(processed_image, od_fovea_result)``.
@@ -108,7 +113,7 @@ def canonical_orientation(
     if not enable_rotation:
         return image, None
 
-    result = detect_od_fovea(image)
+    result = detect_od_fovea(image, return_heatmaps=return_heatmaps)
 
     if result.confident:
         image = rotate_to_horizontal(image, result.angle_deg)

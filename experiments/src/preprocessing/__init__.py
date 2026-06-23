@@ -7,7 +7,12 @@ from .flat_field import apply_flat_field
 from .clahe import apply_clahe, apply_clahe_sweep
 from .upgraded_clahe import apply_upgraded_clahe, maybe_apply_clahe, ClaheParams
 from .imagenet_normalize import imagenet_normalize, normalize_to_tensor
-from .od_fovea_detect import ODFoveaResult, detect_od_fovea, rotate_to_horizontal
+from .od_fovea_detect import (
+    ODFoveaResult,
+    detect_od_fovea,
+    detect_od_fovea_classical,
+    rotate_to_horizontal,
+)
 
 __all__ = [
     # pipeline
@@ -19,6 +24,7 @@ __all__ = [
     "canonical_orientation",
     "ODFoveaResult",
     "detect_od_fovea",
+    "detect_od_fovea_classical",
     "rotate_to_horizontal",
     "crop_and_resize",
     "CropResizeTransform",
