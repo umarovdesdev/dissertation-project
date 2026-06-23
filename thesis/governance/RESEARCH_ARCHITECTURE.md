@@ -5,7 +5,9 @@
 **Candidate:** Yesmukhamedov N.S.
 **Status:** Binding Methodological Blueprint
 **Function:** Experimental, statistical, and architectural formalization of the dissertation research
-**Version:** 6.0.0 | **Date:** 2026-06-01 | **Binding Reference:** INVARIANTS.md v6.0.0
+**Version:** 6.1.0 | **Date:** 2026-06-23 | **Binding Reference:** INVARIANTS.md v6.1.0
+
+**v6.1.0 Amendment:** The OD-3 Stage-1 detector is updated from classical CV to a pre-trained, frozen heatmap-regression detector (U-Net + DSNT head, trained on IDRiD localization ground-truth) with genuine per-landmark confidence; fallback rotation σ reconciled to 15.0°. The detector is frozen (not co-trained with the DR classifier), preserving `model = preprocessing + CNN`. MINOR bump per INVARIANTS v6.1.0; no experimental-design, factorial, or hypothesis change.
 
 **v6.0.0 Amendment:** RETFound is removed as the integrated-arm initialization source. The integrated arm of Experiment 1 now initializes the existing CNN backbone (ResNet-50 / EfficientNet-B3) from **ophthalmology-specific self-supervised pretraining** on an unlabeled retinal fundus corpus (CNN-compatible domain-adaptive SSL — DINO / BYOL / SimCLR / MoCo family — selected empirically). Because the SSL initialization is CNN-native, the 2×2 *(preprocessing × architecture)* factorial is restored: the retired configs **B and D are reinstated** and config **B′ is retired**. Section 4.2bis and Section 5.1 are updated; AOQ-1/AOQ-3/AOQ-4 are resolved and AOQ-2 is simplified (INVARIANTS v6.0.0 Section X). The composite *(preprocessing × pretraining)* independent variable and CFC-2.8 are retained.
 
@@ -132,7 +134,7 @@ Defined per OD-3.
 The preprocessing pipeline comprises eight ordered stages. All stages are always on except Stage 6 (train only):
 
 - **Stage 0: Canonical Flip** — Left-eye images are horizontally flipped to right-eye canonical orientation (OD right, macula left). Always on.
-- **Stage 1: OD-Fovea Rotation Normalization** — Classical CV detection of OD (brightest region) and fovea (darkest region with distance prior); rotates image so OD→fovea axis is horizontal. Fallback: skip rotation on low confidence. Augmentation rotation σ is adaptive per-image from detection uncertainty (fallback σ = 13.0°). Always on.
+- **Stage 1: OD-Fovea Rotation Normalization** — A pre-trained, frozen heatmap-regression detector (U-Net encoder + DSNT head, trained on IDRiD localization ground-truth) predicts probability heatmaps for the OD and fovea centers on the FOV-cropped frame; rotates image so OD→fovea axis is horizontal. Per-landmark confidence from heatmap peak sharpness and spread. Fallback: skip rotation on low confidence (and pivot Stage-5 polar CLAHE on the FOV centroid). Augmentation rotation σ is adaptive per-image from heatmap-derived localization uncertainty (fallback σ = 15.0°). Detector is pre-trained and frozen — not co-trained with the DR classifier — preserving `model = preprocessing + CNN`. Always on. (Detection runs on the FOV-cropped frame from Stage 2; stage numbering retained.)
 - **Stage 2: FOV Crop + Isotropic Resize** — Foreground detection, crop to FOV region, isotropic scale to 512×512 with centered zero-padding preserving fundus circle geometry. Always on.
 - **Stage 3: FOV Mask Generation** — Binary mask (1.0 = real fundus data, 0.0 = zero-padding) appended as 4th input channel. Always on.
 - **Stage 4: Flat-Field Correction** — Gaussian blur subtraction (corrected = image − GaussianBlur(image, σ) + 128) with adaptive σ = 0.07 × D (D = FOV diameter in pixels from mask). Applied inside FOV mask only. Always on.

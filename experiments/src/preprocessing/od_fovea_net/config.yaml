@@ -1,0 +1,35 @@
+# Learned OD/fovea heatmap detector — in-repo inference configuration.
+#
+# This is the production (inference-only) config used by the live preprocessing
+# pipeline via the ``src/preprocessing/od_fovea_detect.py`` facade. It mirrors
+# the training config (``experiments/od_fovea_detector/configs/default.yaml``)
+# for every value the network/decoder depend on (input_size, heatmap_size,
+# backbone, decoder_channels, sigma_ref, threshold, max_rotation_sigma). Only
+# the data/training sections are dropped — inference never reads them.
+#
+# No hardcoded absolute paths: the weights path is resolved relative to THIS
+# file's directory (and may be overridden by the OD_FOVEA_WEIGHTS env var). The
+# 57 MB weights live with the standalone detector and travel on the E: drive.
+
+seed: 42
+
+data:
+  input_size: 512          # FOV-cropped square frame fed to the network
+  heatmap_size: 128        # decoder output grid (square)
+
+model:
+  backbone: "resnet18"     # must match the trained checkpoint
+  pretrained: false        # weights come from the checkpoint, not ImageNet
+  out_channels: 2          # OD, fovea
+  decoder_channels: [256, 128, 64, 32, 16]
+
+confidence:
+  sigma_ref_frac: 0.05     # sigma_ref as fraction of heatmap side
+  threshold: 0.5           # below this -> ODFoveaResult.confident = False
+  max_rotation_sigma_deg: 15.0   # single source of truth (reconciled, 4b)
+
+io:
+  # Resolved relative to this file's directory when not absolute. Points at the
+  # standalone detector's frozen weights (no duplication of the 57 MB file).
+  weights_path: "../../../od_fovea_detector/weights/od_fovea_unet.pt"
+  device: "auto"           # "auto" | "cpu" | "cuda"

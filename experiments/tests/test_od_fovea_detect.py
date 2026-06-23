@@ -8,7 +8,11 @@ import pytest
 
 from src.preprocessing.od_fovea_detect import (
     ODFoveaResult,
-    detect_od_fovea,
+    # The public ``detect_od_fovea`` now delegates to the learned heatmap
+    # detector (Phase 2). These tests exercise the classical-CV algorithm
+    # (geometry on synthetic discs), which lives on as ``*_classical`` for
+    # reference/fallback — alias it so the assertions keep their meaning.
+    detect_od_fovea_classical as detect_od_fovea,
     rotate_to_horizontal,
     _detect_od_center,
     _detect_fovea_center,

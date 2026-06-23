@@ -1,20 +1,20 @@
 """Validate the OD/fovea detector against IDRiD ground-truth (TASK-fix #4).
 
-EyePACS has no OD/fovea annotations, so Stage 1 detects them algorithmically
-(``src/preprocessing/od_fovea_detect.py``). That detector drives (a) the
-rotation normalization, (b) the OD/fovea markers in the demo, and (c) the fovea
-centre that polar CLAHE pivots on (TASK-fix #2). IDRiD provides real
-ground-truth OD and fovea centres, so this script quantifies the detector error
-directly and gives a go/no-go read on whether the fovea pivot is trustworthy.
+EyePACS has no OD/fovea annotations, so Stage 1 detects OD/fovea via the
+pre-trained, frozen learned heatmap detector (``src/preprocessing/od_fovea_detect
+.detect_od_fovea`` → ``src/preprocessing/od_fovea_net``). That detector drives
+(a) the rotation normalization, (b) the OD/fovea markers in the demo, and (c) the
+fovea centre that polar CLAHE pivots on. IDRiD provides real ground-truth OD and
+fovea centres, so this script quantifies the detector error directly and is the
+in-repo reproduction of the standalone Phase-1 acceptance check.
 
 Coordinate frame
 ----------------
-The production pipeline runs ``detect_od_fovea`` on the **full-resolution**
-image *before* FOV crop/resize (``canonical_orientation`` → then
-``crop_and_resize``). IDRiD localization markups are likewise expressed in
-**original-image pixels**. IDRiD has no left/right filename encoding, so no
-canonical flip is applied. Predicted and GT centres therefore share one frame
-and compare directly — no transform required.
+``detect_od_fovea`` accepts the **full-resolution** image and FOV-crops
+internally, returning coordinates back in **original-image pixels**. IDRiD
+localization markups are likewise expressed in original-image pixels, and IDRiD
+has no left/right filename encoding (no canonical flip). Predicted and GT centres
+therefore share one frame and compare directly — no transform required.
 
 Usage::
 
@@ -330,13 +330,13 @@ def main() -> None:
     metrics_path = args.output_dir / "od_fovea_idrid_metrics.json"
     with open(metrics_path, "w") as f:
         json.dump({"per_split": per_split, "n_total": len(all_records)}, f, indent=2)
-    print(f"Saved metrics → {metrics_path}")
+    print(f"Saved metrics -> {metrics_path}")
 
     montage = _make_montage(root, all_records, args.montage_n)
     if montage is not None:
         montage_path = args.output_dir / "od_fovea_idrid_montage.png"
         cv2.imwrite(str(montage_path), montage)
-        print(f"Saved montage → {montage_path}")
+        print(f"Saved montage -> {montage_path}")
 
 
 if __name__ == "__main__":

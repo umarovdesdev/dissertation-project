@@ -7,6 +7,7 @@ insurance (not security) against decode bombs and oversized payloads.
 from __future__ import annotations
 
 import base64
+import hashlib
 import io
 
 import cv2
@@ -110,3 +111,38 @@ def png_b64_from_rgb(image_rgb: np.ndarray) -> str:
         Base64-encoded PNG bytes.
     """
     return png_b64_from_bgr(cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR))
+
+
+def heatmap_png_b64(heatmap: np.ndarray) -> str:
+    """Colorize a float32 probability heatmap to a translucent RGBA PNG.
+
+    The map is peak-normalized (so the sharp DSNT blob is visible), colorized
+    with a JET colormap, and given an alpha channel equal to the normalized
+    intensity — low-probability background is transparent so the PNG can be
+    overlaid directly on the analysis-space base image in the demo.
+
+    Args:
+        heatmap: float32 ``(H, W)`` probability map (any non-negative scale).
+
+    Returns:
+        Base64-encoded RGBA PNG bytes (no ``data:`` prefix).
+
+    Raises:
+        RuntimeError: If PNG encoding fails.
+    """
+    hm = np.asarray(heatmap, dtype=np.float32)
+    peak = float(hm.max())
+    norm = hm / peak if peak > 1e-12 else np.zeros_like(hm)
+    u8 = np.clip(norm * 255.0, 0, 255).astype(np.uint8)
+    color_bgr = cv2.applyColorMap(u8, cv2.COLORMAP_JET)          # (H, W, 3) BGR
+    bgra = cv2.cvtColor(color_bgr, cv2.COLOR_BGR2BGRA)
+    bgra[:, :, 3] = u8                                            # alpha = intensity
+    ok, buf = cv2.imencode(".png", bgra)
+    if not ok:
+        raise RuntimeError("Heatmap PNG encoding failed.")
+    return base64.b64encode(buf.tobytes()).decode("ascii")
+
+
+def sha256_hex(data: bytes) -> str:
+    """Return the hex SHA-256 digest of raw bytes (image content identity)."""
+    return hashlib.sha256(data).hexdigest()

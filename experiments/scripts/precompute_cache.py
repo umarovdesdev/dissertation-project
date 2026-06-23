@@ -15,9 +15,11 @@ have produced. Output per image is a 4-channel PNG:
     R,G,B = Stage-4 flat-field output (uint8, padding zeroed)
     A     = binary FOV mask (0 or 255)  ← lossless: the mask is strictly {0,1}
 
-plus a sidecar ``cache_meta.csv`` with the two OD/fovea scalars Stage 6 reads
-(``confident``, ``rotation_sigma_deg``). ``trainLabels.csv`` is copied into the
-cache dir so the cache is a self-contained training input.
+plus a sidecar ``cache_meta.csv`` with the cached OD/fovea scalars: ``confident``
+and ``rotation_sigma_deg`` (Stage 6) and the analysis-frame fovea pivot
+``fovea_x``/``fovea_y`` (Stage 5 polar CLAHE; empty when not confident).
+``trainLabels.csv`` is copied into the cache dir so the cache is a
+self-contained training input.
 
 Usage:
     python scripts/precompute_cache.py \
@@ -32,7 +34,7 @@ disk, so an interrupted build continues where it stopped.
 
 Output:
     <output-dir>/<name>.png        — one 4-channel PNG per image
-    <output-dir>/cache_meta.csv    — image,confident,rotation_sigma_deg
+    <output-dir>/cache_meta.csv    — image,confident,rotation_sigma_deg,fovea_x,fovea_y
     <output-dir>/trainLabels.csv   — copy of the labels CSV (image,level)
 """
 
@@ -78,24 +80,26 @@ def _init_worker(preset: str, out_dir: str, png_compression: int) -> None:
     _PNG_COMPRESSION = png_compression
 
 
-def _process_one(task: tuple[str, str, str]) -> tuple[str, str, float]:
+def _process_one(task: tuple[str, str, str]) -> tuple[str, str, float, float, float]:
     """Cache one image's Stages 0–4. Runs in a worker process.
 
     Args:
         task: ``(name, image_path, eye_side)``.
 
     Returns:
-        ``(name, status, rotation_sigma_deg)`` where ``status`` is ``"ok"``,
-        ``"ok:True"``/``"ok:False"`` encoding ``confident``, or an error string.
+        ``(name, status, rotation_sigma_deg, fovea_x, fovea_y)`` where ``status``
+        is ``"ok:True"``/``"ok:False"`` encoding ``confident`` or an error
+        string, and ``fovea_x``/``fovea_y`` are the analysis-frame polar-CLAHE
+        pivot (``NaN`` when not confident → centroid pivot at read time).
     """
     name, image_path, eye_side = task
     assert _PIPELINE is not None and _OUT_DIR is not None
 
     img_bgr = cv2.imread(str(image_path))
     if img_bgr is None:
-        return (name, "ERROR_READ", 0.0)
+        return (name, "ERROR_READ", 0.0, float("nan"), float("nan"))
 
-    flat_rgb, fov_mask, confident, rotation_sigma_deg = (
+    flat_rgb, fov_mask, confident, rotation_sigma_deg, fovea_pivot = (
         _PIPELINE.precompute_deterministic(img_bgr, eye_side)
     )
 
@@ -107,9 +111,10 @@ def _process_one(task: tuple[str, str, str]) -> tuple[str, str, float]:
     out_png = _OUT_DIR / f"{name}.png"
     ok = cv2.imwrite(str(out_png), bgra, [cv2.IMWRITE_PNG_COMPRESSION, _PNG_COMPRESSION])
     if not ok:
-        return (name, "ERROR_WRITE", 0.0)
+        return (name, "ERROR_WRITE", 0.0, float("nan"), float("nan"))
 
-    return (name, f"ok:{bool(confident)}", float(rotation_sigma_deg))
+    fx, fy = fovea_pivot if fovea_pivot is not None else (float("nan"), float("nan"))
+    return (name, f"ok:{bool(confident)}", float(rotation_sigma_deg), float(fx), float(fy))
 
 
 def _discover(
@@ -215,7 +220,9 @@ def main() -> None:
     with open(meta_path, "a", newline="") as meta_fh:
         writer = csv.writer(meta_fh)
         if write_header:
-            writer.writerow(["image", "confident", "rotation_sigma_deg"])
+            writer.writerow(
+                ["image", "confident", "rotation_sigma_deg", "fovea_x", "fovea_y"]
+            )
 
         if todo:
             ctx = mp.get_context("spawn")  # safe with cv2/OpenMP across platforms
@@ -224,12 +231,14 @@ def main() -> None:
                 initializer=_init_worker,
                 initargs=(args.preset, str(out_dir), args.png_compression),
             ) as pool:
-                for i, (name, status, rot) in enumerate(
+                for i, (name, status, rot, fx, fy) in enumerate(
                     pool.imap_unordered(_process_one, todo, chunksize=8), start=1
                 ):
                     if status.startswith("ok"):
                         confident = status.split(":", 1)[1]  # "True"/"False"
-                        writer.writerow([name, confident, f"{rot:.6f}"])
+                        fx_s = "" if fx != fx else f"{fx:.4f}"  # NaN → empty
+                        fy_s = "" if fy != fy else f"{fy:.4f}"
+                        writer.writerow([name, confident, f"{rot:.6f}", fx_s, fy_s])
                         n_ok += 1
                     else:
                         n_err += 1

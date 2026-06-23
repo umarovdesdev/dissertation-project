@@ -53,6 +53,13 @@ class Settings:
         self.host: str = os.getenv("HOST", "0.0.0.0")
         self.port: int = int(os.getenv("PORT", "8000"))
 
+        # OD/fovea clinician-correction feedback store (Phase 3/4). JSONL +
+        # content-addressed original images, on the E: drive like the datasets
+        # (gitignored). Defaults under ``server/data/`` relative to this file.
+        self.corrections_dir: Path = Path(
+            os.getenv("OD_FOVEA_CORRECTIONS_DIR", str(_SERVER_ROOT / "data" / "od_fovea_corrections"))
+        )
+
     def resolve_device(self) -> str:
         """Resolve ``"auto"`` to ``"cuda"`` when available, else ``"cpu"``."""
         if self.device != "auto":

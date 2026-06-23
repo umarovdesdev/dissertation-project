@@ -1,9 +1,16 @@
 """
 Anatomical landmark detection for fundus images.
 
-Detects Optic Disc (OD) and fovea centers using classical computer vision
-(no learned models).  Used by Stage 0b for deterministic rotation normalization
-and by Stage 5 for uncertainty-aware adaptive rotation augmentation.
+Detects Optic Disc (OD) and fovea centers. The production ``detect_od_fovea``
+(Phase 2) delegates to a pre-trained, **frozen** heatmap-regression detector
+(``src/preprocessing/od_fovea_net``); it FOV-crops internally, returns genuine
+per-landmark confidence, and drives (a) Stage 1 rotation normalization,
+(b) Stage 5 uncertainty-aware adaptive rotation augmentation, (c) the Stage 5
+polar-CLAHE fovea pivot, and (d) the demo OD/fovea overlay.
+
+``detect_od_fovea_classical`` and the ``_detect_*`` helpers retain the original
+classical-CV implementation (brightest region = OD, darkest with distance prior
+= fovea) for reference and tests; it is no longer on the live path.
 
 All functions expect RGB uint8 NumPy arrays as input.
 """
@@ -22,6 +29,12 @@ class ODFoveaResult:
     """
     Result of OD and fovea detection on a single fundus image.
 
+    The first block is the original contract (unchanged). The fields after
+    ``confident`` are **additive** (Phase 2): they carry the learned detector's
+    genuine per-landmark confidence and optional probability heatmaps. They have
+    defaults so the classical detector and cache-path ``SimpleNamespace`` stand-
+    ins remain valid without setting them.
+
     Attributes:
         od_center: (x, y) pixel coordinates of optic disc center.
         od_radius: Estimated radius of optic disc in pixels.
@@ -32,9 +45,16 @@ class ODFoveaResult:
         angle_deg: Same angle in degrees.
         rotation_sigma_deg: Per-image adaptive rotation σ in degrees,
             derived from localization uncertainty.
-        confident: True if detection passed all sanity checks.
-            When False, caller should skip rotation normalization
-            and use default rotation_sigma.
+        confident: True if detection passed all sanity checks (classical) or
+            both landmark confidences exceed the threshold (learned).
+            When False, caller should skip rotation normalization, use default
+            rotation_sigma, and pivot polar CLAHE on the FOV centroid.
+        od_confidence: OD confidence in ``[0, 1]`` (learned detector; 1.0 from
+            the classical detector, which has no genuine confidence).
+        fovea_confidence: Fovea confidence in ``[0, 1]`` (learned; 1.0 classical).
+        od_heatmap: float32 OD probability map resized to the input frame, or
+            ``None`` (classical, or when heatmaps were not requested).
+        fovea_heatmap: float32 fovea probability map, or ``None``.
     """
 
     od_center: tuple[int, int]
@@ -46,6 +66,10 @@ class ODFoveaResult:
     angle_deg: float
     rotation_sigma_deg: float
     confident: bool
+    od_confidence: float = 1.0
+    fovea_confidence: float = 1.0
+    od_heatmap: np.ndarray | None = None
+    fovea_heatmap: np.ndarray | None = None
 
 
 def _detect_od_center(
@@ -164,9 +188,9 @@ _MIN_OD_RADIUS = 10.0         # Minimum credible OD radius (pixels)
 _MAX_OD_RADIUS_FRACTION = 0.15  # OD radius must be < 15% of image width
 
 
-def detect_od_fovea(image_rgb: np.ndarray) -> ODFoveaResult:
+def detect_od_fovea_classical(image_rgb: np.ndarray) -> ODFoveaResult:
     """
-    Detect optic disc and fovea centers in a fundus image.
+    Detect optic disc and fovea centers in a fundus image (classical CV).
 
     Uses classical CV: brightest region for OD, darkest region (with
     anatomical distance prior) for fovea.  Returns detection result
@@ -254,6 +278,65 @@ def detect_od_fovea(image_rgb: np.ndarray) -> ODFoveaResult:
         angle_deg=angle_deg,
         rotation_sigma_deg=rotation_sigma_deg,
         confident=confident,
+    )
+
+
+def detect_od_fovea(
+    image_rgb: np.ndarray,
+    return_heatmaps: bool = False,
+) -> ODFoveaResult:
+    """
+    Detect optic disc and fovea centers in a fundus image (learned detector).
+
+    This is the production facade (Phase 2). It delegates to the pre-trained,
+    **frozen** heatmap-regression detector (``src/preprocessing/od_fovea_net``),
+    which internally FOV-crops the image to a 512² frame before inference — so
+    detection runs on the FOV-cropped frame (eliminating the dark-vignette
+    failure of the classical detector) — then maps coordinates back to
+    input-image pixels. The signature is unchanged from the classical detector
+    (``return_heatmaps`` is an additive keyword with a default), so callers
+    (``canonical_orientation``, the demo server, ``validate_od_fovea_idrid.py``)
+    need no changes.
+
+    Unlike the classical detector, ``confident`` is a **genuine** gate: it is
+    True only when both landmark confidences (derived from heatmap peak
+    sharpness and spatial spread) exceed the configured threshold. When False,
+    the caller should skip rotation normalization and pivot polar CLAHE on the
+    FOV centroid.
+
+    The detector is pre-trained and frozen relative to the DR classifier; this
+    call performs inference only.
+
+    Args:
+        image_rgb: RGB uint8 NumPy array of shape (H, W, 3), arbitrary
+            resolution. FOV-cropping is performed internally.
+        return_heatmaps: If True, attach OD/fovea probability heatmaps resized
+            to the input frame (for the demo overlay). Default False for the
+            pipeline path (skips two full-resolution resizes).
+
+    Returns:
+        ODFoveaResult with coordinates in **input-image pixels** plus the
+        additive confidence/heatmap fields.
+    """
+    # Lazy import: the learned detector pulls in torch/timm, which the classical
+    # path (and torch-free callers) must not require at module import time.
+    from .od_fovea_net import detect_od_fovea as _net_detect
+
+    res = _net_detect(image_rgb, return_heatmaps=return_heatmaps)
+    return ODFoveaResult(
+        od_center=res.od_center,
+        od_radius=res.od_radius,
+        fovea_center=res.fovea_center,
+        fovea_radius=res.fovea_radius,
+        distance=res.distance,
+        angle_rad=res.angle_rad,
+        angle_deg=res.angle_deg,
+        rotation_sigma_deg=res.rotation_sigma_deg,
+        confident=res.confident,
+        od_confidence=res.od_confidence,
+        fovea_confidence=res.fovea_confidence,
+        od_heatmap=res.od_heatmap,
+        fovea_heatmap=res.fovea_heatmap,
     )
 
 

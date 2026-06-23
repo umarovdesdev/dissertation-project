@@ -345,7 +345,7 @@ persistent location). Confirm storage before building.
 
 **Remaining — manual (the candidate):**
 1. **Interim (Kaggle/APTOS):** take the first finished APTOS epoch's checkpoint → copy to
-   `server/checkpoints/config_d_fold0.pt` **with its APTOS `*_norm_stats.json`** → bring
+   `demo/server/checkpoints/config_d_fold0.pt` **with its APTOS `*_norm_stats.json`** → bring
    the server + demo up now to validate the full service end-to-end (§6/§7 QA).
 2. **Real (Colab/EyePACS):** run the notebook for `--fold 0..4`; retrieve `outputs/exp1/`.
    - **fold 0 alone unblocks the demo.** Folds 1–4 only feed `verify_exp1.py`'s
@@ -353,8 +353,8 @@ persistent location). Confirm storage before building.
    - **Swap-in:** replace the interim APTOS checkpoint with `D_fold0/best_model.pt` **and
      its EyePACS `eyepacs_norm_stats.json`** (both together — to avoid preprocessing
      drift). Only this checkpoint is thesis-faithful.
-3. `pip install -r server/requirements.txt`; run uvicorn; run
-   `server/tests/test_inference.py` and `scripts/verify_exp1.py`.
+3. `pip install -r demo/server/requirements.txt`; run uvicorn; run
+   `demo/server/tests/test_inference.py` and `scripts/verify_exp1.py`.
 4. Deploy (§7).
 
 **Risks:** session timeout mid-fold → `--resume` is wired. EfficientNet fp16 overflow →
@@ -367,7 +367,7 @@ server imports the **same** `pipeline_v5`; `test_preprocessing_matches_training`
 ## 6. FastAPI backend + Demo frontend — done vs remaining
 
 **Done (committed, on `main`):**
-- **Backend `server/`** — bootable FastAPI app importing `experiments/src` (no
+- **Backend `demo/server/`** — bootable FastAPI app importing `experiments/src` (no
   duplication). Endpoints: `/api/predict` (per-eye + worst-eye patient-level, dataset
   stats injected at inference so no train/inference drift), `/api/gradcam`
   (self-contained Grad-CAM on `conv_head`; emits a CAM-geometry `rationale` +
@@ -388,12 +388,12 @@ server imports the **same** `pipeline_v5`; `test_preprocessing_matches_training`
 **Verified as far as the local env allows** (no `fastapi`/`pytorch_grad_cam` installed):
 `merge_config.py` deep-merge; preprocessing stage signatures; end-to-end
 `V5 → (4,512,512) → efficientnet_b3(in_channels=4) → (1,5)`, softmax=1.0; Grad-CAM /
-stage_breakdown / visualize logic on random-init weights; no hardcoded paths in `server/`
+stage_breakdown / visualize logic on random-init weights; no hardcoded paths in `demo/server/`
 or `experiments/kaggle/`.
 
 **Remaining — manual (the candidate):**
 1. Train + drop the checkpoint (§5).
-2. `pip install -r server/requirements.txt`; run `server/tests/test_inference.py`
+2. `pip install -r demo/server/requirements.txt`; run `demo/server/tests/test_inference.py`
    (`test_health`, `test_predict_left_only`, `test_predict_both_eyes`,
    `test_predict_rejects_non_image`, `test_preprocessing_matches_training`).
 3. Curate the **5 walkthrough images** (one per DR grade 0–4): `od_fovea.confident=True`,

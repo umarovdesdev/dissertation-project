@@ -248,25 +248,42 @@ class EyePACSDataset(BaseFundusDataset):
         return cls(image_paths, labels, patient_ids, preprocessing, augmentation, eye_sides)
 
 
-def load_cache_meta(cache_dir: str | Path) -> dict[str, tuple[bool, float]]:
-    """Load the cache sidecar mapping image name → (confident, rotation_sigma_deg).
+def load_cache_meta(
+    cache_dir: str | Path,
+) -> dict[str, tuple[bool, float, tuple[float, float] | None]]:
+    """Load the cache sidecar mapping image name → cached OD/fovea scalars.
 
-    These are the only two OD/fovea scalars Stage 6 augmentation reads; they are
-    cached alongside the Stage-4 PNGs by ``scripts/precompute_cache.py``.
+    These are the OD/fovea values the stochastic stages read, cached alongside
+    the Stage-4 PNGs by ``scripts/precompute_cache.py``: ``confident`` and
+    ``rotation_sigma_deg`` (Stage 6 augmentation) plus the analysis-frame fovea
+    pivot ``(fovea_x, fovea_y)`` (Stage 5 polar CLAHE).
 
     Args:
         cache_dir: Directory containing ``cache_meta.csv`` (columns:
-            ``image``, ``confident``, ``rotation_sigma_deg``).
+            ``image``, ``confident``, ``rotation_sigma_deg`` and optionally
+            ``fovea_x``, ``fovea_y``).
 
     Returns:
-        Dict mapping image name (no extension) → ``(confident, rotation_sigma_deg)``.
+        Dict mapping image name (no extension) → ``(confident,
+        rotation_sigma_deg, fovea_pivot)`` where ``fovea_pivot`` is ``(x, y)`` in
+        analysis-frame pixels, or ``None`` (not confident, or an older cache
+        without the fovea columns → centroid pivot at read time).
     """
     meta_path = Path(cache_dir) / "cache_meta.csv"
     df = pd.read_csv(meta_path)
-    return {
-        str(row["image"]): (bool(row["confident"]), float(row["rotation_sigma_deg"]))
-        for _, row in df.iterrows()
-    }
+    has_fovea = "fovea_x" in df.columns and "fovea_y" in df.columns
+
+    out: dict[str, tuple[bool, float, tuple[float, float] | None]] = {}
+    for _, row in df.iterrows():
+        pivot: tuple[float, float] | None = None
+        if has_fovea:
+            fx, fy = row["fovea_x"], row["fovea_y"]
+            if pd.notna(fx) and pd.notna(fy):
+                pivot = (float(fx), float(fy))
+        out[str(row["image"])] = (
+            bool(row["confident"]), float(row["rotation_sigma_deg"]), pivot
+        )
+    return out
 
 
 class CachedEyePACSDataset(EyePACSDataset):
@@ -298,7 +315,7 @@ class CachedEyePACSDataset(EyePACSDataset):
         labels: list[int],
         patient_ids: list[str],
         preprocessing: Callable,
-        cache_meta: dict[str, tuple[bool, float]],
+        cache_meta: dict[str, tuple[bool, float, tuple[float, float] | None]],
         eye_sides: list[str] | None = None,
     ) -> None:
         super().__init__(
@@ -330,10 +347,10 @@ class CachedEyePACSDataset(EyePACSDataset):
         fov_mask = bgra[:, :, 3].astype(np.float32) / 255.0  # {0,255} → {0.0,1.0}
 
         name = Path(path).stem
-        confident, rotation_sigma_deg = self._cache_meta[name]
+        confident, rotation_sigma_deg, fovea_pivot = self._cache_meta[name]
 
         tensor = self.preprocessing.finish_from_cache(
-            flat_rgb, fov_mask, confident, rotation_sigma_deg
+            flat_rgb, fov_mask, confident, rotation_sigma_deg, fovea_pivot
         )
         return tensor, self.labels[idx]
 
