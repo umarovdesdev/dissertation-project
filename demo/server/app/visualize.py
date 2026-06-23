@@ -7,6 +7,8 @@ for the P2 paradigm.
 
 from __future__ import annotations
 
+import math
+
 import cv2
 import numpy as np
 
@@ -68,7 +70,12 @@ def _od_payload(od, analysis: dict | None, space: int) -> dict:
             "fovea_center": [0, 0], "fovea_radius": 0.0,
             "angle_deg": 0.0, "rotation_sigma_deg": 0.0, "confident": False,
             "space_w": space, "space_h": space, "flipped": False,
+            "od_confidence": float(getattr(od, "od_confidence", 0.0)) if od else 0.0,
+            "fovea_confidence": float(getattr(od, "fovea_confidence", 0.0)) if od else 0.0,
+            "od_heatmap_png_b64": "", "fovea_heatmap_png_b64": "",
         }
+    od_hm = analysis.get("od_heatmap")
+    fovea_hm = analysis.get("fovea_heatmap")
     return {
         "od_center": [float(analysis["od_center"][0]), float(analysis["od_center"][1])],
         "od_radius": float(analysis["od_radius"]),
@@ -78,6 +85,10 @@ def _od_payload(od, analysis: dict | None, space: int) -> dict:
         "rotation_sigma_deg": float(od.rotation_sigma_deg),
         "confident": bool(od.confident),
         "space_w": space, "space_h": space, "flipped": False,
+        "od_confidence": float(getattr(od, "od_confidence", 0.0)),
+        "fovea_confidence": float(getattr(od, "fovea_confidence", 0.0)),
+        "od_heatmap_png_b64": imaging.heatmap_png_b64(od_hm) if od_hm is not None else "",
+        "fovea_heatmap_png_b64": imaging.heatmap_png_b64(fovea_hm) if fovea_hm is not None else "",
     }
 
 
@@ -100,7 +111,7 @@ def compute_visualization(engine, image_bytes: bytes, eye: str) -> dict:
     """
     rgb = imaging.decode_rgb(image_bytes)
 
-    bd = engine.pipeline.stage_breakdown(rgb, eye_side=eye)
+    bd = engine.pipeline.stage_breakdown(rgb, eye_side=eye, with_heatmaps=True)
     strip_rgb = _compose_strip(bd["stages"])
 
     # Analysis-space base: the cropped/oriented RGB that the FOV mask and the
@@ -117,3 +128,110 @@ def compute_visualization(engine, image_bytes: bytes, eye: str) -> dict:
         "preview_png_b64": imaging.png_b64_from_rgb(strip_rgb),
         "od_fovea": _od_payload(bd["od_fovea"], bd["od_fovea_analysis"], space),
     }
+
+
+def _analysis_to_original(
+    point: tuple[float, float], transform: dict, eye: str
+) -> tuple[float, float]:
+    """Invert the Stage 0/1/2 geometry: analysis-frame point → original pixels.
+
+    Reverses the chain :func:`stage_breakdown` applies — canonical flip, Stage-1
+    rotation, then FOV crop+resize — so a clinician-corrected centre placed in
+    the analysis frame maps back to the raw uploaded image's pixels (the frame
+    the Phase-4 fine-tune loop trains on).
+
+    Args:
+        point: ``(x, y)`` in the ``target_size`` analysis canvas.
+        transform: The ``transform`` dict from ``stage_breakdown`` (``crop_tf``,
+            ``angle_deg``, ``flipped``, ``src_w``, ``src_h``).
+        eye: ``"left"``/``"right"`` (only used as a sanity tag; the flip is
+            taken from ``transform['flipped']``).
+
+    Returns:
+        ``(x, y)`` in original (uploaded) image pixels.
+    """
+    crop_tf = transform["crop_tf"]
+    ax, ay = float(point[0]), float(point[1])
+    # 1. Invert FOV crop+resize → oriented (rotated) image pixels.
+    rx, ry = crop_tf.invert(ax, ay) if hasattr(crop_tf, "invert") else (
+        (ax - crop_tf.x_off) / crop_tf.scale + crop_tf.bbox[0],
+        (ay - crop_tf.y_off) / crop_tf.scale + crop_tf.bbox[1],
+    )
+    # 2. Invert the Stage-1 rotation (about the flipped-image centre).
+    src_w, src_h = int(transform["src_w"]), int(transform["src_h"])
+    inv_rot = cv2.getRotationMatrix2D(
+        (src_w // 2, src_h // 2), -float(transform["angle_deg"]), 1.0
+    )
+    fx = inv_rot[0, 0] * rx + inv_rot[0, 1] * ry + inv_rot[0, 2]
+    fy = inv_rot[1, 0] * rx + inv_rot[1, 1] * ry + inv_rot[1, 2]
+    # 3. Invert the canonical flip (left eye was mirrored horizontally).
+    if transform.get("flipped"):
+        fx = (src_w - 1) - fx
+    return (fx, fy)
+
+
+def compute_correction(
+    engine,
+    image_bytes: bytes,
+    eye: str,
+    od_corrected: tuple[float, float],
+    fovea_corrected: tuple[float, float],
+) -> dict:
+    """Recompute the OD/fovea overlay from clinician-corrected centres.
+
+    Re-runs ``stage_breakdown`` on the submitted image (deterministic — frozen
+    detector weights) to recover the Stage 0/1/2 geometry, then:
+      * recomputes the analysis-space overlay (angle/distance/radii) from the
+        corrected centres so the frontend can re-render immediately;
+      * maps the corrected centres back to **original-image pixels** for the
+        Phase-4 feedback store.
+
+    Args:
+        engine: The loaded inference engine (holds the pipeline).
+        image_bytes: Raw original image bytes.
+        eye: ``"left"`` or ``"right"``.
+        od_corrected: Corrected OD centre ``(x, y)`` in the analysis frame.
+        fovea_corrected: Corrected fovea centre ``(x, y)`` in the analysis frame.
+
+    Returns:
+        Dict with ``od_fovea`` (an :class:`ODFoveaPayload` dict) and
+        ``original`` (``{od_center, fovea_center, space_w, space_h}`` in original
+        pixels) for persistence.
+
+    Raises:
+        imaging.BadImage / imaging.PayloadTooLarge: On bad/oversized input.
+    """
+    rgb = imaging.decode_rgb(image_bytes)
+    bd = engine.pipeline.stage_breakdown(rgb, eye_side=eye, with_heatmaps=False)
+    transform = bd["transform"]
+    space = int(transform["space"])
+
+    odx, ody = float(od_corrected[0]), float(od_corrected[1])
+    fvx, fvy = float(fovea_corrected[0]), float(fovea_corrected[1])
+
+    # Geometry recomputed from the corrected centres (analysis frame).
+    dx, dy = fvx - odx, fvy - ody
+    distance = math.hypot(dx, dy)
+    angle_deg = math.degrees(math.atan2(dy, dx))
+    od_radius = max(distance / 4.0, 10.0)        # same anatomical prior as infer
+    fovea_radius = max(od_radius * 0.5, 5.0)
+
+    payload = {
+        "od_center": [odx, ody], "od_radius": od_radius,
+        "fovea_center": [fvx, fvy], "fovea_radius": fovea_radius,
+        "angle_deg": angle_deg,
+        "rotation_sigma_deg": 0.0,               # manual correction → exact
+        "confident": True,
+        "space_w": space, "space_h": space, "flipped": False,
+        "od_confidence": 1.0, "fovea_confidence": 1.0,
+        "od_heatmap_png_b64": "", "fovea_heatmap_png_b64": "",
+    }
+
+    od_orig = _analysis_to_original((odx, ody), transform, eye)
+    fv_orig = _analysis_to_original((fvx, fvy), transform, eye)
+    original = {
+        "od_center": [od_orig[0], od_orig[1]],
+        "fovea_center": [fv_orig[0], fv_orig[1]],
+        "space_w": int(transform["src_w"]), "space_h": int(transform["src_h"]),
+    }
+    return {"od_fovea": payload, "original": original}

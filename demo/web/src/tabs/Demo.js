@@ -745,6 +745,20 @@ export default function Demo() {
           </div>
         )}
 
+        {/* Detector path: for non-GT uploads, show the learned OD/fovea overlay
+            (probability discs + heatmap) and let the clinician drag-correct the
+            centres (Phase 3 feedback loop). Needs the live backend (liveVisuals). */}
+        {liveVisuals && ((leftImg && !leftImg.gt) || (rightImg && !rightImg.gt)) && (
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 12 }}>
+            {leftImg && !leftImg.gt && (
+              <VisionWidget src={leftImg.src} eye="left" name={leftImg.name} enabled={liveVisuals} t={t} />
+            )}
+            {rightImg && !rightImg.gt && (
+              <VisionWidget src={rightImg.src} eye="right" name={rightImg.name} enabled={liveVisuals} t={t} />
+            )}
+          </div>
+        )}
+
         <div style={{ marginTop: 14 }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <button

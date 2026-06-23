@@ -46,11 +46,17 @@ class HealthResponse(BaseModel):
 
 
 class ODFoveaPayload(BaseModel):
-    """Classical-CV OD/fovea detection result (TASK-Demo §C.1).
+    """Learned OD/fovea detection result (TASK-Demo §C.1; Phase 3).
 
     Coordinates are in the analysis-image pixel space described by
     ``space_w``/``space_h``/``flipped`` — i.e. the cropped/oriented
     ``fov_crop_resize`` frame (``space_w == space_h``, ``flipped`` False).
+
+    The ``od_confidence``/``fovea_confidence`` fields and the base64 heatmap
+    PNGs are additive (Phase 3): the genuine per-landmark confidence from the
+    learned detector, and translucent RGBA probability-map overlays aligned to
+    the same ``fov_base`` analysis frame. Heatmap strings are empty when no
+    confident detection / heatmaps are available.
     """
 
     od_center: list[float]
@@ -63,6 +69,25 @@ class ODFoveaPayload(BaseModel):
     space_w: int
     space_h: int
     flipped: bool
+    od_confidence: float = 0.0
+    fovea_confidence: float = 0.0
+    od_heatmap_png_b64: str = ""
+    fovea_heatmap_png_b64: str = ""
+
+
+class ODFoveaCorrectionResponse(BaseModel):
+    """POST /api/od_fovea/correct payload (Phase 3).
+
+    Echoes the corrected OD/fovea overlay back in the same analysis space the
+    frontend edits in (so it can re-render immediately), with geometry
+    (``angle_deg``/``rotation_sigma_deg``) recomputed from the corrected
+    centres. ``stored`` is ``True`` when the correction was persisted to the
+    feedback store (Phase 4), with ``record_id`` its content-hash key.
+    """
+
+    od_fovea: ODFoveaPayload
+    stored: bool
+    record_id: str
 
 
 class GradcamResponse(BaseModel):

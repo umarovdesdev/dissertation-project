@@ -11,6 +11,7 @@ import asyncio
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
+from . import corrections as corrections_mod
 from . import gradcam as gradcam_mod
 from . import imaging
 from . import visualize as visualize_mod
@@ -20,6 +21,7 @@ from .schemas import (
     AuthResponse,
     GradcamResponse,
     HealthResponse,
+    ODFoveaCorrectionResponse,
     PatientPredictionResponse,
     SelftestResponse,
     VisualizeResponse,
@@ -173,6 +175,71 @@ async def visualize(
         return VisualizeResponse(**visualize_mod.compute_visualization(engine, data, eye))
     except (imaging.BadImage, imaging.PayloadTooLarge) as exc:
         raise _http_from_imaging(exc) from exc
+
+
+_MIME_EXT = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
+
+
+@app.post("/api/od_fovea/correct", response_model=ODFoveaCorrectionResponse)
+async def od_fovea_correct(
+    image: UploadFile = File(...),
+    eye: str = Form(default="left"),
+    od_x: float = Form(...),
+    od_y: float = Form(...),
+    fovea_x: float = Form(...),
+    fovea_y: float = Form(...),
+    od_confidence: float = Form(default=0.0),
+    fovea_confidence: float = Form(default=0.0),
+    notes: str | None = Form(default=None),
+    reviewer: str | None = Form(default=None),
+    password: str | None = Form(default=None),
+) -> ODFoveaCorrectionResponse:
+    """Persist a clinician OD/fovea correction and echo the updated overlay.
+
+    Corrected centres arrive in the analysis frame (where the frontend edits).
+    The overlay geometry is recomputed from them, and they are mapped back to
+    original-image pixels for the Phase-4 feedback store (the original image is
+    saved once, content-addressed by SHA-256).
+    """
+    _require_password(password)
+    data = await _read_validated(image)
+    try:
+        async with _predict_lock:
+            result = visualize_mod.compute_correction(
+                engine, data, eye, (od_x, od_y), (fovea_x, fovea_y)
+            )
+    except (imaging.BadImage, imaging.PayloadTooLarge) as exc:
+        raise _http_from_imaging(exc) from exc
+
+    image_hash = imaging.sha256_hex(data)
+    ext = _MIME_EXT.get((image.content_type or "").split(";")[0].strip().lower(), "png")
+    record = {
+        "eye": eye,
+        "od_center_analysis": [od_x, od_y],
+        "fovea_center_analysis": [fovea_x, fovea_y],
+        "space_w": result["od_fovea"]["space_w"],
+        "space_h": result["od_fovea"]["space_h"],
+        "od_center_original": result["original"]["od_center"],
+        "fovea_center_original": result["original"]["fovea_center"],
+        "original_w": result["original"]["space_w"],
+        "original_h": result["original"]["space_h"],
+        "od_confidence_at_capture": od_confidence,
+        "fovea_confidence_at_capture": fovea_confidence,
+        "reviewer": reviewer,
+        "notes": notes,
+    }
+    try:
+        record_id = corrections_mod.save_correction(
+            settings.corrections_dir, record, data, image_hash, image_ext=ext
+        )
+        stored = True
+    except OSError as exc:  # store is best-effort: never fail the correction
+        print(f"[WARN] could not persist OD/fovea correction: {exc}")
+        record_id, stored = image_hash, False
+
+    return ODFoveaCorrectionResponse(
+        od_fovea=result["od_fovea"], stored=stored, record_id=record_id
+    )
 
 
 @app.get("/api/selftest", response_model=SelftestResponse)

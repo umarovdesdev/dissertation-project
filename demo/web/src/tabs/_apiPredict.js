@@ -73,6 +73,27 @@ export async function visualizeImage(src, eye, name) {
   return await res.json();
 }
 
+// POST /api/od_fovea/correct → { od_fovea, stored, record_id }.
+// Persists a clinician OD/fovea correction (centres in the analysis frame) and
+// returns the recomputed overlay payload. `od`/`fovea` are [x, y] in analysis
+// space; `conf` is { od, fovea } confidence-at-capture (for the feedback store).
+export async function correctOdFovea(src, eye, name, od, fovea, conf = {}) {
+  if (!API) throw new Error('REACT_APP_API_URL is not set');
+  const fd = new FormData();
+  fd.append('image', await srcToBlob(src), name || `${eye}.png`);
+  fd.append('eye', eye);
+  fd.append('od_x', String(od[0]));
+  fd.append('od_y', String(od[1]));
+  fd.append('fovea_x', String(fovea[0]));
+  fd.append('fovea_y', String(fovea[1]));
+  if (conf.od != null) fd.append('od_confidence', String(conf.od));
+  if (conf.fovea != null) fd.append('fovea_confidence', String(conf.fovea));
+  appendPassword(fd);
+  const res = await fetch(`${API}/api/od_fovea/correct`, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
+  return await res.json();
+}
+
 // POST /api/gradcam → { gradcam_png_b64, attention_overlay_png_b64, target_class }.
 export async function gradcamImage(src, eye, name) {
   if (!API) throw new Error('REACT_APP_API_URL is not set');
