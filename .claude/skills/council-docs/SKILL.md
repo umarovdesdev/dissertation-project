@@ -62,7 +62,7 @@ before rendering (`strip_version_markers()` in `md2gost.py`, on by default):
 (`version 5.x`, `версия 5`, `нұсқа 5`). The pipeline reads as "the pipeline" /
 "8-stage pipeline" / "конвейер" in the output. **`V5` is a version marker** (fifth
 version) and is scrubbed too — the source `thesis/output/*.md` keeps it, the
-export does not. See `REFACTORING.md §9`.
+export does not. See `PROJECT_MEMORY/strip-version-markers.md`.
 
 ## Notes / limitations
 

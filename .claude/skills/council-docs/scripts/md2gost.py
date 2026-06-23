@@ -37,7 +37,7 @@ _INLINE = re.compile(r"(\*\*.+?\*\*|\*[^*].*?\*|`.+?`|\$[^$\n]+\$)")
 # project versioning policy, version markers — including the "V5" proper noun for
 # the preprocessing pipeline — must never leak outside thesis/. The source .md in
 # thesis/output/ is allowed to keep them; this converter strips them on the way
-# out so the .docx/.pdf never carry a version. See REFACTORING.md §"V5 leak".
+# out so the .docx/.pdf never carry a version. See PROJECT_MEMORY/strip-version-markers.md.
 
 # Each pattern eats one adjacent space (leading where present) so removal leaves
 # no double space and no space before punctuation — without touching whitespace

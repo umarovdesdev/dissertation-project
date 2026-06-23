@@ -10,7 +10,7 @@ Persistent project facts live in `PROJECT_MEMORY/` on this drive, indexed by
 facts there** (one file per fact, `[[name]]` cross-links) — never into the machine-local
 `~/.claude/.../memory/` store. The candidate works across a work PC, a home laptop, and a
 university machine, carrying the project on an external drive (E:); only what lives under
-`E:\dissertation-project\` travels. See `REFACTORING.md` for the migration rationale.
+`E:\dissertation-project\` travels.
 
 ## Monorepo Structure
 

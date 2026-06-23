@@ -6,7 +6,7 @@ the machine-local `~/.claude/.../memory/` store (which does NOT travel). Read th
 at session start; write new durable facts into `PROJECT_MEMORY/` and add a line here.
 
 Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `description`,
-`metadata.type`). Link facts with `[[name]]`. See `REFACTORING.md` for the migration plan.
+`metadata.type`). Link facts with `[[name]]`.
 
 ## People & documents
 - [People & identifiers](PROJECT_MEMORY/people-and-identifiers.md) — canonical EN/KZ/RU names (candidate Yesmukhamedov N.S., supervisor Sapakova S.Z. = к.ф.-м.н./associate prof., foreign consultant Al-Haddad), programme **8D06104 Computer systems and software engineering**; human copy `council/PEOPLE.md`
@@ -29,8 +29,7 @@ Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `
 - [V5 cache / throughput](PROJECT_MEMORY/v5-cache-throughput.md) — GPU-starved by per-image CPU preprocessing; fix = precompute+cache Stages 0–4 (IMPLEMENTED feat/v5-cache-colab)
 - [Config-D cache handoff](PROJECT_MEMORY/config-d-cache-handoff.md) — 2026-06-03 handoff; experiments/ mirrored to dr-classifier repo; next = the Colab run
 - [Preprocessing: OD/fovea + polar CLAHE](PROJECT_MEMORY/preprocessing-od-fovea-polar.md) — classical detector unreliable (fovea fails); polar CLAHE now Stage-5 default pivoting on FOV centroid → checkpoints must be retrained; **2026-06-18 decided to replace with learned heatmap detector**
-- [OD/fovea heatmap detector plan](PROJECT_MEMORY/od-fovea-heatmap-detector-plan.md) — learned U-Net+DSNT heatmap detector (FundusPosNet ref); build spec in `experiments/docs/od_fovea_heatmap_detector_brief.md`; INVARIANTS OD-3 applied (v6.1.0). **Phases 1–4 DONE (2026-06-23): trained+validated, pipeline-integrated, demo discs/heatmap/drag-correct + correction store, and Phase-4 offline feedback loop (`scripts/export_corrections.py` + `finetune_corrections.py`: dedup + test-leakage-filtered export → fine-tune from frozen base weights → versioned `od_fovea_unet_vN.pt` gated on IDRiD-test acceptance). Operator run pending real corrections.**
-- [OD/fovea detector — 4-phase task brief](TASK_OD_FOVEA_DETECTOR.md) — root task file (2026-06-23): code-complete standalone detector is **UNTRAINED** (empty weights/); remaining work = Phase1 train+validate on IDRiD → Phase2 integrate into live pipeline (FOV-crop-first reorder + facade + OD-3 governance) → Phase3 demo heatmap discs + drag-correct UI → Phase4 persist corrections + offline fine-tune (detector stays frozen vs DR-CNN)
+- [OD/fovea heatmap detector plan](PROJECT_MEMORY/od-fovea-heatmap-detector-plan.md) — learned U-Net+DSNT heatmap detector (FundusPosNet ref); build spec in `experiments/docs/od_fovea_heatmap_detector_brief.md`; INVARIANTS OD-3 applied (v6.1.0). **Phases 1–4 DONE (2026-06-23): trained+validated, pipeline-integrated, demo discs/heatmap/drag-correct + correction store, and Phase-4 offline feedback loop (`scripts/export_corrections.py` + `finetune_corrections.py`: dedup + test-leakage-filtered export → fine-tune from frozen base weights → versioned `od_fovea_unet_vN.pt` gated on IDRiD-test acceptance). Operator run pending real corrections.** (Root 4-phase task brief `TASK_OD_FOVEA_DETECTOR.md` removed 2026-06-23 once all phases landed.)
 
 ## Cross-cutting
 - [Strip version markers](PROJECT_MEMORY/strip-version-markers.md) — V5 IS a version marker; remove V5/V4/V3 outside thesis/; defense/experiments/demo/server done, council export now auto-scrubbed in md2gost.py (2026-06-12), root TODO
