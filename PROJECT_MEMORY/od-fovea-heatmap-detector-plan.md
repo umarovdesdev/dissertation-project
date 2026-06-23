@@ -28,6 +28,31 @@ it latches onto the dark vignette at native res) and its `confident` flag is fak
   flat-field → CLAHE`); cache OD/fovea coords+confidence into the Stage 0–4 cache; let polar CLAHE
   pivot on detected fovea when confident.
 
+## PHASE 1 — TRAINED & VALIDATED (2026-06-23) ✅
+
+Trained in WSL2 Ubuntu / `dr-classifier` conda env, RTX 3060 (Windows-native torch is CPU-only).
+Canonical `configs/default.yaml` unchanged; a WSL-path copy is generated at
+`experiments/od_fovea_detector/outputs/_wsl_config.yaml` (idrid_root → `/mnt/e/...`, absolute
+weights/output paths; gitignored via `outputs/*.yaml`). Re-create it from `default.yaml` whenever
+training on a WSL machine.
+
+- **Run:** DSNT loss, seed=42, ResNet-18 U-Net, batch 8, lr 1e-3. Early-stopped at **epoch 136**
+  (best val 0.0171 @ epoch 76, patience 60). ~41 s/epoch. Weights → `weights/od_fovea_unet.pt`
+  (57 MB, gitignored — travels on E:). Artifacts: `outputs/{eval_report.json, montage.png, train_log.txt}`.
+- **IDRiD TEST (103 imgs, honest hold-out) — acceptance PASSED:**
+  - Fovea: median **0.107 R** (<1.0 ✓), **99.0 %** within 1R (≥90 % ✓).
+  - OD: median **0.066 R** (≤0.5 ✓), **100 %** within 1R (≥95 % ✓). (vs classical baseline ~5R / ~0 %.)
+  - Confidence: **fovea Spearman(σ_eff, err) ρ=0.441**, n=103, significant ✓. OD ρ=0.081 **n.s.** —
+    acceptable: OD error is saturated (max 0.32R) so there's no error variance for confidence to track.
+  - Runtime: GPU net-forward **34.6 ms/img** (≤50 ms ✓). Full-res standalone FOV crop adds ~176 ms CPU,
+    but that crop becomes shared Stage 2 in-pipeline, so detector marginal cost ≈ the 35 ms forward.
+- **Honest caveats (carry into Phase 2/4):** the single fovea failure >1R (IDRiD_053, 2.25R) was
+  **NOT** caught by the low-confidence gate (conf 0.561 > 0.5 threshold). 10/103 flagged not-confident
+  (captures elevated-error cases 0.6–0.7R but misses this one outlier). Threshold 0.5 is the config
+  default; revisit calibration if the gate needs to catch catastrophic misses. Fovea mean (56 px) is
+  pulled up by this one outlier; median (33 px) is the honest central tendency.
+- **Next:** Phase 2 (integrate into live pipeline) — NOT started.
+
 ## PENDING governance edit — apply ONLY after the detector is implemented & validated
 
 `thesis/governance/INVARIANTS.md` is the supreme authority (currently v6.0.0). Changing the
