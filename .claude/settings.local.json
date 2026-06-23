@@ -390,7 +390,18 @@
       "Bash(PYTHONIOENCODING=utf-8 PYTHONUTF8=1 python -c ' *)",
       "PowerShell(python \"D:\\\\dissertation-project\\\\.claude\\\\skills\\\\council-docs\\\\scripts\\\\build_frontmatter_bundle.py\" --date 2026-06-17)",
       "PowerShell(python \"D:\\\\dissertation-project\\\\.claude\\\\skills\\\\council-docs\\\\scripts\\\\build_full_dissertation.py\" --date 2026-06-17)",
-      "Bash(pdftotext -layout -f 1 -l 4 FULL_DISSERTATION_EN_GOST_2026-06-17.pdf -)"
+      "Bash(pdftotext -layout -f 1 -l 4 FULL_DISSERTATION_EN_GOST_2026-06-17.pdf -)",
+      "WebFetch(domain:www.academia.edu)",
+      "Bash(sort -t't' -k1)",
+      "Bash(awk '{print $0}')",
+      "Bash(mkdir -p od_fovea_net)",
+      "Bash(cp ../../od_fovea_detector/src/dsnt.py od_fovea_net/dsnt.py)",
+      "Bash(cp ../../od_fovea_detector/src/model.py od_fovea_net/model.py)",
+      "Bash(cp ../../od_fovea_detector/src/geometry.py od_fovea_net/geometry.py)",
+      "Bash(cp ../../od_fovea_detector/src/confidence.py od_fovea_net/confidence.py)",
+      "Bash(grep -vi \"^$\")",
+      "Bash(npx --no-install eslint src/tabs/_VisionWidget.js src/tabs/_apiPredict.js src/tabs/Demo.js)",
+      "Bash(CI=false npx --no-install react-scripts build)"
     ]
   }
 }

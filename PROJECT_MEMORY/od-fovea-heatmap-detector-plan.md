@@ -51,11 +51,49 @@ training on a WSL machine.
   (captures elevated-error cases 0.6–0.7R but misses this one outlier). Threshold 0.5 is the config
   default; revisit calibration if the gate needs to catch catastrophic misses. Fovea mean (56 px) is
   pulled up by this one outlier; median (33 px) is the honest central tendency.
-- **Next:** Phase 2 (integrate into live pipeline) — NOT started.
+- **Next:** Phase 3 (demo overlay + clinician correction UI) — NOT started.
 
-## PENDING governance edit — apply ONLY after the detector is implemented & validated
+## PHASE 2 — INTEGRATED & GOVERNANCE APPLIED (2026-06-23) ✅
 
-`thesis/governance/INVARIANTS.md` is the supreme authority (currently v6.0.0). Changing the
+Learned detector ported to `experiments/src/preprocessing/od_fovea_net/` (model, dsnt, geometry,
+confidence, utils, infer + `config.yaml`; weights resolved repo-relative to the standalone
+`od_fovea_detector/weights/od_fovea_unet.pt` via the bundled config, overridable by
+`OD_FOVEA_WEIGHTS`). The monorepo facade `src/preprocessing/od_fovea_detect.detect_od_fovea`
+now **delegates to the learned net** (classical kept as `detect_od_fovea_classical` for
+reference/tests); `ODFoveaResult` extended with additive `od_confidence`, `fovea_confidence`,
+`od_heatmap`, `fovea_heatmap` (defaults preserve classical/cache-namespace callers).
+
+- **No pipeline reorder needed:** the learned detector **FOV-crops internally** (geometry.crop_and_resize,
+  mirroring Stage 2) and returns coords in input-image pixels — so "detection runs on the FOV-cropped
+  frame" holds without physically reordering `pipeline.py` (which would double-crop and rotate a padded
+  canvas). Call order unchanged; `canonical_orientation`/`stage_breakdown`/validate script untouched.
+- **Real fallback gate (TASK #4):** when confident, Stage-5 polar CLAHE pivots on the detected fovea
+  **projected into analysis space** (`_project_to_analysis` in pipeline.py); when not confident → FOV
+  centroid. Pivot is plumbed through `_finish`, `precompute_deterministic`, `finish_from_cache`, and the
+  cache (`cache_meta.csv` gains `fovea_x,fovea_y`; `load_cache_meta` returns 3-tuple, backward-compatible
+  with old caches → None → centroid). **Live==cache verified bit-identical** (inference + seeded training,
+  both fallback and confident paths, through the CSV+PNG round-trip).
+- **In-repo validation reproduces acceptance** (`scripts/validate_od_fovea_idrid.py --splits test`,
+  103 imgs): OD median 0.066 R / 100 % @1R; fovea median 0.107 R / 99 % @1R — matches the standalone
+  eval_report.json. (Fixed a pre-existing Windows cp1251 unicode-arrow crash in that script's prints.)
+- Tests: full `experiments/tests/` suite green (24 passed); `test_od_fovea_detect` repointed to the
+  classical alias; `test_cache` updated for the new arities.
+
+## GOVERNANCE — APPLIED at v6.1.0 (MINOR) on 2026-06-23 ✅
+
+OD-3 / Stage-1 replacement text applied to `INVARIANTS.md` (and mirrored in
+`RESEARCH_ARCHITECTURE.md`, `methods/preprocessing-pipeline.md`). **Fallback σ adopted as 15.0°**
+(not the draft's 13.0°, per the code/eval value — resolved-decision 4b). Version bumped **6.0.0 → 6.1.0**
+(MINOR: new substantive entity, no binding reversed); `VERSION_SYNC.md` scope block + file-status table
+updated; `CHANGELOG.md` entry added. Explicitly states the detector is **pre-trained and frozen, not
+co-trained** with the DR-CNN. HYPOTHESIS.md unaffected (H-1/Premise-3 name Stage 1 generically; H-2 does
+not reference the detector implementation). **Still pending (separate narrative pass, does not gate the
+bump):** chapter drafts (3.1.1, 3.1.3, 1.1.1, 2.2.1), assembled dissertation bundles, abstracts, glossary
+entries that still describe the classical detector; and the formal git commit + `git tag v6.1.0` release step.
+
+## (historical) PENDING governance edit — superseded by the APPLIED block above
+
+`thesis/governance/INVARIANTS.md` is the supreme authority. Changing the
 canonical OD-3 / Stage-1 definition is a MINOR-or-MAJOR version bump — also update
 `VERSION_SYNC.md` and any downstream mentions (RESEARCH_ARCHITECTURE.md, methods/preprocessing-pipeline.md,
 CLAUDE.md stage tables, HYPOTHESIS H-2 ablation if it references the classical detector).
@@ -83,3 +121,42 @@ CLAUDE.md stage tables, HYPOTHESIS H-2 ablation if it references the classical d
 **Note for the editor:** confirm the fallback σ value (INVARIANTS says 13.0°; code constant
 `_MAX_ROTATION_SIGMA` = 15.0° — reconcile during the edit). Also reconsider whether the literal
 "fovea-centred" polar-CLAHE claim can now be made truthfully for high-confidence images.
+
+---
+
+## Implementation status (2026-06-23)
+
+- **Phase 1 (train+validate):** DONE — frozen `weights/od_fovea_unet.pt`; IDRiD test acceptance met.
+- **Phase 2 (pipeline integrate):** DONE — live pipeline uses the learned detector via the
+  `src/preprocessing/od_fovea_detect.detect_od_fovea` facade (detector FOV-crops internally; no
+  physical stage reorder). INVARIANTS OD-3 updated, versions synced to v6.1.0, σ reconciled to **15.0°**.
+- **Phase 3 (demo discs + heatmap + drag-correct):** DONE.
+  - Server: `ODFoveaPayload` gained `od_confidence`, `fovea_confidence`, `od_heatmap_png_b64`,
+    `fovea_heatmap_png_b64` (analysis-space RGBA heatmaps); new `POST /api/od_fovea/correct`
+    recomputes the overlay from corrected centers, inverts the Stage 0/1/2 affine to original-image
+    pixels (exact round-trip verified for both flip states), and persists JSONL + content-addressed
+    original images under `demo/server/data/od_fovea_corrections/` (gitignored; `OD_FOVEA_CORRECTIONS_DIR`).
+  - Pipeline: `PreprocessingPipeline.stage_breakdown(with_heatmaps=…)` warps detector heatmaps into
+    analysis space and returns a `transform` handle; `canonical_orientation(return_heatmaps=…)`.
+  - Frontend: probability discs (opacity ∝ confidence), heatmap toggle, draggable OD/fovea markers,
+    Save-correction button in `demo/web/src/tabs/_VisionWidget.js`; wired for non-GT uploads in `Demo.js`;
+    EN/KZ i18n added. `correctOdFovea()` client in `_apiPredict.js`.
+- **Phase 4 (feedback fine-tune):** DONE (2026-06-23, code) — two offline scripts in
+  `od_fovea_detector/scripts/`:
+  - `export_corrections.py` (torch-free): parses the demo `corrections.jsonl` store →
+    deduped (latest-per-image) `Sample(image_id=hash, image_path, od_xy, fovea_xy)` in
+    **original-image pixels** (the store already records `od/fovea_center_original`), dropping
+    any correction whose SHA-256 matches an IDRiD **test** image (`idrid_test_hashes`) — no
+    leakage. Reusable `load_correction_samples()` + CLI manifest.
+  - `finetune_corrections.py`: starts from the frozen base `od_fovea_unet.pt`, mixes IDRiD-train
+    + corrections oversampled by `finetune.correction_repeat`, early-stops on the held-out
+    IDRiD-train slice (test never fit), saves a **versioned** `od_fovea_unet_vN.pt` + sidecar
+    `.json` (base weights, exact correction hashes, acceptance), then runs the IDRiD-test
+    acceptance gate (reuses `src.eval.evaluate_split`): exit 0 promotable / 2 regressed / 1
+    nothing-to-do. Base weights never overwritten in place; promote by repointing
+    `io.weights_path` / `OD_FOVEA_WEIGHTS`.
+  - Config: new `finetune:` block in `configs/default.yaml` (epochs, lr 1e-4, correction_repeat,
+    corrections_dir, acceptance bar). Detector stays **frozen vs the DR-CNN** (offline loop only).
+  - Tests: 5 torch-free export tests (`tests/test_corrections_export.py`); full detector suite 16
+    passed. **Operator step (needs WSL2/GPU + a non-empty store):** run the two scripts once real
+    clinician corrections exist — no run has been executed yet (store is currently empty).
