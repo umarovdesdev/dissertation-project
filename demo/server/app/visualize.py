@@ -50,6 +50,23 @@ def _compose_strip(stages: list[tuple[str, np.ndarray]]) -> np.ndarray:
     return np.hstack(panels)
 
 
+def _fit_max(image_rgb: np.ndarray, max_side: int = 512) -> np.ndarray:
+    """Downscale ``image_rgb`` so its longest side is ``max_side`` (keeps aspect).
+
+    Used to bound the per-stage slide payloads — the pre-crop stages (original /
+    canonical flip) can be at full upload resolution. Already-small images are
+    returned unchanged.
+    """
+    h, w = image_rgb.shape[:2]
+    scale = max_side / float(max(h, w))
+    if scale < 1.0:
+        image_rgb = cv2.resize(
+            image_rgb, (int(round(w * scale)), int(round(h * scale))),
+            interpolation=cv2.INTER_AREA,
+        )
+    return image_rgb
+
+
 def _od_payload(od, analysis: dict | None, space: int) -> dict:
     """Build an ODFoveaPayload dict in **analysis space** (the cropped frame).
 
@@ -122,11 +139,29 @@ def compute_visualization(engine, image_bytes: bytes, eye: str) -> dict:
 
     mask_u8 = (np.clip(bd["fov_mask"], 0, 1) * 255).astype(np.uint8)
 
+    # Per-stage slides for the step-by-step detailed view: each preprocessing
+    # stage as its own image (bounded resolution), plus the FOV mask (Stage 3,
+    # the 4th input channel) as a final slide.
+    stage_slides = [
+        {
+            "key": label,
+            "caption": _PANEL_LABELS.get(label, label),
+            "png_b64": imaging.png_b64_from_rgb(_fit_max(img)),
+        }
+        for label, img in bd["stages"]
+    ]
+    stage_slides.append({
+        "key": "fov_mask",
+        "caption": "3. FOV mask (4th channel)",
+        "png_b64": imaging.png_b64_from_bgr(mask_u8),
+    })
+
     return {
         "fov_mask_png_b64": imaging.png_b64_from_bgr(mask_u8),  # single-channel → PNG
         "fov_base_png_b64": imaging.png_b64_from_rgb(fov_base_rgb),
         "preview_png_b64": imaging.png_b64_from_rgb(strip_rgb),
         "od_fovea": _od_payload(bd["od_fovea"], bd["od_fovea_analysis"], space),
+        "stages": stage_slides,
     }
 
 

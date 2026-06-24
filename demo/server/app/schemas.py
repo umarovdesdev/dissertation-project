@@ -104,6 +104,19 @@ class GradcamResponse(BaseModel):
     cam_region: str
 
 
+class StageSlide(BaseModel):
+    """One preprocessing-stage result, rendered as its own slide in the demo.
+
+    ``key`` is the raw stage label from ``stage_breakdown`` (e.g.
+    ``fov_crop_resize``); ``caption`` is the human-readable title; ``png_b64``
+    is the base64 PNG of that stage's output image.
+    """
+
+    key: str
+    caption: str
+    png_b64: str
+
+
 class VisualizeResponse(BaseModel):
     """POST /api/visualize payload."""
 
@@ -111,6 +124,9 @@ class VisualizeResponse(BaseModel):
     fov_base_png_b64: str
     preview_png_b64: str
     od_fovea: ODFoveaPayload
+    # Per-stage slides (original → flip → rotation → crop → flat-field → CLAHE
+    # → FOV mask) for the step-by-step detailed view.
+    stages: list[StageSlide] = []
 
 
 class SelftestResponse(BaseModel):

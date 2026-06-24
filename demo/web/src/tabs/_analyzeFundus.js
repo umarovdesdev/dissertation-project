@@ -2,8 +2,11 @@
 //
 // Two pure-canvas heuristics, no network / no model:
 //   1. Is this a fundus photograph?  (4 independent tests, ≥3 → fundus)
-//   2. Which eye is it?  Optic disc sits on the nasal side, so the brighter
-//      half of the fundus ROI tells us the laterality.
+//   2. Which eye is it?  We localize the optic disc (the brightest compact
+//      structure) and read laterality from which side of the FOV it sits on.
+//      Project canonical convention (canonical_orientation.py): right eye =
+//      optic disc on the RIGHT, macula on the LEFT; left eye = mirror image.
+//      So OD centroid right of the FOV centre → right eye; left → left eye.
 //
 // Exported entry point:
 //   analyzeFundus(dataUrl): Promise<{ isFundus, laterality, confidence }>
@@ -98,29 +101,91 @@ function checkIsFundus(imageData, roi) {
   return passes >= 3;
 }
 
-// Laterality via half-luma comparison inside the ROI. The half holding the
-// optic disc is brighter:  disc on left → right eye, disc on right → left eye.
-function detectLaterality(imageData, roi) {
-  const { x, y, w, h } = roi;
-  let leftSum = 0, rightSum = 0, leftN = 0, rightN = 0;
-  const mid = x + w / 2;
-  const d = imageData.data;
-  for (let j = y; j < y + h; j += 2) {
-    for (let i = x; i < x + w; i += 2) {
-      const k = (j * imageData.width + i) * 4;
-      const l = 0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2];
-      if (l < 10) continue;             // outside the fundus disk
-      if (i < mid) { leftSum += l; leftN++; }
-      else         { rightSum += l; rightN++; }
+// Separable box blur of a single-channel float grid (in place via a scratch
+// buffer). A few passes approximate a Gaussian — enough to suppress thin dark
+// vessels and small specular highlights so the optic disc survives as the
+// dominant bright blob. `radius` is in grid pixels.
+function boxBlur(src, w, h, radius) {
+  const tmp = new Float32Array(w * h);
+  const r = Math.max(1, radius | 0);
+  const norm = 1 / (2 * r + 1);
+  // Horizontal pass: src → tmp.
+  for (let j = 0; j < h; j++) {
+    const row = j * w;
+    let acc = 0;
+    for (let i = -r; i <= r; i++) acc += src[row + Math.min(w - 1, Math.max(0, i))];
+    for (let i = 0; i < w; i++) {
+      tmp[row + i] = acc * norm;
+      const iOut = Math.max(0, i - r);
+      const iIn = Math.min(w - 1, i + r + 1);
+      acc += src[row + iIn] - src[row + iOut];
     }
   }
-  const L = leftSum / Math.max(leftN, 1);
-  const R = rightSum / Math.max(rightN, 1);
-  const ratio = (L - R) / ((L + R) / 2); // > 0 → disc on left → right eye
-  if (Math.abs(ratio) < 0.03) return { guess: null, conf: 0 };
+  // Vertical pass: tmp → src.
+  for (let i = 0; i < w; i++) {
+    let acc = 0;
+    for (let j = -r; j <= r; j++) acc += tmp[Math.min(h - 1, Math.max(0, j)) * w + i];
+    for (let j = 0; j < h; j++) {
+      src[j * w + i] = acc * norm;
+      const jOut = Math.max(0, j - r);
+      const jIn = Math.min(h - 1, j + r + 1);
+      acc += tmp[jIn * w + i] - tmp[jOut * w + i];
+    }
+  }
+  return src;
+}
+
+// Laterality via optic-disc localization. We blur the luma inside the FOV to
+// suppress vessels, find the optic disc as the centroid of the brightest pixels
+// (top percentile of the blurred map, FOV-masked), and read laterality from its
+// horizontal position relative to the FOV centre.
+//   OD right of centre → right eye  |  OD left of centre → left eye
+// (matches the project canonical convention: right eye = disc on the right).
+function detectLaterality(imageData, roi) {
+  const { x, y, w, h } = roi;
+  const W = imageData.width;
+  const d = imageData.data;
+
+  // Luma grid over the ROI, with a FOV mask (luma > 15 = inside the disk).
+  const grid = new Float32Array(w * h);
+  const fov = new Uint8Array(w * h);
+  let fovN = 0;
+  for (let j = 0; j < h; j++) {
+    for (let i = 0; i < w; i++) {
+      const l = luma(d, ((y + j) * W + (x + i)) * 4);
+      grid[j * w + i] = l;
+      if (l > 15) { fov[j * w + i] = 1; fovN++; }
+    }
+  }
+  if (fovN < 16) return { guess: null, conf: 0 };
+
+  // Blur radius ~6% of the short side suppresses vessels but keeps the disc.
+  boxBlur(grid, w, h, Math.max(2, Math.round(0.06 * Math.min(w, h))));
+
+  // Peak blurred intensity inside the FOV → disc threshold at 92% of the peak.
+  let peak = 0;
+  for (let p = 0; p < grid.length; p++) if (fov[p] && grid[p] > peak) peak = grid[p];
+  if (peak <= 0) return { guess: null, conf: 0 };
+  const thr = 0.92 * peak;
+
+  // Centroid of the brightest blob (the optic disc).
+  let sx = 0, n = 0;
+  for (let j = 0; j < h; j++) {
+    for (let i = 0; i < w; i++) {
+      const p = j * w + i;
+      if (fov[p] && grid[p] >= thr) { sx += i; n++; }
+    }
+  }
+  if (n === 0) return { guess: null, conf: 0 };
+  const odx = sx / n;
+
+  // Offset of the disc from the FOV centre, normalized to the half-width.
+  const half = w / 2;
+  const offset = (odx - half) / half; // >0 → disc on the right → right eye
+  if (Math.abs(offset) < 0.05) return { guess: null, conf: 0 };
   return {
-    guess: ratio > 0 ? 'right' : 'left',
-    conf: Math.min(1, Math.abs(ratio) * 20),
+    guess: offset > 0 ? 'right' : 'left',
+    conf: Math.min(1, Math.abs(offset) * 2.5),
   };
 }
 

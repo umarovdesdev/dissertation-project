@@ -53,7 +53,8 @@ class ODFoveaNetResult:
         fovea_center: ``(x, y)`` fovea center in INPUT-image pixels.
         fovea_radius: Fovea radius estimate in pixels.
         distance: Euclidean OD<->fovea distance in pixels.
-        angle_rad: ``atan2(dy, dx)`` of the OD->fovea vector (radians).
+        angle_rad: Axis tilt (fovea→OD direction) Stage 1 rotates to horizontal,
+            keeping the optic disc on the canonical right side (radians).
         angle_deg: Same angle in degrees.
         rotation_sigma_deg: Adaptive rotation sigma (degrees), from heatmap
             spread, capped at ``max_rotation_sigma_deg``.
@@ -240,7 +241,10 @@ def detect_od_fovea(
     dx = fovea_center[0] - od_center[0]
     dy = fovea_center[1] - od_center[1]
     distance = math.hypot(dx, dy)
-    angle_rad = math.atan2(dy, dx)
+    # Tilt measured fovea→OD (negated deltas) so Stage 1 levels the axis while
+    # keeping the optic disc on the canonical right side; the OD→fovea direction
+    # would rotate canonically-oriented eyes ~180° (a flip, not a levelling).
+    angle_rad = math.atan2(-dy, -dx)
     angle_deg = math.degrees(angle_rad)
     od_radius = max(distance / 4.0, 10.0)  # anatomical: OD-fovea ~ 4 OD radii
     fovea_radius = max(od_radius * 0.5, 5.0)

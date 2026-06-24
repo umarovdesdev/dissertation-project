@@ -35,21 +35,20 @@ function EyeGradcam({ eye, src, name, t }) {
     );
   }
 
-  const heat = `data:image/png;base64,${data.gradcam_png_b64}`;
   const overlay = `data:image/png;base64,${data.attention_overlay_png_b64}`;
   return (
     <div style={{ flex: 1, minWidth: 220 }}>
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary,#666)', marginBottom: 6 }}>{label}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-        <figure style={{ margin: 0 }}>
-          <img src={heat} alt={`Grad-CAM ${eye}`} style={{ width: '100%', display: 'block', borderRadius: 6, background: '#000' }} />
-          <figcaption style={{ fontSize: 10, marginTop: 4, color: 'var(--color-text-secondary,#666)' }}>{t('demo.viz.gradcam')}</figcaption>
-        </figure>
-        <figure style={{ margin: 0 }}>
-          <img src={overlay} alt={`Attention overlay ${eye}`} style={{ width: '100%', display: 'block', borderRadius: 6, background: '#000' }} />
-          <figcaption style={{ fontSize: 10, marginTop: 4, color: 'var(--color-text-secondary,#666)' }}>{t('demo.viz.overlay')}</figcaption>
-        </figure>
-      </div>
+      <figure style={{ margin: 0 }}>
+        {/* The backend warps the overlay back into the original upload frame, so
+            no client-side flip is needed — it already matches the snapshot. */}
+        <img
+          src={overlay}
+          alt={`Attention overlay ${eye}`}
+          style={{ width: '100%', display: 'block', borderRadius: 6, background: '#000' }}
+        />
+        <figcaption style={{ fontSize: 10, marginTop: 4, color: 'var(--color-text-secondary,#666)' }}>{t('demo.viz.overlay')}</figcaption>
+      </figure>
       {/* Predicted-class rationale (TASK-Demo D.3) — backend-generated from CAM
           geometry (no LLM). English only, per the backend-copy scope note. */}
       {data.rationale && (
@@ -67,13 +66,18 @@ function EyeGradcam({ eye, src, name, t }) {
 }
 
 export default function LiveVisualizationBlock({ eyes, t }) {
+  // Right eye (OD) first (shown on the left), matching the clinical convention
+  // and the upload block order.
+  const ordered = [...eyes].sort(
+    (a, b) => (a.eye === 'right' ? 0 : 1) - (b.eye === 'right' ? 0 : 1)
+  );
   return (
     <div style={{ marginTop: 14 }}>
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary,#666)', marginBottom: 6 }}>
         {t('demo.viz.title')}
       </div>
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-        {eyes.map((e) => (
+        {ordered.map((e) => (
           <EyeGradcam key={e.eye} eye={e.eye} src={e.src} name={e.name} t={t} />
         ))}
       </div>

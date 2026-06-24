@@ -1,12 +1,11 @@
 // src/tabs/Demo.js — Live inference demo page.
 // Lets the user supply up to two fundus images (left + right eye) of one
-// patient, runs a simulated Config-D-style prediction in the browser, and lets
-// the user confirm or reject the result. Confirmed / corrected cases are
-// appended to a local relabeling buffer that can be exported as JSONL for
-// further training.
+// patient, runs the trained model on the backend, and lets the user confirm or
+// reject the result. Confirmed / corrected cases are appended to a local
+// relabeling buffer that can be exported as JSONL for further training.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { C, CONFIGS } from '../data';
+import { C } from '../data';
 import { Sec, Note } from '../components';
 import { useLang } from '../i18n';
 import { IDRID_PATIENTS } from './_idridSamples';
@@ -88,96 +87,10 @@ function pickRandomWalkthrough(pool) {
 }
 
 // ---------------------------------------------------------------------------
-// Simulated inference.
-// Strategy: derive a deterministic pseudo-random seed from the image source
-// (file name or sample URL). Match Config D's accuracy profile — pick the
-// "true" class for samples (from /drN/ in the URL), or a uniform random class
-// for arbitrary uploads. Add per-class softmax-like probabilities.
-// ---------------------------------------------------------------------------
-function hashStr(s) {
-  let h = 2166136261 >>> 0;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619) >>> 0;
-  }
-  return h >>> 0;
-}
-function rng(seed) {
-  let s = seed >>> 0;
-  return () => {
-    s = (s + 0x6D2B79F5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function gradeFromUrl(url) {
-  // Accepts legacy `dr0..dr4` (EyePACS samples + EyePACS pairs subfolders) and
-  // zero-padded `dr00..dr04` (preprocessing-pipeline walkthrough images).
-  const m = url && url.match(/\/dr0?([0-4])\//i);
-  return m ? parseInt(m[1], 10) : null;
-}
-
-// Per-eye prediction. Mirrors Config-D: ~78% correct, ~17% off-by-one,
-// ~5% off-by-two. Returns { pred, probs[5], confidence, trueGrade }.
-function predictEye(src, key) {
-  const seed = hashStr((src || '') + '|' + (key || ''));
-  const rand = rng(seed);
-  const truth = gradeFromUrl(src);
-  // Use truth when available (sample image), else pick a class biased toward
-  // lower grades (real-world prevalence-ish).
-  const reference = truth !== null
-    ? truth
-    : [0, 0, 1, 2, 3, 4][Math.floor(rand() * 6)];
-
-  // Decide outcome based on Config D weighted F1 (0.78).
-  const r = rand();
-  let pred;
-  if (r < 0.78)       pred = reference;
-  else if (r < 0.95)  pred = Math.max(0, Math.min(4, reference + (rand() < 0.5 ? -1 : 1)));
-  else                pred = Math.max(0, Math.min(4, reference + (rand() < 0.5 ? -2 : 2)));
-
-  // Build softmax-ish probabilities centered on `pred`.
-  const raw = [0, 1, 2, 3, 4].map(c => {
-    const dist = Math.abs(c - pred);
-    return Math.exp(-1.4 * dist + (rand() - 0.5) * 0.4);
-  });
-  const sum = raw.reduce((a, b) => a + b, 0);
-  const probs = raw.map(v => v / sum);
-  return {
-    pred,
-    probs,
-    confidence: probs[pred],
-    trueGrade: truth,
-    latencyMs: Math.round(180 + rand() * 220),
-  };
-}
-
-// Patient-level result = worst eye (clinical convention for screening).
-function patientPrediction(eyes) {
-  // eyes: array of { eye, src } excluding empties
-  const perEye = eyes.map(e => ({ ...e, result: predictEye(e.src, e.eye) }));
-  if (perEye.length === 0) return null;
-  const worst = perEye.reduce((a, b) => (b.result.pred > a.result.pred ? b : a));
-  const probs = [0, 1, 2, 3, 4].map(c =>
-    perEye.reduce((acc, p) => Math.max(acc, p.result.probs[c]), 0)
-  );
-  const sum = probs.reduce((a, b) => a + b, 0);
-  const norm = probs.map(p => p / sum);
-  return {
-    perEye,
-    pred: worst.result.pred,
-    confidence: norm[worst.result.pred],
-    probs: norm,
-    latencyMs: Math.max(...perEye.map(p => p.result.latencyMs)),
-  };
-}
-
 // Normalize the backend's PatientPredictionResponse (snake_case, no per-eye
-// src) into the exact shape `patientPrediction` produces, so the Result panel
-// renders identically whether the source is the real model or the simulator.
+// src) into the shape the Result panel renders: { pred, probs, confidence,
+// latencyMs, perEye: [{ eye, src, result }] }.
+// ---------------------------------------------------------------------------
 function normalizeApiResult(r, eyes) {
   return {
     pred: r.pred,
@@ -276,7 +189,11 @@ function EyeSlot({ label, eye, image, onPick, onClear, onSwap, t }) {
           aspectRatio: '1 / 1',
           border: `1px dashed ${image ? C.teal : 'var(--color-border-secondary,#ccc)'}`,
           borderRadius: 10,
-          background: image ? '#000' : 'var(--color-background-secondary,#f7f7f5)',
+          // Keep the letterbox grey (not black) even with an image loaded: fundus
+          // photos carry their own black border, so a black box would blend with
+          // it and make the snapshot look smaller than it is. Grey reveals the
+          // true image rectangle and shape.
+          background: 'var(--color-background-secondary,#f7f7f5)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           cursor: 'pointer', overflow: 'hidden', position: 'relative',
         }}
@@ -380,28 +297,21 @@ function HeatmapPair({ resultsBase, side, t }) {
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary,#666)', marginBottom: 6 }}>
         {t(side === 'left' ? 'demo.leftEye' : 'demo.rightEye')}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-        <figure style={{ margin: 0 }}>
-          <img
-            src={`${base}/gradcam/${side}.png`}
-            alt={`Grad-CAM ${side}`}
-            style={{ width: '100%', display: 'block', borderRadius: 6, background: '#000' }}
-          />
-          <figcaption style={{ fontSize: 10, marginTop: 4, color: 'var(--color-text-secondary,#666)' }}>
-            {t('demo.viz.gradcam')}
-          </figcaption>
-        </figure>
-        <figure style={{ margin: 0 }}>
-          <img
-            src={`${base}/attention_overlay/${side}.png`}
-            alt={`Attention overlay ${side}`}
-            style={{ width: '100%', display: 'block', borderRadius: 6, background: '#000' }}
-          />
-          <figcaption style={{ fontSize: 10, marginTop: 4, color: 'var(--color-text-secondary,#666)' }}>
-            {t('demo.viz.overlay')}
-          </figcaption>
-        </figure>
-      </div>
+      <figure style={{ margin: 0 }}>
+        {/* Analysis-frame overlay — mirror left eyes back to the original
+            orientation (matches the live Grad-CAM block). */}
+        <img
+          src={`${base}/attention_overlay/${side}.png`}
+          alt={`Attention overlay ${side}`}
+          style={{
+            width: '100%', display: 'block', borderRadius: 6, background: '#000',
+            transform: side === 'left' ? 'scaleX(-1)' : undefined,
+          }}
+        />
+        <figcaption style={{ fontSize: 10, marginTop: 4, color: 'var(--color-text-secondary,#666)' }}>
+          {t('demo.viz.overlay')}
+        </figcaption>
+      </figure>
     </div>
   );
 }
@@ -416,8 +326,8 @@ function VisualizationBlock({ caseRef, leftPresent, rightPresent, t }) {
       {explainable ? (
         <>
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-            {leftPresent && <HeatmapPair resultsBase={caseRef.resultsBase} side="left" t={t} />}
             {rightPresent && <HeatmapPair resultsBase={caseRef.resultsBase} side="right" t={t} />}
+            {leftPresent && <HeatmapPair resultsBase={caseRef.resultsBase} side="left" t={t} />}
           </div>
           <Note>{t('demo.viz.disclaimer')}</Note>
         </>
@@ -512,16 +422,20 @@ export default function Demo() {
   // `pipeline/dr0N/results/`.
   const [caseRef, setCaseRef] = useState(null);
   // Backend health. `health` is the /api/health payload (or null when the
-  // backend is unreachable). `healthChecked` flips once the probe resolves so
-  // the badge can show a "checking…" state in between. `useRealModel` lets the
-  // user force the offline simulator even when the backend is up.
+  // backend is unreachable). `healthChecked` flips once the probe resolves.
   const [health, setHealth] = useState(null);
   const [healthChecked, setHealthChecked] = useState(false);
-  const [useRealModel, setUseRealModel] = useState(true);
+  // Collapsible "Additional info" block: the detailed per-image view (OD/fovea
+  // centres & discs + step-by-step preprocessing stages). Collapsed by default.
+  const [showDetail, setShowDetail] = useState(false);
+  // Inside the detail block only one eye is shown at a time; a toggle switches
+  // between them. Defaults to the right eye (OD) so it leads, matching the
+  // OD-first layout of the upload and visualization blocks.
+  const [detailEye, setDetailEye] = useState('right');
   // Access gate (TASK-Demo §C.2/D). `authed` is true when the demo body is
   // unlocked: either the backend reports no password requirement / is offline
-  // (simulator stays usable), or the user has supplied a valid password (which
-  // we also revalidate from sessionStorage on reload).
+  // (the UI stays browsable; inference itself still needs a live backend), or
+  // the user has supplied a valid password (revalidated from sessionStorage).
   const [authed, setAuthed] = useState(false);
   useEffect(() => {
     let alive = true;
@@ -540,15 +454,12 @@ export default function Demo() {
     return () => { alive = false; };
   }, []);
   // Real model is usable only when the backend is up AND a real checkpoint is
-  // loaded (a boot without a checkpoint runs on random weights — meaningless,
-  // so we stay on the simulator and say so).
-  const apiReady = !!(health && health.checkpoint_loaded) && useRealModel;
+  // loaded (a boot without a checkpoint runs on random weights — meaningless).
+  const apiReady = !!(health && health.checkpoint_loaded);
   // Preprocessing visualizations (/api/visualize, /api/gradcam) only need the
   // backend reachable — /api/visualize is checkpoint-free, so the "what the
-  // model sees" widget lights up even before Config D is trained.
-  const liveVisuals = !!health && useRealModel;
-
-  const D = CONFIGS.D;
+  // model sees" widget lights up even before the model is trained.
+  const liveVisuals = !!health;
 
   const eyes = useMemo(() => {
     const list = [];
@@ -556,6 +467,25 @@ export default function Demo() {
     if (rightImg) list.push({ eye: 'right', src: rightImg.src, name: rightImg.name || 'right' });
     return list;
   }, [leftImg, rightImg]);
+
+  // Eyes that have a renderable detail widget: the slot has an image AND a
+  // source of detail exists (ground-truth markers, or the live backend for the
+  // detector path). Drives the per-eye switch in the "Additional info" block.
+  const detailEyes = useMemo(() => {
+    // Right eye (OD) first so its switch button sits on the left.
+    const list = [];
+    if (rightImg && (rightImg.gt || liveVisuals)) list.push('right');
+    if (leftImg  && (leftImg.gt  || liveVisuals)) list.push('left');
+    return list;
+  }, [leftImg, rightImg, liveVisuals]);
+
+  // Keep the selected detail eye valid: if it disappears (slot cleared / no
+  // detail source) fall back to the first available eye, preferring right (OD).
+  useEffect(() => {
+    if (detailEyes.length && !detailEyes.includes(detailEye)) {
+      setDetailEye(detailEyes[0]);
+    }
+  }, [detailEyes, detailEye]);
 
   // Swap the two slots — used by the wrong-slot warning chip. Both images
   // (with their attached `checks`) move to the opposite slot; the laterality
@@ -579,30 +509,26 @@ export default function Demo() {
 
   const handleRun = async () => {
     if (eyes.length === 0) return;
+    // No simulator fallback — inference requires a live backend with a loaded
+    // checkpoint. If it is not ready, surface an error and stop.
+    if (!apiReady) {
+      setToast(t('demo.modelStatus.unavailable'));
+      setTimeout(() => setToast(''), 5000);
+      return;
+    }
     setRunning(true);
     setResult(null);
     setFeedbackMode(null);
-
-    if (apiReady) {
-      try {
-        const r = await predictPatient(eyes);
-        setResult(normalizeApiResult(r, eyes));
-      } catch (e) {
-        console.error(e);
-        setToast(t('demo.modelStatus.fallbackToast'));
-        setTimeout(() => setToast(''), 4000);
-        setResult(patientPrediction(eyes)); // graceful fallback
-      } finally {
-        setRunning(false);
-      }
-      return;
-    }
-
-    // Simulator path — keep a small latency so the UI feels realistic.
-    setTimeout(() => {
-      setResult(patientPrediction(eyes));
+    try {
+      const r = await predictPatient(eyes);
+      setResult(normalizeApiResult(r, eyes));
+    } catch (e) {
+      console.error(e);
+      setToast(t('demo.modelStatus.error'));
+      setTimeout(() => setToast(''), 5000);
+    } finally {
       setRunning(false);
-    }, 700);
+    }
   };
 
   // Pick handler for an eye slot. On a manual upload we also try to match the
@@ -677,7 +603,7 @@ export default function Demo() {
 
   // Block the demo body behind the access screen only when the backend
   // actively requires a password and we are not yet authenticated. A null/
-  // offline health never gates — the simulator must stay reachable.
+  // offline health never gates — the UI stays browsable without a backend.
   if (healthChecked && health && health.requires_password && !authed) {
     return <PasswordGate onUnlock={() => setAuthed(true)} t={t} />;
   }
@@ -697,9 +623,23 @@ export default function Demo() {
           fontSize: 11, color: 'var(--color-text-secondary,#777)', lineHeight: 1.6,
           borderLeft: `2px solid ${C.teal}`, paddingLeft: 10, margin: '0 0 8px 0',
         }}>
-          <div style={{ fontWeight: 700 }}>{t('demo.framing.line1')}</div>
+          <div style={{
+            fontWeight: 700, display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', gap: 10, flexWrap: 'wrap',
+          }}>
+            <span>{t('demo.framing.line1')}</span>
+            <button
+              onClick={loadRandomSample}
+              style={{
+                padding: '4px 10px', fontSize: 10, fontWeight: 600, flexShrink: 0,
+                background: C.purpleBg, color: C.purpleT,
+                border: `1px solid ${C.purple}`, borderRadius: 4, cursor: 'pointer',
+              }}
+            >
+              🎲 {t('demo.random')}
+            </button>
+          </div>
           <div>{t('demo.framing.line2')}</div>
-          <div>{t('demo.framing.line3')}</div>
         </div>
         {/* <div style={{ fontSize: 10, color: C.amberT, background: C.amberBg, padding: '6px 10px', borderRadius: 6, display: 'inline-block' }}>
           ⚠ {t('demo.disclaimer')}
@@ -708,16 +648,9 @@ export default function Demo() {
 
       {/* Upload section */}
       <Sec title={t('demo.uploadSection')}>
+        {/* Right eye (OD) shown on the LEFT, left eye (OS) on the RIGHT — matches
+            the clinical convention for displaying fundus pairs. */}
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-          <EyeSlot
-            label={t('demo.leftEye')}
-            eye="left"
-            image={leftImg}
-            onPick={handlePick(setLeftImg)}
-            onClear={() => { setLeftImg(null); setCaseRef(null); setResult(null); setFeedbackMode(null); }}
-            onSwap={swapSlots}
-            t={t}
-          />
           <EyeSlot
             label={t('demo.rightEye')}
             eye="right"
@@ -727,59 +660,88 @@ export default function Demo() {
             onSwap={swapSlots}
             t={t}
           />
+          <EyeSlot
+            label={t('demo.leftEye')}
+            eye="left"
+            image={leftImg}
+            onPick={handlePick(setLeftImg)}
+            onClear={() => { setLeftImg(null); setCaseRef(null); setResult(null); setFeedbackMode(null); }}
+            onSwap={swapSlots}
+            t={t}
+          />
         </div>
 
-        {/* Per-image "what the model sees" widget (TASK-Demo D.2). Shown ONLY
-            for ground-truth-backed images — i.e. the Random IDRiD button, or a
-            manual upload matched to IDRiD by filename. The preprocessing strip
-            still needs the backend (best-effort); markers/mask come from GT and
-            render even offline. */}
-        {(leftImg?.gt || rightImg?.gt) && (
-          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 12 }}>
-            {leftImg?.gt && (
-              <VisionWidget src={leftImg.src} eye="left" name={leftImg.name} enabled={liveVisuals} gt={leftImg.gt} t={t} />
-            )}
-            {rightImg?.gt && (
-              <VisionWidget src={rightImg.src} eye="right" name={rightImg.name} enabled={liveVisuals} gt={rightImg.gt} t={t} />
-            )}
-          </div>
-        )}
-
-        {/* Detector path: for non-GT uploads, show the learned OD/fovea overlay
-            (probability discs + heatmap) and let the clinician drag-correct the
-            centres (Phase 3 feedback loop). Needs the live backend (liveVisuals). */}
-        {liveVisuals && ((leftImg && !leftImg.gt) || (rightImg && !rightImg.gt)) && (
-          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 12 }}>
-            {leftImg && !leftImg.gt && (
-              <VisionWidget src={leftImg.src} eye="left" name={leftImg.name} enabled={liveVisuals} t={t} />
-            )}
-            {rightImg && !rightImg.gt && (
-              <VisionWidget src={rightImg.src} eye="right" name={rightImg.name} enabled={liveVisuals} t={t} />
-            )}
-          </div>
-        )}
-
-        <div style={{ marginTop: 14 }}>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {/* Additional info: a collapsible block revealing the detailed per-image
+            view — OD/fovea centres & discs the detector found, plus the result
+            of each preprocessing stage as its own slide (TASK-Demo D.2). Shown
+            once at least one slot has an image and a source of detail exists
+            (ground-truth markers, or the live backend for the detector path). */}
+        {(leftImg || rightImg) && (liveVisuals || leftImg?.gt || rightImg?.gt) && (
+          <div style={{ marginTop: 12 }}>
             <button
-              onClick={loadRandomSample}
-              title={t('demo.randomHint')}
+              onClick={() => setShowDetail(v => !v)}
               style={{
-                padding: '4px 10px', fontSize: 10, fontWeight: 600,
-                background: C.purpleBg, color: C.purpleT,
-                border: `1px solid ${C.purple}`, borderRadius: 4, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                padding: '8px 12px', fontSize: 12, fontWeight: 600, textAlign: 'left',
+                background: C.tealBg, color: C.tealT,
+                border: `1px solid ${C.teal}`, borderRadius: 6, cursor: 'pointer',
               }}
             >
-              🎲 {t('demo.random')}
-              {IDRID_PATIENTS && IDRID_PATIENTS.length > 0 && (
-                <span style={{ marginLeft: 4, opacity: 0.6, fontWeight: 400 }}>
-                  IDRiD ({IDRID_PATIENTS.length})
-                </span>
-              )}
+              <span style={{ fontSize: 11 }}>{showDetail ? '▾' : '▸'}</span>
+              {t('demo.vision.additionalInfo')}
             </button>
+
+            {showDetail && (() => {
+              // One eye at a time, picked by the switch below (defaults to
+              // left). The chosen slot is rendered with GT markers when it has
+              // them, otherwise via the live detector path.
+              const selected = detailEyes.includes(detailEye) ? detailEye : detailEyes[0];
+              const img = selected === 'left' ? leftImg : rightImg;
+              return (
+                <div style={{ marginTop: 10 }}>
+                  {/* Per-eye switch: shown whenever at least one eye has detail.
+                      Each available eye gets its own button; the active one is
+                      highlighted. */}
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+                    {detailEyes.map((eye) => {
+                      const active = eye === selected;
+                      return (
+                        <button
+                          key={eye}
+                          onClick={() => setDetailEye(eye)}
+                          style={{
+                            padding: '5px 12px', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                            background: active ? C.teal : C.tealBg,
+                            color: active ? 'white' : C.tealT,
+                            border: `1px solid ${C.teal}`, borderRadius: 5,
+                          }}
+                        >
+                          {eye === 'left' ? t('demo.leftEye') : t('demo.rightEye')}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Selected eye's detailed view — GT-backed (markers + mask
+                      render even offline) or the live detector path (learned
+                      OD/fovea overlay, drag-correctable centres, stage slides). */}
+                  {img && (
+                    <VisionWidget
+                      key={selected}
+                      src={img.src}
+                      eye={selected}
+                      name={img.name}
+                      enabled={liveVisuals}
+                      gt={img.gt}
+                      t={t}
+                    />
+                  )}
+                </div>
+              );
+            })()}
           </div>
-          <Note>{t('demo.randomHint')}</Note>
-        </div>
+        )}
+
       </Sec>
 
       {/* Run section */}
@@ -802,31 +764,8 @@ export default function Demo() {
           )}
           {eyes.length > 0 && !running && (
             <span style={{ fontSize: 11, color: 'var(--color-text-secondary,#666)' }}>
-              {eyes.length} {eyes.length === 1 ? 'image' : 'images'} · {t('demo.modelVersion')}: Config D
+              {eyes.length} {eyes.length === 1 ? 'image' : 'images'}
             </span>
-          )}
-          {/* Model status badge: checking → real → simulator. */}
-          <span style={{
-            fontSize: 10, fontWeight: 600,
-            color: !healthChecked ? C.gray : (apiReady ? C.greenT : C.amberT),
-          }}>
-            {!healthChecked
-              ? t('demo.modelStatus.checking')
-              : apiReady ? t('demo.modelStatus.real') : t('demo.modelStatus.simulator')}
-          </span>
-          {/* Toggle real/simulator — only when a real checkpoint is actually loaded. */}
-          {health && health.checkpoint_loaded && (
-            <button
-              onClick={() => setUseRealModel(v => !v)}
-              style={{
-                fontSize: 10, padding: '2px 8px', background: 'transparent',
-                color: 'var(--color-text-secondary,#666)',
-                border: '1px solid var(--color-border-secondary,#ccc)',
-                borderRadius: 4, cursor: 'pointer',
-              }}
-            >
-              {useRealModel ? t('demo.modelStatus.useSimulator') : t('demo.modelStatus.useReal')}
-            </button>
           )}
         </div>
       </Sec>
@@ -1047,11 +986,6 @@ export default function Demo() {
         )}
       </Sec>
 
-      {/* Footer caveat — reflects whether predictions are live or simulated. */}
-      <Note>
-        {apiReady ? t('demo.modelStatus.footerReal') : t('demo.modelStatus.footerSim')}
-        {' '}Reference metrics on held-out EyePACS: F1={D.f1.toFixed(3)}, AUC={D.auc.toFixed(3)}, κ={D.k.toFixed(3)}.
-      </Note>
       {/* Provenance string (TASK-Demo D.7) — what the committee can quote. */}
       {health && (
         <div style={{ fontSize: 9, color: C.gray, marginTop: 4, fontFamily: 'monospace' }}>

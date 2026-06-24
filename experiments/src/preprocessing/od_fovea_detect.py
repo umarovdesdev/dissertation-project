@@ -41,7 +41,8 @@ class ODFoveaResult:
         fovea_center: (x, y) pixel coordinates of fovea center.
         fovea_radius: Estimated radius of fovea in pixels.
         distance: Euclidean distance between OD and fovea centers in pixels.
-        angle_rad: Angle of OD→fovea vector in radians (from arctan2).
+        angle_rad: Axis tilt (fovea→OD direction) Stage 1 rotates to horizontal,
+            keeping the optic disc on the canonical right side (radians).
         angle_deg: Same angle in degrees.
         rotation_sigma_deg: Per-image adaptive rotation σ in degrees,
             derived from localization uncertainty.
@@ -222,11 +223,15 @@ def detect_od_fovea_classical(image_rgb: np.ndarray) -> ODFoveaResult:
         green, od_center, od_radius
     )
 
-    # Step 3: Compute geometry
+    # Step 3: Compute geometry. The rotation angle is the tilt of the axis in the
+    # **fovea→OD** direction (note the negated deltas): rotating by it levels the
+    # OD-fovea axis while keeping the optic disc on the canonical right side.
+    # Using the OD→fovea direction instead would rotate canonically-oriented eyes
+    # ~180° — flipping the image rather than levelling it.
     dx = fovea_center[0] - od_center[0]
     dy = fovea_center[1] - od_center[1]
     distance = math.sqrt(dx * dx + dy * dy)
-    angle_rad = math.atan2(dy, dx)
+    angle_rad = math.atan2(-dy, -dx)
     angle_deg = math.degrees(angle_rad)
 
     # Step 4: Compute adaptive rotation σ
@@ -340,34 +345,79 @@ def detect_od_fovea(
     )
 
 
+def rotation_affine_expand(
+    w: int,
+    h: int,
+    angle_deg: float,
+    center: tuple[int, int] | None = None,
+) -> tuple[np.ndarray, int, int]:
+    """Rotation affine into an **expanded** canvas that fits the whole image.
+
+    Returns the 2×3 matrix and the output size such that rotating a ``w×h``
+    image by ``angle_deg`` clips nothing — the canvas grows to the rotated
+    bounding box and the content is re-centred. This is the single source of
+    truth for the Stage-1 rotation geometry, shared by the image/mask rotation,
+    the OD/fovea coordinate projection, and the demo's inverse warp, so they
+    stay consistent.
+
+    Args:
+        w: Source width (pre-rotation).
+        h: Source height (pre-rotation).
+        angle_deg: Rotation angle (``ODFoveaResult.angle_deg``).
+        center: Rotation pivot. Defaults to the image centre ``(w//2, h//2)``.
+
+    Returns:
+        ``(M, new_w, new_h)`` — the 2×3 affine and the expanded canvas size.
+    """
+    if center is None:
+        center = (w // 2, h // 2)
+    m = cv2.getRotationMatrix2D(center, angle_deg, 1.0)
+    cos, sin = abs(m[0, 0]), abs(m[0, 1])
+    new_w = int(math.ceil(h * sin + w * cos))
+    new_h = int(math.ceil(h * cos + w * sin))
+    m[0, 2] += new_w / 2.0 - center[0]
+    m[1, 2] += new_h / 2.0 - center[1]
+    return m, new_w, new_h
+
+
 def rotate_to_horizontal(
     image: np.ndarray,
     angle_deg: float,
     center: tuple[int, int] | None = None,
+    border_mode: int = cv2.BORDER_REFLECT,
 ) -> np.ndarray:
     """
     Rotate image so that the OD–fovea axis becomes horizontal.
 
-    Rotation center defaults to the image center.  Uses BORDER_REFLECT
-    to avoid introducing black pixels at the edges.
+    Rotation is done into an **expanded canvas** (:func:`rotation_affine_expand`)
+    so no part of the fundus is clipped when the image is tilted — previously the
+    output kept the input size, cutting a crescent off field-filling fundi.
+
+    Rotation center defaults to the image center.  The default
+    ``BORDER_REFLECT`` avoids introducing black pixels at the edges of the RGB
+    image (the reflected "ears" are real pixel data for the CNN).  Pass
+    ``border_mode=cv2.BORDER_CONSTANT`` when rotating a FOV mask so those
+    reflected corners are *excluded* from the field of view — the mask must mark
+    only genuine fundus area, not rotation-induced reflections.
 
     Args:
-        image: RGB uint8 NumPy array of shape (H, W, 3).
-        angle_deg: Angle to correct (from ODFoveaResult.angle_deg).
-            Image is rotated by -angle_deg to bring axis to 0°.
+        image: RGB uint8 NumPy array of shape (H, W, 3), or a single-channel
+            mask of shape (H, W).
+        angle_deg: Angle to correct (from ODFoveaResult.angle_deg, the fovea→OD
+            tilt). The image is rotated to level that axis to 0°, which keeps the
+            optic disc on the right (canonical) side.
         center: Optional rotation center.  Defaults to image center.
+        border_mode: OpenCV border mode for out-of-bounds pixels. Defaults to
+            ``cv2.BORDER_REFLECT`` (use ``cv2.BORDER_CONSTANT`` for masks).
 
     Returns:
-        Rotated RGB uint8 NumPy array of same shape.
+        Rotated NumPy array on the expanded canvas (≥ input size).
     """
     h, w = image.shape[:2]
-    if center is None:
-        center = (w // 2, h // 2)
-
-    M = cv2.getRotationMatrix2D(center, angle_deg, 1.0)
-    rotated = cv2.warpAffine(
-        image, M, (w, h),
+    m, new_w, new_h = rotation_affine_expand(w, h, angle_deg, center)
+    return cv2.warpAffine(
+        image, m, (new_w, new_h),
         flags=cv2.INTER_LINEAR,
-        borderMode=cv2.BORDER_REFLECT,
+        borderMode=border_mode,
+        borderValue=0,
     )
-    return rotated

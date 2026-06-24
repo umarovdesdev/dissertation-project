@@ -33,9 +33,9 @@ import numpy as np
 import torch
 
 from .canonical_orientation import canonical_flip, canonical_orientation
-from .od_fovea_detect import ODFoveaResult
+from .od_fovea_detect import ODFoveaResult, rotation_affine_expand
 from .config import PreprocessingConfig
-from .crop_resize import crop_and_resize, CropResizeTransform
+from .crop_resize import crop_and_resize, CropResizeTransform, _fov_foreground_mask
 from .flat_field import apply_flat_field
 from .imagenet_normalize import imagenet_normalize
 from .polar_clahe import (
@@ -73,7 +73,7 @@ def _project_to_analysis(
     Returns:
         ``(x, y)`` in the padded ``target_size`` analysis canvas.
     """
-    rot_m = cv2.getRotationMatrix2D((src_w // 2, src_h // 2), angle_deg, 1.0)
+    rot_m, _, _ = rotation_affine_expand(src_w, src_h, angle_deg)
     px, py = float(point[0]), float(point[1])
     rx = rot_m[0, 0] * px + rot_m[0, 1] * py + rot_m[0, 2]
     ry = rot_m[1, 0] * px + rot_m[1, 1] * py + rot_m[1, 2]
@@ -106,7 +106,7 @@ def _warp_heatmap_to_analysis(
     Returns:
         float32 ``(target_size, target_size)`` heatmap on the analysis canvas.
     """
-    rot_m = cv2.getRotationMatrix2D((src_w // 2, src_h // 2), angle_deg, 1.0)
+    rot_m, _, _ = rotation_affine_expand(src_w, src_h, angle_deg)
     left, upper = crop_tf.bbox[0], crop_tf.bbox[1]
     # Affine for crop_tf.apply: (x - left) * scale + x_off, (y - upper) * scale + y_off.
     crop_m = np.array(
@@ -284,23 +284,34 @@ class PreprocessingPipeline:
                 or ``None`` when detection is absent / not confident (→ centroid
                 pivot).
         """
-        # Stage 0: canonical orientation (flip + OD–fovea rotation)
+        # Pre-rotation dims (canonical flip preserves size), needed to project
+        # the detected fovea through the SAME expand-rotation into analysis space.
+        # Captured before the reassignment below — Stage-1 rotation now grows the
+        # canvas, so the post-rotation size is not the rotation pivot frame.
+        src_h, src_w = image.shape[:2]
+
+        # Stage 0: canonical orientation (flip + OD–fovea rotation). Build the
+        # FOV mask from the CLEAN pre-rotation frame and carry it through the
+        # identical flip+rotation (BORDER_CONSTANT) so the reflected "ears" the
+        # RGB's BORDER_REFLECT rotation introduces are excluded from the FOV.
         od_fovea_result: ODFoveaResult | None = None
+        mask_oriented: np.ndarray | None = None
         if self.config.use_canonical_flip or self.config.use_od_fovea_rotation:
-            image, od_fovea_result = canonical_orientation(
+            raw_mask = _fov_foreground_mask(image)
+            image, od_fovea_result, mask_oriented = canonical_orientation(
                 image,
                 eye_side=eye_side if self.config.use_canonical_flip else "unknown",
                 enable_rotation=self.config.use_od_fovea_rotation,
+                fov_mask=raw_mask,
             )
 
-        # Pre-crop (rotation-preserved) dims, needed to project the detected
-        # fovea into analysis space below.
-        src_h, src_w = image.shape[:2]
-
-        # Stage 2: FOV crop + isotropic resize (always) — keep the transform so
-        # the fovea pivot can be mapped into the cropped analysis frame.
+        # Stage 2/3: FOV crop + isotropic resize (always) — keep the transform so
+        # the fovea pivot can be mapped into the cropped analysis frame. Pass the
+        # oriented mask so it is cropped with the identical bbox (None → segment
+        # from the crop, used only when no orientation ran).
         image, fov_mask, crop_tf = crop_and_resize(
-            image, self.config.target_size, return_transform=True
+            image, self.config.target_size, return_transform=True,
+            fov_mask=mask_oriented,
         )
 
         # Stage-5 polar-CLAHE pivot: the detected fovea, projected to analysis
@@ -526,21 +537,29 @@ class PreprocessingPipeline:
         stages.append(("canonical_flip", flipped.copy()))
 
         # Stage 0+1: flip + OD-fovea rotation (the real path), with OD result.
+        # The FOV mask is segmented from the CLEAN pre-rotation frame and carried
+        # through the same flip+rotation (BORDER_CONSTANT) so reflected "ears"
+        # from the RGB's BORDER_REFLECT rotation are kept out of the FOV.
         od_fovea_result: ODFoveaResult | None = None
+        mask_oriented: np.ndarray | None = None
         if self.config.use_canonical_flip or self.config.use_od_fovea_rotation:
-            oriented, od_fovea_result = canonical_orientation(
+            raw_mask = _fov_foreground_mask(image)
+            oriented, od_fovea_result, mask_oriented = canonical_orientation(
                 image,
                 eye_side=eye_side if self.config.use_canonical_flip else "unknown",
                 enable_rotation=self.config.use_od_fovea_rotation,
                 return_heatmaps=with_heatmaps,
+                fov_mask=raw_mask,
             )
         else:
             oriented = image
         stages.append(("od_fovea_rotation", oriented.copy()))
 
-        # Stage 2/3: FOV crop + isotropic resize → (image, mask, transform).
+        # Stage 2/3: FOV crop + isotropic resize → (image, mask, transform). Pass
+        # the oriented mask so it is cropped with the identical bbox.
         cropped, fov_mask, crop_tf = crop_and_resize(
-            oriented, self.config.target_size, return_transform=True
+            oriented, self.config.target_size, return_transform=True,
+            fov_mask=mask_oriented,
         )
         stages.append(("fov_crop_resize", cropped.copy()))
 
@@ -548,20 +567,34 @@ class PreprocessingPipeline:
         # cropped analysis frame so the demo can overlay markers on the
         # ``fov_crop_resize`` panel. Mirror the rotation applied inside
         # ``canonical_orientation`` (about the flipped image centre), then the
-        # crop+resize transform. Only meaningful for confident detections.
+        # crop+resize transform. The projection is produced for ANY detection
+        # (confident or not) so the demo can show a best-guess marker the
+        # clinician can drag-correct even at low confidence. Because
+        # ``canonical_orientation`` rotates the image only for confident
+        # detections, project with the angle actually applied: ``angle_deg``
+        # when confident, ``0`` otherwise (the analysis base is unrotated).
         od_fovea_analysis: dict | None = None
         fovea_pivot: tuple[float, float] | None = None
-        if od_fovea_result is not None and od_fovea_result.confident:
+        if od_fovea_result is not None:
             src_h, src_w = image.shape[:2]
+            applied_angle = (
+                od_fovea_result.angle_deg if od_fovea_result.confident else 0.0
+            )
 
             def _to_analysis(point: tuple[int, int]) -> list[float]:
                 ax, ay = _project_to_analysis(
-                    point, od_fovea_result.angle_deg, src_w, src_h, crop_tf
+                    point, applied_angle, src_w, src_h, crop_tf
                 )
                 return [ax, ay]
 
             fovea_center_analysis = _to_analysis(od_fovea_result.fovea_center)
-            fovea_pivot = (fovea_center_analysis[0], fovea_center_analysis[1])
+            # Polar-CLAHE pivots on the detected fovea ONLY for confident
+            # detections — matching the model path, where low confidence falls
+            # back to the FOV centroid (TASK-fix #4). The overlay projection
+            # above must not change this gate, or the demo's stage strip would
+            # diverge from what the CNN actually sees.
+            if od_fovea_result.confident:
+                fovea_pivot = (fovea_center_analysis[0], fovea_center_analysis[1])
             od_fovea_analysis = {
                 "od_center": _to_analysis(od_fovea_result.od_center),
                 "fovea_center": fovea_center_analysis,
@@ -579,11 +612,11 @@ class PreprocessingPipeline:
             ):
                 od_fovea_analysis["od_heatmap"] = _warp_heatmap_to_analysis(
                     od_fovea_result.od_heatmap,
-                    od_fovea_result.angle_deg, src_w, src_h, crop_tf,
+                    applied_angle, src_w, src_h, crop_tf,
                 )
                 od_fovea_analysis["fovea_heatmap"] = _warp_heatmap_to_analysis(
                     od_fovea_result.fovea_heatmap,
-                    od_fovea_result.angle_deg, src_w, src_h, crop_tf,
+                    applied_angle, src_w, src_h, crop_tf,
                 )
 
         # Stage 4: flat-field correction (adaptive σ).

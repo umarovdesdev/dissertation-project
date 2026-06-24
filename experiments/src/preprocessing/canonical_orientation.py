@@ -81,7 +81,8 @@ def canonical_orientation(
     eye_side: str = "unknown",
     enable_rotation: bool = True,
     return_heatmaps: bool = False,
-) -> tuple[np.ndarray, ODFoveaResult | None]:
+    fov_mask: np.ndarray | None = None,
+) -> tuple[np.ndarray, ODFoveaResult | None, np.ndarray | None]:
     """
     Apply full canonical orientation: flip + OD–fovea rotation.
 
@@ -92,6 +93,13 @@ def canonical_orientation(
     only the flip is applied and ``ODFoveaResult`` is returned with
     ``confident=False`` (or ``None``).
 
+    When *fov_mask* is supplied, it is flipped and rotated by the **same**
+    transform applied to the image, but with ``BORDER_CONSTANT`` so the rotation
+    introduces no reflected "ears" into the field of view. The mask must be in
+    the same (pre-flip) geometry as *image* on input; it is returned in the same
+    (post flip+rotation) geometry as the returned image, ready to be cropped
+    with the identical bbox.
+
     Args:
         image: RGB uint8 NumPy array of shape ``(H, W, 3)``.
         eye_side: ``"left"``, ``"right"``, or ``"unknown"``.
@@ -100,22 +108,32 @@ def canonical_orientation(
             probability heatmaps (attached to ``od_fovea_result`` in the
             **flipped** input frame, i.e. pre-rotation, pre-crop). Used by the
             demo overlay (Phase 3); off by default to skip two full-res resizes.
+        fov_mask: Optional FOV mask (``(H, W)`` uint8) in the pre-flip frame, to
+            carry through the identical flip+rotation. ``None`` skips it.
 
     Returns:
-        Tuple of ``(processed_image, od_fovea_result)``.
+        Tuple of ``(processed_image, od_fovea_result, processed_fov_mask)``.
         *od_fovea_result* is ``None`` when *enable_rotation* is ``False``.
         ``od_fovea_result.confident`` may be ``False`` if detection failed.
+        *processed_fov_mask* is ``None`` when *fov_mask* was not supplied.
     """
-    # Sub-step 0a: canonical flip (existing)
+    # Sub-step 0a: canonical flip (existing) — flip the mask the same way.
     image = canonical_flip(image, eye_side)
+    if fov_mask is not None:
+        fov_mask = canonical_flip(fov_mask, eye_side)
 
     # Sub-step 0b: OD–fovea rotation normalization (new)
     if not enable_rotation:
-        return image, None
+        return image, None, fov_mask
 
     result = detect_od_fovea(image, return_heatmaps=return_heatmaps)
 
     if result.confident:
         image = rotate_to_horizontal(image, result.angle_deg)
+        if fov_mask is not None:
+            # BORDER_CONSTANT so reflected corners are NOT counted as FOV.
+            fov_mask = rotate_to_horizontal(
+                fov_mask, result.angle_deg, border_mode=cv2.BORDER_CONSTANT
+            )
 
-    return image, result
+    return image, result, fov_mask

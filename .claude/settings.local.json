@@ -401,7 +401,26 @@
       "Bash(cp ../../od_fovea_detector/src/confidence.py od_fovea_net/confidence.py)",
       "Bash(grep -vi \"^$\")",
       "Bash(npx --no-install eslint src/tabs/_VisionWidget.js src/tabs/_apiPredict.js src/tabs/Demo.js)",
-      "Bash(CI=false npx --no-install react-scripts build)"
+      "Bash(CI=false npx --no-install react-scripts build)",
+      "Bash(grep -iE '\\(^|/\\)\\(task|todo|handoff|brief|plan|done|wip|scratch|notes?|fixme|draft|backlog|roadmap|migration|refactor\\)[^/]*\\\\.\\(md|txt|sh\\)$')",
+      "Bash(grep -E '^[^/]+\\\\.\\(md|txt|sh\\)$')",
+      "PowerShell(wsl -l -v)",
+      "PowerShell(wsl -d Ubuntu bash -lc \"cd /mnt/e/dissertation-project/demo && ~/miniconda3/bin/conda run --no-capture-output -n dr-classifier uvicorn server.app.main:app --host 127.0.0.1 --port 8000\")",
+      "PowerShell($ok=$false; for\\($i=0;$i -lt 40;$i++\\){ try{ $r=Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 3 -UseBasicParsing; if\\($r.StatusCode -eq 200\\){ \"frontend up: HTTP \"+$r.StatusCode; $ok=$true; break } }catch{ Start-Sleep -Seconds 3 } }; if\\(-not $ok\\){ \"frontend not up yet\" })",
+      "PowerShell(try{ $r=Invoke-RestMethod -Uri \"http://127.0.0.1:8000/api/selftest\" -TimeoutSec 60; $r | ConvertTo-Json -Depth 5 -Compress }catch{ \"selftest error: $_\" })",
+      "Bash(ls -la web/.env*)",
+      "Bash(ls -la server/)",
+      "Bash(grep -nA8 -i confidence)",
+      "PowerShell(try{ $r=Invoke-RestMethod -Uri \"http://127.0.0.1:8000/api/health\" -TimeoutSec 5; \"ALIVE: \"+\\($r|ConvertTo-Json -Compress\\) }catch{ \"DOWN: $_\" })",
+      "Bash(BROWSER=none npm start)",
+      "Bash(ls dr02/input/)",
+      "Bash(ls dr02/results/)",
+      "Bash(ls dr02/results/attention_overlay/)",
+      "Bash(cd /e/dissertation-project/demo/web/public/pipeline/dr02/preprocessing)",
+      "Bash(ls stage_1_od_fovea_rotation/)",
+      "PowerShell($conns = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue; if \\($conns\\) { $conns | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force; \"killed PID $_\" } } else { \"nothing on :3000\" })",
+      "Bash(rm -f _edge_diag.png)",
+      "Bash(ls _edge_diag.png)"
     ]
   }
 }

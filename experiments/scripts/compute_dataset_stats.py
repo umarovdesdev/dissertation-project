@@ -54,7 +54,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
 
 from src.preprocessing.canonical_orientation import canonical_orientation
 from src.preprocessing.config import PreprocessingConfig
-from src.preprocessing.crop_resize import crop_and_resize
+from src.preprocessing.crop_resize import crop_and_resize, _fov_foreground_mask
 from src.preprocessing.flat_field import apply_flat_field
 
 
@@ -167,16 +167,22 @@ def _preprocess_stages_0_to_4(
     """
     image = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
 
-    # Stage 0 + 1: canonical flip + OD-fovea rotation.
+    # Stage 0 + 1: canonical flip + OD-fovea rotation. Carry the FOV mask through
+    # the same flip+rotation (BORDER_CONSTANT) so the stats match training.
+    mask_oriented = None
     if config.use_canonical_flip or config.use_od_fovea_rotation:
-        image, _ = canonical_orientation(
+        raw_mask = _fov_foreground_mask(image)
+        image, _, mask_oriented = canonical_orientation(
             image,
             eye_side=eye_side if config.use_canonical_flip else "unknown",
             enable_rotation=config.use_od_fovea_rotation,
+            fov_mask=raw_mask,
         )
 
     # Stage 2 + 3: FOV crop + isotropic resize → (image, mask).
-    image, fov_mask = crop_and_resize(image, config.target_size)
+    image, fov_mask = crop_and_resize(
+        image, config.target_size, fov_mask=mask_oriented
+    )
 
     # Stage 4: flat-field correction (adaptive σ = factor · FOV diameter).
     if config.use_flat_field:

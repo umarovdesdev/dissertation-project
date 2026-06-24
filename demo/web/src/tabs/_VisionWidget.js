@@ -53,7 +53,9 @@ function unproject(px, py, sw, sh, flipped) {
 export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
   const [data, setData] = useState(null);
   const [status, setStatus] = useState('idle'); // idle | loading | done | error
-  const [showStages, setShowStages] = useState(false);
+  // Index of the currently shown preprocessing-stage slide (step-by-step view).
+  const [stageIdx, setStageIdx] = useState(0);
+  const [retryNonce, setRetryNonce] = useState(0); // bump to force a re-fetch
   const [showMask, setShowMask] = useState(false);
   const [showHeat, setShowHeat] = useState(false);
   // Detector-path correction state (analysis coords): null until a confident
@@ -68,20 +70,46 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
     // for detector markers on non-GT images. GT samples don't depend on it.
     if (!enabled || !src) { setData(null); setStatus('idle'); return; }
     let alive = true;
+    let timer = null;
     setStatus('loading'); setData(null);
-    setShowStages(false); setShowMask(false); setShowHeat(false);
+    setStageIdx(0);
+    setShowMask(false); setShowHeat(false);
     setEdit(null); setDrag(null); setSaveStatus('idle');
-    visualizeImage(src, eye, name)
-      .then((d) => { if (alive) { setData(d); setStatus('done'); } })
-      .catch(() => { if (alive) { setStatus('error'); } });
-    return () => { alive = false; };
-  }, [src, eye, name, enabled]);
+
+    // The visualize call is best-effort and can hit a transient blip (backend
+    // mid-restart, momentary network drop). Retry a few times with linear
+    // backoff before surfacing "unavailable", so a brief hiccup self-heals
+    // instead of pinning the widget to the error state.
+    const MAX_ATTEMPTS = 5;
+    const attempt = (n) => {
+      visualizeImage(src, eye, name)
+        .then((d) => { if (alive) { setData(d); setStatus('done'); } })
+        .catch(() => {
+          if (!alive) return;
+          if (n < MAX_ATTEMPTS) {
+            timer = setTimeout(() => attempt(n + 1), Math.min(800 * n, 4000));
+          } else {
+            setStatus('error');
+          }
+        });
+    };
+    attempt(1);
+    return () => { alive = false; if (timer) clearTimeout(timer); };
+  }, [src, eye, name, enabled, retryNonce]);
 
   // Seed the editable centres from the detector payload once it lands.
   useEffect(() => {
     if (gt || !data) { setEdit(null); return; }
     const od = data.od_fovea || {};
-    if (od.confident && od.od_center && od.fovea_center) {
+    // Seed editable centres for ANY detection — confident or not — so the
+    // clinician can drag-correct a low-confidence best guess. The backend
+    // projects real centres for both cases now; only the all-zero sentinel
+    // (no detection at all) is skipped.
+    const hasCenters =
+      Array.isArray(od.od_center) && Array.isArray(od.fovea_center) &&
+      !(od.od_center[0] === 0 && od.od_center[1] === 0 &&
+        od.fovea_center[0] === 0 && od.fovea_center[1] === 0);
+    if (hasCenters) {
       setEdit({ od: [...od.od_center], fovea: [...od.fovea_center] });
     } else {
       setEdit(null);
@@ -97,11 +125,18 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
     return <div style={{ fontSize: 10, color: C.gray, marginTop: 6 }}>{t('demo.vision.loading')}</div>;
   }
   if (!gt && (status === 'error' || !data)) {
-    return <div style={{ fontSize: 10, color: C.amberT, marginTop: 6 }}>{t('demo.vision.unavailable')}</div>;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+        <span style={{ fontSize: 10, color: C.amberT }}>{t('demo.vision.unavailable')}</span>
+        <button onClick={() => setRetryNonce((n) => n + 1)} style={chipBtn}>
+          {t('demo.vision.retry')}
+        </button>
+      </div>
+    );
   }
 
   const od = !gt && data ? (data.od_fovea || {}) : {};
-  const editable = !gt && !!edit;       // detector path with a confident detection
+  const editable = !gt && !!edit;       // detector path with any seeded detection
   const sw = od.space_w || BOX, sh = od.space_h || BOX, flipped = !!od.flipped;
 
   // --- Resolve markers + mask from either ground truth or the detector. ---
@@ -138,7 +173,11 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
     ? src
     : (data && data.fov_base_png_b64 ? `data:image/png;base64,${data.fov_base_png_b64}` : src);
 
-  const stripSrc = data ? `data:image/png;base64,${data.preview_png_b64}` : null;
+  // Per-stage slides for the step-by-step view (one image per preprocessing
+  // stage). Available for any image once the backend has returned them (GT
+  // samples included, when the backend is reachable).
+  const stages = data && Array.isArray(data.stages) ? data.stages : [];
+  const stageI = Math.min(stageIdx, Math.max(0, stages.length - 1));
   const odHeat = od.od_heatmap_png_b64 ? `data:image/png;base64,${od.od_heatmap_png_b64}` : null;
   const fvHeat = od.fovea_heatmap_png_b64 ? `data:image/png;base64,${od.fovea_heatmap_png_b64}` : null;
   const hasHeat = !gt && (odHeat || fvHeat);
@@ -276,11 +315,19 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
               : <span style={{ color: C.greenT }}>{' · ✓ '}{t('demo.vision.confident')}</span>}
           </span>
         ) : (
-          <span style={{ color: C.amberT }}>⚠ {t('demo.vision.lowConfidence')}</span>
+          <span style={{ color: C.amberT }}>
+            ⚠ {t('demo.vision.lowConfidence')}
+            {' · '}<span style={{ color: C.teal, fontWeight: 700 }}>OD</span>
+            {' '}<span style={{ color: C.gray }}>{(odConf * 100).toFixed(0)}%</span>
+            {' · '}<span style={{ color: C.coral, fontWeight: 700 }}>{t('demo.vision.fovea')}</span>
+            {' '}<span style={{ color: C.gray }}>{(fvConf * 100).toFixed(0)}%</span>
+            {editable && <span style={{ color: C.gray }}>{' · '}{t('demo.vision.bestGuess')}</span>}
+          </span>
         )}
       </div>
 
-      {/* Edit hint + Save (detector path with a confident detection). */}
+      {/* Edit hint + Save (detector path with any seeded detection, incl. low
+          confidence — the clinician corrects the best guess). */}
       {editable && (
         <div style={{ marginTop: 5, fontSize: 10, color: 'var(--color-text-secondary,#666)' }}>
           <span style={{ color: C.gray }}>{t('demo.vision.dragHint')}</span>
@@ -306,11 +353,6 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
 
       {/* Toggles */}
       <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-        {stripSrc && (
-          <button onClick={() => setShowStages(v => !v)} style={chipBtn}>
-            {showStages ? t('demo.vision.hideStages') : t('demo.vision.showStages')}
-          </button>
-        )}
         {hasHeat && (
           <button onClick={() => { setShowHeat(v => !v); if (!showHeat) setShowMask(false); }} style={chipBtn}>
             {showHeat ? t('demo.vision.hideHeat') : t('demo.vision.showHeat')}
@@ -323,11 +365,53 @@ export default function VisionWidget({ src, eye, name, enabled, gt, t }) {
         )}
       </div>
 
-      {/* stage strip */}
-      {showStages && stripSrc && (
-        <div style={{ marginTop: 8, overflowX: 'auto' }}>
-          <img src={stripSrc} alt="stages" style={{ height: 120, display: 'block', borderRadius: 6 }} />
-          <div style={{ fontSize: 9, color: C.gray, marginTop: 3 }}>{t('demo.vision.stripCaption')}</div>
+      {/* Step-by-step preprocessing stages — one slide per stage (mirrors the
+          Step-by-Step Walkthrough block: prev/next + progress + caption). */}
+      {stages.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-secondary,#666)', marginBottom: 6 }}>
+            {t('demo.vision.stagesHeading')}
+          </div>
+          {/* Navigation */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, width: BOX }}>
+            <button
+              onClick={() => setStageIdx(i => Math.max(0, i - 1))}
+              disabled={stageI === 0}
+              style={{ ...chipBtn, opacity: stageI === 0 ? 0.3 : 1, cursor: stageI === 0 ? 'default' : 'pointer' }}
+            >
+              ←
+            </button>
+            <span style={{ fontSize: 10, color: C.gray }}>{stageI + 1} / {stages.length}</span>
+            <button
+              onClick={() => setStageIdx(i => Math.min(stages.length - 1, i + 1))}
+              disabled={stageI === stages.length - 1}
+              style={{ ...chipBtn, opacity: stageI === stages.length - 1 ? 0.3 : 1, cursor: stageI === stages.length - 1 ? 'default' : 'pointer' }}
+            >
+              →
+            </button>
+          </div>
+          {/* Progress segments — click to jump to a stage. */}
+          <div style={{ display: 'flex', gap: 3, marginBottom: 8, width: BOX }}>
+            {stages.map((s, i) => (
+              <button
+                key={s.key}
+                onClick={() => setStageIdx(i)}
+                title={s.caption}
+                style={{
+                  flex: 1, height: 5, border: 'none', borderRadius: 3, cursor: 'pointer',
+                  background: i <= stageI ? C.teal : 'var(--color-background-secondary,#e5e5e3)',
+                  opacity: i === stageI ? 1 : 0.55,
+                }}
+              />
+            ))}
+          </div>
+          {/* Current stage slide. */}
+          <div style={{ fontSize: 11, fontWeight: 600, marginBottom: 4 }}>{stages[stageI].caption}</div>
+          <img
+            src={`data:image/png;base64,${stages[stageI].png_b64}`}
+            alt={stages[stageI].caption}
+            style={{ width: BOX, height: BOX, objectFit: 'contain', display: 'block', borderRadius: 6, background: '#000' }}
+          />
         </div>
       )}
     </div>

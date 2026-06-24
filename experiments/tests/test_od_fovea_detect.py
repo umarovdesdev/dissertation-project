@@ -137,11 +137,16 @@ class TestRotateToHorizontal:
         rotated = rotate_to_horizontal(image, 0.0)
         np.testing.assert_array_equal(image, rotated)
 
-    def test_preserves_shape(self):
+    def test_expands_canvas_to_avoid_clipping(self):
+        # The rotation grows the canvas to the rotated bounding box so no part of
+        # a field-filling fundus is clipped (a tilted image must expand).
         rng = np.random.RandomState(123)
         image = rng.randint(0, 255, (200, 300, 3), dtype=np.uint8)
         rotated = rotate_to_horizontal(image, 15.0)
-        assert rotated.shape == image.shape
+        assert rotated.shape[0] >= image.shape[0]
+        assert rotated.shape[1] >= image.shape[1]
+        assert rotated.shape[2] == image.shape[2]
+        assert rotated.shape != image.shape  # a 15° tilt must expand the canvas
 
     def test_preserves_dtype(self):
         rng = np.random.RandomState(123)
