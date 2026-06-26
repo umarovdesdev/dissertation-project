@@ -4,9 +4,9 @@
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| Shear range | [-2.0°, 2.0°] | `default.yaml:58` |
-| Distribution | Uniform | `augmentation_unified.py:172` |
-| Probability | 0.3 (30%) | `default.yaml:59` |
+| Shear range | [-2.0°, 2.0°] | `default.yaml: shear_range` |
+| Distribution | Uniform | `augmentation_unified.py` (`_sample_affine_params`) |
+| Probability | 0.3 (30%) | `default.yaml: shear_prob` |
 
 ## Algorithm
 

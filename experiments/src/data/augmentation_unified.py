@@ -1,12 +1,18 @@
 """
-Stage 5: Augmentation — Unified Affine + PCA Color + Brightness/Contrast.
+Stage 6: Augmentation — Unified Affine + ColorJitter + Gaussian Noise + JPEG.
 
-Replaces :class:`FundusAugmentation` with a augmentation pipeline that
-applies a single unified affine transform (rotation + zoom + stretch + shear),
-stochastic interpolation, PCA colour jitter, and brightness/contrast scaling.
+Replaces :class:`FundusAugmentation` with an augmentation pipeline that applies,
+in order:
 
-Applied to **RGB uint8** images *before* ImageNet normalisation (Stage 4).
-All sub-transforms are individually toggleable via :class:`PreprocessingConfig`.
+1. a single unified affine transform (rotation + zoom + stretch + shear) with
+   stochastic interpolation;
+2. ColorJitter (brightness, contrast, saturation, hue) — each component sampled
+   and applied independently;
+3. Gaussian noise (acquisition-variability simulation);
+4. JPEG compression (acquisition-variability simulation).
+
+Applied to **RGB uint8** images *before* the Stage-7 normalisation.  All
+sub-transforms are individually toggleable via :class:`PreprocessingConfig`.
 
 References
 ----------
@@ -29,30 +35,18 @@ from src.preprocessing.config import PreprocessingConfig
 
 class UnifiedFundusAugmentation:
     """
-    augmentation: unified affine transform + PCA colour + brightness/contrast.
+    Augmentation: unified affine + ColorJitter + Gaussian noise + JPEG.
 
-    Applied to uint8 RGB images before ImageNet normalisation.  All
+    Applied to uint8 RGB images before the Stage-7 normalisation.  All
     sub-transforms are controlled by the boolean toggles in *config*.
 
     Args:
         config: :class:`PreprocessingConfig` controlling all augmentation
             parameters and toggle flags.
-        pca_eigvecs: PCA eigenvectors of shape ``(3, 3)`` computed offline
-            from the training set.  ``None`` disables PCA colour jitter
-            regardless of ``config.use_pca_color``.
-        pca_eigvals: PCA eigenvalues of shape ``(3,)``.  ``None`` disables
-            PCA colour jitter regardless of ``config.use_pca_color``.
     """
 
-    def __init__(
-        self,
-        config: PreprocessingConfig,
-        pca_eigvecs: np.ndarray | None = None,
-        pca_eigvals: np.ndarray | None = None,
-    ) -> None:
+    def __init__(self, config: PreprocessingConfig) -> None:
         self.config = config
-        self.pca_eigvecs = pca_eigvecs
-        self.pca_eigvals = pca_eigvals
 
     # ------------------------------------------------------------------
     # Public callable
@@ -68,8 +62,9 @@ class UnifiedFundusAugmentation:
 
         Application order:
         1. Unified affine (rotation + zoom + stretch + shear)
-        2. Brightness / contrast
-        3. PCA colour jitter
+        2. ColorJitter (brightness, contrast, saturation, hue)
+        3. Gaussian noise
+        4. JPEG compression
 
         Args:
             image: RGB uint8 NumPy array of shape ``(H, W, 3)``.
@@ -96,13 +91,17 @@ class UnifiedFundusAugmentation:
         interp = self._sample_interpolation()
         image = self._apply_affine(image, M, interp)
 
-        # 2. Brightness / contrast
-        if self.config.use_brightness_contrast:
-            image = self._apply_brightness_contrast(image)
+        # 2. ColorJitter (brightness / contrast / saturation / hue)
+        if self.config.use_color_jitter:
+            image = self._apply_color_jitter(image)
 
-        # 3. PCA colour jitter
-        if self.config.use_pca_color:
-            image = self._apply_pca_color(image)
+        # 3. Gaussian noise
+        if self.config.use_gaussian_noise:
+            image = self._apply_gaussian_noise(image)
+
+        # 4. JPEG compression
+        if self.config.use_jpeg_compression:
+            image = self._apply_jpeg_compression(image)
 
         return image
 
@@ -252,42 +251,102 @@ class UnifiedFundusAugmentation:
             borderMode=self.config.border_mode,
         )
 
-    def _apply_pca_color(self, image: np.ndarray) -> np.ndarray:
+    def _apply_color_jitter(self, image: np.ndarray) -> np.ndarray:
         """
-        Apply PCA colour jitter with probability ``config.pca_color_prob``.
+        Apply ColorJitter (brightness, contrast, saturation, hue).
 
-        No-op if ``pca_eigvecs`` or ``pca_eigvals`` are ``None``.
+        Each component is sampled from its configured range and applied
+        independently with probability ``config.color_jitter_prob``.  Brightness
+        and contrast operate in RGB; saturation and hue operate in HSV.
+
+        Args:
+            image: RGB uint8 array of shape ``(H, W, 3)``.
+
+        Returns:
+            Jittered RGB uint8 array of the same shape.
+        """
+        cfg = self.config
+        img = image.astype(np.float32)
+
+        # Brightness: scale RGB intensities.
+        if np.random.rand() < cfg.color_jitter_prob:
+            factor = float(np.random.uniform(*cfg.color_jitter_brightness_range))
+            img = img * factor
+
+        # Contrast: blend toward the per-image grayscale mean.
+        if np.random.rand() < cfg.color_jitter_prob:
+            factor = float(np.random.uniform(*cfg.color_jitter_contrast_range))
+            gray_mean = float(
+                np.mean(img @ np.array([0.299, 0.587, 0.114], dtype=np.float32))
+            )
+            img = (img - gray_mean) * factor + gray_mean
+
+        img = np.clip(img, 0, 255)
+
+        # Saturation: blend toward the per-pixel grayscale image.
+        if np.random.rand() < cfg.color_jitter_prob:
+            factor = float(np.random.uniform(*cfg.color_jitter_saturation_range))
+            gray = img @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
+            img = gray[..., None] + factor * (img - gray[..., None])
+            img = np.clip(img, 0, 255)
+
+        # Hue: rotate the H channel in HSV space.
+        if np.random.rand() < cfg.color_jitter_prob:
+            # hue range is a fraction of the colour circle ([-0.5, 0.5]); OpenCV
+            # encodes hue in [0, 180), so scale the shift by 180.
+            shift = float(np.random.uniform(*cfg.color_jitter_hue_range)) * 180.0
+            hsv = cv2.cvtColor(
+                np.clip(img, 0, 255).astype(np.uint8), cv2.COLOR_RGB2HSV
+            ).astype(np.float32)
+            hsv[..., 0] = (hsv[..., 0] + shift) % 180.0
+            img = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2RGB).astype(np.float32)
+
+        return np.clip(img, 0, 255).astype(np.uint8)
+
+    def _apply_gaussian_noise(self, image: np.ndarray) -> np.ndarray:
+        """
+        Add zero-mean Gaussian noise with probability ``config.gaussian_noise_prob``.
+
+        The standard deviation is sampled uniformly from
+        ``config.gaussian_noise_sigma_range`` on the 8-bit RGB scale.
 
         Args:
             image: RGB uint8 array.
 
         Returns:
-            Jittered RGB uint8 array (or original if skipped).
+            Noisy RGB uint8 array (or original if skipped).
         """
-        if self.pca_eigvecs is None or self.pca_eigvals is None:
-            return image
-        if np.random.rand() >= self.config.pca_color_prob:
+        if np.random.rand() >= self.config.gaussian_noise_prob:
             return image
 
-        alpha = np.random.normal(0.0, self.config.pca_color_sigma, size=3)
-        noise = self.pca_eigvecs @ (alpha * self.pca_eigvals)
+        sigma = float(np.random.uniform(*self.config.gaussian_noise_sigma_range))
+        noise = np.random.normal(0.0, sigma, size=image.shape).astype(np.float32)
         img_float = image.astype(np.float32) + noise
         return np.clip(img_float, 0, 255).astype(np.uint8)
 
-    def _apply_brightness_contrast(self, image: np.ndarray) -> np.ndarray:
+    def _apply_jpeg_compression(self, image: np.ndarray) -> np.ndarray:
         """
-        Apply brightness and contrast scaling with probability ``config.bc_prob``.
+        Apply lossy JPEG re-compression with probability ``config.jpeg_prob``.
+
+        The quality factor is sampled uniformly from
+        ``config.jpeg_quality_range``.  The image is round-tripped through the
+        JPEG codec (RGB→BGR for encoding so the codec's YCbCr transform matches
+        real-world acquisition, then BGR→RGB back).
 
         Args:
             image: RGB uint8 array.
 
         Returns:
-            Adjusted RGB uint8 array (or original if skipped).
+            Re-compressed RGB uint8 array (or original if skipped).
         """
-        if np.random.rand() >= self.config.bc_prob:
+        if np.random.rand() >= self.config.jpeg_prob:
             return image
 
-        alpha = float(np.random.uniform(*self.config.brightness_alpha_range))
-        beta = float(np.random.uniform(*self.config.brightness_beta_range))
-        img_float = image.astype(np.float32) * alpha + beta
-        return np.clip(img_float, 0, 255).astype(np.uint8)
+        lo, hi = self.config.jpeg_quality_range
+        quality = int(np.random.randint(int(lo), int(hi) + 1))
+        bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        ok, buf = cv2.imencode(".jpg", bgr, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
+        if not ok:
+            return image
+        decoded = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+        return cv2.cvtColor(decoded, cv2.COLOR_BGR2RGB)

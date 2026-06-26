@@ -152,10 +152,6 @@ class PreprocessingPipeline:
         config: :class:`PreprocessingConfig` controlling all parameters
             and toggle flags.
         is_training: ``True`` enables stochastic CLAHE and augmentation.
-        pca_eigvecs: PCA eigenvectors of shape ``(3, 3)`` for colour
-            augmentation.  ``None`` disables PCA colour jitter.
-        pca_eigvals: PCA eigenvalues of shape ``(3,)``.  ``None`` disables
-            PCA colour jitter.
         input_color_space: ``"bgr"`` or ``"rgb"``.  Controls BGR→RGB
             conversion at the pipeline entry point.  Default ``"bgr"``
             matches :func:`cv2.imread` output.
@@ -165,8 +161,6 @@ class PreprocessingPipeline:
         self,
         config: PreprocessingConfig,
         is_training: bool = False,
-        pca_eigvecs: np.ndarray | None = None,
-        pca_eigvals: np.ndarray | None = None,
         input_color_space: str = "bgr",
     ) -> None:
         if input_color_space not in ("bgr", "rgb"):
@@ -193,11 +187,7 @@ class PreprocessingPipeline:
         )
         # Lazy import to break the circular dependency with src.data
         from src.data.augmentation_unified import UnifiedFundusAugmentation  # noqa: PLC0415
-        self._augmentation = UnifiedFundusAugmentation(
-            config=config,
-            pca_eigvecs=pca_eigvecs,
-            pca_eigvals=pca_eigvals,
-        )
+        self._augmentation = UnifiedFundusAugmentation(config=config)
 
     # ------------------------------------------------------------------
     # Core callable
@@ -705,8 +695,6 @@ class PreprocessingPipeline:
     def create_for_training(
         cls,
         config: PreprocessingConfig,
-        pca_eigvecs: np.ndarray | None = None,
-        pca_eigvals: np.ndarray | None = None,
         input_color_space: str = "bgr",
     ) -> "PreprocessingPipeline":
         """
@@ -714,8 +702,6 @@ class PreprocessingPipeline:
 
         Args:
             config: :class:`PreprocessingConfig` instance.
-            pca_eigvecs: Optional PCA eigenvectors for colour jitter.
-            pca_eigvals: Optional PCA eigenvalues for colour jitter.
             input_color_space: ``"bgr"`` (default) or ``"rgb"``.
 
         Returns:
@@ -724,8 +710,6 @@ class PreprocessingPipeline:
         return cls(
             config,
             is_training=True,
-            pca_eigvecs=pca_eigvecs,
-            pca_eigvals=pca_eigvals,
             input_color_space=input_color_space,
         )
 
@@ -772,8 +756,9 @@ class PreprocessingPipeline:
             use_od_fovea_rotation=False,
             use_flat_field=False,
             use_clahe=False,
-            use_pca_color=False,
-            use_brightness_contrast=False,
+            use_color_jitter=False,
+            use_gaussian_noise=False,
+            use_jpeg_compression=False,
             use_shear=False,
             use_stretch=False,
             target_size=target_size,

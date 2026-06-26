@@ -53,12 +53,14 @@ The preprocessing pipeline is defined as an integral component of the diagnostic
 
 ### Stage 6 — Augmentation (train only)
 
-- Unified affine: rotation (σ adaptive from Stage 1 detection uncertainty), zoom [0.9, 1.1], shear, stretch
-- Brightness/contrast jitter
-- PCA color jitter (Krizhevsky-style, σ = 0.1)
-- Horizontal re-flip for augmentation diversity (no vertical flip)
+Applied on-the-fly during training only, with independently sampled parameters and application probabilities, in the following order:
+
+- Unified affine: rotation (σ adaptive from Stage 1 detection uncertainty), zoom [0.9, 1.1], anisotropic stretch, shear
+- ColorJitter: brightness, contrast, and saturation (each factor ∈ [0.9, 1.1]) and hue (shift ∈ [−0.02, 0.02]); each component applied independently with p = 0.5
+- Gaussian noise: σ ∈ [2, 6] on the 8-bit RGB scale, p = 0.15 (simulates variability in acquisition noise)
+- JPEG compression: quality ∈ [70, 100], p = 0.20 (simulates variability in acquisition/compression)
 - Applied before Stage 7 (operates on uint8 images)
-- Implementation: `augmentation_v4.py`
+- Implementation: `augmentation_unified.py`
 
 ### Stage 7 — Dataset-Specific Normalization (always on, always last)
 

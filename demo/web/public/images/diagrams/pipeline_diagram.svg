@@ -140,7 +140,7 @@
   <rect x="20" y="732" width="340" height="92" rx="8" class="box-train"/>
   <text x="190" y="752" text-anchor="middle" dominant-baseline="central" class="text-train-title">Stage 6 : Augmentation (Train Only)</text>
   <text x="190" y="772" text-anchor="middle" dominant-baseline="central" class="text-train-detail">Unified affine: rotation (adaptive sigma), zoom, shear</text>
-  <text x="190" y="790" text-anchor="middle" dominant-baseline="central" class="text-train-detail">PCA color jitter (sigma=0.1) + brightness/contrast</text>
+  <text x="190" y="790" text-anchor="middle" dominant-baseline="central" class="text-train-detail">ColorJitter + Gaussian noise + JPEG compression</text>
   <text x="190" y="808" text-anchor="middle" dominant-baseline="central" class="param-text">Rotation sigma from Stage 1 OD-fovea confidence</text>
 </g>
 <!-- Train-only badge -->

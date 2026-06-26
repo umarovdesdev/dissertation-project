@@ -92,7 +92,6 @@ dr-classifier/
 │   └── VERSION_SYNC.md
 ├── scripts/                     # Utilities & verification
 │   ├── generate_report.py       #   Auto-generate dissertation-ready report
-│   ├── compute_pca_eigvecs.py   #   PCA eigenvectors for colour augmentation
 │   ├── verify_*.py              #   Integration tests (datasets, models, experiments)
 │   └── smoke_test.py
 ├── tests/                       # Unit tests

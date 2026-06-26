@@ -149,11 +149,11 @@ Stage 6 (augmentation) is inserted **before** Stage 7 (normalization) because au
 
 **Purpose:** Increase training data variability, reduce overfitting, mitigate class imbalance effects.
 
-**Operation (unified affine + color):**
+**Operation (on-the-fly, in order):**
 - Unified affine transform: rotation (σ adaptive from Stage 1 OD-fovea confidence, fallback σ=13.0°, clipped ±40°), zoom [0.9, 1.1], optional shear (±2°, p=0.3), optional stretch ([1/1.05, 1.05])
-- Brightness/contrast jitter (α ∈ [0.9, 1.1], β ∈ [−10, 10], p=0.5)
-- PCA color jitter (Krizhevsky-style, σ=0.1, p=0.5)
-- Horizontal re-flip for augmentation diversity (no vertical flip)
+- ColorJitter: brightness, contrast, saturation (each factor ∈ [0.9, 1.1]) and hue (shift ∈ [−0.02, 0.02]); each component applied independently with p=0.5
+- Gaussian noise (σ ∈ [2, 6] on the 8-bit RGB scale, p=0.15)
+- JPEG compression (quality ∈ [70, 100], p=0.20)
 
 Applied only during training. At inference: no augmentation (deterministic pipeline).
 

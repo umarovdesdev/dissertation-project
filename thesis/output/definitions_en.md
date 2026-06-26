@@ -12,7 +12,7 @@
 
 **Cross-validation** — a validation strategy using 5-fold patient-level stratified splitting; for each fold, four folds serve as training data and one as test data, with no patient's images appearing in both partitions; metrics are reported as mean ± standard deviation across folds.
 
-**Data augmentation** — image transformations (flips, rotations, zoom, brightness/contrast, PCA colour) applied to the training data to increase variability and improve generalization; the train-only Stage 6 of the pipeline.
+**Data augmentation** — image transformations (unified affine, ColorJitter [brightness/contrast/saturation/hue], Gaussian noise, JPEG compression) applied to the training data to increase variability and improve generalization; the train-only Stage 6 of the pipeline.
 
 **Dataset-specific normalization** — channel-wise normalization (Stage 7) using mean and standard deviation computed from the training split of the primary dataset rather than ImageNet statistics; the normalization of the full pipeline.
 

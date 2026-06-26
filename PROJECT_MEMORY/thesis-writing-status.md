@@ -21,7 +21,9 @@ Everything remaining is **Phase 2, hard-blocked on real experiment results** (§
 
 ## Chapter 3 (Methodology) detail — drafted & APPROVED 2026-06-09
 
-All 13 sections (§3.1.1–§3.1.4, §3.2.1–§3.2.2, §3.3.1–§3.3.4, §3.4.1–§3.4.2, §3.C) under `thesis/chapters/03-methodology/`. Real artifacts cited (verified on disk): RES-VAL `od_fovea_idrid_metrics.json` (OD within-1-OD-radius 0.673 train/0.612 test; fovea ~0% — honest disclosure in §3.1.1); RES-NORM `eyepacs_norm_stats.json` (mean ≈[0.506,0.505,0.504], std ≈[0.090,0.074,0.058]); RES-PCA eigvals ≈[20.42,128.06,2374.04] (one dominant chromatic axis ~18×, §3.1.3).
+All 13 sections (§3.1.1–§3.1.4, §3.2.1–§3.2.2, §3.3.1–§3.3.4, §3.4.1–§3.4.2, §3.C) under `thesis/chapters/03-methodology/`. Real artifacts cited (verified on disk): RES-VAL `od_fovea_idrid_metrics.json` (OD within-1-OD-radius 0.673 train/0.612 test; fovea ~0% — honest disclosure in §3.1.1); RES-NORM `eyepacs_norm_stats.json` (mean ≈[0.506,0.505,0.504], std ≈[0.090,0.074,0.058]).
+
+**Stage-6 augmentation redefined (2026-06-26):** §3.1.3 no longer uses PCA colour jitter — replaced by **ColorJitter** (brightness/contrast/saturation ∈ [0.9,1.1], hue ∈ [−0.02,0.02], each component p=0.5) plus **acquisition-variability** augmentations **Gaussian noise** (σ∈[2,6], p=0.15) and **JPEG compression** (quality∈[70,100], p=0.20). Final on-the-fly order: affine → ColorJitter → Gaussian noise → JPEG. RES-PCA artifact **retired** (no estimated colour basis); `scripts/compute_pca_eigvecs.py` deleted; OD-3 Stage 6 updated in INVARIANTS v6.1.0. Code: `experiments/src/data/augmentation_unified.py`, `config.py`, `configs/default.yaml`. ⚠️ FIG-3.8 render + demo `stage_6_augmentation` images still depict the old PCA aug — regenerate.
 
 **Carry-forward flags for Ch 4 / corpus completion:**
 - CFC-2.8 composite IV binds §4.2 (integrated-config only, never preprocessing-alone). See [[config-d-pretraining]].

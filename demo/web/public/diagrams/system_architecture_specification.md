@@ -138,7 +138,7 @@ The preprocessing module $\mathcal{P}$ transforms a raw BGR fundus image and its
 | 3 | FOV mask generation (binary mask → 4th channel) | Yes |
 | 4 | Flat-field illumination correction (adaptive σ = 0.07·D) | Yes |
 | 5 | Dual-constraint CLAHE (LAB L-channel, stochastic at train) | Stochastic (train) |
-| 6 | Integrated augmentation (affine + color, train only) | Stochastic (train only) |
+| 6 | Integrated augmentation (affine + ColorJitter + noise/JPEG, train only) | Stochastic (train only) |
 | 7 | Dataset-specific normalization → tensor | Yes |
 
 ### 4.2 Pipeline Configurations

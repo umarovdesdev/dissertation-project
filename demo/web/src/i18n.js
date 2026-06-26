@@ -313,7 +313,7 @@ const translations = {
     'tooltip.stage_3': 'Stage 3: Binary FOV mask generated as 4th input channel (1=retina, 0=background).',
     'tooltip.stage_4': 'Stage 4: Flat-field correction removes illumination gradient. Formula: corrected = image − blur(σ=0.07·D) + 128.',
     'tooltip.stage_5': 'Stage 5: Upgraded CLAHE with dual-constraint clip limit dramatically enhances vessel and lesion contrast.',
-    'tooltip.stage_6': 'Stage 6: Integrated augmentation (train only). 360° rotation, PCA color jitter, adaptive σ.',
+    'tooltip.stage_6': 'Stage 6: Integrated augmentation (train only). Affine (360° rotation, adaptive σ) + ColorJitter + Gaussian noise + JPEG compression.',
     'tooltip.stage_7': 'Stage 7: Dataset-specific channel-wise normalization → 4ch tensor (RGB + FOV mask).',
     'tooltip.method_flip': 'Canonical flip comparison: left eye (OD on left) → flipped (OD on right) → right eye (already correct).',
     'tooltip.method_flatfield': 'Flat-field: input → estimated illumination envelope (blur σ=0.07·D) → corrected (uniform brightness).',

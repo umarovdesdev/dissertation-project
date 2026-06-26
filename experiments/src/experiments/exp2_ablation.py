@@ -64,43 +64,43 @@ _ABLATION_LEVELS: list[dict] = [
         "name": "baseline",
         "description": "Stages 1+4 only: FOV crop+resize + ImageNet normalize",
         "flags": dict(use_canonical_flip=False, use_od_fovea_rotation=False,
-                      use_flat_field=False, use_clahe=False, use_pca_color=False,
-                      use_brightness_contrast=False, use_shear=False, use_stretch=False),
+                      use_flat_field=False, use_clahe=False, use_color_jitter=False,
+                      use_gaussian_noise=False, use_jpeg_compression=False, use_shear=False, use_stretch=False),
     },
     {
         "name": "baseline_canonical_flip",
         "description": "Stages 0+1+4",
         "flags": dict(use_canonical_flip=True, use_od_fovea_rotation=False,
-                      use_flat_field=False, use_clahe=False, use_pca_color=False,
-                      use_brightness_contrast=False, use_shear=False, use_stretch=False),
+                      use_flat_field=False, use_clahe=False, use_color_jitter=False,
+                      use_gaussian_noise=False, use_jpeg_compression=False, use_shear=False, use_stretch=False),
     },
     {
         "name": "baseline_flat_field",
         "description": "Stages 1+2+4",
         "flags": dict(use_canonical_flip=False, use_od_fovea_rotation=False,
-                      use_flat_field=True, use_clahe=False, use_pca_color=False,
-                      use_brightness_contrast=False, use_shear=False, use_stretch=False),
+                      use_flat_field=True, use_clahe=False, use_color_jitter=False,
+                      use_gaussian_noise=False, use_jpeg_compression=False, use_shear=False, use_stretch=False),
     },
     {
         "name": "baseline_clahe",
         "description": "Stages 1+3+4",
         "flags": dict(use_canonical_flip=False, use_od_fovea_rotation=False,
-                      use_flat_field=False, use_clahe=True, use_pca_color=False,
-                      use_brightness_contrast=False, use_shear=False, use_stretch=False),
+                      use_flat_field=False, use_clahe=True, use_color_jitter=False,
+                      use_gaussian_noise=False, use_jpeg_compression=False, use_shear=False, use_stretch=False),
     },
     {
         "name": "baseline_augmentation",
         "description": "Stages 1+4+5 (train-time aug only)",
         "flags": dict(use_canonical_flip=False, use_od_fovea_rotation=False,
-                      use_flat_field=False, use_clahe=False, use_pca_color=True,
-                      use_brightness_contrast=True, use_shear=True, use_stretch=True),
+                      use_flat_field=False, use_clahe=False, use_color_jitter=True,
+                      use_gaussian_noise=True, use_jpeg_compression=True, use_shear=True, use_stretch=True),
     },
     {
         "name": "full",
         "description": "All stages 0+1+2+3+4+5+6+7",
         "flags": dict(use_canonical_flip=True, use_od_fovea_rotation=True,
-                      use_flat_field=True, use_clahe=True, use_pca_color=True,
-                      use_brightness_contrast=True, use_shear=True, use_stretch=True),
+                      use_flat_field=True, use_clahe=True, use_color_jitter=True,
+                      use_gaussian_noise=True, use_jpeg_compression=True, use_shear=True, use_stretch=True),
     },
 ]
 
@@ -167,11 +167,15 @@ def _build_pipeline(
         zoom_range=tuple(prep_cfg.get("zoom_range", [0.9, 1.1])),
         shear_range=tuple(prep_cfg.get("shear_range", [-2.0, 2.0])),
         shear_prob=prep_cfg.get("shear_prob", 0.3),
-        pca_color_sigma=prep_cfg.get("pca_color_sigma", 0.1),
-        pca_color_prob=prep_cfg.get("pca_color_prob", 0.5),
-        brightness_alpha_range=tuple(prep_cfg.get("brightness_alpha_range", [0.9, 1.1])),
-        brightness_beta_range=tuple(prep_cfg.get("brightness_beta_range", [-10.0, 10.0])),
-        bc_prob=prep_cfg.get("bc_prob", 0.5),
+        color_jitter_brightness_range=tuple(prep_cfg.get("color_jitter_brightness_range", [0.9, 1.1])),
+        color_jitter_contrast_range=tuple(prep_cfg.get("color_jitter_contrast_range", [0.9, 1.1])),
+        color_jitter_saturation_range=tuple(prep_cfg.get("color_jitter_saturation_range", [0.9, 1.1])),
+        color_jitter_hue_range=tuple(prep_cfg.get("color_jitter_hue_range", [-0.02, 0.02])),
+        color_jitter_prob=prep_cfg.get("color_jitter_prob", 0.5),
+        gaussian_noise_sigma_range=tuple(prep_cfg.get("gaussian_noise_sigma_range", [2.0, 6.0])),
+        gaussian_noise_prob=prep_cfg.get("gaussian_noise_prob", 0.15),
+        jpeg_quality_range=tuple(prep_cfg.get("jpeg_quality_range", [70, 100])),
+        jpeg_prob=prep_cfg.get("jpeg_prob", 0.2),
         **level_flags,
     )
     return PreprocessingPipeline(preproc_config, is_training=is_training)
@@ -401,8 +405,8 @@ def _run_clahe_sweep(
         # Build a config with clahe enabled and the swept clip_factor
         sweep_flags = dict(
             use_canonical_flip=False, use_flat_field=False,
-            use_clahe=True, use_pca_color=False,
-            use_brightness_contrast=False, use_shear=False, use_stretch=False,
+            use_clahe=True, use_color_jitter=False,
+            use_gaussian_noise=False, use_jpeg_compression=False, use_shear=False, use_stretch=False,
         )
         sweep_prep_cfg = dict(prep_cfg)
         sweep_prep_cfg["clahe_clip_factor"] = clip_factor

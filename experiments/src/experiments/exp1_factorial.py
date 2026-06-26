@@ -55,8 +55,6 @@ def _make_preprocessing(
     kind: str,
     model_name: str,
     is_training: bool,
-    pca_eigvecs: np.ndarray | None = None,
-    pca_eigvals: np.ndarray | None = None,
     dataset_mean: tuple[float, float, float] | None = None,
     dataset_std: tuple[float, float, float] | None = None,
 ) -> PreprocessingPipeline:
@@ -68,8 +66,6 @@ def _make_preprocessing(
         model_name: ``"resnet50"`` or ``"efficientnet_b3"`` — selects the
             augmentation preset for the full pipeline.
         is_training: Enables stochastic CLAHE and augmentation when ``True``.
-        pca_eigvecs: PCA eigenvectors for colour augmentation (optional).
-        pca_eigvals: PCA eigenvalues for colour augmentation (optional).
         dataset_mean: EyePACS-computed per-channel mean for Stage 7
             dataset-specific normalize (full pipeline only). ``None`` falls
             back to ImageNet stats (and prints a warning).
@@ -95,11 +91,7 @@ def _make_preprocessing(
         config.dataset_std = tuple(dataset_std)
 
     if is_training:
-        return PreprocessingPipeline.create_for_training(
-            config,
-            pca_eigvecs=pca_eigvecs,
-            pca_eigvals=pca_eigvals,
-        )
+        return PreprocessingPipeline.create_for_training(config)
     return PreprocessingPipeline.create_for_inference(config)
 
 
@@ -282,25 +274,13 @@ def run(
     fold_range = [fold] if fold is not None else list(range(n_folds))
     configs_to_run = _configs_to_run or list(_CONFIGS.keys())
 
-    # ── PCA eigenvectors (optional) ───────────────────────────────────────────
-    pca_dir = Path(config.get("paths", {}).get("output_dir", "outputs/")).parent / "data" / "processed"
-    pca_eigvecs: np.ndarray | None = None
-    pca_eigvals: np.ndarray | None = None
-    eigvecs_path = pca_dir / "eyepacs_pca_eigvecs.npy"
-    eigvals_path = pca_dir / "eyepacs_pca_eigvals.npy"
-    if eigvecs_path.exists() and eigvals_path.exists():
-        pca_eigvecs = np.load(str(eigvecs_path))
-        pca_eigvals = np.load(str(eigvals_path))
-        print(f"  PCA eigenvectors loaded from {eigvecs_path}")
-    else:
-        print("  PCA eigenvectors not found — colour augmentation disabled.")
-
     # ── Dataset-specific normalize stats (Stage 7, D-2) ───────────────────────
     # Computed by scripts/compute_dataset_stats.py (Stages 0–4, mask=1.0 only).
     # Consumed by the full configs (B/D). Absent → ImageNet fallback (warned).
+    processed_dir = Path(config.get("paths", {}).get("output_dir", "outputs/")).parent / "data" / "processed"
     dataset_mean: tuple[float, float, float] | None = None
     dataset_std: tuple[float, float, float] | None = None
-    stats_path = pca_dir / "eyepacs_norm_stats.json"
+    stats_path = processed_dir / "eyepacs_norm_stats.json"
     if stats_path.exists():
         with open(stats_path) as f:
             _stats = json.load(f)
@@ -422,7 +402,6 @@ def run(
             # preprocessing pipelines (augmentation integrated into train pipeline)
             train_preproc = _make_preprocessing(
                 preproc_kind, model_name, is_training=True,
-                pca_eigvecs=pca_eigvecs, pca_eigvals=pca_eigvals,
                 dataset_mean=dataset_mean, dataset_std=dataset_std,
             )
             val_preproc = _make_preprocessing(

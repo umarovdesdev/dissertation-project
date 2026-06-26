@@ -167,25 +167,7 @@ r'''subprocess.run([
 '''))
 
 cells.append(md(
-"""## 5. (Optional) PCA eigenvectors for colour augmentation
-
-One-shot. If skipped, colour augmentation is simply disabled (exp1 prints a
-notice and continues). Output dir matches where exp1 looks:
-`/kaggle/working/data/processed`. Comment out the cell to skip."""))
-cells.append(code(
-r'''subprocess.run([
-    sys.executable, "scripts/compute_pca_eigvecs.py",
-    "--dataset", "eyepacs",
-    "--images-root", str(Path(EYEPACS_ROOT) / "train"),
-    "--labels-csv", str(Path(EYEPACS_ROOT) / "trainLabels.csv"),
-    "--output-dir", "/kaggle/working/data/processed",
-    "--n-samples", "5000",
-    "--seed", "42",
-], check=True)
-'''))
-
-cells.append(md(
-"""## 6. Dataset-specific normalization stats (Stage 7, D-2) — REQUIRED for Config D
+"""## 5. Dataset-specific normalization stats (Stage 7, D-2) — REQUIRED for Config D
 
 The thesis (`methods/preprocessing-pipeline.md`, Stage 7) specifies that the
 full configs (B/D) normalize with mean/std **computed from the EyePACS training
@@ -207,7 +189,7 @@ r'''subprocess.run([
 ], check=True)
 '''))
 
-cells.append(md("## 7. Train one fold\n\nSet `FOLD` per session. `--resume` continues from `last_checkpoint.pt` if the previous output is attached."))
+cells.append(md("## 6. Train one fold\n\nSet `FOLD` per session. `--resume` continues from `last_checkpoint.pt` if the previous output is attached."))
 cells.append(code(
 r'''FOLD = 0   # <-- change to 1, 2, 3, 4 in subsequent sessions
 
@@ -220,7 +202,7 @@ subprocess.run([
 ], check=True)
 '''))
 
-cells.append(md("## 8. Inspect outputs\n\nOutputs already live under `/kaggle/working/outputs`, which persists with *Save Version* — no copy needed. Best checkpoint is `best_model.pt`."))
+cells.append(md("## 7. Inspect outputs\n\nOutputs already live under `/kaggle/working/outputs`, which persists with *Save Version* — no copy needed. Best checkpoint is `best_model.pt`."))
 cells.append(code(
 r'''ckpt_dir = Path("/kaggle/working/outputs/exp1/checkpoints") / f"D_fold{FOLD}"
 print("checkpoint dir:", ckpt_dir)
@@ -230,7 +212,7 @@ print("\n--- metrics.csv (tail) ---")
 '''))
 
 cells.append(md(
-"""## 9. Multi-fold strategy
+"""## 8. Multi-fold strategy
 
 Run this notebook five times, once per fold:
 

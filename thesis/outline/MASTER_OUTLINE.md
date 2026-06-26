@@ -303,7 +303,7 @@
   - **(Stage 3) FOV Mask Generation** (always on): Binary mask (1.0 = fundus, 0.0 = zero-padding) appended as 4th input channel.
   - **(Stage 4) Adaptive Flat-Field Correction** (always on): `corrected = image − GaussianBlur(image, σ=0.07·D) + mean`. Adaptive σ proportional to FOV diameter D.
   - **(Stage 5) Upgraded CLAHE** (always on): Dual-constraint clip limit (`CL_tile = min(clip_factor × tile_area/256, global_threshold × tile_area)`) on LAB L-channel; stochastic at train time (p=0.8).
-  - **(Stage 6) Augmentation** (train only): Unified affine + brightness/contrast + PCA color jitter.
+  - **(Stage 6) Augmentation** (train only): Unified affine + ColorJitter (brightness/contrast/saturation/hue) + Gaussian noise + JPEG compression.
   - **(Stage 7) Dataset-Specific Normalization** (always on, always last): `(x − μ_dataset)/σ_dataset → tensor`; mean/std computed from training set per dataset.
 - Baseline (Exp 1 A/C): stretch-resize 512×512 + ImageNet normalize (3 channels).
 - Full pipeline (Exp 1 B/D): all 8 stages (4 channels: RGB + FOV mask).
@@ -314,7 +314,7 @@
 - Implementation via OpenCV (LC-SQOPUS_Q3, p. 82–83).
 
 #### 3.1.3 Augmentation Strategy for Class Imbalance Mitigation
-- Specific operations: horizontal/vertical flips, rotation ±15°, zoom ±10%, brightness variation.
+- Final on-the-fly augmentation pipeline (train only), applied in order: (1) unified affine (rotation, zoom, anisotropic stretch, shear); (2) ColorJitter — brightness/contrast/saturation (each factor ∈ [0.9, 1.1]) and hue (shift ∈ [−0.02, 0.02]), each component p = 0.5; (3) Gaussian noise (σ ∈ [2, 6], p = 0.15); (4) JPEG compression (quality ∈ [70, 100], p = 0.20). The Gaussian-noise and JPEG-compression terms simulate variability in image-acquisition conditions.
 - Dual function: regularization (§2.2.3) and class imbalance mitigation.
 - Class distribution documented: Class 0 = 73.5% training / 49.3% test; Classes 3+4 = 4.5% training / 13.3% test (LC-CONF, p. 498; ARGUMENT_MAP SC-1.4).
 

@@ -4,14 +4,14 @@
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| Distribution | Truncated Gaussian | `augmentation_unified.py:147-148` |
-| σ (sigma) | 13.0° | `default.yaml:54` |
-| Clip boundary | ±40.0° | `default.yaml:55` |
-| Adaptive sigma | Enabled | `default.yaml:32` |
-| Fallback sigma | 13.0° | `default.yaml:33` |
+| Distribution | Truncated Gaussian | `augmentation_unified.py` (`_sample_affine_params`) |
+| σ (sigma) | 13.0° | `default.yaml: rotation_sigma` |
+| Clip boundary | ±40.0° | `default.yaml: rotation_clip` |
+| Adaptive sigma | Enabled | `default.yaml: adaptive_rotation_sigma` |
+| Fallback sigma | 13.0° | `default.yaml: fallback_rotation_sigma` |
 | Probability | 100% (always applied) | — |
-| Interpolation | Stochastic: 60% linear, 30% cubic, 10% nearest | `default.yaml:60` |
-| Border mode | BORDER_REFLECT | `default.yaml:61` |
+| Interpolation | Stochastic: 60% linear, 30% cubic, 10% nearest | `default.yaml: interp_weights` |
+| Border mode | BORDER_REFLECT | `default.yaml: border_mode` |
 
 ## Algorithm
 

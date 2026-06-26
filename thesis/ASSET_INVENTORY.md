@@ -38,7 +38,7 @@ This inventory distinguishes three things that are easy to conflate:
 | **Exp 6** | H-6 | Device domain shift on DDR/ODIR-5K/RFMiD | No real run; demo-dashboard preview PNG | **❌ NOT RUN** |
 | **Exp 7** | — | Small-data 5-fold IDRiD → Clinical | No real run; demo-dashboard preview `exp7_small_data.json` + PNG | **❌ NOT RUN** |
 | **Validation** | — (supporting Ch 3/Exp 4) | OD/fovea detector accuracy on IDRiD | **Real** `od_fovea_idrid_metrics.json` + montage (516 imgs) | **✅ COMPLETE** |
-| **Preproc artifacts** | — (Ch 3) | norm stats, PCA color basis | **Real** EyePACS + IDRiD norm stats, EyePACS PCA eigvals/eigvecs | **✅ COMPLETE** |
+| **Preproc artifacts** | — (Ch 3) | norm stats | **Real** EyePACS + IDRiD norm stats | **✅ COMPLETE** |
 
 ### 1.2 Resource tally
 
@@ -54,7 +54,7 @@ This inventory distinguishes three things that are easy to conflate:
 **Writable now (no result dependency):**
 - **Chapter 1 (Problem Domain)** — literature review; dataset sample montages available for context.
 - **Chapter 2 (Theoretical Foundations)** — pure theory; some diagrams reusable, others to draw.
-- **Chapter 3 (Methodology)** — ✅ **fully unblocked.** Every pipeline stage has a real render; OD/fovea validation, norm stats, PCA basis, training-config and evaluation-framework tables all exist.
+- **Chapter 3 (Methodology)** — ✅ **fully unblocked.** Every pipeline stage has a real render; OD/fovea validation, norm stats, training-config and evaluation-framework tables all exist. (FIG-3.8 Stage-6 render to be regenerated for the ColorJitter/noise/JPEG augmentation.)
 - **Chapter 6 (System Architecture)** — design-only chapter; system diagram + webapp screenshots available. **Only blocker:** UML diagrams (component/sequence/class/activity/ER) are not on disk.
 - **§4.1 (Datasets & Configuration)** — dataset architecture table + class distribution + samples available.
 
@@ -101,7 +101,7 @@ This inventory distinguishes three things that are easy to conflate:
 | FIG-3.5 | figure | Stage 3 — FOV mask (4th channel) | §3.1.1 | defense / demo | `defense/presentation/assets/preprocessing/14_fov_mask/stage3_fov_mask.png` | ✅ AVAILABLE |
 | FIG-3.6 | figure | Stage 4 — Adaptive flat-field correction | §3.1.1 | defense / demo | `defense/presentation/assets/preprocessing/15_flatfield/stage4_flatfield.png` | ✅ AVAILABLE |
 | FIG-3.7 | figure | Stage 5 — Dual-constraint CLAHE (incl. polar variant + vessel maps) | §3.1.1, §3.1.2 | defense / demo | `defense/presentation/assets/preprocessing/17_clahe_polar/stage5_clahe.png`; `demo/web/public/pipeline/dr04/preprocessing/stage_5_clahe/polar/` | ✅ AVAILABLE |
-| FIG-3.8 | figure | Stage 6 — Augmentation (rotation/translation/scale/shear/PCA-color/brightness) | §3.1.3 | defense / demo | `defense/presentation/assets/preprocessing/19_aug_rotation/ … 24_aug_brightness_contrast/stage6_augmentation.png` | ✅ AVAILABLE |
+| FIG-3.8 | figure | Stage 6 — Augmentation (rotation/translation/scale/shear/ColorJitter/Gaussian-noise/JPEG) | §3.1.3 | defense / demo | `defense/presentation/assets/preprocessing/19_aug_rotation/ … 24_aug_brightness_contrast/stage6_augmentation.png` | ⚠️ REGENERATE (current render depicts the superseded PCA-colour aug) |
 | FIG-3.9 | figure | Stage 7 — Dataset-specific normalization | §3.1.1 | defense / demo | `defense/presentation/assets/preprocessing/25_normalization/stage7_normalize.png` | ✅ AVAILABLE |
 | FIG-3.10 | figure | OD/fovea detector validation montage (IDRiD, 516 imgs) | §3.1.1 (Stage 1) | **Exp validation (real)** | `experiments/outputs/validation/od_fovea_idrid_montage.png` | ✅ AVAILABLE |
 | FIG-3.11 | diagram | ResNet-50 / EfficientNet-B3 backbone architecture | §3.2.1 | defense | `defense/presentation/assets/architecture/08_comparison/01_abstract_model_architecture.png`; `defense/figures/figures_mine/fig5_architecture_artistic.png` | ✅ AVAILABLE |
@@ -112,7 +112,7 @@ This inventory distinguishes three things that are easy to conflate:
 | TAB-3.2 | table | Multi-metric evaluation framework & diagnostic thresholds (EH-1, OD-5) | §3.4.1 | governance | text | ✅ AVAILABLE |
 | TAB-3.3 | table | Image-quality metrics definitions (CNR/VVI/Entropy/SSIM) | §3.4.1 | governance (RESEARCH_ARCHITECTURE §3.3) | text | ✅ AVAILABLE |
 | RES-NORM | result-set | Per-dataset normalization stats (EyePACS, IDRiD) — Stage 7 | §3.1.1 | **Exp (real)** | `experiments/data/processed/eyepacs_norm_stats.json`, `experiments/data/processed/idrid_norm_stats.json` | ✅ AVAILABLE |
-| RES-PCA | result-set | EyePACS PCA color-jitter basis (Stage 6) | §3.1.3 | **Exp (real)** | `experiments/outputs/kaggle_config_d_v2/data/processed/eyepacs_pca_eigvals.npy`, `…_eigvecs.npy` | ✅ AVAILABLE |
+| RES-PCA | result-set | ~~EyePACS PCA color-jitter basis (Stage 6)~~ | — | — | — | ❌ RETIRED (2026-06-26 — Stage 6 chromatic aug replaced by ColorJitter; no PCA basis used) |
 | RES-VAL | result-set | OD/fovea detector accuracy metrics (IDRiD train/test) | §3.1.1 | **Exp (real)** | `experiments/outputs/validation/od_fovea_idrid_metrics.json` | ✅ AVAILABLE |
 
 ### 2.4 Chapter 4 — Experimental Research
@@ -196,7 +196,6 @@ experiments/outputs/validation/od_fovea_idrid_metrics.json             # OD/fove
 experiments/outputs/validation/od_fovea_idrid_montage.png              # OD/fovea overlay montage (real)
 experiments/data/processed/eyepacs_norm_stats.json                     # Stage-7 norm stats (real)
 experiments/data/processed/idrid_norm_stats.json                       # Stage-7 norm stats (real)
-experiments/outputs/kaggle_config_d_v2/data/processed/eyepacs_pca_eigvals.npy / eigvecs.npy   # Stage-6 PCA basis (real)
 experiments/logs/exp1_*.log, smoke_test_*.log, exp2_remaining_smoke.log  # training/smoke logs
 ```
 

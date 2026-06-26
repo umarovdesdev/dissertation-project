@@ -18,7 +18,7 @@ two design goals that make the **real EyePACS Config-D run** actually feasible:
 
 Two MODES (set in cell 1):
   * MODE="build_cache" — one-time: download EyePACS → run Stages 0–4 + dataset
-    stats + PCA → push the bundle as a Kaggle Dataset.
+    stats → push the bundle as a Kaggle Dataset.
   * MODE="train"       — per fold: pull the cache + last checkpoints → train one
     fold (GPU-bound) → push checkpoints back.
 
@@ -58,7 +58,7 @@ Loss, 5-fold patient-level CV), engineered to actually finish on Colab.
 ## Two MODES (cell 1)
 | MODE | What it does | When |
 |------|--------------|------|
-| `"build_cache"` | Download EyePACS → Stages 0–4 cache + dataset-stats + PCA → push as a Kaggle Dataset. | **Once.** ~1–2 h (EyePACS) / minutes (APTOS test). |
+| `"build_cache"` | Download EyePACS → Stages 0–4 cache + dataset-stats → push as a Kaggle Dataset. | **Once.** ~1–2 h (EyePACS) / minutes (APTOS test). |
 | `"train"` | Pull cache + last checkpoint → train one fold → push checkpoints. | **Per fold** (`FOLD=0..4`). |
 
 ## 24 h limit / unfinished runs
@@ -107,7 +107,7 @@ from pathlib import Path
 DATA        = Path("/content/data")        # raw dataset download (build mode only)
 CACHE_LOCAL = Path("/content/cache")    # extracted Stage 0–4 cache (train reads this)
 OUT_LOCAL   = Path("/content/outputs")     # exp1 writes checkpoints here
-PROC_LOCAL  = Path("/content/data_proc")   # data/processed (stats + PCA) for exp1
+PROC_LOCAL  = Path("/content/data_proc")   # data/processed (stats) for exp1
 for d in (DATA, CACHE_LOCAL, OUT_LOCAL, PROC_LOCAL):
     d.mkdir(parents=True, exist_ok=True)
 
@@ -257,7 +257,7 @@ cells.append(md(
 """## 5. BUILD MODE — download EyePACS, run Stages 0–4 cache, push to Kaggle
 
 Runs **only** when `MODE="build_cache"`. Downloads the raw dataset, adapts the
-layout, computes dataset-stats (Stage 7) + PCA (Stage 6 colour), runs
+layout, computes dataset-stats (Stage 7), runs
 `precompute_cache.py` over all images, bundles everything, and pushes it as the
 `CACHE_SLUG` dataset. Skip straight to §6 if you already built the cache."""))
 cells.append(code(
@@ -331,7 +331,7 @@ if MODE == "build_cache":
           "| images:", sum(1 for _ in (WORK / "train").glob("*.jpeg")))
 '''))
 cells.append(code(
-r'''# ---- 5c. dataset-stats (Stage 7) + PCA (Stage 6) + Stage 0–4 cache, then push ----
+r'''# ---- 5c. dataset-stats (Stage 7) + Stage 0–4 cache, then push ----
 if MODE == "build_cache":
     PROC_LOCAL.mkdir(parents=True, exist_ok=True)
 
@@ -340,16 +340,6 @@ if MODE == "build_cache":
         "--images-root", str(Path(EYEPACS_ROOT) / "train"),
         "--labels-csv",  str(Path(EYEPACS_ROOT) / "trainLabels.csv"),
         "--output-dir",  str(PROC_LOCAL), "--n-samples", "5000", "--seed", "42"], check=True)
-
-    # PCA eigenvectors for colour augmentation (optional; best-effort).
-    try:
-        subprocess.run([sys.executable, "scripts/compute_pca_eigvecs.py",
-            "--dataset", "eyepacs",
-            "--images-root", str(Path(EYEPACS_ROOT) / "train"),
-            "--labels-csv",  str(Path(EYEPACS_ROOT) / "trainLabels.csv"),
-            "--output-dir",  str(PROC_LOCAL), "--n-samples", "5000", "--seed", "42"], check=True)
-    except Exception as e:
-        print("PCA step skipped (colour aug will be disabled):", e)
 
     # The heavy one-shot: Stages 0–4 cache for ALL images (multi-process).
     import os as _os
@@ -360,7 +350,7 @@ if MODE == "build_cache":
         "--num-workers", str(max(2, (_os.cpu_count() or 2))),
         "--preset", "efficientnet"], check=True)
 
-    # Bundle stats + PCA INTO the cache dir so they travel with the cache.
+    # Bundle stats INTO the cache dir so they travel with the cache.
     import shutil
     for f in PROC_LOCAL.glob("*"):
         if f.is_file():
@@ -395,14 +385,14 @@ if MODE == "train":
     print("cache images:", n_png)
     assert n_png > 0, "Cache empty — run MODE='build_cache' first."
 
-    # ---- 6b. Restore dataset-stats + PCA where exp1 looks (output_dir.parent/data/processed) ----
+    # ---- 6b. Restore dataset-stats where exp1 looks (output_dir.parent/data/processed) ----
     proc = OUT_LOCAL.parent / "data" / "processed"   # exp1: Path(output_dir).parent/data/processed
     proc.mkdir(parents=True, exist_ok=True)
-    for name in ("eyepacs_norm_stats.json", "eyepacs_pca_eigvecs.npy", "eyepacs_pca_eigvals.npy"):
+    for name in ("eyepacs_norm_stats.json",):
         src = CACHE_LOCAL / name
         if src.exists():
             shutil.copy(src, proc / name)
-    print("restored stats/PCA ->", proc, "|", [p.name for p in proc.glob('*')])
+    print("restored stats ->", proc, "|", [p.name for p in proc.glob('*')])
 
     # ---- 6c. Restore the latest checkpoint for --resume ----
     if dataset_exists(CKPT_SLUG):

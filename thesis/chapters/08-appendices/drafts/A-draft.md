@@ -22,7 +22,7 @@ Table A.1 maps each pipeline stage of Chapter 3 to the module that implements it
 | 3 | FOV mask generation (binary → 4th channel) | `crop_resize.py` (mask returned with the resized image) |
 | 4 | Flat-field correction (adaptive σ = 0.07·D, inside mask) | `flat_field.py` |
 | 5 | Dual-constraint CLAHE (LAB L-channel; stochastic at train) | `upgraded_clahe.py`, `polar_clahe.py`, `clahe.py` |
-| 6 | Augmentation (unified affine + brightness/contrast + PCA colour; train only) | `experiments/src/data/augmentation_unified.py` |
+| 6 | Augmentation (unified affine + ColorJitter + Gaussian noise + JPEG compression; train only) | `experiments/src/data/augmentation_unified.py` |
 | 7 | Dataset-specific normalize → tensor (always last) | `imagenet_normalize.py` |
 | — | Configuration surface (baseline vs full-pipeline presets) | `config.py` (`PreprocessingConfig`, `PIPELINE_PRESETS`) |
 | — | Stage orchestration (fixed execution order) | `pipeline.py` (`PreprocessingPipeline`) |

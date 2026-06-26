@@ -32,15 +32,16 @@
     <text x="20" y="138" class="sec-hdr">OPERATIONS</text>
     <text x="20" y="162" class="body">1.  Unified affine: rotation, zoom,</text>
     <text x="20" y="180" class="body">     optional shear / stretch</text>
-    <text x="20" y="202" class="body">2.  Brightness / contrast jitter (α, β)</text>
-    <text x="20" y="224" class="body">3.  PCA colour jitter  (Krizhevsky-style)</text>
-    <text x="20" y="246" class="body">4.  Horizontal re-flip for diversity</text>
+    <text x="20" y="202" class="body">2.  ColorJitter: brightness / contrast /</text>
+    <text x="20" y="220" class="body">     saturation / hue  (each p = 0.5)</text>
+    <text x="20" y="242" class="body">3.  Gaussian noise  ·  4.  JPEG compression</text>
     <text x="20" y="276" class="body-em">At inference: skipped (deterministic).</text>
 
     <text x="20" y="320" class="sec-hdr">PARAMETERS</text>
     <text x="20" y="340" class="mono">rot σ_adapt (fallback 13°, clip ±40°)</text>
     <text x="20" y="358" class="mono">zoom ∈ [0.9, 1.1]   ·   shear ±2°  (p=0.3)</text>
-    <text x="20" y="376" class="mono">PCA σ = 0.1  (p = 0.5)</text>
+    <text x="20" y="376" class="mono">CJ factors ∈ [0.9,1.1], hue ±0.02  (p=0.5)</text>
+    <text x="20" y="392" class="mono">noise σ∈[2,6] p=.15 · JPEG q∈[70,100] p=.20</text>
 
     <text x="20" y="402" class="sec-hdr">OUTPUT</text>
     <text x="20" y="424" class="mono">RGB uint8  ·  512 × 512 × 3</text>

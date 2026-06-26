@@ -103,10 +103,11 @@ The dual-constraint clip limit is treated as a two-parameter optimizable formula
 - All metrics reported as mean ± standard deviation across 3 folds
 - Data augmentation applied only to training partitions
 
-**Augmentation (V4 — integrated into pipeline as Stage 5, training only):**
-- Unified affine: rotation + zoom + stretch + shear
-- Brightness/contrast adjustment
-- PCA color jitter
+**Augmentation (integrated into the pipeline, training only):**
+- Unified affine: rotation + zoom + anisotropic stretch + shear
+- ColorJitter: brightness, contrast, saturation (each factor ∈ [0.9, 1.1]) and hue (shift ∈ [−0.02, 0.02]); each component p = 0.5
+- Gaussian noise: σ ∈ [2, 6] (8-bit RGB), p = 0.15
+- JPEG compression: quality ∈ [70, 100], p = 0.20
 - Model-specific presets: "resnet" (full augmentation) vs. "efficientnet" (reduced augmentation)
 
 Augmentation is integrated into the V4 pipeline as Stage 5 (not a separate layer). See `methods/preprocessing-pipeline.md` for full specification.

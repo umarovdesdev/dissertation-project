@@ -34,8 +34,10 @@ class PreprocessingConfig:
         use_od_fovea_rotation: Enable Stage 1 OD–fovea axis rotation normalization.
         use_flat_field: Enable Stage 4 Gaussian flat-field correction.
         use_clahe: Enable Stage 5 upgraded CLAHE L-channel enhancement.
-        use_pca_color: Enable Stage 6 PCA colour jitter augmentation.
-        use_brightness_contrast: Enable Stage 6 brightness/contrast augmentation.
+        use_color_jitter: Enable Stage 6 ColorJitter (brightness/contrast/
+            saturation/hue) augmentation.
+        use_gaussian_noise: Enable Stage 6 Gaussian-noise augmentation.
+        use_jpeg_compression: Enable Stage 6 JPEG-compression augmentation.
         use_shear: Enable Stage 6 shear component of the affine transform.
         use_stretch: Enable Stage 6 anisotropic stretch component.
         target_size: Output spatial resolution in pixels (square).
@@ -62,11 +64,18 @@ class PreprocessingConfig:
         shear_prob: Probability of applying shear augmentation.
         interp_weights: Sampling weights for (LINEAR, CUBIC, NEAREST).
         border_mode: OpenCV border mode for warpAffine (default BORDER_REFLECT).
-        pca_color_sigma: σ of Normal distribution for PCA colour noise.
-        pca_color_prob: Probability of applying PCA colour jitter.
-        brightness_alpha_range: Contrast multiplier range [min, max].
-        brightness_beta_range: Brightness additive range [min, max] (uint8 scale).
-        bc_prob: Probability of applying brightness/contrast augmentation.
+        color_jitter_brightness_range: Brightness factor range [min, max].
+        color_jitter_contrast_range: Contrast factor range [min, max].
+        color_jitter_saturation_range: Saturation factor range [min, max].
+        color_jitter_hue_range: Hue-shift range [min, max] as a fraction of the
+            colour circle ([-0.5, 0.5]).
+        color_jitter_prob: Per-component probability of applying each ColorJitter
+            sub-transform (brightness, contrast, saturation, hue).
+        gaussian_noise_sigma_range: σ range [min, max] for additive Gaussian
+            noise on the 8-bit RGB scale.
+        gaussian_noise_prob: Probability of applying Gaussian noise.
+        jpeg_quality_range: JPEG quality range [min, max] for lossy re-compression.
+        jpeg_prob: Probability of applying JPEG compression.
         normalize_mode: ``"dataset_specific"`` or ``"imagenet"``.
         dataset_mean: Per-channel mean from EyePACS training set (mask=1.0 only).
             ``None`` falls back to ImageNet mean.
@@ -93,8 +102,9 @@ class PreprocessingConfig:
     use_od_fovea_rotation: bool = True
     use_flat_field: bool = True
     use_clahe: bool = True
-    use_pca_color: bool = True
-    use_brightness_contrast: bool = True
+    use_color_jitter: bool = True
+    use_gaussian_noise: bool = True
+    use_jpeg_compression: bool = True
     use_shear: bool = True
     use_stretch: bool = True
 
@@ -134,11 +144,15 @@ class PreprocessingConfig:
     shear_prob: float = 0.3
     interp_weights: tuple[float, float, float] = (0.6, 0.3, 0.1)  # LINEAR, CUBIC, NEAREST
     border_mode: int = cv2.BORDER_REFLECT
-    pca_color_sigma: float = 0.1
-    pca_color_prob: float = 0.5
-    brightness_alpha_range: tuple[float, float] = (0.9, 1.1)
-    brightness_beta_range: tuple[float, float] = (-10.0, 10.0)
-    bc_prob: float = 0.5
+    color_jitter_brightness_range: tuple[float, float] = (0.9, 1.1)
+    color_jitter_contrast_range: tuple[float, float] = (0.9, 1.1)
+    color_jitter_saturation_range: tuple[float, float] = (0.9, 1.1)
+    color_jitter_hue_range: tuple[float, float] = (-0.02, 0.02)
+    color_jitter_prob: float = 0.5
+    gaussian_noise_sigma_range: tuple[float, float] = (2.0, 6.0)
+    gaussian_noise_prob: float = 0.15
+    jpeg_quality_range: tuple[int, int] = (70, 100)
+    jpeg_prob: float = 0.2
 
     # --- Stage 7: Normalise ---
     normalize_mode: str = "dataset_specific"  # "dataset_specific" or "imagenet"
@@ -229,10 +243,12 @@ PIPELINE_PRESETS: dict[str, dict[str, Any]] = {
         "use_clahe": True,
         "clahe_mode": "polar",
         "clahe_train_prob": 0.8,
-        "use_pca_color": True,
-        "pca_color_prob": 0.5,
-        "use_brightness_contrast": True,
-        "bc_prob": 0.5,
+        "use_color_jitter": True,
+        "color_jitter_prob": 0.5,
+        "use_gaussian_noise": True,
+        "gaussian_noise_prob": 0.15,
+        "use_jpeg_compression": True,
+        "jpeg_prob": 0.2,
         "use_shear": True,
         "shear_prob": 0.3,
         "use_stretch": True,
@@ -244,9 +260,10 @@ PIPELINE_PRESETS: dict[str, dict[str, Any]] = {
         "use_clahe": True,
         "clahe_mode": "polar",
         "clahe_train_prob": 0.5,
-        "use_pca_color": False,
-        "use_brightness_contrast": True,
-        "bc_prob": 0.3,
+        "use_color_jitter": True,
+        "color_jitter_prob": 0.5,
+        "use_gaussian_noise": False,
+        "use_jpeg_compression": False,
         "use_shear": False,
         "use_stretch": True,
         "use_od_fovea_rotation": True,

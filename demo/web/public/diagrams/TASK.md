@@ -247,7 +247,7 @@ Open the "black box" of preprocessing 𝒫 from Diagram №2 — show all 8 stag
 - **Stage 3** — FOV Mask Generation (always-on, side branch for the 4th channel)
 - **Stage 4** — Adaptive Flat-Field Correction, σ = 0.07·D (always-on)
 - **Stage 5** — Dual-Constraint CLAHE, LAB L-channel (always-on, stochastic at train)
-- **Stage 6** — Augmentation, affine + PCA color (train only)
+- **Stage 6** — Augmentation, affine + ColorJitter + noise/JPEG (train only)
 - **Stage 7** — Dataset-Specific Normalize + FOV Mask Append (always-on)
 
 ### 5.5 Visual features

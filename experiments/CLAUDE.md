@@ -38,7 +38,7 @@ src/data/datasets.py            — dataset loaders (EyePACS, IDRiD, APTOS, Mess
 src/data/clinical_dataset.py    — ClinicalDataset stub
 src/data/messidor2_dataset.py   — Messidor2Dataset stub
 src/data/splits.py              — PatientLevelKFold (patient-level stratified k-fold CV)
-src/data/augmentation_unified.py     — augmentation (unified affine + PCA color)
+src/data/augmentation_unified.py     — augmentation (unified affine + ColorJitter + Gaussian noise + JPEG)
 src/data/label_harmonization.py — taxonomy mapping for Messidor-2, RFMiD, ODIR
 ```
 
@@ -105,7 +105,7 @@ Stage 2: FOV crop + isotropic resize to 512×512 + zero-padding — always on
 Stage 3: FOV mask generation (binary 1.0/0.0 → 4th channel) — always on
 Stage 4: Flat-field correction (adaptive Gaussian σ=0.07·D) — always on
 Stage 5: CLAHE (dual-constraint, LAB L-channel, stochastic p=0.8 at train) — always on
-Stage 6: Augmentation (unified affine + brightness/contrast + PCA color) — train only
+Stage 6: Augmentation (unified affine + ColorJitter + Gaussian noise + JPEG compression) — train only
 Stage 7: Dataset-specific normalize → tensor (mean/std from training set) — always last
 
 Baseline (Configs A/C) = stretch-resize 512×512 + ImageNet normalize (3 channels).

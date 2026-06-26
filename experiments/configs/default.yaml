@@ -64,13 +64,20 @@ preprocessing:
   shear_prob: 0.3
   interp_weights: [0.6, 0.3, 0.1]        # LINEAR, CUBIC, NEAREST
   border_mode: 4                          # cv2.BORDER_REFLECT
-  pca_color_sigma: 0.1
-  pca_color_prob: 0.5
-  brightness_alpha_range: [0.9, 1.1]
-  brightness_beta_range: [-10.0, 10.0]
-  bc_prob: 0.5
-  use_pca_color: true
-  use_brightness_contrast: true
+  # ColorJitter (brightness/contrast/saturation/hue), per-component prob
+  color_jitter_brightness_range: [0.9, 1.1]
+  color_jitter_contrast_range: [0.9, 1.1]
+  color_jitter_saturation_range: [0.9, 1.1]
+  color_jitter_hue_range: [-0.02, 0.02]
+  color_jitter_prob: 0.5
+  # Acquisition-variability augmentations
+  gaussian_noise_sigma_range: [2.0, 6.0]  # 8-bit RGB scale
+  gaussian_noise_prob: 0.15
+  jpeg_quality_range: [70, 100]
+  jpeg_prob: 0.2
+  use_color_jitter: true
+  use_gaussian_noise: true
+  use_jpeg_compression: true
   use_shear: true
   use_stretch: true
 

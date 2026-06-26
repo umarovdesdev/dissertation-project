@@ -420,7 +420,9 @@
       "Bash(ls stage_1_od_fovea_rotation/)",
       "PowerShell($conns = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue; if \\($conns\\) { $conns | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force; \"killed PID $_\" } } else { \"nothing on :3000\" })",
       "Bash(rm -f _edge_diag.png)",
-      "Bash(ls _edge_diag.png)"
+      "Bash(ls _edge_diag.png)",
+      "Bash(cp diagrams/03_preprocessing_stages_detailed.svg images/diagrams/03_preprocessing_stages_detailed.svg)",
+      "Bash(cp diagrams/pipeline_diagram.svg images/diagrams/pipeline_diagram.svg)"
     ]
   }
 }

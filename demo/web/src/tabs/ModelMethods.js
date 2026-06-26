@@ -357,15 +357,16 @@ function Stage5() {
       </p>
       <ImageWithTooltip
         src="/pipeline/dr04/preprocessing/stage_6_augmentation/1_rotation/left_variant_A.png"
-        caption="Augmentation example — 360° rotation applied (only valid because circular FOV has no black corners). Stage 6 also applies scale, shear, PCA colour jitter, and brightness/contrast — all composed into a single affine pass."
+        caption="Augmentation example — 360° rotation applied (only valid because circular FOV has no black corners). Stage 6 also applies scale and shear (composed into a single affine pass), then ColorJitter (brightness/contrast/saturation/hue), Gaussian noise, and JPEG compression."
         tooltip="tooltip.method_augment"
       />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
         {[
           { aspect: '360° rotation', standard: '±15° (avoids black corners)', ours: 'Full 360° — circular FOV means any rotation is valid. No black corners appear.' },
           { aspect: 'Rotation magnitude', standard: 'Fixed ±15°', ours: 'Adaptive: σ_θ from Stage 1 confidence. Higher OD/fovea detection uncertainty → larger rotation range.' },
-          { aspect: 'Colour jitter', standard: 'Random brightness/contrast/saturation', ours: 'PCA colour jitter (à la AlexNet): perturbation along principal colour axes preserves colour correlations.' },
-          { aspect: 'Transform pipeline', standard: 'Sequential (multiple interpolations)', ours: 'Composed into single affine matrix — single bilinear interpolation pass. Reduces cumulative resampling artefacts.' },
+          { aspect: 'Colour jitter', standard: 'Random brightness/contrast/saturation', ours: 'ColorJitter — brightness/contrast/saturation ∈ [0.9, 1.1] and hue ∈ [−0.02, 0.02], each component applied independently with p = 0.5. Narrow bands preserve diagnostic colour.' },
+          { aspect: 'Acquisition variability', standard: 'Rarely modelled', ours: 'Gaussian noise (σ ∈ [2, 6], p = 0.15) and JPEG compression (quality ∈ [70, 100], p = 0.20) simulate real sensor noise and storage artefacts.' },
+          { aspect: 'Transform pipeline', standard: 'Sequential (multiple interpolations)', ours: 'Geometry composed into a single affine matrix — single bilinear interpolation pass. Reduces cumulative resampling artefacts.' },
         ].map((r, i) => (
           <div key={i} style={{ display: 'flex', gap: 0, borderRadius: 5, overflow: 'hidden', border: '1px solid var(--color-border-tertiary,#eee)' }}>
             <div style={{ width: 140, minWidth: 140, padding: '6px 8px', background: 'var(--color-background-secondary,#f7f7f5)', fontSize: 10, fontWeight: 600 }}>{r.aspect}</div>
@@ -388,7 +389,7 @@ function ComparisonTable() {
     { stage: 'S3: FOV Mask', standard: 'None (discarded after crop)', ours: 'Binary FOV mask → 4th input channel', innovation: 'Spatial boundary for CNN (novel)' },
     { stage: 'S4: Flat-Field', standard: 'None (most pipelines skip)', ours: 'Blur subtraction, adaptive σ=0.07·D, per-channel', innovation: 'Scale-invariant σ (novel)' },
     { stage: 'S5: CLAHE', standard: 'cv2.createCLAHE (fixed clip limit)', ours: 'Dual-constraint + stochastic 80%', innovation: 'Global cap + regularisation' },
-    { stage: 'S6: Augmentation', standard: 'Separate transforms, ±15° rotation', ours: 'Integrated affine, 360°, adaptive σ, PCA jitter', innovation: 'Circular FOV enables full rotation' },
+    { stage: 'S6: Augmentation', standard: 'Separate transforms, ±15° rotation', ours: 'Integrated affine (360°, adaptive σ) + ColorJitter + Gaussian noise + JPEG', innovation: 'Circular FOV enables full rotation' },
     { stage: 'S7: Normalization', standard: 'ImageNet channel-wise (μ, σ), 3ch', ours: 'Dataset-specific μ/σ, 4ch (RGB + FOV mask)', innovation: 'Dataset-specific stats + 4ch input' },
   ];
 

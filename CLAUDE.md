@@ -51,7 +51,7 @@ Stage 2: FOV crop + isotropic resize to 512×512 — always on
 Stage 3: FOV mask generation (binary mask → 4th channel) — always on
 Stage 4: Flat-field correction (adaptive σ=0.07·D) — always on
 Stage 5: CLAHE (dual-constraint, LAB L-channel, stochastic at train) — always on
-Stage 6: Augmentation (unified affine + PCA color + brightness/contrast) — train only
+Stage 6: Augmentation (unified affine + ColorJitter + Gaussian noise + JPEG compression) — train only
 Stage 7: Dataset-specific normalize → tensor — always last
 
 Baseline (Exp 1 A/C) = stretch-resize 512×512 + ImageNet normalize (3 channels).

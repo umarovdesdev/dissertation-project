@@ -174,8 +174,8 @@ Stage 6 is applied on-the-fly during training (not saved to disk). For demo purp
 | `1_rotation/` | Truncated Gaussian | ±40° (clip boundary) | 100% |
 | `2_scale/` | Log-uniform zoom | 0.9× / 1.1× | 100% |
 | `3_shear/` | Uniform shear | ±2° | 30% |
-| `4_pca_color_jitter/` | PCA color noise | ±1σ (all components) | 50% |
-| `5_brightness_contrast/` | Linear α×pixel+β | α=0.9/1.1, β=±10 | 50% |
+| `4_color_jitter/` | ColorJitter (brightness/contrast/saturation/hue) | factors ∈ [0.9,1.1], hue ∈ [−0.02,0.02] | 50% per component |
+| `5_acquisition_variability/` | Gaussian noise + JPEG compression | σ ∈ [2,6] / quality ∈ [70,100] | 15% / 20% |
 
 #### Files per augmentation type
 
@@ -191,7 +191,7 @@ Stage 6 is applied on-the-fly during training (not saved to disk). For demo purp
 
 **Key novelty — adaptive rotation σ:** rotation sigma is derived from OD-fovea detection uncertainty per image, not a fixed value. Fallback σ = 13° when detection fails.
 
-**Parameters from:** `experiments/configs/default.yaml` (lines 54–70), `experiments/src/data/augmentation_unified.py`
+**Parameters from:** `experiments/configs/default.yaml` (Stage-6 section), `experiments/src/data/augmentation_unified.py`
 
 #### Adaptive rotation visualization
 

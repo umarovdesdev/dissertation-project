@@ -54,8 +54,8 @@
 | 20 | 20_PREPROCESS_AUG_TRANSLATION.md | Аугментация: жылжыту (translation) |
 | 21 | 21_PREPROCESS_AUG_SCALE.md | Аугментация: масштабтау (scale) |
 | 22 | 22_PREPROCESS_AUG_SHEAR.md | Аугментация: ығыстыру (shear) |
-| 23 | 23_PREPROCESS_AUG_PCA_COLOR.md | Аугментация: PCA түс jitter |
-| 24 | 24_PREPROCESS_AUG_BRIGHTNESS_CONTRAST.md | Аугментация: жарықтық және контраст |
+| 23 | 23_PREPROCESS_AUG_COLORJITTER.md | Аугментация: ColorJitter (жарықтылық/контраст/қанығу/реңк) |
+| 24 | 24_PREPROCESS_AUG_ACQUISITION.md | Аугментация: Гаусс шуы + JPEG компрессия |
 | 25 | 25_PREPROCESS_NORMALIZATION.md | Деректер жиынына сәйкес нормализация (dataset-specific normalization) |
 
 ### VI. Деректер (Data) (4 слайд)

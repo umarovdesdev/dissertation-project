@@ -72,8 +72,8 @@ pipeline/
 │   │   │   │   └── params.md                      │
 │   │   │   ├── 2_scale/             {side}_min/max.png + distribution.png + params.md
 │   │   │   ├── 3_shear/             {side}_min/max.png + distribution.png + params.md
-│   │   │   ├── 4_pca_color_jitter/  {side}_min/max.png + distribution.png + params.md
-│   │   │   └── 5_brightness_contrast/ {side}_min/max.png + distribution.png + params.md
+│   │   │   ├── 4_color_jitter/      {side}_min/max.png + distribution.png + params.md
+│   │   │   └── 5_acquisition_variability/ {side}_min/max.png + distribution.png + params.md
 │   │   │         │                                │
 │   │   │         ▼ stage 7 = stage_5/polar RGB + stage_3 mask
 │   │   └── stage_7_normalize/
@@ -197,8 +197,8 @@ Stage 6 is applied on-the-fly during training. For demo, we generate min/max ext
 | `1_rotation/` | Truncated Gaussian, **adaptive σ** per image | ±40° clip | 100% |
 | `2_scale/` | Log-uniform zoom | 0.9× / 1.1× | 100% |
 | `3_shear/` | Uniform shear | ±2° | 30% |
-| `4_pca_color_jitter/` | PCA color noise | ±1σ | 50% |
-| `5_brightness_contrast/` | Linear α·pixel + β | α=0.9/1.1, β=±10 | 50% |
+| `4_color_jitter/` | ColorJitter (brightness/contrast/saturation/hue) | factors ∈ [0.9,1.1], hue ∈ [−0.02,0.02] | 50% per component |
+| `5_acquisition_variability/` | Gaussian noise + JPEG compression | σ ∈ [2,6] / quality ∈ [70,100] | 15% / 20% |
 
 **Adaptive σ formula** (from `experiments/src/preprocessing/od_fovea_detect.py`):
 ```

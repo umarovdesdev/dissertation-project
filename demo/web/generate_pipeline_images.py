@@ -197,11 +197,11 @@ def stage5_clahe(img, clip_limit=2.5, tile_grid=(8, 8)):
 
 
 def stage6_augmentation(img, angle=15):
-    """Stage 6: Example augmentation (train only). Mild rotation + color jitter."""
+    """Stage 6: Example augmentation (train only). Mild rotation + ColorJitter."""
     h, w = img.shape[:2]
     M = cv2.getRotationMatrix2D((w / 2, h / 2), angle, 1.0)
     rotated = cv2.warpAffine(img, M, (w, h), borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0))
-    # Mild brightness/contrast jitter
+    # Mild ColorJitter (brightness/contrast within [0.9, 1.1])
     alpha = 1.05  # contrast
     beta = 5  # brightness
     adjusted = cv2.convertScaleAbs(rotated, alpha=alpha, beta=beta)
@@ -988,15 +988,26 @@ def make_method_augmentation(right_img):
         M = cv2.getRotationMatrix2D((w / 2, h / 2), 0, factor)
         return cv2.warpAffine(img, M, (w, h), borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0))
 
-    def _brightness(img, beta):
-        return cv2.convertScaleAbs(img, alpha=1.0, beta=beta)
+    def _color_jitter(img):
+        """ColorJitter at the high end of the bands (brightness/contrast/saturation/hue)."""
+        rgb = img.astype(np.float32) * 1.1                      # brightness
+        gmean = float(np.mean(rgb @ np.array([0.299, 0.587, 0.114], np.float32)))
+        rgb = np.clip((rgb - gmean) * 1.1 + gmean, 0, 255)      # contrast
+        gray = rgb @ np.array([0.299, 0.587, 0.114], np.float32)
+        rgb = np.clip(gray[..., None] + 1.1 * (rgb - gray[..., None]), 0, 255)  # saturation
+        hsv = cv2.cvtColor(rgb.astype(np.uint8), cv2.COLOR_RGB2HSV).astype(np.float32)
+        hsv[..., 0] = (hsv[..., 0] + 0.02 * 180.0) % 180.0      # hue
+        return cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2RGB)
 
-    def _pca_jitter(img):
+    def _acquisition(img):
+        """Gaussian noise (\u03c3=6) + JPEG re-compression (quality 70)."""
         np.random.seed(7)
-        jittered = img.astype(np.float32)
-        for c in range(3):
-            jittered[:, :, c] += np.random.normal(0, 10)
-        return np.clip(jittered, 0, 255).astype(np.uint8)
+        noisy = np.clip(img.astype(np.float32) + np.random.normal(0, 6, img.shape), 0, 255).astype(np.uint8)
+        bgr = cv2.cvtColor(noisy, cv2.COLOR_RGB2BGR)
+        ok, buf = cv2.imencode('.jpg', bgr, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        if not ok:
+            return noisy
+        return cv2.cvtColor(cv2.imdecode(buf, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
 
     def _combined(img):
         out = _rotate(img, 12)
@@ -1009,8 +1020,8 @@ def make_method_augmentation(right_img):
         ('Rotation \u221215\u00b0', _rotate(base, -15)),
         ('Rotation +180\u00b0', _rotate(base, 180)),
         ('Zoom 1.1\u00d7', _zoom(base, 1.1)),
-        ('Brightness +10%', _brightness(base, 25)),
-        ('PCA Color Jitter', _pca_jitter(base)),
+        ('ColorJitter', _color_jitter(base)),
+        ('Noise + JPEG', _acquisition(base)),
         ('Combined Affine', _combined(base)),
     ]
 
@@ -1039,7 +1050,7 @@ def make_methods_comparison_table():
         ['3. FOV Mask',        'None (most skip)',          'Binary 4th channel',                 'Explicit FOV boundary'],
         ['4. Flat-Field',      'None (most skip)',          'Blur subtract\n\u03c3=0.07\u00b7D',  'Removes gradient\n(adaptive \u03c3)'],
         ['5. CLAHE',           'cv2.createCLAHE\nfixed clip', 'Dual-constraint\nclip + threshold', 'Global cap + reg'],
-        ['6. Augmentation',    'Separate, \u00b115\u00b0', 'Integrated, unified\naffine + PCA',  'Circular FOV'],
+        ['6. Augmentation',    'Separate, \u00b115\u00b0', 'Affine + ColorJitter\n+ noise/JPEG',  'Circular FOV'],
         ['7. Normalize',       'ImageNet ch-wise',          'Dataset-specific\n+ mask append',    'Pre-train match\n+ 4ch input'],
     ]
 

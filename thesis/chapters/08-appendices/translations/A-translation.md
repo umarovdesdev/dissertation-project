@@ -22,7 +22,7 @@ A.1-кесте 3-тараудың әр pipeline кезеңін оны жүзег
 | 3 | FOV маска генерациясы (бинарлық → 4-ші арна) | `crop_resize.py` (маска өлшемі өзгертілген кескінмен қайтарылады) |
 | 4 | Жарық-өрісін түзету (адаптивті σ = 0,07·D, маска ішінде) | `flat_field.py` |
 | 5 | Қос шектеулі CLAHE (LAB L-арна; оқытуда стохастикалық) | `upgraded_clahe.py`, `polar_clahe.py`, `clahe.py` |
-| 6 | Augmentation (біртұтас аффинді + жарықтылық/контраст + PCA түс; тек оқыту) | `experiments/src/data/augmentation_unified.py` |
+| 6 | Augmentation (біртұтас аффинді + ColorJitter + Гаусс шуы + JPEG компрессия; тек оқыту) | `experiments/src/data/augmentation_unified.py` |
 | 7 | Деректер жиынтығына тән нормалау → tensor (әрқашан соңғы) | `imagenet_normalize.py` |
 | — | Конфигурация беті (базалық пен толық-pipeline пресеттері) | `config.py` (`PreprocessingConfig`, `PIPELINE_PRESETS`) |
 | — | Кезең оркестрациясы (тіркелген орындау реті) | `pipeline.py` (`PreprocessingPipeline`) |
