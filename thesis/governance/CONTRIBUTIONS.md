@@ -4,7 +4,9 @@
 
 **Candidate:** Yesmukhamedov N.S.
 **Document Type:** Formal contributions register
-**Version:** 6.0.0 | **Date:** 2026-06-01 | **Binding Reference:** INVARIANTS.md v6.0.0
+**Version:** 6.2.0 | **Date:** 2026-06-26 | **Binding Reference:** INVARIANTS.md v6.2.0
+
+**v6.2.0 Amendment:** SC-H is refined with the now-locked operational specifics of the integrated-arm initialization (no contribution added or removed): the fundus-SSL corpus is the unlabeled EyePACS "test" split (53,576 images, disjoint from the ~35,126 Experiment-1 corpus per INVARIANTS SB-2.4); the primary protocol is BYOL pretrained from-scratch on the 4-channel tensor; and the initialization must pass a linear-probe acceptance gate (beat random init, competitive with ImageNet) before entering Experiment 1. CFC-2.8 and the composite-IV boundary are unchanged.
 
 **v6.0.0 Amendment:** The integrated-arm pretraining source is changed from the RETFound foundation model to **ophthalmology-specific self-supervised pretraining** of the existing CNN backbone (see SC-H). The composite *(preprocessing × pretraining)* independent variable and CFC-2.8 are retained, so the SSL initialization is reported as part of the integrated configuration, not as an independently attributable contribution.
 
@@ -114,9 +116,11 @@ The principal conceptual contribution of this dissertation is a **paradigm shift
 
 **Contribution:** Replacement of generic ImageNet transfer with an in-domain initialization for the integrated arm: the same CNN backbone (ResNet-50 / EfficientNet-B3) is pretrained with a CNN-compatible domain-adaptive self-supervised learning protocol (DINO / BYOL / SimCLR / MoCo family) on an unlabeled retinal fundus corpus, then fine-tuned for DR classification. This preserves the CNN architecture — avoiding the architecture confound that a foundation model such as RETFound (ViT-Large) would introduce — while supplying retina-aware representations (vascular topology, optic-disc and macular morphology, retinal texture, illumination/artifact variability) as the starting point for the integrated pipeline.
 
+**Operational specification (v6.2.0):** The corpus is the unlabeled EyePACS "test" split (53,576 images), disjoint from the ~35,126 Experiment-1 corpus by image and patient identity — a no-pretraining-leakage constraint (INVARIANTS SB-2.4) analogous to ImageNet being a separate corpus for the baseline arm. **BYOL** is the primary protocol (MoCo-v2 / SimSiam / DINO as alternatives), pretrained **from-scratch (random init)** directly on the 4-channel tensor. The initialization is admitted into Experiment 1 only after passing a **frozen-backbone linear-probe acceptance gate** (it must beat random init and be competitive with ImageNet on the EyePACS-test probe slice, for both backbones); a fallback ImageNet→continual-SSL initialization is documented but is not the default.
+
 **Evidence:** Experiment 1 integrated arm (configs B, D), paired with the full preprocessing pipeline.
 
-**Boundary (CFC-2.8):** Because the integrated arm differs from baseline along both the preprocessing and the pretraining axis, the isolated effect of the SSL initialization is **not** independently claimed; it is reported as a component of the integrated configuration. The associated research question — how ophthalmology-specific SSL interacts with the preprocessing pipeline for robustness and generalization — is framed as a direction motivated by this design, bounded by CFC-2.8.
+**Boundary (CFC-2.8):** Because the integrated arm differs from baseline along both the preprocessing and the pretraining axis, the isolated effect of the SSL initialization is **not** independently claimed; it is reported as a component of the integrated configuration. The associated research question — how ophthalmology-specific SSL interacts with the preprocessing pipeline for robustness and generalization — is framed as a direction motivated by this design, bounded by CFC-2.8. No SSL performance is asserted in advance of training: SC-H is, at present, a specification whose efficacy is to be established empirically (and gated, per the linear-probe acceptance criterion above).
 
 ---
 

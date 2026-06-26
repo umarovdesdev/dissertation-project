@@ -148,16 +148,97 @@ evaluation:
   bootstrap_iterations: 1000
   confidence_level:   0.95
 
+# ---------------------------------------------------------------------------
+# Self-supervised pretraining (SSL) for the pipeline arm (Configs B/D).
+# Records supporting contribution SC-H; bounded by CFC-2.8. Label-free
+# pretraining on the EyePACS original "test" split (53,576 images), disjoint
+# from Exp-1's train/ corpus (INV-SSL-2). See docs/fundus_ssl_pretraining_brief.md.
+# ---------------------------------------------------------------------------
+ssl:
+  method:            byol            # byol | mocov2 | simsiam | dino
+  image_size:        256             # Stage-2 target for the SSL base tensor (downstream = 512)
+  in_channels:       4               # RGB + FOV mask
+  epochs:            300             # full run; watch the gate, not a fixed number
+  screening_epochs:  100             # short per-method screening (§5.3)
+  batch_size:        32              # start 32 @ 256²; drop to 16 on OOM, raise to 48 with headroom
+  num_workers:       4
+  seed:              42
+  deterministic:     true
+  grad_clip:         1.0
+
+  corpus:
+    eyepacs_test_dir:   "test"               # joined onto paths.eyepacs
+    test_labels_csv:    "testLabels15.csv"   # probe only; joined onto paths.eyepacs
+    train_labels_csv:   "trainLabels.csv"    # Exp-1 corpus, for the disjointness assertion
+    image_glob:         "*.jpeg"
+    expected_count:     53576
+
+  optimizer:
+    name:            lars            # lars | sgd | adamw
+    base_lr:         0.45            # ≈ 0.2 × batch_size/256 (recompute per batch size)
+    weight_decay:    1.0e-6
+    warmup_epochs:   10
+    schedule:        cosine
+
+  byol:
+    proj_hidden:     4096
+    proj_out:        256
+    pred_hidden:     4096
+    ema_base:        0.996           # ramps 0.996 → 1.0 on a cosine schedule
+
+  mocov2:  { queue_size: 8192, moco_dim: 128, temperature: 0.2, ema: 0.999 }
+  simsiam: { proj_hidden: 2048, proj_out: 2048, pred_hidden: 512 }
+  dino:    { out_dim: 65536, n_local_crops: 6, student_temp: 0.1, teacher_temp: 0.07, center_momentum: 0.9 }
+
+  augment:
+    global_crop_scale:   [0.2, 1.0]
+    local_crop_scale:    [0.05, 0.2]   # dino only (multi-crop not wired — see methods.py DINO note)
+    color_jitter:        [0.4, 0.4, 0.2, 0.1]
+    color_jitter_prob:   0.8
+    grayscale_prob:      0.2
+    blur_prob_view1:     1.0
+    blur_prob_view2:     0.1
+    solarize_prob_view2: 0.2
+    hflip_prob:          0.5
+    # NOTE: all photometric entries above apply to RGB channels ONLY (§4.3)
+
+  backbones:          [resnet50, efficientnet_b3]   # pretrain each separately
+
+  mixed_precision:
+    resnet50:         true
+    efficientnet_b3:  false          # fp16 overflow — must stay disabled (CLAUDE.md)
+
+  checkpoint:
+    out_dir:          "outputs/ssl"   # versioned subdirs (e.g. v1.0) appended at save time
+    version:          "v1.0"
+    save_every:       50
+    keep_last:        2
+
+  probe:                              # linear-probe acceptance gate (§8)
+    enabled:          true
+    image_size:       256
+    epochs:           50
+    batch_size:       64
+    lr:               0.1
+    label_csv:        "testLabels15.csv"
+    holdout_usage:    "Private"        # probe-test slice by the Usage column
+    knn_k:            20
+    accept_vs_random_kappa_delta:    0.05    # κ(SSL) − κ(random) ≥ 0.05
+    accept_vs_imagenet_kappa_margin: -0.03   # κ(SSL) ≥ κ(ImageNet) − 0.03
+
 experiments:
   exp1:
     name:       "Experiment 1: Preprocessing Dominance (2x2 Factorial)"
     hypothesis: H-1
     dataset:    eyepacs
+    # init.source wires CFC-2.8: baseline arm (A/C) ⟹ ImageNet;
+    # pipeline arm (B/D) ⟹ fundus-only SSL (gated checkpoint, brief §10).
+    # B/D refuse to start until their SSL checkpoint exists with meta.gate_passed=true.
     configurations:
-      A: {preprocessing: baseline, model: resnet50,        in_channels: 3}
-      B: {preprocessing: full,  model: resnet50,        in_channels: 4}
-      C: {preprocessing: baseline, model: efficientnet_b3, in_channels: 3}
-      D: {preprocessing: full,  model: efficientnet_b3, in_channels: 4}
+      A: {preprocessing: baseline, model: resnet50,        in_channels: 3, init: {source: imagenet}}
+      B: {preprocessing: full,  model: resnet50,        in_channels: 4, init: {source: ssl, ckpt: "outputs/ssl/v1.0/ssl_byol_resnet50_4ch_256_ep300.pt"}}
+      C: {preprocessing: baseline, model: efficientnet_b3, in_channels: 3, init: {source: imagenet}}
+      D: {preprocessing: full,  model: efficientnet_b3, in_channels: 4, init: {source: ssl, ckpt: "outputs/ssl/v1.0/ssl_byol_efficientnet_b3_4ch_256_ep300.pt"}}
 
   exp2:
     name:       "Experiment 2: Component Ablation + Parameter Sweeps"

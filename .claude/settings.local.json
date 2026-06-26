@@ -422,7 +422,12 @@
       "Bash(rm -f _edge_diag.png)",
       "Bash(ls _edge_diag.png)",
       "Bash(cp diagrams/03_preprocessing_stages_detailed.svg images/diagrams/03_preprocessing_stages_detailed.svg)",
-      "Bash(cp diagrams/pipeline_diagram.svg images/diagrams/pipeline_diagram.svg)"
+      "Bash(cp diagrams/pipeline_diagram.svg images/diagrams/pipeline_diagram.svg)",
+      "PowerShell(python -m pip install --quiet --upgrade kaggle 2>&1)",
+      "PowerShell(python -c \"import kaggle, sys; print\\('kaggle module OK'\\)\" 2>&1)",
+      "Bash(rm -rf outputs/ssl/v1.0/ssl_byol_resnet50_4ch_256_ep1.pt outputs/ssl/v1.0/gate_report.json outputs/ssl/v1.0/manifest.json)",
+      "Bash(ls outputs/ssl/v1.0/)",
+      "Bash(echo \"pyc-check-exit:$?\")"
     ]
   }
 }

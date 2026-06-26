@@ -1,0 +1,25 @@
+# SSL pretraining overlay (brief §3.4 / §6).
+#
+# The authoritative `ssl:` block lives in configs/default.yaml. This file is an
+# OVERLAY: load it on top of default.yaml via src.utils.config.load_configs,
+# e.g.
+#     python scripts/run_ssl_pretrain.py \
+#         --config configs/default.yaml --config configs/ssl_pretrain.yaml \
+#         --backbone resnet50
+#
+# Only the keys you want to override need appear here; everything else is
+# inherited from default.yaml through the deep-merge. Below mirrors the defaults
+# for visibility and is the natural place to pin a screening run (e.g. fewer
+# epochs, a different method) without touching default.yaml.
+
+ssl:
+  method:           byol
+  epochs:           300
+  screening_epochs: 100
+  batch_size:       32
+
+  checkpoint:
+    version:        "v1.0"
+
+  probe:
+    enabled:        true

@@ -31,6 +31,9 @@ Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `
 - [Preprocessing: OD/fovea + polar CLAHE](PROJECT_MEMORY/preprocessing-od-fovea-polar.md) — classical detector unreliable (fovea fails); polar CLAHE now Stage-5 default pivoting on FOV centroid → checkpoints must be retrained; **2026-06-18 decided to replace with learned heatmap detector**
 - [OD/fovea heatmap detector plan](PROJECT_MEMORY/od-fovea-heatmap-detector-plan.md) — learned U-Net+DSNT heatmap detector (FundusPosNet ref); build spec in `experiments/docs/od_fovea_heatmap_detector_brief.md`; INVARIANTS OD-3 applied (v6.1.0). **Phases 1–4 DONE (2026-06-23): trained+validated, pipeline-integrated, demo discs/heatmap/drag-correct + correction store, and Phase-4 offline feedback loop (`scripts/export_corrections.py` + `finetune_corrections.py`: dedup + test-leakage-filtered export → fine-tune from frozen base weights → versioned `od_fovea_unet_vN.pt` gated on IDRiD-test acceptance). Operator run pending real corrections.** (Root 4-phase task brief `TASK_OD_FOVEA_DETECTOR.md` removed 2026-06-23 once all phases landed.)
 
+## Datasets
+- [EyePACS local dataset](PROJECT_MEMORY/eyepacs-local-dataset.md) — `E:\datasets\EyePACS` is the FULL 88,702-img set (train 35,126 + test 53,576), not partial; test labels added 2026-06-26 (`testLabels15.csv`, verified 1:1); 66.6 GB redundant split-zips still on disk
+
 ## Cross-cutting
 - [Strip version markers](PROJECT_MEMORY/strip-version-markers.md) — V5 IS a version marker; remove V5/V4/V3 outside thesis/; defense/experiments/demo/server done, council export now auto-scrubbed in md2gost.py (2026-06-12), root TODO
 - [Demo stack](PROJECT_MEMORY/demo-stack.md) — launch backend (WSL) + frontend (npm) + Cloudflare tunnels for the real model; human copy `demo/RUNBOOK.md`

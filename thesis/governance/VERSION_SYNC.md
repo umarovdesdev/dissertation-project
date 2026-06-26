@@ -1,6 +1,10 @@
 # VERSION SYNCHRONIZATION REGISTER
 
-**Version:** 6.1.0 | **Date:** 2026-06-23
+**Version:** 6.2.0 | **Date:** 2026-06-26
+
+## v6.2.0 Amendment Scope
+
+**Fundus-SSL corpus + acceptance protocol locked for the integrated arm.** The v6.0.0 ophthalmology-SSL decision is unchanged; v6.2.0 fixes the operational specifics that were previously left open. (1) The integrated-arm SSL corpus is the **unlabeled EyePACS "test" split — 53,576 images**, **disjoint** from the Experiment-1 evaluation corpus (the ~35,126 labeled "train" split, 5-fold patient-level CV) by image identity *and* patient identity. This no-pretraining-leakage constraint is recorded as new clause **SB-2.4** (INVARIANTS) and operationalized in the experiments code as the disjointness assertions **INV-SSL-1 / INV-SSL-2**. (2) **BYOL** (Grill et al., 2020) is recorded as the **primary** CNN-compatible protocol (MoCo-v2 / SimSiam / DINO retained as alternatives), pretrained **from-scratch** on the 4-channel tensor. (3) A **linear-probe acceptance gate** is added: an SSL checkpoint enters Experiment 1 only after it beats random init and is competitive with ImageNet, for both backbones. **Adds new referenceable entities (SB-2.4, the linear-probe acceptance gate), reverses no binding → MINOR bump** per VERSIONING_POLICY §4. CFC-2.8 (baseline ⟹ ImageNet, integrated ⟹ fundus-SSL) and the composite IV are retained; no SSL performance is asserted (the integrated arm is specified, not yet trained). Governance files updated: INVARIANTS (SB-2.4, DGL-6, header), HYPOTHESIS (Premise 4 + Conclusion RETFound→SSL sync; specifics), RESEARCH_ARCHITECTURE (§4.2bis, §9.1), CONTRIBUTIONS (SC-H), VERSION_SYNC, CHANGELOG. Narrative sync: methodology §3.3.2 draft + KZ translation + continuity; glossary EN/KZ (linear-probe gate term + SSL-entry refinements). Literature: SSL cards #84–#92 already registered (no new card needed); LITERATURE_INDEX notes BYOL as the selected primary.
 
 ## v6.1.0 Amendment Scope
 
@@ -30,13 +34,13 @@ Pretraining source amendment: integrated arm of Experiment 1 uses RETFound; base
 
 | File | Version | Synced |
 |------|---------|--------|
-| governance/INVARIANTS.md | 6.1.0 | ✅ — v6.1.0: OD-3 Stage-1 classical CV → pre-trained frozen learned heatmap detector; fallback σ reconciled to 15.0° — completed 2026-06-23 |
-| governance/HYPOTHESIS.md | 6.0.0 | ✅ — unaffected by v6.1.0 (H-1/Premise-3 name Stage 1 generically, no classical-detector reference; H-2 ablation does not reference the detector implementation) |
-| governance/RESEARCH_ARCHITECTURE.md | 6.1.0 | ✅ — v6.1.0: Stage-1 detector description updated to the frozen learned detector (σ = 15.0°); no factorial/design change — completed 2026-06-23 |
-| governance/VERSION_SYNC.md | 6.1.0 | ✅ |
-| governance/ARGUMENT_MAP.md | 6.0.0 | ✅ — v6.0.0: binding-ref bump only (no RETFound/pretraining node in this file) — completed 2026-06-01 |
-| governance/CONTRIBUTIONS.md | 6.0.0 | ✅ — v6.0.0: SC-H (ophthalmology-SSL initialization, CFC-2.8-bounded) added; header amendment note — completed 2026-06-01 |
-| governance/CENTRAL_THESIS.md | 6.0.0 | ✅ — v6.0.0: binding-ref bump only (no pretraining reference in body) — completed 2026-06-01 |
+| governance/INVARIANTS.md | 6.2.0 | ✅ — v6.2.0: SB-2.4 (fundus-SSL corpus disjointness / no pretraining leakage) added; DGL-6 extended with corpus (EyePACS-test 53,576), BYOL-primary, from-scratch, linear-probe gate — completed 2026-06-26 |
+| governance/HYPOTHESIS.md | 6.2.0 | ✅ — v6.2.0: Premise 4 + Conclusion corrected RETFound→ophthalmology-SSL (v6.0.0 sync miss); SSL operational specifics recorded — completed 2026-06-26 |
+| governance/RESEARCH_ARCHITECTURE.md | 6.2.0 | ✅ — v6.2.0: §4.2bis extended (corpus, BYOL-primary, from-scratch 4-channel, linear-probe gate); §9.1 pretraining-leakage bullet — completed 2026-06-26 |
+| governance/VERSION_SYNC.md | 6.2.0 | ✅ |
+| governance/ARGUMENT_MAP.md | 6.0.0 | ✅ — unaffected by v6.2.0 (no pretraining-source node in this file; binding-ref unchanged) |
+| governance/CONTRIBUTIONS.md | 6.2.0 | ✅ — v6.2.0: SC-H refined with locked specifics (EyePACS-test corpus, BYOL-primary from-scratch, linear-probe gate); CFC-2.8 boundary unchanged — completed 2026-06-26 |
+| governance/CENTRAL_THESIS.md | 6.0.0 | ✅ — unaffected by v6.2.0 (no pretraining reference in body; binding-ref unchanged) |
 | literature/external/gulshan-2016.md | v5.3 sync ✅ | ✅ — v5.3: §15 Paradigmatic Role block + §16 Paradigmatic citation-ready statements + §18 Paradigmatic Synthesis — completed 2026-05-28 |
 | literature/external/pratt-2016.md | v5.3 sync ✅ | ✅ — v5.3: P1 position-in-paradigm-space line added to §15 |
 | literature/external/rakhlin-2017.md | v5.3 sync ✅ | ✅ — v5.3: P1 position-in-paradigm-space line added to §15 |
@@ -61,8 +65,8 @@ Pretraining source amendment: integrated arm of Experiment 1 uses RETFound; base
 | outline/MASTER_OUTLINE.md | 5.0 | ❌ — chapter outlines that frame H-1 must be updated AND paradigmatic framing inserted in ch 1.4 / 1.5 |
 | outline/TABLE_OF_CONTENTS_EN.md | 5.0 | ⚠️ — likely unchanged but verify |
 | outline/TABLE_OF_CONTENTS_KZ.md | 5.0 | ⚠️ — likely unchanged but verify |
-| glossary/GLOSSARY_EN.md | 5.0 | ❌ — v6.0.0: add ophthalmology-specific SSL, DINO, BYOL, SimCLR, MoCo terms (RETFound now historical); plus paradigm P1/P2, canonical representative (v5.3) |
-| glossary/GLOSSARY_KZ.md | 5.0 | ❌ — Kazakh equivalents for new glossary terms |
+| glossary/GLOSSARY_EN.md | 6.2.0 | ✅ — v6.0.0 SSL/paradigm terms present; v6.2.0: added Linear-Probe Acceptance Gate + Fundus-SSL Pretraining Corpus terms, refined SSL-Method-Family (BYOL primary) and Ophthalmology-SSL entries — completed 2026-06-26 |
+| glossary/GLOSSARY_KZ.md | 6.2.0 | ✅ — v6.2.0: Kazakh equivalents mirrored for the new/refined SSL terms — completed 2026-06-26 |
 | literature/LITERATURE_INDEX.md | 5.0 | ❌ — v6.0.0: SSL-family cards (DINO/BYOL/SimCLR/MoCo) for the integrated-arm pretraining; Zhou et al. 2023 (RETFound) demoted to historical/contrast; Paradigm column (v5.3) |
 | literature/external/gulshan-2016.md | 5.0 | ❌ — Paradigmatic Role block required in §15 (v5.3) — see Task 1.1 |
 | experiments/experimental-protocol.md | 5.0 | ❌ — v6.0.0: Exp 1 protocol must reflect the restored A/B/C/D factorial (integrated arm = ophthalmology-SSL); AOQ-1/3/4 resolved, AOQ-2 simplified |

@@ -5,9 +5,9 @@
 ### Докторлық диссертация: Automated Diabetic Retinopathy Diagnosis via Fundus Image Enhancement and CNN Classification
 
 **Кандидат:** Есмұхамедов Н.С.\
-**Нұсқа:** 6.0.0\
-**Күні:** 2026-06-01\
-**Байланыстырушы құжат:** INVARIANTS.md v6.0.0
+**Нұсқа:** 6.2.0\
+**Күні:** 2026-06-26\
+**Байланыстырушы құжат:** INVARIANTS.md v6.2.0
 
 ------------------------------------------------------------------------
 
@@ -154,8 +154,10 @@ Bootstrap
 | FOV Standardization (Hough) | FOV стандарттау (Hough) | [Тарихи — бұрынғы 5 компонентті pipeline-ның 1-компоненті]; ауыстырылды → FOV Crop and Resize (2-кезең) — Deprecated |
 | Green Channel Imaging | Жасыл арна бөліп алу | [Тарихи — бұрынғы 5 компонентті pipeline-ның 4-компоненті]; pipeline-нан алынып тасталды — Deprecated |
 | HSV Contrast Enhancement | HSV контрастты күшейту | [Тарихи — бұрынғы 5 компонентті pipeline-ның 3-компоненті]; ауыстырылды → Flat-Field Correction — Deprecated |
-| Ophthalmology-Specific Self-Supervised Pretraining | Офтальмологияға тән өзін-өзі бақылайтын алдын ала оқыту | [ҚОСЫЛДЫ: v6.0.0]; толық pipeline арнасының инициализация көзі; белгіленбеген көз түбі корпусында CNN backbone-ды алдын ала оқыту (INVARIANTS v6.0.0, H-1, DGL-6, SC-H) |
-| SSL Method Family (DINO / BYOL / SimCLR / MoCo) | SSL әдістер отбасы (DINO / BYOL / SimCLR / MoCo) | [ҚОСЫЛДЫ: v6.0.0]; толық pipeline инициализация хаттамасы эмпирикалық таңдалатын CNN-үйлесімді SSL отбасы; төрт мүше — DINO, BYOL, SimCLR, MoCo |
+| Ophthalmology-Specific Self-Supervised Pretraining | Офтальмологияға тән өзін-өзі бақылайтын алдын ала оқыту | [ҚОСЫЛДЫ: v6.0.0 · ТОЛЫҚТЫРЫЛДЫ: v6.2.0]; толық pipeline арнасының инициализация көзі; белгіленбеген көз түбі корпусында CNN backbone-ды алдын ала оқыту. v6.2.0: корпус — белгіленбеген EyePACS «test» бөлігі (53 576 кескін, SB-2.4 бойынша Эксперимент-1 корпусынан бөлек); басты хаттама — BYOL, 4 арналы tensor-да from-scratch (кездейсоқ инициализация); Эксперимент-1-ге кіру Linear-Probe қабылдау қақпасымен шектеледі (INVARIANTS v6.2.0, H-1, DGL-6, SB-2.4, SC-H) |
+| SSL Method Family (DINO / BYOL / SimCLR / MoCo) | SSL әдістер отбасы (DINO / BYOL / SimCLR / MoCo) | [ҚОСЫЛДЫ: v6.0.0 · ТОЛЫҚТЫРЫЛДЫ: v6.2.0]; толық pipeline инициализация хаттамасы алынатын CNN-үйлесімді SSL отбасы; төрт мүше — DINO, BYOL, SimCLR, MoCo. v6.2.0: BYOL — басты хаттама (MoCo-v2 / SimSiam / DINO — баламалар); түпкілікті таңдау Linear-Probe қабылдау қақпасымен расталады |
+| Fundus-SSL Pretraining Corpus | Көз түбі-SSL алдын ала оқыту корпусы | [ҚОСЫЛДЫ: v6.2.0]; біріктірілген арна backbone-ы алдын ала оқытылатын белгіленбеген корпус — EyePACS «test» бөлігі (53 576 кескін); pretext міндеті үшін таңбасыз; кескін және пациент бойынша Эксперимент-1 корпусынан (≈35 126) бөлек (SB-2.4); кодта INV-SSL-1 / INV-SSL-2 ретінде орындалады; тек алдын ала оқытуға арналған |
+| Linear-Probe Acceptance Gate | Сызықтық зонд қабылдау қақпасы | [ҚОСЫЛДЫ: v6.2.0]; SSL checkpoint-тың Эксперимент-1-ге кіру алғышарты; backbone қатырылған, бір сызықтық бас EyePACS-test таңбалы тілімінде оқытылады; екі backbone үшін де кездейсоқ инициализациядан асып, ImageNet-пен бәсекеге қабілетті болуы тиіс (DGL-6; RESEARCH_ARCHITECTURE §4.2bis) |
 | Composite Independent Variable (preprocessing × pretraining) | Құрама тәуелсіз айнымалы (preprocessing × pretraining) | [ҚОСЫЛДЫ: v6.0.0]; H-1 манипуляцияланатын факторы; pretraining арнаға бағынады (baseline ⟹ ImageNet, толық pipeline ⟹ ophthalmology-SSL); CFC-2.8 |
 | Paradigm P1 (End-to-End CNN) | P1 парадигмасы (End-to-End CNN) | [ҚОСЫЛДЫ: v6.0.0]; preprocessing қосалқы дайындық ретінде қаралатын парадигма; Gulshan (2016) — P1 канондық өкілі (SIR-9, SB-1.12) |
 | Paradigm P2 (Integrated Preprocessing-CNN) | P2 парадигмасы (Біріктірілген preprocessing-CNN) | [ҚОСЫЛДЫ: v6.0.0]; preprocessing — интегралды модель компоненті (model = preprocessing + CNN); толық pipeline — P2 парадигмалық дананы (C-1) |
@@ -528,6 +530,6 @@ Bootstrap
 
 ------------------------------------------------------------------------
 
-*Глоссарий v6.0.0 аяқталды*\
-*Байланыстырушы құжат: INVARIANTS.md v6.0.0*\
+*Глоссарий v6.2.0 аяқталды*\
+*Байланыстырушы құжат: INVARIANTS.md v6.2.0*\
 *Корпус дереккөздері: CENTRAL_THESIS.md, CORE_OBJECTIVE.md, HYPOTHESIS.md, INVARIANTS.md, ARGUMENT_MAP.md, RESEARCH_ARCHITECTURE.md, CONTRIBUTIONS.md, VERSION_SYNC.md, TABLE_OF_CONTENTS_EN.md, LC-SAPAKOVA-2025, LC-Yesmukhamedov-2025-SELF, LC-Sapakova-2024-01, LC-AlTimemy-2021, LC-SAPAKOVA-2025-01, LC-2025-Yesmukhamedov-01*

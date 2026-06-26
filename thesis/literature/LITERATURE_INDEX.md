@@ -235,7 +235,7 @@ The **Paradigm** column was added in governance v5.3 to support the paradigmatic
 | §3.1.4 | ⚠️ GAP — no external literature; methodological contribution by candidate |
 | §3.2 | #09, **#24**, #66, #68, #69, #70, #99, #100, #107, #108 |
 | §3.3 | **#19, #21, #23**, #71, #72, #109 |
-| §3.3.2 (NEW) | ✅ RESOLVED — #84 (RETFound), #90 (MAE — pretraining basis), #85 (MICLe), #86–#89, #91 (SSL methods), #92 (survey). Ophthalmology-specific SSL now well-grounded. |
+| §3.3.2 (NEW) | ✅ RESOLVED — #84 (RETFound), #90 (MAE — pretraining basis), #85 (MICLe), #86–#89, #91 (SSL methods), #92 (survey). Ophthalmology-specific SSL now well-grounded. **[v6.2.0] #88 (BYOL, Grill et al. 2020) is the selected *primary* protocol** for the integrated-arm SSL initialization (MoCo #87 / SimSiam #91 / DINO #89 retained as alternatives); cited accordingly in §3.3.2. |
 | §3.4 | **#21**, #40, #52, #64, #96, #98, #113 |
 | §4.1 | #06, #10, #15, #47, #48, #49, #50, #51, **#19, #21, #24**, #41, #83 |
 | §4.2 (Exp 1, H-1) | **#19, #21, #24** ⚡ THIN (self-only) |

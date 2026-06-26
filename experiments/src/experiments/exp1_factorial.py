@@ -32,6 +32,7 @@ from src.data.datasets import (
 from src.data.splits import PatientLevelKFold
 from src.evaluation.metrics import check_dominance
 from src.models.factory import create_model, create_patient_model
+from src.ssl.loader import load_ssl_backbone
 from src.preprocessing.config import PreprocessingConfig
 from src.preprocessing.pipeline import PreprocessingPipeline
 from src.training.checkpoint import CheckpointManager
@@ -93,6 +94,77 @@ def _make_preprocessing(
     if is_training:
         return PreprocessingPipeline.create_for_training(config)
     return PreprocessingPipeline.create_for_inference(config)
+
+
+# ── Initialization (CFC-2.8): ImageNet vs gated fundus-SSL ─────────────────────
+
+# experiments/ root, used to resolve relative SSL checkpoint paths from config.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _resolve_init(config: dict[str, Any], cfg_key: str) -> dict[str, Any]:
+    """Resolve the per-config init spec from the Exp-1 config (brief §10.2).
+
+    Reads ``config["experiment"]["configurations"][cfg_key]["init"]``. Defaults
+    to ImageNet when absent, preserving the legacy behaviour for any config that
+    does not declare an ``init`` block.
+
+    Args:
+        config: Full merged config dict (with an ``experiment`` section).
+        cfg_key: Config key (``"A"``–``"D"``).
+
+    Returns:
+        Init spec dict, e.g. ``{"source": "imagenet"}`` or
+        ``{"source": "ssl", "ckpt": "outputs/ssl/.../*.pt"}``.
+    """
+    confs = config.get("experiment", {}).get("configurations", {})
+    entry = confs.get(cfg_key, {}) if isinstance(confs, dict) else {}
+    init = entry.get("init") if isinstance(entry, dict) else None
+    return init if isinstance(init, dict) else {"source": "imagenet"}
+
+
+def _build_model_with_init(
+    model_name: str,
+    model_cfg: dict[str, Any],
+    cfg_key: str,
+    config: dict[str, Any],
+):
+    """Build the config's model, honouring CFC-2.8 initialization (brief §10).
+
+    - ``source: imagenet`` (baseline arm A/C) → factory ``pretrained=True``.
+    - ``source: ssl`` (pipeline arm B/D) → factory ``pretrained=False`` then
+      :func:`load_ssl_backbone`, with a fail-fast ``gate_passed`` guard so no
+      ungated init enters the experiment.
+
+    Args:
+        model_name: Backbone name.
+        model_cfg: Model config dict (carries ``in_channels`` etc.).
+        cfg_key: Config key (``"A"``–``"D"``).
+        config: Full merged config dict.
+
+    Returns:
+        A model ready for fine-tuning (fresh 5-class head for the SSL arm).
+    """
+    init = _resolve_init(config, cfg_key)
+    source = str(init.get("source", "imagenet")).lower()
+    if source != "ssl":
+        return create_model(model_name, model_cfg)
+
+    ckpt_rel = init.get("ckpt")
+    if not ckpt_rel:
+        raise ValueError(
+            f"Config {cfg_key} declares init.source=ssl but no init.ckpt path."
+        )
+    ckpt_path = Path(ckpt_rel)
+    if not ckpt_path.is_absolute():
+        ckpt_path = _REPO_ROOT / ckpt_path
+
+    ssl_model_cfg = {**model_cfg, "pretrained": False}
+    model = create_model(model_name, ssl_model_cfg)
+    meta = load_ssl_backbone(model, ckpt_path, require_gate_passed=True)
+    print(f"  Init: SSL ({meta.get('method')} / {meta.get('ssl_corpus')}) "
+          f"loaded from {ckpt_path.name}; gate_passed={meta.get('gate_passed')}")
+    return model
 
 
 # ── Data helpers ──────────────────────────────────────────────────────────────
@@ -470,7 +542,7 @@ def run(
             )
 
             ckpt_mgr = CheckpointManager(ckpt_dir, max_keep=5)
-            model = create_model(model_name, model_cfg)
+            model = _build_model_with_init(model_name, model_cfg, cfg_key, config)
 
             best_metrics = trainer.train_fold(
                 model=model,
