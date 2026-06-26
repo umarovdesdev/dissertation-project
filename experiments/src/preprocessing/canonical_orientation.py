@@ -82,6 +82,7 @@ def canonical_orientation(
     enable_rotation: bool = True,
     return_heatmaps: bool = False,
     fov_mask: np.ndarray | None = None,
+    od_override: ODFoveaResult | None = None,
 ) -> tuple[np.ndarray, ODFoveaResult | None, np.ndarray | None]:
     """
     Apply full canonical orientation: flip + OD–fovea rotation.
@@ -100,22 +101,33 @@ def canonical_orientation(
     (post flip+rotation) geometry as the returned image, ready to be cropped
     with the identical bbox.
 
+    When *od_override* is supplied (a clinician-corrected detection in the
+    **flipped** frame), it replaces the learned detector entirely: no detection
+    is run, and the rotation is driven by the override's ``angle_deg``. This is
+    the demo's "Save correction" path — the corrected OD/fovea redefine the
+    rotation and therefore every downstream stage.
+
     Args:
         image: RGB uint8 NumPy array of shape ``(H, W, 3)``.
         eye_side: ``"left"``, ``"right"``, or ``"unknown"``.
-        enable_rotation: If ``False``, skip OD–fovea rotation entirely.
+        enable_rotation: If ``False`` (and no *od_override*), skip OD–fovea
+            rotation entirely.
         return_heatmaps: If ``True``, request the learned detector's OD/fovea
             probability heatmaps (attached to ``od_fovea_result`` in the
             **flipped** input frame, i.e. pre-rotation, pre-crop). Used by the
             demo overlay (Phase 3); off by default to skip two full-res resizes.
         fov_mask: Optional FOV mask (``(H, W)`` uint8) in the pre-flip frame, to
             carry through the identical flip+rotation. ``None`` skips it.
+        od_override: Optional pre-computed :class:`ODFoveaResult` (centres in the
+            flipped frame) to use instead of running detection. When given, the
+            detector is bypassed and the override drives the rotation.
 
     Returns:
         Tuple of ``(processed_image, od_fovea_result, processed_fov_mask)``.
-        *od_fovea_result* is ``None`` when *enable_rotation* is ``False``.
-        ``od_fovea_result.confident`` may be ``False`` if detection failed.
-        *processed_fov_mask* is ``None`` when *fov_mask* was not supplied.
+        *od_fovea_result* is ``None`` when *enable_rotation* is ``False`` and no
+        *od_override* was given. ``od_fovea_result.confident`` may be ``False``
+        if detection failed. *processed_fov_mask* is ``None`` when *fov_mask* was
+        not supplied.
     """
     # Sub-step 0a: canonical flip (existing) — flip the mask the same way.
     image = canonical_flip(image, eye_side)
@@ -123,10 +135,13 @@ def canonical_orientation(
         fov_mask = canonical_flip(fov_mask, eye_side)
 
     # Sub-step 0b: OD–fovea rotation normalization (new)
-    if not enable_rotation:
+    if not enable_rotation and od_override is None:
         return image, None, fov_mask
 
-    result = detect_od_fovea(image, return_heatmaps=return_heatmaps)
+    # A clinician override bypasses the detector; otherwise run detection.
+    result = od_override if od_override is not None else detect_od_fovea(
+        image, return_heatmaps=return_heatmaps
+    )
 
     if result.confident:
         image = rotate_to_horizontal(image, result.angle_deg)

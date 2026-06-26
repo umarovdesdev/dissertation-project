@@ -491,6 +491,7 @@ class PreprocessingPipeline:
         image: np.ndarray,
         eye_side: str = "unknown",
         with_heatmaps: bool = False,
+        od_override: "ODFoveaResult | None" = None,
     ) -> dict:
         """Run preprocessing Stages 0–5 capturing each intermediate.
 
@@ -506,6 +507,11 @@ class PreprocessingPipeline:
                 probability heatmaps and warp them into analysis space (added to
                 ``od_fovea_analysis`` as ``od_heatmap``/``fovea_heatmap``). Used
                 by the demo overlay (Phase 3).
+            od_override: Optional clinician-corrected :class:`ODFoveaResult`
+                (centres in the flipped frame) that replaces the learned
+                detector. When given, the override's ``angle_deg`` drives the
+                Stage-1 rotation and therefore every downstream stage — the
+                demo's "Save correction" re-run.
 
         Returns:
             Dict with:
@@ -542,7 +548,11 @@ class PreprocessingPipeline:
         # from the RGB's BORDER_REFLECT rotation are kept out of the FOV.
         od_fovea_result: ODFoveaResult | None = None
         mask_oriented: np.ndarray | None = None
-        if self.config.use_canonical_flip or self.config.use_od_fovea_rotation:
+        if (
+            self.config.use_canonical_flip
+            or self.config.use_od_fovea_rotation
+            or od_override is not None
+        ):
             raw_mask = _fov_foreground_mask(image)
             oriented, od_fovea_result, mask_oriented = canonical_orientation(
                 image,
@@ -550,6 +560,7 @@ class PreprocessingPipeline:
                 enable_rotation=self.config.use_od_fovea_rotation,
                 return_heatmaps=with_heatmaps,
                 fov_mask=raw_mask,
+                od_override=od_override,
             )
         else:
             oriented = image

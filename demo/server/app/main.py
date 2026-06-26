@@ -194,12 +194,14 @@ async def od_fovea_correct(
     reviewer: str | None = Form(default=None),
     password: str | None = Form(default=None),
 ) -> ODFoveaCorrectionResponse:
-    """Persist a clinician OD/fovea correction and echo the updated overlay.
+    """Persist a clinician OD/fovea correction and re-run the pipeline.
 
-    Corrected centres arrive in the analysis frame (where the frontend edits).
-    The overlay geometry is recomputed from them, and they are mapped back to
-    original-image pixels for the Phase-4 feedback store (the original image is
-    saved once, content-addressed by SHA-256).
+    Corrected centres arrive in the flipped (pre-rotation) frame, where the
+    detection slide is edited. They redefine the Stage-1 rotation, so the whole
+    pipeline is re-run and the full updated stage strip is echoed back. The
+    centres are also mapped back to original-image pixels for the Phase-4
+    feedback store (the original image is saved once, content-addressed by
+    SHA-256).
     """
     _require_password(password)
     data = await _read_validated(image)
@@ -215,8 +217,8 @@ async def od_fovea_correct(
     ext = _MIME_EXT.get((image.content_type or "").split(";")[0].strip().lower(), "png")
     record = {
         "eye": eye,
-        "od_center_analysis": [od_x, od_y],
-        "fovea_center_analysis": [fovea_x, fovea_y],
+        "od_center_flip": [od_x, od_y],
+        "fovea_center_flip": [fovea_x, fovea_y],
         "space_w": result["od_fovea"]["space_w"],
         "space_h": result["od_fovea"]["space_h"],
         "od_center_original": result["original"]["od_center"],
@@ -238,7 +240,11 @@ async def od_fovea_correct(
         record_id, stored = image_hash, False
 
     return ODFoveaCorrectionResponse(
-        od_fovea=result["od_fovea"], stored=stored, record_id=record_id
+        od_fovea=result["od_fovea"], stored=stored, record_id=record_id,
+        fov_mask_png_b64=result["fov_mask_png_b64"],
+        fov_base_png_b64=result["fov_base_png_b64"],
+        detect_base_png_b64=result["detect_base_png_b64"],
+        stages=result["stages"],
     )
 
 

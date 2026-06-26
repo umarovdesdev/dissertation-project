@@ -73,10 +73,13 @@ export async function visualizeImage(src, eye, name) {
   return await res.json();
 }
 
-// POST /api/od_fovea/correct → { od_fovea, stored, record_id }.
-// Persists a clinician OD/fovea correction (centres in the analysis frame) and
-// returns the recomputed overlay payload. `od`/`fovea` are [x, y] in analysis
-// space; `conf` is { od, fovea } confidence-at-capture (for the feedback store).
+// POST /api/od_fovea/correct → { od_fovea, stored, record_id, stages,
+// detect_base_png_b64, fov_mask_png_b64, fov_base_png_b64 }.
+// Persists a clinician OD/fovea correction (centres in the flipped/pre-rotation
+// frame) and returns the FULL pipeline re-run driven by it — the corrected
+// centres redefine the rotation, so every downstream stage is recomputed.
+// `od`/`fovea` are [x, y] in the flipped frame; `conf` is { od, fovea }
+// confidence-at-capture (for the feedback store).
 export async function correctOdFovea(src, eye, name, od, fovea, conf = {}) {
   if (!API) throw new Error('REACT_APP_API_URL is not set');
   const fd = new FormData();

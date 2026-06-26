@@ -36,7 +36,7 @@ import cv2
 import numpy as np
 
 from .confidence import decode_heatmap
-from .geometry import crop_and_resize
+from .geometry import FovTransform, crop_and_resize
 from .utils import load_config, resolve_device
 
 _DEFAULT_CONFIG = pathlib.Path(__file__).resolve().parent / "config.yaml"
@@ -180,6 +180,58 @@ def reset_cache() -> None:
     _CACHE.clear()
 
 
+def _heatmap_to_input(
+    prob_c: np.ndarray,
+    transform: FovTransform,
+    ratio: float,
+    w_in: int,
+    h_in: int,
+) -> np.ndarray:
+    """Warp a frame-space probability heatmap back to input-image pixels.
+
+    The heatmap is produced on the FOV-cropped, isotropically-resized frame, so
+    it must be returned to the original image through the **same** inverse
+    transform used for the landmark coordinates (:meth:`FovTransform.invert`) —
+    not merely stretched to ``(w_in, h_in)``. A plain resize ignores the crop
+    offset, the isotropic scale, and the centering pad, so the heatmap peak
+    would drift away from the returned centre (the demo overlay then shows the
+    probability blob and the OD/fovea disc misaligned). This affine maps each
+    input pixel to its heatmap-grid sample point::
+
+        x_hm = (x - left) * scale / ratio + x_off / ratio
+        y_hm = (y - upper) * scale / ratio + y_off / ratio
+
+    Pixels outside the cropped FOV map outside the heatmap grid and read as 0
+    (no probability mass there), matching the zero-padding of the frame.
+
+    Args:
+        prob_c: float32 probability map ``(heatmap_size, heatmap_size)``.
+        transform: The crop+resize transform used for inference.
+        ratio: Frame-pixels per heatmap-pixel (``input_size / heatmap_size``).
+        w_in: Original input-image width.
+        h_in: Original input-image height.
+
+    Returns:
+        float32 heatmap ``(h_in, w_in)`` aligned to the input image.
+    """
+    left, upper = transform.bbox[0], transform.bbox[1]
+    a = transform.scale / ratio
+    # M maps destination (input) pixels -> source (heatmap-grid) pixels, used
+    # directly via WARP_INVERSE_MAP.
+    m = np.array(
+        [
+            [a, 0.0, (transform.x_off - left * transform.scale) / ratio],
+            [0.0, a, (transform.y_off - upper * transform.scale) / ratio],
+        ],
+        dtype=np.float32,
+    )
+    return cv2.warpAffine(
+        prob_c, m, (w_in, h_in),
+        flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
+        borderMode=cv2.BORDER_CONSTANT, borderValue=0,
+    )
+
+
 def detect_od_fovea(
     image_rgb: np.ndarray,
     config_path: pathlib.Path | str = _DEFAULT_CONFIG,
@@ -263,8 +315,8 @@ def detect_od_fovea(
 
     od_hm = fovea_hm = None
     if return_heatmaps:
-        od_hm = cv2.resize(prob[0], (w_in, h_in), interpolation=cv2.INTER_LINEAR)
-        fovea_hm = cv2.resize(prob[1], (w_in, h_in), interpolation=cv2.INTER_LINEAR)
+        od_hm = _heatmap_to_input(prob[0], transform, ratio, w_in, h_in)
+        fovea_hm = _heatmap_to_input(prob[1], transform, ratio, w_in, h_in)
 
     return ODFoveaNetResult(
         od_center=od_center,

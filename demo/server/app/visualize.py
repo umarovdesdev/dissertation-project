@@ -11,6 +11,7 @@ import math
 
 import cv2
 import numpy as np
+from src.preprocessing.od_fovea_detect import ODFoveaResult
 
 from . import imaging
 
@@ -67,50 +68,176 @@ def _fit_max(image_rgb: np.ndarray, max_side: int = 512) -> np.ndarray:
     return image_rgb
 
 
-def _od_payload(od, analysis: dict | None, space: int) -> dict:
-    """Build an ODFoveaPayload dict in **analysis space** (the cropped frame).
+def _od_payload(od, src_w: int, src_h: int) -> dict:
+    """Build an ODFoveaPayload dict in the **flipped (pre-rotation) frame**.
 
-    Coordinates are expressed in the ``space`` × ``space`` ``fov_crop_resize``
-    frame so the frontend overlays them directly on the analysis-space base
-    image (no flip/rotation to undo). ``space_w == space_h == space`` and
-    ``flipped`` is always ``False`` for this reason.
+    The detection overlay is shown on the un-rotated canonical-flip image, so the
+    OD–fovea axis appears at its true tilt — the Stage-1 rotation slide is what
+    levels it. Coordinates are therefore the detector's native flipped-frame
+    pixels (``space_w == src_w``, ``space_h == src_h``, ``flipped`` False: the
+    base image is already flipped, so the frontend overlays directly). Heatmaps
+    are the detector's native flipped-frame probability maps — no warp needed.
 
     Args:
-        od: The :class:`ODFoveaResult` (for scalar fields), or ``None``.
-        analysis: ``od_fovea_analysis`` from ``stage_breakdown`` (coords already
-            projected into analysis space), or ``None`` when not confident.
-        space: Analysis-frame side length (``target_size``).
+        od: The :class:`ODFoveaResult` (centres in the flipped frame), or
+            ``None`` when no detection ran.
+        src_w: Width of the flipped frame (== original width; flip preserves size).
+        src_h: Height of the flipped frame.
     """
-    if od is None or analysis is None:
+    if od is None:
         return {
             "od_center": [0, 0], "od_radius": 0.0,
             "fovea_center": [0, 0], "fovea_radius": 0.0,
             "angle_deg": 0.0, "rotation_sigma_deg": 0.0, "confident": False,
-            "space_w": space, "space_h": space, "flipped": False,
-            "od_confidence": float(getattr(od, "od_confidence", 0.0)) if od else 0.0,
-            "fovea_confidence": float(getattr(od, "fovea_confidence", 0.0)) if od else 0.0,
+            "space_w": int(src_w), "space_h": int(src_h), "flipped": False,
+            "od_confidence": 0.0, "fovea_confidence": 0.0,
             "od_heatmap_png_b64": "", "fovea_heatmap_png_b64": "",
         }
-    od_hm = analysis.get("od_heatmap")
-    fovea_hm = analysis.get("fovea_heatmap")
+    od_hm = od.od_heatmap
+    fovea_hm = od.fovea_heatmap
     return {
-        "od_center": [float(analysis["od_center"][0]), float(analysis["od_center"][1])],
-        "od_radius": float(analysis["od_radius"]),
-        "fovea_center": [float(analysis["fovea_center"][0]), float(analysis["fovea_center"][1])],
-        "fovea_radius": float(analysis["fovea_radius"]),
+        "od_center": [float(od.od_center[0]), float(od.od_center[1])],
+        "od_radius": float(od.od_radius),
+        "fovea_center": [float(od.fovea_center[0]), float(od.fovea_center[1])],
+        "fovea_radius": float(od.fovea_radius),
         "angle_deg": float(od.angle_deg),
         "rotation_sigma_deg": float(od.rotation_sigma_deg),
         "confident": bool(od.confident),
-        "space_w": space, "space_h": space, "flipped": False,
+        "space_w": int(src_w), "space_h": int(src_h), "flipped": False,
         "od_confidence": float(getattr(od, "od_confidence", 0.0)),
         "fovea_confidence": float(getattr(od, "fovea_confidence", 0.0)),
-        "od_heatmap_png_b64": imaging.heatmap_png_b64(od_hm) if od_hm is not None else "",
-        "fovea_heatmap_png_b64": imaging.heatmap_png_b64(fovea_hm) if fovea_hm is not None else "",
+        "od_heatmap_png_b64": imaging.heatmap_png_b64(_fit_max(od_hm)) if od_hm is not None else "",
+        "fovea_heatmap_png_b64": (
+            imaging.heatmap_png_b64(_fit_max(fovea_hm)) if fovea_hm is not None else ""
+        ),
+    }
+
+
+# Analysis-frame stages share the 512² FOV mask (Stage 3's 4th channel). Earlier
+# (pre-crop) stages predate that mask, so their FOV channel is the stage's own
+# foreground (a luma threshold), keeping every stage a consistent 4-channel view.
+_ANALYSIS_STAGES: frozenset[str] = frozenset({"fov_crop_resize", "flat_field", "clahe"})
+
+
+def _stage_channels(disp_rgb: np.ndarray, label: str, mask_u8: np.ndarray) -> list[dict]:
+    """Split a stage's display RGB into its R/G/B/FOV channel PNGs.
+
+    R/G/B are the stage image's three channels (the literal per-channel
+    intensities the CNN would see); the FOV channel is the analysis FOV mask for
+    analysis-frame stages, or the stage's own foreground for earlier stages.
+
+    Args:
+        disp_rgb: The (bounded) RGB image shown for this stage.
+        label: The stage label (e.g. ``"clahe"``).
+        mask_u8: The 512² analysis FOV mask (Stage 3's 4th channel).
+
+    Returns:
+        Four channel dicts (``key``/``caption``/``png_b64``): R, G, B, FOV.
+    """
+    if label in _ANALYSIS_STAGES:
+        fov = mask_u8
+        if fov.shape[:2] != disp_rgb.shape[:2]:
+            fov = cv2.resize(
+                fov, (disp_rgb.shape[1], disp_rgb.shape[0]),
+                interpolation=cv2.INTER_NEAREST,
+            )
+    else:
+        gray = cv2.cvtColor(disp_rgb, cv2.COLOR_RGB2GRAY)
+        fov = (gray > 15).astype(np.uint8) * 255
+    return [
+        {"key": "ch_r", "caption": "Ch 0 · R",
+         "png_b64": imaging.png_b64_from_bgr(np.ascontiguousarray(disp_rgb[:, :, 0]))},
+        {"key": "ch_g", "caption": "Ch 1 · G",
+         "png_b64": imaging.png_b64_from_bgr(np.ascontiguousarray(disp_rgb[:, :, 1]))},
+        {"key": "ch_b", "caption": "Ch 2 · B",
+         "png_b64": imaging.png_b64_from_bgr(np.ascontiguousarray(disp_rgb[:, :, 2]))},
+        {"key": "ch_fov", "caption": "Ch 3 · FOV",
+         "png_b64": imaging.png_b64_from_bgr(fov)},
+    ]
+
+
+def _build_payload(
+    engine,
+    image_bytes: bytes,
+    eye: str,
+    *,
+    od_override: ODFoveaResult | None = None,
+    with_heatmaps: bool = True,
+) -> dict:
+    """Run ``stage_breakdown`` and assemble the demo's visualize payload.
+
+    Shared by :func:`compute_visualization` (live detector) and
+    :func:`compute_correction` (clinician override re-run), so a Save correction
+    rebuilds the SAME payload — the recomputed rotation and every downstream
+    stage — from the corrected OD/fovea centres.
+
+    Args:
+        engine: The loaded inference engine (holds the pipeline).
+        image_bytes: Raw image bytes.
+        eye: ``"left"`` or ``"right"``.
+        od_override: Clinician-corrected detection (flipped frame) to drive the
+            rotation, or ``None`` to use the learned detector.
+        with_heatmaps: Request detector probability heatmaps (live path only).
+
+    Returns:
+        Dict with ``fov_mask_png_b64``, ``fov_base_png_b64``,
+        ``detect_base_png_b64`` (the un-rotated overlay base), ``preview_png_b64``,
+        ``od_fovea`` (flipped frame), and ``stages`` — each image stage carrying a
+        ``channels`` list (its R/G/B/FOV decomposition).
+
+    Raises:
+        imaging.BadImage / imaging.PayloadTooLarge: On bad/oversized input.
+    """
+    rgb = imaging.decode_rgb(image_bytes)
+    src_h, src_w = rgb.shape[:2]
+
+    bd = engine.pipeline.stage_breakdown(
+        rgb, eye_side=eye, with_heatmaps=with_heatmaps, od_override=od_override
+    )
+    strip_rgb = _compose_strip(bd["stages"])
+
+    stage_map = dict(bd["stages"])
+    # Analysis-space crop (the Grad-CAM frame) and the pre-rotation overlay base
+    # (the canonical-flip image the detection markers are aligned to).
+    fov_base_rgb = stage_map["fov_crop_resize"]
+    detect_base_rgb = stage_map["canonical_flip"]
+
+    mask_u8 = (np.clip(bd["fov_mask"], 0, 1) * 255).astype(np.uint8)
+
+    # Per-stage slides for the step-by-step detailed view: each preprocessing
+    # stage as its own image (bounded resolution), plus the FOV mask (Stage 3,
+    # the 4th input channel) as a final slide. Each image stage also carries its
+    # R/G/B/FOV channel decomposition (``channels``) so the demo can show how a
+    # method reshapes the individual channels — the "how preprocessing helps"
+    # panel. The final CLAHE stage's channels are the CNN input tensor itself.
+    stage_slides = []
+    for label, img in bd["stages"]:
+        disp = _fit_max(img)
+        stage_slides.append({
+            "key": label,
+            "caption": _PANEL_LABELS.get(label, label),
+            "png_b64": imaging.png_b64_from_rgb(disp),
+            "channels": _stage_channels(disp, label, mask_u8),
+        })
+    stage_slides.append({
+        "key": "fov_mask",
+        "caption": "3. FOV mask (4th channel)",
+        "png_b64": imaging.png_b64_from_bgr(mask_u8),
+        "channels": [],
+    })
+
+    return {
+        "fov_mask_png_b64": imaging.png_b64_from_bgr(mask_u8),  # single-channel → PNG
+        "fov_base_png_b64": imaging.png_b64_from_rgb(fov_base_rgb),
+        "detect_base_png_b64": imaging.png_b64_from_rgb(_fit_max(detect_base_rgb)),
+        "preview_png_b64": imaging.png_b64_from_rgb(strip_rgb),
+        "od_fovea": _od_payload(bd["od_fovea"], src_w, src_h),
+        "stages": stage_slides,
     }
 
 
 def compute_visualization(engine, image_bytes: bytes, eye: str) -> dict:
-    """Produce the preview strip, FOV mask PNG, and OD/fovea payload.
+    """Produce the preview strip, FOV mask PNG, stage slides, and OD/fovea payload.
 
     Args:
         engine: The loaded :class:`InferenceEngine` (holds the pipeline).
@@ -118,89 +245,35 @@ def compute_visualization(engine, image_bytes: bytes, eye: str) -> dict:
         eye: ``"left"`` or ``"right"``.
 
     Returns:
-        Dict with ``fov_mask_png_b64``, ``fov_base_png_b64``,
-        ``preview_png_b64``, ``od_fovea``. ``fov_base_png_b64`` is the
-        analysis-space (cropped/oriented 512²) RGB the mask and OD/fovea
-        markers are aligned to.
+        The visualize payload (see :func:`_build_payload`). The OD/fovea overlay
+        is in the flipped (pre-rotation) frame and aligns to ``detect_base_png_b64``.
 
     Raises:
         imaging.BadImage / imaging.PayloadTooLarge: On bad/oversized input.
     """
-    rgb = imaging.decode_rgb(image_bytes)
-
-    bd = engine.pipeline.stage_breakdown(rgb, eye_side=eye, with_heatmaps=True)
-    strip_rgb = _compose_strip(bd["stages"])
-
-    # Analysis-space base: the cropped/oriented RGB that the FOV mask and the
-    # projected OD/fovea markers share a coordinate frame with.
-    stage_map = dict(bd["stages"])
-    fov_base_rgb = stage_map["fov_crop_resize"]
-    space = int(fov_base_rgb.shape[0])
-
-    mask_u8 = (np.clip(bd["fov_mask"], 0, 1) * 255).astype(np.uint8)
-
-    # Per-stage slides for the step-by-step detailed view: each preprocessing
-    # stage as its own image (bounded resolution), plus the FOV mask (Stage 3,
-    # the 4th input channel) as a final slide.
-    stage_slides = [
-        {
-            "key": label,
-            "caption": _PANEL_LABELS.get(label, label),
-            "png_b64": imaging.png_b64_from_rgb(_fit_max(img)),
-        }
-        for label, img in bd["stages"]
-    ]
-    stage_slides.append({
-        "key": "fov_mask",
-        "caption": "3. FOV mask (4th channel)",
-        "png_b64": imaging.png_b64_from_bgr(mask_u8),
-    })
-
-    return {
-        "fov_mask_png_b64": imaging.png_b64_from_bgr(mask_u8),  # single-channel → PNG
-        "fov_base_png_b64": imaging.png_b64_from_rgb(fov_base_rgb),
-        "preview_png_b64": imaging.png_b64_from_rgb(strip_rgb),
-        "od_fovea": _od_payload(bd["od_fovea"], bd["od_fovea_analysis"], space),
-        "stages": stage_slides,
-    }
+    return _build_payload(engine, image_bytes, eye, od_override=None, with_heatmaps=True)
 
 
-def _analysis_to_original(
-    point: tuple[float, float], transform: dict, eye: str
+def _flip_to_original(
+    point: tuple[float, float], src_w: int, flipped: bool
 ) -> tuple[float, float]:
-    """Invert the Stage 0/1/2 geometry: analysis-frame point → original pixels.
+    """Map a flipped-frame point back to original (uploaded) image pixels.
 
-    Reverses the chain :func:`stage_breakdown` applies — canonical flip, Stage-1
-    rotation, then FOV crop+resize — so a clinician-corrected centre placed in
-    the analysis frame maps back to the raw uploaded image's pixels (the frame
-    the Phase-4 fine-tune loop trains on).
+    The detection overlay now lives in the canonical-flip frame, which is the
+    full original image after (at most) a horizontal flip — no rotation or crop
+    to undo. So the inverse is the flip alone, giving the raw-pixel coordinate
+    the Phase-4 fine-tune loop trains on.
 
     Args:
-        point: ``(x, y)`` in the ``target_size`` analysis canvas.
-        transform: The ``transform`` dict from ``stage_breakdown`` (``crop_tf``,
-            ``angle_deg``, ``flipped``, ``src_w``, ``src_h``).
-        eye: ``"left"``/``"right"`` (only used as a sanity tag; the flip is
-            taken from ``transform['flipped']``).
+        point: ``(x, y)`` in the flipped frame.
+        src_w: Original/flipped image width.
+        flipped: Whether the canonical flip was applied (left eye).
 
     Returns:
         ``(x, y)`` in original (uploaded) image pixels.
     """
-    crop_tf = transform["crop_tf"]
-    ax, ay = float(point[0]), float(point[1])
-    # 1. Invert FOV crop+resize → oriented (rotated) image pixels.
-    rx, ry = crop_tf.invert(ax, ay) if hasattr(crop_tf, "invert") else (
-        (ax - crop_tf.x_off) / crop_tf.scale + crop_tf.bbox[0],
-        (ay - crop_tf.y_off) / crop_tf.scale + crop_tf.bbox[1],
-    )
-    # 2. Invert the Stage-1 rotation (about the flipped-image centre).
-    src_w, src_h = int(transform["src_w"]), int(transform["src_h"])
-    inv_rot = cv2.getRotationMatrix2D(
-        (src_w // 2, src_h // 2), -float(transform["angle_deg"]), 1.0
-    )
-    fx = inv_rot[0, 0] * rx + inv_rot[0, 1] * ry + inv_rot[0, 2]
-    fy = inv_rot[1, 0] * rx + inv_rot[1, 1] * ry + inv_rot[1, 2]
-    # 3. Invert the canonical flip (left eye was mirrored horizontally).
-    if transform.get("flipped"):
+    fx, fy = float(point[0]), float(point[1])
+    if flipped:
         fx = (src_w - 1) - fx
     return (fx, fy)
 
@@ -212,61 +285,67 @@ def compute_correction(
     od_corrected: tuple[float, float],
     fovea_corrected: tuple[float, float],
 ) -> dict:
-    """Recompute the OD/fovea overlay from clinician-corrected centres.
+    """Re-run the pipeline from clinician-corrected OD/fovea centres.
 
-    Re-runs ``stage_breakdown`` on the submitted image (deterministic — frozen
-    detector weights) to recover the Stage 0/1/2 geometry, then:
-      * recomputes the analysis-space overlay (angle/distance/radii) from the
-        corrected centres so the frontend can re-render immediately;
-      * maps the corrected centres back to **original-image pixels** for the
-        Phase-4 feedback store.
+    The corrected centres arrive in the flipped (pre-rotation) frame — where the
+    detection slide is edited. They are packaged as an :class:`ODFoveaResult`
+    override whose ``angle_deg`` (the fovea→OD tilt) redefines the Stage-1
+    rotation; ``stage_breakdown`` is re-run with that override so the rotation
+    and **every downstream stage** (crop, flat-field, CLAHE, FOV mask) are
+    recomputed. The corrected centres are also mapped back to original-image
+    pixels for the Phase-4 feedback store.
 
     Args:
         engine: The loaded inference engine (holds the pipeline).
         image_bytes: Raw original image bytes.
         eye: ``"left"`` or ``"right"``.
-        od_corrected: Corrected OD centre ``(x, y)`` in the analysis frame.
-        fovea_corrected: Corrected fovea centre ``(x, y)`` in the analysis frame.
+        od_corrected: Corrected OD centre ``(x, y)`` in the flipped frame.
+        fovea_corrected: Corrected fovea centre ``(x, y)`` in the flipped frame.
 
     Returns:
-        Dict with ``od_fovea`` (an :class:`ODFoveaPayload` dict) and
-        ``original`` (``{od_center, fovea_center, space_w, space_h}`` in original
-        pixels) for persistence.
+        The full visualize payload (see :func:`_build_payload`) for the corrected
+        geometry, plus ``original`` (``{od_center, fovea_center, space_w,
+        space_h}`` in original pixels) for persistence.
 
     Raises:
         imaging.BadImage / imaging.PayloadTooLarge: On bad/oversized input.
     """
-    rgb = imaging.decode_rgb(image_bytes)
-    bd = engine.pipeline.stage_breakdown(rgb, eye_side=eye, with_heatmaps=False)
-    transform = bd["transform"]
-    space = int(transform["space"])
-
     odx, ody = float(od_corrected[0]), float(od_corrected[1])
     fvx, fvy = float(fovea_corrected[0]), float(fovea_corrected[1])
 
-    # Geometry recomputed from the corrected centres (analysis frame).
+    # Geometry from the corrected centres (flipped frame). The Stage-1 rotation
+    # levels the fovea→OD axis (note the negated deltas), keeping the optic disc
+    # on the canonical right side — matching the detector's own convention.
     dx, dy = fvx - odx, fvy - ody
     distance = math.hypot(dx, dy)
-    angle_deg = math.degrees(math.atan2(dy, dx))
+    angle_rad = math.atan2(-dy, -dx)
+    angle_deg = math.degrees(angle_rad)
     od_radius = max(distance / 4.0, 10.0)        # same anatomical prior as infer
     fovea_radius = max(od_radius * 0.5, 5.0)
 
-    payload = {
-        "od_center": [odx, ody], "od_radius": od_radius,
-        "fovea_center": [fvx, fvy], "fovea_radius": fovea_radius,
-        "angle_deg": angle_deg,
-        "rotation_sigma_deg": 0.0,               # manual correction → exact
-        "confident": True,
-        "space_w": space, "space_h": space, "flipped": False,
-        "od_confidence": 1.0, "fovea_confidence": 1.0,
-        "od_heatmap_png_b64": "", "fovea_heatmap_png_b64": "",
-    }
+    override = ODFoveaResult(
+        od_center=(odx, ody), od_radius=od_radius,
+        fovea_center=(fvx, fvy), fovea_radius=fovea_radius,
+        distance=distance, angle_rad=angle_rad, angle_deg=angle_deg,
+        rotation_sigma_deg=0.0,                  # manual correction → exact
+        confident=True, od_confidence=1.0, fovea_confidence=1.0,
+    )
 
-    od_orig = _analysis_to_original((odx, ody), transform, eye)
-    fv_orig = _analysis_to_original((fvx, fvy), transform, eye)
-    original = {
+    payload = _build_payload(
+        engine, image_bytes, eye, od_override=override, with_heatmaps=False
+    )
+
+    # Map the corrected flipped-frame centres back to ORIGINAL pixels (invert the
+    # canonical flip only; ``space_w`` of the payload is the flipped == original
+    # width).
+    src_w = int(payload["od_fovea"]["space_w"])
+    src_h = int(payload["od_fovea"]["space_h"])
+    flipped = bool(eye == "left" and engine.pipeline.config.use_canonical_flip)
+    od_orig = _flip_to_original((odx, ody), src_w, flipped)
+    fv_orig = _flip_to_original((fvx, fvy), src_w, flipped)
+    payload["original"] = {
         "od_center": [od_orig[0], od_orig[1]],
         "fovea_center": [fv_orig[0], fv_orig[1]],
-        "space_w": int(transform["src_w"]), "space_h": int(transform["src_h"]),
+        "space_w": src_w, "space_h": src_h,
     }
-    return {"od_fovea": payload, "original": original}
+    return payload

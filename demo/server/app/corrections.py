@@ -7,10 +7,10 @@ configured corrections directory, and the original uploaded image is saved once
 lives on the E: drive like the datasets and is gitignored — it is the only
 persisted state in the otherwise-stateless demo.
 
-Corrected centres are recorded in BOTH the analysis frame (what the clinician
-edited) and **original-image pixels** (inverse of the Stage 0/1/2 geometry), so
-Phase 4 can FOV-crop the stored original and regenerate Gaussian targets without
-re-deriving the transform.
+Corrected centres are recorded in BOTH the flipped (pre-rotation) frame — what
+the clinician edited on the detection slide — and **original-image pixels**
+(inverse of the canonical flip), so Phase 4 can FOV-crop the stored original and
+regenerate Gaussian targets without re-deriving the transform.
 """
 
 from __future__ import annotations

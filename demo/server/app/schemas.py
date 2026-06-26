@@ -45,18 +45,36 @@ class HealthResponse(BaseModel):
     requires_password: bool
 
 
+class StageSlide(BaseModel):
+    """One preprocessing-stage result, rendered as its own slide in the demo.
+
+    ``key`` is the raw stage label from ``stage_breakdown`` (e.g.
+    ``fov_crop_resize``); ``caption`` is the human-readable title; ``png_b64``
+    is the base64 PNG of that stage's output image. ``channels`` is that stage's
+    R/G/B/FOV decomposition (also ``StageSlide`` items) — empty for slides that
+    are themselves a single channel (e.g. the standalone FOV-mask slide).
+    """
+
+    key: str
+    caption: str
+    png_b64: str
+    channels: list["StageSlide"] = []
+
+
 class ODFoveaPayload(BaseModel):
     """Learned OD/fovea detection result (TASK-Demo §C.1; Phase 3).
 
-    Coordinates are in the analysis-image pixel space described by
-    ``space_w``/``space_h``/``flipped`` — i.e. the cropped/oriented
-    ``fov_crop_resize`` frame (``space_w == space_h``, ``flipped`` False).
+    Coordinates are in the **flipped (pre-rotation) frame** described by
+    ``space_w``/``space_h``/``flipped`` — i.e. the canonical-flip image
+    (``flipped`` False because the base image, ``detect_base_png_b64``, is
+    already flipped). The OD–fovea axis is shown at its true tilt here; the
+    Stage-1 rotation slide is what levels it.
 
     The ``od_confidence``/``fovea_confidence`` fields and the base64 heatmap
     PNGs are additive (Phase 3): the genuine per-landmark confidence from the
     learned detector, and translucent RGBA probability-map overlays aligned to
-    the same ``fov_base`` analysis frame. Heatmap strings are empty when no
-    confident detection / heatmaps are available.
+    the same flipped frame. Heatmap strings are empty when no detection /
+    heatmaps are available.
     """
 
     od_center: list[float]
@@ -78,16 +96,23 @@ class ODFoveaPayload(BaseModel):
 class ODFoveaCorrectionResponse(BaseModel):
     """POST /api/od_fovea/correct payload (Phase 3).
 
-    Echoes the corrected OD/fovea overlay back in the same analysis space the
-    frontend edits in (so it can re-render immediately), with geometry
-    (``angle_deg``/``rotation_sigma_deg``) recomputed from the corrected
-    centres. ``stored`` is ``True`` when the correction was persisted to the
-    feedback store (Phase 4), with ``record_id`` its content-hash key.
+    Echoes the corrected OD/fovea overlay back in the same flipped frame the
+    frontend edits in, *plus* the full re-run of the pipeline driven by the
+    correction: the recomputed rotation and every downstream stage. The frontend
+    swaps these in so the whole step-by-step view updates. ``stored`` is ``True``
+    when the correction was persisted to the feedback store (Phase 4), with
+    ``record_id`` its content-hash key.
     """
 
     od_fovea: ODFoveaPayload
     stored: bool
     record_id: str
+    # Full re-run of the pipeline from the corrected centres (mirrors
+    # VisualizeResponse), so the detailed view refreshes after a Save correction.
+    fov_mask_png_b64: str = ""
+    fov_base_png_b64: str = ""
+    detect_base_png_b64: str = ""
+    stages: list[StageSlide] = []
 
 
 class GradcamResponse(BaseModel):
@@ -104,28 +129,18 @@ class GradcamResponse(BaseModel):
     cam_region: str
 
 
-class StageSlide(BaseModel):
-    """One preprocessing-stage result, rendered as its own slide in the demo.
-
-    ``key`` is the raw stage label from ``stage_breakdown`` (e.g.
-    ``fov_crop_resize``); ``caption`` is the human-readable title; ``png_b64``
-    is the base64 PNG of that stage's output image.
-    """
-
-    key: str
-    caption: str
-    png_b64: str
-
-
 class VisualizeResponse(BaseModel):
     """POST /api/visualize payload."""
 
     fov_mask_png_b64: str
     fov_base_png_b64: str
+    # Un-rotated canonical-flip RGB the OD/fovea detection overlay aligns to.
+    detect_base_png_b64: str = ""
     preview_png_b64: str
     od_fovea: ODFoveaPayload
     # Per-stage slides (original → flip → rotation → crop → flat-field → CLAHE
-    # → FOV mask) for the step-by-step detailed view.
+    # → FOV mask) for the step-by-step detailed view; each carries its R/G/B/FOV
+    # channel decomposition in ``channels``.
     stages: list[StageSlide] = []
 
 
