@@ -37,12 +37,18 @@ for _stream in (sys.stdout, sys.stderr):
     except Exception:
         pass
 
-from src.ssl.checkpoint import SSLCheckpointManager, write_manifest  # noqa: E402
+from src.ssl.checkpoint import (  # noqa: E402
+    SSLCheckpointManager,
+    clear_train_state,
+    load_train_state,
+    save_train_state,
+    write_manifest,
+)
 from src.ssl.dataset import EyePACSSSLDataset, assert_ssl_corpus_disjoint  # noqa: E402
 from src.ssl.trainer import SSLTrainer  # noqa: E402
 from src.ssl.transforms import build_two_view_transform, resolve_normalize_stats  # noqa: E402
 from src.utils.config import load_configs  # noqa: E402
-from src.utils.seed import set_seed  # noqa: E402
+from src.utils.seed import capture_rng_state, restore_rng_state, set_seed  # noqa: E402
 
 
 def _parse_args() -> argparse.Namespace:
@@ -67,6 +73,10 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--pretrained-init", action="store_true",
                         help="Start from ImageNet (§11 continual-SSL fallback). "
                              "Flagged in the manifest. Default: from-scratch.")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume this backbone from its rolling train_state.pt "
+                             "(method+optimizer+scaler+epoch) in the version dir, if "
+                             "present. No-op when none exists. Use after a mid-run kill.")
     parser.add_argument("--skip-disjointness", action="store_true",
                         help="Skip the INV-SSL-2 assertion (e.g. when the train "
                              "labels CSV is absent on a smoke box). NOT for real runs.")
@@ -146,13 +156,37 @@ def main() -> None:
         keep_last=int(ssl_cfg.get("checkpoint", {}).get("keep_last", 2)),
     )
     save_every = int(ssl_cfg.get("checkpoint", {}).get("save_every", 50))
+    resume_every = max(1, int(ssl_cfg.get("checkpoint", {}).get("resume_every", 1)))
+
+    # ── Resume (optional) ─────────────────────────────────────────────────────
+    # The rolling train_state.pt carries the full optimizer/EMA/method state so a
+    # killed multi-day run continues from its last epoch instead of epoch 0.
+    start_epoch = 0
+    if args.resume:
+        state = load_train_state(out_dir, backbone)
+        if state is None:
+            print(f"  --resume: no train_state for {backbone} in {out_dir}; starting fresh.")
+        else:
+            trainer.load_state_dict(state["trainer"])
+            restore_rng_state(state.get("rng"))
+            start_epoch = int(state["epoch"])
+            print(f"  --resume: restored {backbone} at epoch {start_epoch}/{epochs} "
+                  f"(global_step={state.get('global_step')}).")
 
     def _on_epoch_end(epoch: int, metrics: dict) -> None:
+        # Resume state every `resume_every` epochs (atomic, single rolling file).
+        if (epoch + 1) % resume_every == 0:
+            save_train_state(
+                out_dir, backbone, epoch + 1, int(metrics.get("global_step", 0)),
+                trainer.state_dict(), capture_rng_state(),
+            )
+        # Periodic trunk-only deliverable checkpoint.
         if (epoch + 1) % save_every == 0:
             ckpt_mgr.save(epoch + 1, trainer.trunk_state_dict(), gate_passed=False)
 
     history = trainer.train(
         loader, epochs=epochs, on_epoch_end=_on_epoch_end, max_steps=args.max_steps,
+        start_epoch=start_epoch,
     )
 
     # ── Final checkpoint + manifest ───────────────────────────────────────────
@@ -181,10 +215,25 @@ def main() -> None:
     }
     manifest_path = write_manifest(out_dir, manifest)
 
+    # Run finished — drop the rolling resume state so a later --resume does not
+    # pick up a completed run.
+    clear_train_state(out_dir, backbone)
+
     print(f"\nDone. Checkpoint: {final_path}")
     print(f"Manifest: {manifest_path}")
     print("Next: run scripts/run_ssl_probe.py to evaluate the §8 gate.")
 
 
 if __name__ == "__main__":
+    # CUDA + DataLoader workers: the default 'fork' start method on Linux/WSL
+    # re-initialises CUDA in the child, which crashes once the trainer has already
+    # created a CUDA context. Force 'spawn' before any CUDA use; guard so it is a
+    # no-op when the context is already configured. Datasets/transforms are
+    # pickled to spawned workers, so they must stay picklable.
+    import torch.multiprocessing as _mp
+
+    try:
+        _mp.set_start_method("spawn", force=True)
+    except RuntimeError:
+        pass
     main()

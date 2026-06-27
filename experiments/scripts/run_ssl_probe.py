@@ -124,4 +124,15 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # CUDA + DataLoader workers: the default 'fork' start method on Linux/WSL
+    # re-initialises CUDA in the child, which crashes once a CUDA context exists.
+    # Force 'spawn' before any CUDA use; guard so it is a no-op when already set.
+    # Datasets/transforms are pickled to spawned workers, so they must stay
+    # picklable.
+    import torch.multiprocessing as _mp
+
+    try:
+        _mp.set_start_method("spawn", force=True)
+    except RuntimeError:
+        pass
     main()

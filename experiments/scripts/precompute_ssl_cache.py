@@ -137,10 +137,31 @@ def main() -> None:
         print("ERROR: No images found.", file=sys.stderr)
         sys.exit(1)
 
+    # Resume: skip images already cached (meta row + PNG both present). This job is
+    # long and may be interrupted, so a re-run continues instead of recomputing from
+    # scratch. PNGs written but not yet flushed to meta are simply re-done (idempotent).
+    have_meta = meta_path.exists() and meta_path.stat().st_size > 0
+    done: set[str] = set()
+    if have_meta:
+        with open(meta_path, newline="") as fh:
+            for row in csv.DictReader(fh):
+                nm = row.get("image", "")
+                if nm and (out_dir / f"{nm}.png").exists():
+                    done.add(nm)
+    if done:
+        before = len(tasks)
+        tasks = [t for t in tasks if t[0] not in done]
+        print(f"Resume: {len(done)} already cached, {before - len(tasks)} skipped, "
+              f"{len(tasks)} remaining.")
+    if not tasks:
+        print(f"Nothing to do — cache already complete ({len(done)} images).")
+        return
+
     n_ok = n_err = 0
-    with open(meta_path, "w", newline="") as meta_fh:
+    with open(meta_path, "a", newline="") as meta_fh:
         writer = csv.writer(meta_fh)
-        writer.writerow(["image", "confident", "rotation_sigma_deg", "fovea_x", "fovea_y"])
+        if not have_meta:
+            writer.writerow(["image", "confident", "rotation_sigma_deg", "fovea_x", "fovea_y"])
         ctx = mp.get_context("spawn")
         with ctx.Pool(
             processes=max(1, args.num_workers),

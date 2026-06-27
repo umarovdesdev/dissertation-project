@@ -158,6 +158,9 @@ ssl:
   method:            byol            # byol | mocov2 | simsiam | dino
   image_size:        256             # Stage-2 target for the SSL base tensor (downstream = 512)
   in_channels:       4               # RGB + FOV mask
+  cache_dir:         null            # Stage 0–4 cache dir (from scripts/precompute_ssl_cache.py).
+                                     # When set + present, the SSL dataset reads cached PNGs and runs
+                                     # only Stage 5 + two-view aug (throughput fix). null = live pipeline.
   epochs:            300             # full run; watch the gate, not a fixed number
   screening_epochs:  100             # short per-method screening (§5.3)
   batch_size:        32              # start 32 @ 256²; drop to 16 on OOM, raise to 48 with headroom
@@ -213,6 +216,7 @@ ssl:
     version:          "v1.0"
     save_every:       50
     keep_last:        2
+    resume_every:     1               # rolling train_state.pt cadence (epochs) for --resume
 
   probe:                              # linear-probe acceptance gate (§8)
     enabled:          true

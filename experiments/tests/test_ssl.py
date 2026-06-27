@@ -14,13 +14,27 @@ from __future__ import annotations
 
 import random as pyrandom
 
+import cv2
 import numpy as np
 import pytest
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from src.ssl.checkpoint import save_ssl_checkpoint, set_gate_passed
-from src.ssl.dataset import assert_ssl_corpus_disjoint
+from src.ssl.checkpoint import (
+    clear_train_state,
+    load_train_state,
+    save_ssl_checkpoint,
+    save_train_state,
+    set_gate_passed,
+)
+from src.ssl.dataset import (
+    CachedEyePACSSSLDataset,
+    EyePACSSSLDataset,
+    assert_ssl_corpus_disjoint,
+    build_ssl_base_pipeline,
+    index_ssl_cache,
+)
+from src.data.datasets import load_cache_meta
 from src.ssl.encoder import build_ssl_encoder
 from src.ssl.loader import load_ssl_backbone
 from src.ssl.methods import build_method
@@ -237,6 +251,55 @@ def test_loader_rejects_3channel_model(tmp_path):
         load_ssl_backbone(model_3ch, ckpt, require_gate_passed=True)
 
 
+def test_train_state_resume_roundtrip(tmp_path):
+    """Full-state save/load restores method+optimizer; mismatch refused; clear works."""
+    cfg = _minimal_ssl_config("byol")
+    loader = DataLoader(_SyntheticTwoView(n=4), batch_size=2)
+
+    # Train a couple of steps, then persist the rolling resume state.
+    a = SSLTrainer(cfg, "resnet50", device="cpu")
+    a.train(loader, epochs=2, log_every=1, max_steps=2)
+    out_dir = tmp_path / "v1.0"
+    state_path = save_train_state(
+        out_dir, "resnet50", epoch=1, global_step=2, trainer_state=a.state_dict(),
+    )
+    assert state_path.exists()
+
+    # A fresh trainer loads it → the whole method (online+EMA target) matches.
+    b = SSLTrainer(cfg, "resnet50", device="cpu")
+    payload = load_train_state(out_dir, "resnet50")
+    assert payload["epoch"] == 1 and payload["backbone"] == "resnet50"
+    b.load_state_dict(payload["trainer"])
+    sd_a, sd_b = a.method.state_dict(), b.method.state_dict()
+    assert sd_a.keys() == sd_b.keys()
+    for k in sd_a:
+        assert torch.equal(sd_a[k], sd_b[k]), f"weight mismatch at {k}"
+    # Optimizer momentum buffers were restored (LARS 'mu' state is non-empty).
+    assert b.optimizer.state_dict()["state"]
+
+    # Loading into a different backbone is refused (guards architecture identity).
+    c = SSLTrainer(cfg, "efficientnet_b3", device="cpu")
+    with pytest.raises(ValueError):
+        c.load_state_dict(payload["trainer"])
+
+    # clear_train_state removes the rolling file.
+    clear_train_state(out_dir, "resnet50")
+    assert load_train_state(out_dir, "resnet50") is None
+
+
+def test_train_resumes_global_step_for_schedule():
+    """start_epoch advances global_step so resumed LR/momentum continue the curve."""
+    cfg = _minimal_ssl_config("byol")
+    # Non-zero warmup so the LR schedule is position-dependent.
+    cfg["optimizer"]["warmup_epochs"] = 1
+    loader = DataLoader(_SyntheticTwoView(n=4), batch_size=2)  # 2 steps/epoch
+    trainer = SSLTrainer(cfg, "resnet50", device="cpu")
+    hist = trainer.train(loader, epochs=4, log_every=1, start_epoch=2)
+    # Only epochs 2 and 3 run, and global_step picks up at start_epoch*steps.
+    assert [int(h["epoch"]) for h in hist] == [2, 3]
+    assert hist[0]["global_step"] >= 2 * 2  # started at start_epoch * steps_per_epoch
+
+
 # ---------------------------------------------------------------------------
 # §8 — probe evaluation + acceptance logic
 # ---------------------------------------------------------------------------
@@ -270,3 +333,107 @@ def test_probe_evaluate_and_acceptance():
     imnet_m = {"linear": {"cohen_kappa_quadratic": 0.52, "weighted_f1": 0.62}, "feat_std": 0.2}
     decision = decide_acceptance(ssl_m, rand_m, imnet_m, 0.05, -0.03)
     assert decision["passed"] is True  # +0.10 vs random, within 0.03 of imagenet
+
+
+# ---------------------------------------------------------------------------
+# §4.1 / §12 — cached Stage 0–4 read path (throughput fix)
+# ---------------------------------------------------------------------------
+
+def _make_synthetic_fundus(seed: int = 0) -> np.ndarray:
+    """Landscape BGR image (w>1.2h so FOV detection engages) with a disc + OD."""
+    rng = np.random.default_rng(seed)
+    img = np.zeros((600, 800, 3), np.uint8)
+    cv2.circle(img, (400, 300), 280, (160, 110, 80), -1)
+    cv2.circle(img, (500, 250), 40, (240, 220, 200), -1)  # bright OD-ish region
+    noise = rng.integers(-8, 8, img.shape)
+    return (img.astype(np.int16) + noise).clip(0, 255).astype(np.uint8)
+
+
+def _write_tiny_ssl_cache(cache_dir, target_size: int = 64) -> "PreprocessingPipeline":
+    """Precompute a 2-image SSL Stage 0–4 cache, mirroring precompute_ssl_cache.py.
+
+    Returns the inference pipeline used so the test can reuse its CLAHE config.
+    """
+    import csv
+
+    pipe = build_ssl_base_pipeline(None, target_size)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    meta_path = cache_dir / "cache_meta.csv"
+    with open(meta_path, "w", newline="") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(["image", "confident", "rotation_sigma_deg", "fovea_x", "fovea_y"])
+        for name, side, seed in (("90_left", "left", 1), ("91_right", "right", 2)):
+            img_bgr = _make_synthetic_fundus(seed)
+            flat_rgb, fov_mask, conf, rot, pivot = pipe.precompute_deterministic(img_bgr, side)
+            bgr = cv2.cvtColor(flat_rgb, cv2.COLOR_RGB2BGR)
+            alpha = (fov_mask > 0.5).astype(np.uint8) * 255
+            cv2.imwrite(str(cache_dir / f"{name}.png"), np.dstack([bgr, alpha]),
+                        [cv2.IMWRITE_PNG_COMPRESSION, 6])
+            fx, fy = pivot if pivot is not None else ("", "")
+            writer.writerow([name, bool(conf), f"{rot:.6f}",
+                             f"{fx:.4f}" if fx != "" else "", f"{fy:.4f}" if fy != "" else ""])
+    return pipe
+
+
+def test_cached_ssl_dataset_two_views_and_skips_stages_0_4(tmp_path):
+    """Cached SSL dataset yields two 4-channel views and never runs Stages 0–4."""
+    from src.preprocessing.pipeline import PreprocessingPipeline  # noqa: PLC0415
+
+    cache_dir = tmp_path / "ssl_cache"
+    target_size = 64
+    _write_tiny_ssl_cache(cache_dir, target_size)
+
+    paths, pids, sides = index_ssl_cache(cache_dir)
+    assert len(paths) == 2 and pids == ["90", "91"]
+
+    cache_meta = load_cache_meta(cache_dir)
+    transform = TwoViewTransform(out_size=target_size)
+    preprocessing = build_ssl_base_pipeline(None, target_size)
+    ds = CachedEyePACSSSLDataset(paths, pids, sides, preprocessing, transform, cache_meta)
+
+    # Guard: any attempt to run the live Stages 0–4 must blow up — so a passing
+    # __getitem__ proves the cached path skips OD/fovea + crop+resize + flat-field.
+    def _boom(*_a, **_k):
+        raise AssertionError("Stages 0–4 (precompute_deterministic) must be skipped")
+
+    preprocessing.precompute_deterministic = _boom  # type: ignore[method-assign]
+
+    v1, v2 = ds[0]
+    assert v1.shape == (4, target_size, target_size)
+    assert v2.shape == (4, target_size, target_size)
+    # Mask channel stays strictly binary after the two-view geometric transform.
+    assert set(torch.unique(v1[3]).tolist()).issubset({0.0, 1.0})
+    assert set(torch.unique(v2[3]).tolist()).issubset({0.0, 1.0})
+    assert len(ds) == 2
+
+
+def test_from_config_selects_cached_dataset(tmp_path):
+    """from_config returns the cached dataset when ssl.cache_dir points at a cache."""
+    cache_dir = tmp_path / "ssl_cache"
+    target_size = 64
+    _write_tiny_ssl_cache(cache_dir, target_size)
+
+    config = {
+        "paths": {"eyepacs": str(tmp_path)},  # unused on the cached path
+        "ssl": {
+            "image_size": target_size,
+            "cache_dir": str(cache_dir),
+            "corpus": {"eyepacs_test_dir": "test", "test_labels_csv": "testLabels15.csv"},
+        },
+    }
+    transform = TwoViewTransform(out_size=target_size)
+    ds = EyePACSSSLDataset.from_config(config, transform)
+    assert isinstance(ds, CachedEyePACSSSLDataset)
+    assert len(ds) == 2
+
+    # cache_dir null → live dataset class (no cache lookup). Provide an (empty)
+    # corpus labels CSV so the live indexer runs; no image files → empty dataset.
+    import pandas as pd
+
+    pd.DataFrame({"image": ["90_left"], "level": [0]}).to_csv(
+        tmp_path / "testLabels15.csv", index=False
+    )
+    config["ssl"]["cache_dir"] = None
+    ds_live = EyePACSSSLDataset.from_config(config, transform)
+    assert isinstance(ds_live, EyePACSSSLDataset)
+    assert not isinstance(ds_live, CachedEyePACSSSLDataset)

@@ -10,6 +10,7 @@ model via :func:`~src.ssl.loader.load_ssl_backbone`. Naming:
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -119,6 +120,93 @@ def set_gate_passed(ckpt_path: str | Path, gate_passed: bool) -> None:
     ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     ckpt["meta"]["gate_passed"] = bool(gate_passed)
     torch.save(ckpt, ckpt_path)
+
+
+def train_state_filename(backbone: str) -> str:
+    """Return the rolling resume-checkpoint filename for ``backbone``.
+
+    One file per backbone (ResNet-50 and EfficientNet-B3 share a version dir),
+    overwritten each cycle — this is the *resume* state, not a deliverable.
+
+    Args:
+        backbone: Backbone name (e.g. ``"resnet50"``).
+
+    Returns:
+        Filename string ``train_state_<backbone>.pt``.
+    """
+    return f"train_state_{backbone}.pt"
+
+
+def save_train_state(
+    out_dir: str | Path,
+    backbone: str,
+    epoch: int,
+    global_step: int,
+    trainer_state: dict[str, Any],
+    rng_state: dict[str, Any] | None = None,
+) -> Path:
+    """Persist the full training state so a killed run can resume (brief §9.2).
+
+    Writes a single rolling file per backbone holding the next epoch to run, the
+    global step, the trainer state (method + optimizer + AMP scaler) and an
+    optional RNG snapshot. The write is **atomic** (temp file + ``os.replace``)
+    so a kill mid-write cannot corrupt the resume point — critical on a machine
+    that has been observed to drop the job mid-run.
+
+    Args:
+        out_dir: Versioned output directory (e.g. ``outputs/ssl/v1.0``).
+        backbone: Backbone name.
+        epoch: Number of epochs completed (the epoch to resume *at*).
+        global_step: Optimizer steps completed so far.
+        trainer_state: ``SSLTrainer.state_dict()`` output.
+        rng_state: Optional ``capture_rng_state()`` snapshot.
+
+    Returns:
+        Path to the written ``.pt`` file.
+    """
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / train_state_filename(backbone)
+    payload = {
+        "epoch": int(epoch),
+        "global_step": int(global_step),
+        "backbone": backbone,
+        "trainer": trainer_state,
+        "rng": rng_state or {},
+    }
+    tmp = path.with_name(path.name + ".tmp")
+    torch.save(payload, tmp)
+    os.replace(tmp, path)
+    return path
+
+
+def load_train_state(out_dir: str | Path, backbone: str) -> dict[str, Any] | None:
+    """Load the rolling resume checkpoint for ``backbone`` if it exists.
+
+    Args:
+        out_dir: Versioned output directory.
+        backbone: Backbone name.
+
+    Returns:
+        The payload written by :func:`save_train_state`, or ``None`` if no
+        resume state is present.
+    """
+    path = Path(out_dir) / train_state_filename(backbone)
+    if not path.exists():
+        return None
+    return torch.load(path, map_location="cpu", weights_only=False)
+
+
+def clear_train_state(out_dir: str | Path, backbone: str) -> None:
+    """Remove the rolling resume checkpoint for ``backbone`` (run completed).
+
+    Args:
+        out_dir: Versioned output directory.
+        backbone: Backbone name.
+    """
+    path = Path(out_dir) / train_state_filename(backbone)
+    if path.exists():
+        path.unlink()
 
 
 def write_manifest(out_dir: str | Path, manifest: dict[str, Any]) -> Path:

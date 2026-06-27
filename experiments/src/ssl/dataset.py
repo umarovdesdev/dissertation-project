@@ -27,6 +27,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
+from src.data.datasets import load_cache_meta
 from src.preprocessing.config import PreprocessingConfig
 from src.preprocessing.pipeline import PreprocessingPipeline
 from src.preprocessing.polar_clahe import PolarClaheParams, apply_polar_clahe
@@ -242,23 +243,28 @@ class EyePACSSSLDataset(Dataset):
     def __len__(self) -> int:
         return len(self.image_paths)
 
-    def _base_tensor(self, idx: int) -> torch.Tensor:
-        """Build the deterministic Stage 0–5 base 4-channel tensor for index.
+    def _clahe_and_pack(
+        self,
+        flat_rgb: np.ndarray,
+        fov_mask: np.ndarray,
+        fovea_pivot: "tuple[float, float] | None",
+    ) -> torch.Tensor:
+        """Apply deterministic Stage 5 (CLAHE) and pack the 4-channel base tensor.
+
+        Shared by the live and cached read paths so both produce an identical
+        Stage 0–5 base tensor (Stage 7 normalize is deferred to the two-view
+        transform). CLAHE is deterministic here (``is_training=False``); SSL view
+        stochasticity comes solely from :class:`TwoViewTransform`.
 
         Args:
-            idx: Sample index.
+            flat_rgb: Stage-4 flat-field RGB uint8 image ``(H, W, 3)``.
+            fov_mask: Binary FOV mask ``(H, W)`` in ``{0.0, 1.0}``.
+            fovea_pivot: Analysis-frame fovea pivot ``(x, y)`` or ``None`` (polar
+                CLAHE falls back to the FOV centroid when ``None``).
 
         Returns:
             Float tensor ``(4, H, W)`` — RGB in ``[0, 1]``, mask in ``{0, 1}``.
         """
-        img_bgr = cv2.imread(str(self.image_paths[idx]))
-        if img_bgr is None:
-            raise FileNotFoundError(f"Could not load image: {self.image_paths[idx]}")
-
-        flat_rgb, fov_mask, _confident, _rot, fovea_pivot = (
-            self.preprocessing.precompute_deterministic(img_bgr, self.eye_sides[idx])
-        )
-
         cfg = self.preprocessing.config
         if cfg.use_clahe and cfg.clahe_mode == "polar":
             base_rgb = apply_polar_clahe(
@@ -277,6 +283,27 @@ class EyePACSSSLDataset(Dataset):
         )
         mask = torch.from_numpy(np.ascontiguousarray(fov_mask.astype(np.float32))).unsqueeze(0)
         return torch.cat([rgb01, mask], dim=0)
+
+    def _base_tensor(self, idx: int) -> torch.Tensor:
+        """Build the deterministic Stage 0–5 base 4-channel tensor for index.
+
+        Runs the full live Stages 0–4 (OD/fovea, crop+resize, flat-field) then the
+        shared Stage-5 CLAHE + pack via :meth:`_clahe_and_pack`.
+
+        Args:
+            idx: Sample index.
+
+        Returns:
+            Float tensor ``(4, H, W)`` — RGB in ``[0, 1]``, mask in ``{0, 1}``.
+        """
+        img_bgr = cv2.imread(str(self.image_paths[idx]))
+        if img_bgr is None:
+            raise FileNotFoundError(f"Could not load image: {self.image_paths[idx]}")
+
+        flat_rgb, fov_mask, _confident, _rot, fovea_pivot = (
+            self.preprocessing.precompute_deterministic(img_bgr, self.eye_sides[idx])
+        )
+        return self._clahe_and_pack(flat_rgb, fov_mask, fovea_pivot)
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         """Return the SSL positive pair ``(view1, view2)`` for one image.
@@ -298,16 +325,35 @@ class EyePACSSSLDataset(Dataset):
     ) -> "EyePACSSSLDataset":
         """Build from the project config, reading the SSL corpus paths (§3.1).
 
+        When ``ssl.cache_dir`` is set and the cache exists, returns a
+        :class:`CachedEyePACSSSLDataset` that reads the precomputed Stage 0–4 PNGs
+        (produced by ``scripts/precompute_ssl_cache.py``) and runs only Stage 5 +
+        the two-view augmentation — the throughput fix. Otherwise returns the live
+        full-pipeline dataset (backward compatible).
+
         Args:
             config: Full config dict (must contain ``paths.eyepacs`` and the
-                ``ssl.corpus`` block).
+                ``ssl.corpus`` block; optionally ``ssl.cache_dir``).
             transform: A configured :class:`TwoViewTransform`.
             subset_size: Optional row cap for smoke tests.
 
         Returns:
-            Constructed :class:`EyePACSSSLDataset`.
+            Constructed :class:`EyePACSSSLDataset` (live) or
+            :class:`CachedEyePACSSSLDataset` (cached).
         """
         ssl_cfg = config["ssl"]
+        preprocessing = build_ssl_base_pipeline(
+            config.get("preprocessing"), int(ssl_cfg.get("image_size", 256))
+        )
+
+        cache_dir = ssl_cfg.get("cache_dir")
+        if cache_dir and (Path(cache_dir) / "cache_meta.csv").exists():
+            paths, pids, sides = index_ssl_cache(cache_dir, subset_size=subset_size)
+            cache_meta = load_cache_meta(cache_dir)
+            return CachedEyePACSSSLDataset(
+                paths, pids, sides, preprocessing, transform, cache_meta
+            )
+
         corpus = ssl_cfg["corpus"]
         eyepacs_root = Path(config["paths"]["eyepacs"])
         test_dir = eyepacs_root / corpus["eyepacs_test_dir"]
@@ -317,10 +363,109 @@ class EyePACSSSLDataset(Dataset):
         paths, _labels, pids, sides = index_eyepacs_split(
             test_dir, test_labels, image_glob_suffix=suffix, subset_size=subset_size
         )
-        preprocessing = build_ssl_base_pipeline(
-            config.get("preprocessing"), int(ssl_cfg.get("image_size", 256))
-        )
         return cls(paths, pids, sides, preprocessing, transform)
+
+
+def index_ssl_cache(
+    cache_dir: str | Path,
+    subset_size: int | None = None,
+) -> tuple[list[str], list[str], list[str]]:
+    """Index a precomputed SSL Stage 0–4 cache from its ``cache_meta.csv``.
+
+    Enumerates the ``image`` column of ``cache_meta.csv`` (written by
+    ``scripts/precompute_ssl_cache.py``), forms ``cache_dir/<name>.png``, and
+    skips rows whose PNG is missing — the cached mirror of
+    :func:`index_eyepacs_split` (labels are not needed for the SSL objective).
+
+    Args:
+        cache_dir: Directory holding ``<name>.png`` files and ``cache_meta.csv``.
+        subset_size: If set, use only the first N cache rows (smoke tests).
+
+    Returns:
+        Tuple ``(cache_png_paths, patient_ids, eye_sides)``.
+    """
+    cache_dir = Path(cache_dir)
+    df = pd.read_csv(cache_dir / "cache_meta.csv")
+    if subset_size is not None:
+        df = df.iloc[:subset_size].reset_index(drop=True)
+
+    paths: list[str] = []
+    pids: list[str] = []
+    sides: list[str] = []
+    for _, row in df.iterrows():
+        name = str(row["image"])
+        png_path = cache_dir / f"{name}.png"
+        if not png_path.exists():
+            continue
+        paths.append(str(png_path))
+        pids.append(name.split("_")[0])
+        sides.append(_eye_side_from_name(name))
+    return paths, pids, sides
+
+
+class CachedEyePACSSSLDataset(EyePACSSSLDataset):
+    """SSL dataset reading a precomputed Stage 0–4 cache (the throughput fix).
+
+    Each sample is a 4-channel PNG written by ``scripts/precompute_ssl_cache.py``
+    (RGB = Stage-4 flat-field output, alpha = binary FOV mask) plus the cached
+    analysis-frame fovea pivot from ``cache_meta.csv``. Only the deterministic
+    Stage 5 (CLAHE) and the stochastic two-view augmentation run per epoch, so the
+    expensive Stages 0–4 (OD/fovea, crop+resize, flat-field) are skipped — the
+    DataLoader stops being the bottleneck. The two 4-channel ``[4, H, W]`` base
+    views are bit-identical to the live :class:`EyePACSSSLDataset` (same
+    :meth:`_clahe_and_pack`), so the SSL objective is unchanged.
+
+    Args:
+        image_paths: Absolute paths to the cached ``{name}.png`` files.
+        patient_ids: Patient id per image (numeric prefix).
+        eye_sides: ``"left"``/``"right"``/``"unknown"`` per image (unused at read
+            time — the cache already encodes Stage-0 orientation — kept for parity).
+        preprocessing: Inference pipeline supplying the Stage-5 CLAHE config/params
+            (its Stages 0–4 are never invoked on the cached path).
+        transform: A :class:`~src.ssl.transforms.TwoViewTransform`.
+        cache_meta: Mapping from :func:`~src.data.datasets.load_cache_meta`.
+    """
+
+    def __init__(
+        self,
+        image_paths: list[str],
+        patient_ids: list[str],
+        eye_sides: list[str],
+        preprocessing: PreprocessingPipeline,
+        transform: Callable[[torch.Tensor], tuple[torch.Tensor, torch.Tensor]],
+        cache_meta: dict[str, tuple[bool, float, tuple[float, float] | None]],
+    ) -> None:
+        super().__init__(image_paths, patient_ids, eye_sides, preprocessing, transform)
+        self._cache_meta = cache_meta
+
+    def _base_tensor(self, idx: int) -> torch.Tensor:
+        """Build the Stage 0–5 base tensor from the cache (skipping Stages 0–4).
+
+        Reads the cached Stage-4 BGRA PNG (BGR→RGB + binary FOV-mask alpha) and the
+        cached fovea pivot, then runs the shared Stage-5 CLAHE + pack via
+        :meth:`_clahe_and_pack`.
+
+        Args:
+            idx: Sample index.
+
+        Returns:
+            Float tensor ``(4, H, W)`` — RGB in ``[0, 1]``, mask in ``{0, 1}``.
+        """
+        path = self.image_paths[idx]
+        bgra = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+        if bgra is None:
+            raise FileNotFoundError(f"Could not load cached image: {path}")
+        if bgra.ndim != 3 or bgra.shape[2] != 4:
+            raise ValueError(
+                f"Cached image {path} must be 4-channel BGRA, got shape {bgra.shape}"
+            )
+
+        flat_rgb = cv2.cvtColor(bgra[:, :, :3], cv2.COLOR_BGR2RGB)
+        fov_mask = bgra[:, :, 3].astype(np.float32) / 255.0  # {0,255} → {0.0,1.0}
+
+        name = Path(path).stem
+        _confident, _rotation_sigma_deg, fovea_pivot = self._cache_meta[name]
+        return self._clahe_and_pack(flat_rgb, fov_mask, fovea_pivot)
 
 
 # ---------------------------------------------------------------------------

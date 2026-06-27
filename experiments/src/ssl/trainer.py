@@ -219,30 +219,37 @@ class SSLTrainer:
         log_every: int = 50,
         on_epoch_end: Callable[[int, dict[str, float]], None] | None = None,
         max_steps: int | None = None,
+        start_epoch: int = 0,
     ) -> list[dict[str, float]]:
         """Run SSL pretraining.
 
         Args:
             dataloader: Yields ``(view1, view2)`` batches from
                 :class:`EyePACSSSLDataset`.
-            epochs: Number of epochs to train.
+            epochs: Number of epochs to train (the full target; unchanged when
+                resuming so the LR/momentum schedules span the whole run).
             log_every: Step interval for the collapse-monitor / log readout.
             on_epoch_end: Optional callback ``(epoch, metrics)`` after each epoch
-                (e.g. for periodic checkpointing).
+                (e.g. for periodic checkpointing). ``metrics`` includes
+                ``global_step`` so callers can persist a resume point.
             max_steps: Optional hard cap on optimizer steps (smoke tests).
+            start_epoch: First epoch to run (resume point). The global step and
+                therefore the schedules are advanced to ``start_epoch`` so a
+                resumed run continues the same LR/momentum curve. Default 0.
 
         Returns:
-            Per-epoch history dicts ``{epoch, loss, feat_std, lr, ema_momentum}``.
+            Per-epoch history dicts
+            ``{epoch, loss, feat_std, lr, ema_momentum, global_step}``.
         """
         steps_per_epoch = max(1, len(dataloader))
         total_steps = steps_per_epoch * epochs
         warmup_steps = self.warmup_epochs * steps_per_epoch
 
         history: list[dict[str, float]] = []
-        global_step = 0
+        global_step = max(0, start_epoch) * steps_per_epoch
         self.method.train()
 
-        for epoch in range(epochs):
+        for epoch in range(max(0, start_epoch), epochs):
             running_loss = 0.0
             last_feat_std = 0.0
             n_batches = 0
@@ -293,6 +300,7 @@ class SSLTrainer:
                 "feat_std": last_feat_std,
                 "lr": cosine_warmup_lr(global_step, total_steps, warmup_steps, self.base_lr),
                 "ema_momentum": cosine_momentum(global_step, total_steps, self.base_momentum),
+                "global_step": float(global_step),
             }
             history.append(epoch_metrics)
             if on_epoch_end is not None:
@@ -314,3 +322,52 @@ class SSLTrainer:
             State dict of the trunk's parameters and buffers.
         """
         return {k: v.detach().cpu() for k, v in self.method.backbone.state_dict().items()}
+
+    # -- full training state (resume) ------------------------------------------
+
+    def state_dict(self) -> dict[str, Any]:
+        """Return the **full** training state for resuming an interrupted run.
+
+        Unlike :meth:`trunk_state_dict` (the trunk-only deliverable), this
+        captures everything needed to continue bit-for-bit: the whole SSL method
+        (online trunk, projector, predictor *and* the EMA target network — all
+        submodules of ``self.method``), the optimizer momentum buffers, and the
+        AMP ``GradScaler`` state. The backbone/method identity is recorded so a
+        resume into an incompatible architecture is refused.
+
+        Returns:
+            A dict consumable by :meth:`load_state_dict`.
+        """
+        return {
+            "method": self.method.state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+            "scaler": self.scaler.state_dict(),
+            "backbone_name": self.backbone_name,
+            "method_name": self.method_name,
+        }
+
+    def load_state_dict(self, state: dict[str, Any]) -> None:
+        """Restore full training state saved by :meth:`state_dict`.
+
+        Args:
+            state: A dict from :meth:`state_dict`.
+
+        Raises:
+            ValueError: If the checkpoint's backbone or method does not match
+                this trainer (guards against loading into a mismatched run).
+        """
+        ckpt_backbone = state.get("backbone_name")
+        if ckpt_backbone not in (None, self.backbone_name):
+            raise ValueError(
+                f"Resume backbone mismatch: checkpoint={ckpt_backbone} "
+                f"trainer={self.backbone_name}"
+            )
+        ckpt_method = state.get("method_name")
+        if ckpt_method not in (None, self.method_name):
+            raise ValueError(
+                f"Resume method mismatch: checkpoint={ckpt_method} "
+                f"trainer={self.method_name}"
+            )
+        self.method.load_state_dict(state["method"])
+        self.optimizer.load_state_dict(state["optimizer"])
+        self.scaler.load_state_dict(state["scaler"])
