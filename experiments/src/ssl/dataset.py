@@ -191,6 +191,31 @@ def build_ssl_base_pipeline(
     return PreprocessingPipeline.create_for_inference(config)
 
 
+def resolve_normalize_stats(
+    config: "PreprocessingConfig",
+) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    """Return the (mean, std) Stage-7 normalize stats a pipeline would apply.
+
+    Mirrors the Stage-7 branch of :meth:`PreprocessingPipeline.__call__` exactly:
+    dataset-specific stats when configured and present, else the ImageNet
+    fallback. Used by the cached probe path so its normalized tensor is
+    numerically identical to the live pipeline output.
+
+    Args:
+        config: The pipeline's :class:`PreprocessingConfig`.
+
+    Returns:
+        Tuple ``(mean, std)`` — each a 3-tuple of per-channel floats.
+    """
+    if (
+        config.normalize_mode == "dataset_specific"
+        and config.dataset_mean is not None
+        and config.dataset_std is not None
+    ):
+        return tuple(config.dataset_mean), tuple(config.dataset_std)
+    return tuple(config.normalize_mean), tuple(config.normalize_std)
+
+
 # ---------------------------------------------------------------------------
 # Two-view label-free SSL dataset
 # ---------------------------------------------------------------------------
@@ -468,6 +493,64 @@ class CachedEyePACSSSLDataset(EyePACSSSLDataset):
         return self._clahe_and_pack(flat_rgb, fov_mask, fovea_pivot)
 
 
+class CachedEyePACSProbeDataset(CachedEyePACSSSLDataset):
+    """Labelled probe dataset reading the precomputed Stage 0–4 cache (§8, fix).
+
+    The cached mirror of :class:`EyePACSProbeDataset`: instead of running the full
+    live Stages 0–4 per image (the linear-probe gate's throughput bottleneck — it
+    re-preprocesses the whole corpus once per initialization × backbone), it reads
+    the same 4-channel PNG cache used for SSL training and runs only the
+    deterministic Stage 5 (CLAHE) + Stage 7 normalize. The returned
+    ``(4, H, W)`` normalized tensor is numerically identical to the live
+    :class:`EyePACSProbeDataset` output (same :meth:`_clahe_and_pack`, then the
+    same Stage-7 stats via :func:`resolve_normalize_stats`), so gate decisions are
+    unchanged — only the wall-clock cost drops from hours to minutes.
+
+    Args:
+        image_paths: Absolute paths to the cached ``{name}.png`` files.
+        labels: DR grade labels (0–4) per image.
+        eye_sides: ``"left"``/``"right"``/``"unknown"`` per image (unused at read
+            time — kept for parity with the live dataset).
+        preprocessing: Inference pipeline supplying the Stage-5 CLAHE config and
+            the Stage-7 normalize stats (its Stages 0–4 are never invoked).
+        cache_meta: Mapping from :func:`~src.data.datasets.load_cache_meta`.
+    """
+
+    def __init__(
+        self,
+        image_paths: list[str],
+        labels: list[int],
+        eye_sides: list[str],
+        preprocessing: PreprocessingPipeline,
+        cache_meta: dict[str, tuple[bool, float, tuple[float, float] | None]],
+    ) -> None:
+        patient_ids = [Path(p).stem.split("_")[0] for p in image_paths]
+        # No two-view transform on the probe path — labels replace the SSL pair.
+        super().__init__(
+            image_paths, patient_ids, eye_sides, preprocessing,
+            transform=None, cache_meta=cache_meta,
+        )
+        self.labels = labels
+        mean, std = resolve_normalize_stats(preprocessing.config)
+        self._mean = torch.tensor(mean, dtype=torch.float32).view(3, 1, 1)
+        self._std = torch.tensor(std, dtype=torch.float32).view(3, 1, 1)
+
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, int]:
+        """Return ``(normalized_4ch_tensor, label)`` read from the cache.
+
+        Args:
+            idx: Sample index.
+
+        Returns:
+            Tuple of the 4-channel tensor (Stage-7 normalized RGB + FOV mask) and
+            the integer DR grade.
+        """
+        base = self._base_tensor(idx)                 # (4, H, W): RGB [0,1] + mask
+        rgb = (base[:3] - self._mean) / self._std     # Stage 7 normalize (RGB only)
+        tensor = torch.cat([rgb, base[3:4]], dim=0)   # keep FOV mask channel as-is
+        return tensor, self.labels[idx]
+
+
 # ---------------------------------------------------------------------------
 # Labelled probe dataset (linear-probe gate, §8)
 # ---------------------------------------------------------------------------
@@ -558,10 +641,43 @@ class EyePACSProbeDataset(Dataset):
             rng = np.random.default_rng(config.get("seed", 42))
             test_mask = rng.random(len(df)) < 0.2
 
-        preprocessing = build_ssl_base_pipeline(
-            config.get("preprocessing"),
-            int(probe_cfg.get("image_size", ssl_cfg.get("image_size", 256))),
+        probe_size = int(probe_cfg.get("image_size", ssl_cfg.get("image_size", 256)))
+        preprocessing = build_ssl_base_pipeline(config.get("preprocessing"), probe_size)
+
+        # Cached path (throughput fix): reuse the Stage 0–4 SSL cache when present
+        # and its resolution matches the probe resolution. The cache covers the
+        # full EyePACS-test corpus (== the probe corpus), so every Usage slice is
+        # served from it. Membership is checked in-memory against cache_meta —
+        # NOT via a per-file .exists() stat storm on the (slow) /mnt/e mount.
+        cache_dir = ssl_cfg.get("cache_dir")
+        cache_size = int(ssl_cfg.get("image_size", 256))
+        use_cache = (
+            cache_dir is not None
+            and (Path(cache_dir) / "cache_meta.csv").exists()
+            and probe_size == cache_size
         )
+
+        if use_cache:
+            cache_dir = Path(cache_dir)
+            cache_meta = load_cache_meta(cache_dir)
+            cached_names = set(cache_meta.keys())
+
+            def _make_cached(sub: pd.DataFrame) -> "EyePACSProbeDataset":
+                paths, labels, sides = [], [], []
+                for _, row in sub.iterrows():
+                    name = str(row["image"])
+                    if name not in cached_names:
+                        continue
+                    paths.append(str(cache_dir / f"{name}.png"))
+                    labels.append(int(row["level"]))
+                    sides.append(_eye_side_from_name(name))
+                return CachedEyePACSProbeDataset(
+                    paths, labels, sides, preprocessing, cache_meta
+                )
+
+            train_ds = _make_cached(df[~test_mask].reset_index(drop=True))
+            test_ds = _make_cached(df[test_mask].reset_index(drop=True))
+            return train_ds, test_ds
 
         def _make(sub: pd.DataFrame) -> "EyePACSProbeDataset":
             paths, labels, sides = [], [], []

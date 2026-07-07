@@ -51,6 +51,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=None, help="Override probe.epochs.")
     parser.add_argument("--limit", type=int, default=None, help="Cap probe rows (smoke).")
     parser.add_argument("--device", default="auto", help="auto | cpu | cuda.")
+    parser.add_argument("--no-feature-cache", action="store_true",
+                        help="Disable the resumable on-disk feature cache "
+                             "(default: cache under <out_dir>/<version>/probe_features).")
     return parser.parse_args()
 
 
@@ -83,6 +86,15 @@ def main() -> None:
 
     backbones = [args.backbone] if args.backbone else list(ssl_cfg.get("backbones", ["resnet50"]))
 
+    version = ssl_cfg.get("checkpoint", {}).get("version", "v1.0")
+    out_dir = pathlib.Path(ssl_cfg["checkpoint"]["out_dir"]) / version
+    # Disable the resumable feature cache for --limit smoke runs so a truncated
+    # slice never poisons the cache a later full run would read.
+    feature_cache_dir = (
+        None if (args.no_feature_cache or args.limit is not None)
+        else out_dir / "probe_features"
+    )
+
     print("Building probe slices (Usage-based) …")
     train_ds, test_ds = EyePACSProbeDataset.build_probe_splits(config, subset_size=args.limit)
     batch = int(ssl_cfg.get("probe", {}).get("batch_size", 64))
@@ -90,7 +102,10 @@ def main() -> None:
                               num_workers=int(ssl_cfg.get("num_workers", 0)))
     test_loader = DataLoader(test_ds, batch_size=batch, shuffle=False,
                              num_workers=int(ssl_cfg.get("num_workers", 0)))
-    print(f"  probe-train={len(train_ds)} | probe-test={len(test_ds)}")
+    print(f"  probe-train={len(train_ds)} | probe-test={len(test_ds)} "
+          f"| dataset={type(train_ds).__name__}")
+    if feature_cache_dir is not None:
+        print(f"  feature cache (resumable): {feature_cache_dir}")
 
     reports: dict[str, dict] = {}
     all_passed = True
@@ -99,6 +114,7 @@ def main() -> None:
         print(f"\nProbing {backbone} | ckpt={ckpt_path}")
         report = run_probe_for_backbone(
             config, backbone, ckpt_path, train_loader, test_loader, device,
+            feature_cache_dir=feature_cache_dir,
         )
         reports[backbone] = report
         passed = report["acceptance"]["passed"]
@@ -111,8 +127,6 @@ def main() -> None:
             set_gate_passed(ckpt_path, True)
             print(f"  meta.gate_passed set to True on {ckpt_path.name}")
 
-    version = ssl_cfg.get("checkpoint", {}).get("version", "v1.0")
-    out_dir = pathlib.Path(ssl_cfg["checkpoint"]["out_dir"]) / version
     out_dir.mkdir(parents=True, exist_ok=True)
     gate_report = {"backbones": reports, "all_passed": all_passed}
     report_path = out_dir / "gate_report.json"

@@ -13,6 +13,8 @@ linear head and the kNN second opinion.
 
 from __future__ import annotations
 
+import os
+import time
 from pathlib import Path
 from typing import Any
 
@@ -29,7 +31,11 @@ from src.ssl.methods import feature_std
 
 @torch.no_grad()
 def extract_features(
-    encoder: nn.Module, loader: DataLoader, device: torch.device
+    encoder: nn.Module,
+    loader: DataLoader,
+    device: torch.device,
+    desc: str = "",
+    log_every: int = 50,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Extract frozen pooled features and labels for a probe loader.
 
@@ -37,6 +43,9 @@ def extract_features(
         encoder: Head-stripped trunk (frozen).
         loader: Yields ``(tensor, label)`` batches.
         device: Compute device.
+        desc: Optional label printed with the progress lines (e.g. ``"ssl/test"``).
+        log_every: Print a progress line every this many batches (0 disables). The
+            probe otherwise prints nothing for minutes, so this restores an ETA.
 
     Returns:
         Tuple ``(features (N, d), labels (N,))`` on CPU.
@@ -44,11 +53,80 @@ def extract_features(
     encoder.eval()
     feats: list[torch.Tensor] = []
     labels: list[torch.Tensor] = []
-    for x, y in loader:
+    try:
+        n_batches = len(loader)
+    except TypeError:
+        n_batches = 0
+    t0 = time.time()
+    for i, (x, y) in enumerate(loader):
         f = encoder(x.to(device))
         feats.append(f.detach().cpu())
         labels.append(y if isinstance(y, torch.Tensor) else torch.as_tensor(y))
+        if log_every and desc and (i + 1) % log_every == 0:
+            done = sum(t.shape[0] for t in feats)
+            rate = done / max(time.time() - t0, 1e-6)
+            eta = (n_batches - (i + 1)) / max(i + 1, 1) * (time.time() - t0)
+            print(
+                f"    [{desc}] batch {i + 1}/{n_batches or '?'} "
+                f"({done} imgs, {rate:.1f} img/s, eta {eta / 60:.1f} min)",
+                flush=True,
+            )
     return torch.cat(feats), torch.cat(labels)
+
+
+def _extract_or_load(
+    encoder: nn.Module,
+    loader: DataLoader,
+    device: torch.device,
+    cache_path: Path | None,
+    desc: str = "",
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Extract features, or load them from a resumable on-disk cache if present.
+
+    Feature extraction is the probe's cost. Caching the ``(features, labels)``
+    blob per ``(backbone, init, split)`` makes the gate stop-and-resume safe: a
+    killed run re-computes only the extractions it had not yet finished, and a
+    re-run (e.g. on a faster machine after copying the blobs) is near-instant.
+    Written atomically (temp + :func:`os.replace`) so a kill mid-write cannot
+    leave a corrupt cache.
+
+    Args:
+        encoder: Frozen trunk.
+        loader: Probe loader for the split.
+        device: Compute device.
+        cache_path: Destination ``.pt`` path, or ``None`` to disable caching.
+        desc: Progress label forwarded to :func:`extract_features`.
+
+    Returns:
+        Tuple ``(features (N, d), labels (N,))`` on CPU.
+    """
+    try:
+        expected_n = len(loader.dataset)  # type: ignore[arg-type]
+    except (TypeError, AttributeError):
+        expected_n = None
+
+    if cache_path is not None and cache_path.exists():
+        blob = torch.load(cache_path, map_location="cpu", weights_only=False)
+        cached_n = int(blob["features"].shape[0])
+        if expected_n is not None and cached_n != expected_n:
+            # Stale/partial cache (e.g. from a --limit smoke, or an interrupted
+            # write) — the row count no longer matches this run. Re-extract.
+            print(f"    [{desc}] ignoring stale cache {cache_path.name} "
+                  f"(has {cached_n} rows, expected {expected_n})", flush=True)
+        else:
+            print(f"    [{desc}] loaded cached features {tuple(blob['features'].shape)} "
+                  f"from {cache_path.name}", flush=True)
+            return blob["features"], blob["labels"]
+
+    feats, labels = extract_features(encoder, loader, device, desc=desc)
+
+    if cache_path is not None:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = cache_path.with_suffix(cache_path.suffix + ".tmp")
+        torch.save({"features": feats, "labels": labels}, tmp)
+        os.replace(tmp, cache_path)
+        print(f"    [{desc}] cached features -> {cache_path.name}", flush=True)
+    return feats, labels
 
 
 def _train_linear_head(
@@ -134,6 +212,8 @@ def evaluate_init(
     epochs: int = 50,
     lr: float = 0.1,
     knn_k: int = 20,
+    feature_cache: tuple[Path | None, Path | None] = (None, None),
+    desc: str = "",
 ) -> dict[str, Any]:
     """Run the frozen-backbone linear probe + kNN for one initialization.
 
@@ -147,6 +227,9 @@ def evaluate_init(
         epochs: Linear-head epochs.
         lr: Linear-head learning rate.
         knn_k: kNN neighbour count.
+        feature_cache: ``(train_cache_path, test_cache_path)`` for the resumable
+            on-disk feature cache; ``(None, None)`` disables caching.
+        desc: Progress label prefix (e.g. ``"resnet50/ssl"``).
 
     Returns:
         Dict with ``linear`` metrics, ``knn`` metrics, and ``feat_std``.
@@ -155,8 +238,13 @@ def evaluate_init(
         p.requires_grad = False
     encoder.to(device)
 
-    tr_feats, tr_labels = extract_features(encoder, train_loader, device)
-    te_feats, te_labels = extract_features(encoder, test_loader, device)
+    train_cache, test_cache = feature_cache
+    tr_feats, tr_labels = _extract_or_load(
+        encoder, train_loader, device, train_cache, desc=f"{desc}/train"
+    )
+    te_feats, te_labels = _extract_or_load(
+        encoder, test_loader, device, test_cache, desc=f"{desc}/test"
+    )
 
     probs = _train_linear_head(
         tr_feats, tr_labels, te_feats, feature_dim, num_classes, epochs, lr, device
@@ -227,6 +315,7 @@ def run_probe_for_backbone(
     train_loader: DataLoader,
     test_loader: DataLoader,
     device: torch.device,
+    feature_cache_dir: str | Path | None = None,
 ) -> dict[str, Any]:
     """Run the full gate (random / ImageNet / SSL) for one backbone (§8.3/§8.4).
 
@@ -237,6 +326,10 @@ def run_probe_for_backbone(
         train_loader: Probe-train loader.
         test_loader: Probe-test loader.
         device: Compute device.
+        feature_cache_dir: Directory for the resumable per-init feature cache, or
+            ``None`` to disable. Blobs are keyed ``{backbone}_{init}_{split}.pt``;
+            random/ImageNet/SSL features are all deterministic under the fixed
+            probe seed, so cached blobs stay consistent across resumed runs.
 
     Returns:
         Per-backbone report dict: metrics for each init condition + acceptance.
@@ -247,19 +340,34 @@ def run_probe_for_backbone(
     epochs = int(probe_cfg.get("epochs", 50))
     lr = float(probe_cfg.get("lr", 0.1))
 
+    cache_root = Path(feature_cache_dir) if feature_cache_dir else None
+
+    def _cache_pair(init_name: str) -> tuple[Path | None, Path | None]:
+        if cache_root is None:
+            return (None, None)
+        return (
+            cache_root / f"{backbone_name}_{init_name}_train.pt",
+            cache_root / f"{backbone_name}_{init_name}_test.pt",
+        )
+
     # Random init
+    print(f"  [{backbone_name}] evaluating init: random", flush=True)
     rand_enc, feat_dim = build_ssl_encoder(backbone_name, in_channels, pretrained=False)
     random_metrics = evaluate_init(
-        rand_enc, train_loader, test_loader, feat_dim, device, epochs=epochs, lr=lr
+        rand_enc, train_loader, test_loader, feat_dim, device, epochs=epochs, lr=lr,
+        feature_cache=_cache_pair("random"), desc=f"{backbone_name}/random",
     )
 
     # ImageNet init
+    print(f"  [{backbone_name}] evaluating init: imagenet", flush=True)
     imnet_enc, _ = build_ssl_encoder(backbone_name, in_channels, pretrained=True)
     imagenet_metrics = evaluate_init(
-        imnet_enc, train_loader, test_loader, feat_dim, device, epochs=epochs, lr=lr
+        imnet_enc, train_loader, test_loader, feat_dim, device, epochs=epochs, lr=lr,
+        feature_cache=_cache_pair("imagenet"), desc=f"{backbone_name}/imagenet",
     )
 
     # SSL init
+    print(f"  [{backbone_name}] evaluating init: ssl", flush=True)
     ssl_enc, _ = build_ssl_encoder(backbone_name, in_channels, pretrained=False)
     ckpt = torch.load(Path(ssl_ckpt_path), map_location="cpu", weights_only=False)
     load_result = ssl_enc.load_state_dict(ckpt["backbone_state_dict"], strict=False)
@@ -269,7 +377,8 @@ def run_probe_for_backbone(
             f"{load_result.unexpected_keys[:10]}"
         )
     ssl_metrics = evaluate_init(
-        ssl_enc, train_loader, test_loader, feat_dim, device, epochs=epochs, lr=lr
+        ssl_enc, train_loader, test_loader, feat_dim, device, epochs=epochs, lr=lr,
+        feature_cache=_cache_pair("ssl"), desc=f"{backbone_name}/ssl",
     )
 
     acceptance = decide_acceptance(
