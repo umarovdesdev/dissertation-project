@@ -1,0 +1,11 @@
+# LOCAL WSL overlay (machine-specific paths — do NOT commit).
+# Translates the Windows E: dataset root to the WSL /mnt mount, points the SSL
+# dataset at the precomputed Stage 0-4 cache, and pins a VRAM-safe batch size
+# for the RTX 3060. Load LAST in the --config chain.
+paths:
+  eyepacs: "/mnt/e/datasets/EyePACS"
+
+ssl:
+  batch_size: 16
+  num_workers: 4                                  # WSL capped at 12GB RAM; >6 spawn workers crash the VM (E_UNEXPECTED)
+  cache_dir: "/home/yesmu/ssl_cache_256"          # WSL-native ext4: 9p mass-writes crash the VM (E_UNEXPECTED)
