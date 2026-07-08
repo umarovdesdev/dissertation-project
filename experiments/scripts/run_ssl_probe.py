@@ -57,6 +57,20 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _worker_init(_worker_id: int) -> None:
+    """Keep each DataLoader worker single-threaded so N workers do not each
+    spawn OpenCV/torch thread pools and oversubscribe the CPU."""
+    try:
+        import cv2
+        cv2.setNumThreads(0)
+    except Exception:
+        pass
+    try:
+        torch.set_num_threads(1)
+    except Exception:
+        pass
+
+
 def _derive_ckpt_path(config: dict, backbone: str) -> pathlib.Path:
     """Derive the canonical SSL checkpoint path for a backbone from config."""
     ssl_cfg = config["ssl"]
@@ -98,10 +112,17 @@ def main() -> None:
     print("Building probe slices (Usage-based) …")
     train_ds, test_ds = EyePACSProbeDataset.build_probe_splits(config, subset_size=args.limit)
     batch = int(ssl_cfg.get("probe", {}).get("batch_size", 64))
-    train_loader = DataLoader(train_ds, batch_size=batch, shuffle=False,
-                              num_workers=int(ssl_cfg.get("num_workers", 0)))
-    test_loader = DataLoader(test_ds, batch_size=batch, shuffle=False,
-                             num_workers=int(ssl_cfg.get("num_workers", 0)))
+    n_workers = int(ssl_cfg.get("num_workers", 0))
+    # Feature extraction is forward-only, so the GPU starves unless the loader
+    # keeps it fed. With workers, pin memory, persist them across the three init
+    # passes (avoids re-spawning on Windows), and prefetch deeper.
+    loader_kwargs: dict = {"batch_size": batch, "shuffle": False,
+                           "num_workers": n_workers}
+    if n_workers > 0:
+        loader_kwargs.update(pin_memory=True, persistent_workers=True,
+                             prefetch_factor=2, worker_init_fn=_worker_init)
+    train_loader = DataLoader(train_ds, **loader_kwargs)
+    test_loader = DataLoader(test_ds, **loader_kwargs)
     print(f"  probe-train={len(train_ds)} | probe-test={len(test_ds)} "
           f"| dataset={type(train_ds).__name__}")
     if feature_cache_dir is not None:

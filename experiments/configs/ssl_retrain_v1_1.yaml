@@ -1,0 +1,25 @@
+# SSL RETRAIN overlay — v1.1 (fixes the v1.0 batch-16 BYOL collapse).
+#
+# The v1.0 ResNet-50 BYOL run collapsed (probe gate 2026-07-07: kappa_ssl=0.0025
+# vs kappa_imagenet=0.30). Two root causes, both addressed here:
+#   1. LEARNING RATE: SSLTrainer reads optimizer.base_lr verbatim with NO
+#      batch-size scaling. v1.0 used base_lr=0.45 at batch 16 — ~36x above the
+#      standard BYOL/LARS rule lr = 0.2 * batch/256 (= 0.0125 at batch 16). Here
+#      batch=128 -> lr = 0.2 * 128/256 = 0.10.
+#   2. BATCH SIZE: BYOL's projector/predictor use BatchNorm1d; batch 16 gives
+#      far-too-noisy BN stats (a known collapse driver). RTX 5070 Ti 16 GB fits a
+#      much larger batch at 256^2 with AMP.
+#
+# Writes to a NEW version dir (v1.1) so the collapsed v1.0 checkpoint + its
+# gate_report.json are preserved as the record. Load LAST in the --config chain
+# (after _win_local.yaml) so these win.
+ssl:
+  batch_size: 96             # ~12 GB VRAM on the 16 GB 5070 Ti (batch 128 hit 15.9 GB — too tight for an unattended run)
+  optimizer:
+    base_lr: 0.075           # 0.2 * batch/256 for batch=96 (v1.0 used 0.45 @ batch 16)
+  checkpoint:
+    version: "v1.1"
+    out_dir: "C:/ssl_out"    # WRITE checkpoints to the fast INTERNAL disk, not the external D:.
+                             # A 413 MB train_state written every epoch to the USB drive crashed
+                             # torch.save mid-write (inline_container "unexpected pos"). Copy the
+                             # final deliverable to D:/outputs/ssl/v1.1 at the end for durability.

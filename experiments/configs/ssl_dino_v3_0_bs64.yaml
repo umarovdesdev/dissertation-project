@@ -1,0 +1,9 @@
+# DINO v3.0 OOM-fallback overlay — load AFTER ssl_dino_v3_0.yaml.
+# Used automatically by the orchestrator only if the batch-96 DINO launch dies
+# early (OOM on the 16 GB 5070 Ti — DINO holds student+teacher backbones + two
+# 65536-dim heads, heavier than MoCo). Recipe from ssl_dino_v3_0.yaml header:
+# batch 64, base_lr rescaled 0.0005 * 64/256 = 0.000125.
+ssl:
+  batch_size: 64
+  optimizer:
+    base_lr: 0.000125

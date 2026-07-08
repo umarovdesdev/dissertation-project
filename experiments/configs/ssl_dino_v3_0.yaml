@@ -1,0 +1,71 @@
+# SSL run v3.0 — METHOD CHANGE: MoCo-v2 -> DINO (INV-SSL-6 allowed family).
+#
+# STATUS: STAND-BY config. Launch ONLY if MoCo-v2 (v2.0) FAILS the ep50 linear-probe
+# gate. If v2.0 passes (kappa_ssl >= kappa_imagenet - 0.03 AND beats random), this
+# run is not needed. Prepared now so the fallback is ready with zero delay.
+#
+# WHY DINO NEXT (and NOT Barlow Twins / VICReg): DINO is already inside the allowed
+# INV-SSL-6 family (BYOL / MoCo-v2 / SimSiam / DINO), so it needs NO amendment to
+# INVARIANTS.md / CONTRIBUTIONS.md. Barlow/VICReg are a redundancy-reduction family
+# NOT in INV-SSL-6 and require a maintainer amendment — keep them as the LAST resort.
+# Order: MoCo-v2 (v2.0) -> DINO (this, v3.0) -> only then escalate for Barlow/VICReg.
+#
+# WHY IT MAY SUCCEED WHERE BYOL COLLAPSED: DINO avoids collapse by a DIFFERENT
+# mechanism than a negative queue — self-distillation to an EMA teacher with output
+# CENTERING (removes the constant/global-mode the BYOL loss collapsed onto) + teacher
+# temperature SHARPENING, over a 65536-prototype head. Forcing every image onto one of
+# 65,536 sharp clusters demands fine-grained discriminative content, so — like MoCo's
+# InfoNCE — it resists collapsing onto global illumination / camera / vignetting.
+#
+# TWO CODE LIMITATIONS TO KNOW (both in src/ssl/methods.py, both accepted for now):
+#   1. NO multi-crop. The DINO class is two-global-crop only; `n_local_crops` is inert
+#      (methods.py:316-318). The "local crops force attention to sparse lesions" benefit
+#      is therefore NOT active here — wiring multi-crop is a code change, out of scope
+#      for this config. DINO is still a distinct, allowed method worth trying without it.
+#   2. NO teacher-temp warmup. Canonical DINO ramps teacher_temp 0.04 -> 0.07 over the
+#      first epochs precisely to avoid EARLY collapse; the code holds it FIXED. So we
+#      set the SAFE constant teacher_temp = 0.04 (the low, collapse-resistant end) from
+#      step 0 rather than the sharp 0.07 that the missing warmup exists to defer.
+#
+# CLEAN ATTRIBUTION: keeps the SAME v1.2 domain-tuned augmentation as v1.2 and v2.0, so
+# across the whole BYOL -> MoCo-v2 -> DINO sweep the ONLY changed variable is the method.
+# NEW from-scratch run in a NEW v3.0 dir; v1.x / v2.0 records preserved. Gate ep50 early.
+ssl:
+  method: dino
+  batch_size: 96              # matches v2.0 for attribution; DINO holds student+teacher
+                              # backbones + two 65536-dim heads, so VRAM is HEAVIER than
+                              # MoCo-v2 (~9.3 GB @96). IF OOM on the 5070 Ti: drop to 64
+                              # AND rescale base_lr to 0.0005*64/256 = 0.000125.
+  optimizer:
+    name: adamw               # DINO canonical optimizer (BYOL used lars, MoCo-v2 sgd)
+    base_lr: 0.0001875        # DINO AdamW rule: 0.0005 * batch/256 = 0.0005 * 96/256
+    weight_decay: 0.04        # DINO start wd (canonical uses a 0.04->0.4 cosine wd that
+                              # the trainer does not schedule; fixed 0.04 = the gentle end)
+    # warmup_epochs (10) + cosine schedule inherited from default.yaml (DINO also wants
+    # a 10-epoch LR warmup) — same as v2.0.
+  byol:
+    ema_base: 0.996           # NOTE: the teacher EMA momentum schedule is read from this
+                              # key for ALL methods (trainer.py:194) — 0.996 -> 1.0 cosine
+                              # is exactly DINO's canonical teacher momentum. Set explicitly
+                              # for reproducibility; value unchanged from the default.
+  checkpoint:
+    version: "v3.0"
+    out_dir: "C:/ssl_out"     # fast internal disk (D: USB crashed torch.save mid-write);
+                              # copy the final deliverable to D: at the end for travel.
+  dino:
+    out_dim: 65536            # canonical DINO prototype count
+    student_temp: 0.1         # canonical
+    teacher_temp: 0.04        # SAFE fixed value — compensates for the missing 0.04->0.07
+                              # warmup (see header limitation #2); do NOT raise without
+                              # first adding a teacher-temp warmup schedule in code.
+    center_momentum: 0.9      # canonical output-center EMA
+  augment:                    # inherit the v1.2 domain-tuned block so METHOD is the ONLY
+                              # changed variable vs v1.2 (BYOL) and v2.0 (MoCo-v2)
+    global_crop_scale:   [0.5, 1.0]
+    color_jitter:        [0.2, 0.2, 0.1, 0.02]
+    color_jitter_prob:   0.8
+    grayscale_prob:      0.0
+    blur_prob_view1:     0.5
+    blur_prob_view2:     0.1
+    solarize_prob_view2: 0.0
+    hflip_prob:          0.5

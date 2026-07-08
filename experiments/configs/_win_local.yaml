@@ -1,0 +1,16 @@
+# LOCAL native-Windows overlay (machine-specific paths — do NOT commit).
+#
+# For the FAST PC: RTX 5070 Ti (16 GB, Blackwell) on native Windows (no WSL).
+# The external drive mounts as D: here; the Stage 0-4 cache was extracted from
+# outputs/ssl/ssl_cache_256.tar to a fast internal disk (C:). Load LAST in the
+# --config chain, in place of _wsl_local.yaml (which holds the RTX 3060 / WSL
+# paths and is kept intact so the drive round-trips to that machine).
+paths:
+  eyepacs: "D:/datasets/EyePACS"
+
+ssl:
+  batch_size: 48                       # RTX 5070 Ti 16 GB has ample headroom at 256^2
+  num_workers: 14                      # 20 logical CPUs here (no WSL 12 GB cap) — saturate CPU-bound preproc
+  cache_dir: "C:/ssl_data/ssl_cache_256"   # extracted tarball on fast internal NTFS
+  probe:
+    batch_size: 128                    # frozen-backbone forward; bounded so 14-worker prefetch fits in RAM

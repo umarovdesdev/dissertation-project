@@ -1,0 +1,45 @@
+# SSL RETRAIN overlay — v1.2 (fixes the DOMAIN-INAPPROPRIATE augmentation that
+# left v1.1 ep50 at chance on the linear-probe gate: kappa_ssl=0.0000,
+# ROC-AUC=0.508 vs kappa_imagenet=0.3198 — i.e. SSL features carry no linearly
+# decodable DR signal, the SAME failure mode as the v1.0 collapse).
+#
+# ROOT CAUSE (2026-07-08): the SSL two-view augmentation (src/ssl/transforms.py,
+# ssl.augment in default.yaml) is the VERBATIM ImageNet SimCLR/BYOL recipe. BYOL
+# has no negatives, so the cheapest way to match two views is to become invariant
+# to exactly the cues that define DR grade — and this recipe forces precisely that:
+#   * global_crop_scale [0.2, 1.0]  -> a view can sample down to ~20% area; sparse
+#     microaneurysms / small hemorrhages fall out of frame -> "location doesn't
+#     matter" invariance, but DR grading is counting sparse lesions field-wide.
+#   * ColorJitter [0.4,0.4,0.2,0.1] @0.8 + grayscale @0.2 -> hemorrhages are RED
+#     spots defined by colour/contrast vs retinal background; +-40% brightness/
+#     contrast and 20% full desaturation force invariance to the lesion signal.
+#   * blur (sigma up to 2.0) view1 @1.0 + solarize @0.2 -> few-pixel lesions get
+#     blurred away; solarize inverts lesion polarity (no physical fundus analog).
+# INTERNAL EVIDENCE: this project's OWN supervised DR augmentation is deliberately
+# mild (brightness/contrast [0.9,1.1] = +-10%, hue +-0.02, no grayscale, no
+# solarize; default.yaml:68-72) — the team already knows aggressive photometry
+# harms DR. The SSL block ignored that and copied ImageNet defaults.
+#
+# FIX: domain-aware two-view augmentation. Reduce (do NOT eliminate — BYOL still
+# needs non-trivial views) photometric strength toward the validated supervised
+# range; keep sparse lesions in-frame; drop the DR-destructive ops (grayscale,
+# solarize). Carries the v1.1 numeric fix (batch 96, base_lr 0.075) since this
+# overlay is loaded LAST (in place of ssl_retrain_v1_1.yaml). NEW from-scratch run
+# (changed data distribution -> cannot --resume v1.1); writes a NEW v1.2 dir so
+# v1.0/v1.1 records are preserved. Gate ep50/ep100 early exactly as before.
+ssl:
+  batch_size: 96              # v1.1 fix: large batch for stable BatchNorm1d in the projector/predictor
+  optimizer:
+    base_lr: 0.075            # v1.1 fix: 0.2 * batch/256 for batch=96
+  checkpoint:
+    version: "v1.2"
+    out_dir: "C:/ssl_out"     # fast internal disk (D: USB crashed torch.save mid-write); copy final to D: at the end
+  augment:
+    global_crop_scale:   [0.5, 1.0]        # was [0.2, 1.0] — keep >=50% of the field so sparse lesions stay in-frame
+    color_jitter:        [0.2, 0.2, 0.1, 0.02]  # was [0.4, 0.4, 0.2, 0.1] — near the validated supervised +-10-20%, preserves lesion colour/contrast
+    color_jitter_prob:   0.8               # keep — some photometric variation is still wanted (device/illumination invariance)
+    grayscale_prob:      0.0               # was 0.2 — red lesions are a COLOUR cue; never fully desaturate
+    blur_prob_view1:     0.5               # was 1.0 — microaneurysms are ~few px; don't blur them away every view
+    blur_prob_view2:     0.1               # unchanged (asymmetric BYOL convention)
+    solarize_prob_view2: 0.0               # was 0.2 — intensity inversion destroys lesion polarity; no fundus analog
+    hflip_prob:          0.5               # keep — DR grade is horizontal-flip invariant

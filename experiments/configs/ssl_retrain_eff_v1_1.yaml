@@ -1,0 +1,28 @@
+# SSL RETRAIN overlay — EfficientNet-B3, v1.1 (SAME collapse fix as ResNet-50).
+# TARGET MACHINE: the RTX 3060 (12 GB) / WSL box — runs in PARALLEL with the
+# ResNet-50 v1.1 run on the other PC. Load LAST in the --config chain, AFTER
+# configs/_wsl_local.yaml (which supplies that machine's paths + cache_dir).
+#
+# Two-pronged fix (identical rationale to configs/ssl_retrain_v1_1.yaml):
+#   1. LR scaled to batch:  base_lr = 0.2 * batch / 256   (v1.0 used 0.45 @ batch 16 -> ~36x too high).
+#   2. batch >> 16 so BYOL's BatchNorm1d projector (src/ssl/heads.py) has stable stats.
+#
+# EfficientNet-SPECIFIC: mixed precision MUST stay OFF (fp16 overflow — CLAUDE.md); already set in
+# default.yaml (ssl.mixed_precision.efficientnet_b3: false). fp32 costs MUCH more VRAM than ResNet's
+# AMP path — MEASURED on an RTX 5070 Ti: EfficientNet-B3 fp32 @256^2, 4ch, two-view BYOL:
+#       batch 64 -> ~15.9 GB      (needs a 24 GB GPU)
+#       batch 48 -> ~12 GB        (16 GB GPU)
+#       batch 32 -> ~8.5 GB       (12 GB GPU — the RTX 3060)   <-- default below
+#       batch 24 -> ~6.5 GB       (8-10 GB GPU; still 1.5x the collapsed batch 16)
+# If you change batch_size, RESCALE base_lr = 0.2 * batch / 256 (64->0.05, 48->0.0375, 32->0.025).
+ssl:
+  batch_size: 32                 # RTX 3060 12 GB, fp32 (~8.5 GB); 2x the collapsed batch 16
+  num_workers: 4                 # WSL 12 GB RAM cap — keep <= 4-6 (E_UNEXPECTED VM crash above that)
+  optimizer:
+    base_lr: 0.025               # 0.2 * 32 / 256  (v1.0 used 0.45 @ batch 16)
+  checkpoint:
+    version: "v1.1"
+    # WRITE to WSL-native ext4, NOT /mnt/e — mass/large writes to the 9p mount crash the VM, and a
+    # per-epoch train_state to any external/mounted drive can also truncate torch.save mid-write.
+    # Copy the FINAL .pt to /mnt/e/dissertation-project/experiments/outputs/ssl/v1.1/ at the end.
+    out_dir: "/home/yesmu/ssl_out"

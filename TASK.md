@@ -12,6 +12,62 @@
 
 ## ⓪ TL;DR — what we are doing and the one thing in flight
 
+> ### ▶▶ SESSION 2026-07-08 (native Windows / RTX 5070 Ti / drive D:) — METHOD PIVOT BYOL → MoCo-v2
+>
+> **The BYOL approach is abandoned after 3 failed probe gates; MoCo-v2 (v2.0) is now the run in flight.**
+> Read this block first — it supersedes the older v1.1 "healthy ep18" optimism below.
+>
+> - **v1.1 ResNet-50 BYOL — GATED @ ep50 & FAILED.** The batch-96/lr-0.075 fix reached ep58/300 then
+>   stopped. ep50 probe gate: **κ(SSL)=0.0000, AUC 0.508 ≈ random** (κ_imagenet=0.320, AUC 0.711).
+>   Same failure as v1.0. Probe machinery proven sound (ImageNet scores normally).
+> - **v1.2 = domain-tuned AUGMENTATION fix — BUILT, TRAINED to ep50, GATED & FAILED.** New config
+>   `configs/ssl_retrain_v1_2.yaml`: crop [0.2→0.5], color_jitter [0.4→0.2], grayscale 0.2→**0**,
+>   solarize 0.2→**0**, blur_view1 1.0→0.5 (the SSL block had copied the raw ImageNet SimCLR recipe;
+>   the project's own supervised aug is 4× milder). ep50 gate: **κ(SSL)=0.0000, AUC 0.524** — moved
+>   only +0.016 vs v1.1. **CONCLUSION: augmentation is NOT the dominant lever.**
+> - **🔎 ROOT CAUSE (confirmed across 3 runs):** BYOL has **no negatives**, so its loss is dominated by
+>   the largest un-augmented variation (global illumination / camera / vignetting / FOV) and the
+>   **sparse DR lesion signal (<1% of pixels) contributes negligibly** → features are rich (feat_std
+>   healthy, 0 dead dims, `not_collapsed=true`) but **orthogonal to DR grade** (even kNN κ≈0.006).
+>   feat_std is a false-negative collapse monitor; the linear-probe κ is the only trustworthy test.
+> - **⚖ GOVERNANCE GATE on the fix:** the intended pivot was Barlow Twins / VICReg, but those are a
+>   **redundancy-reduction family NOT in INV-SSL-6** (allowed: BYOL / MoCo-v2 / SimSiam / DINO; brief
+>   §88-92). Using them needs a maintainer amendment to INVARIANTS.md + CONTRIBUTIONS.md — out of scope
+>   for the implementer. **Chosen instead: MoCo-v2** — already in the allowed family, **already coded**
+>   (`src/ssl/methods.py` MoCoV2), and it targets the exact root cause: an **8192-entry InfoNCE negative
+>   queue** forces every image to be distinguishable from thousands of others → representation must
+>   encode discriminative content, cannot collapse onto global nuisance. Zero new code — config only.
+> - **▶ v2.0 MoCo-v2 — LAUNCHED & HEALTHY (2026-07-08 18:02).** New config `configs/ssl_moco_v2_0.yaml`:
+>   `method=mocov2`, optimizer **sgd base_lr 0.01125** (=0.03×96/256) **wd 1e-4**, batch 96, queue 8192,
+>   moco_dim 128, temp 0.2, ema 0.999; **keeps the v1.2 domain-tuned augment so METHOD is the only
+>   changed variable vs the last BYOL run** (clean attribution). From-scratch, NEW dir `C:/ssl_out/v2.0/`.
+>   Healthy start: loss plateaus ~8.7 (near InfoNCE equilibrium ln(8193)≈9.0 — EXPECTED as the queue
+>   fills; declines only after the 10-ep warmup), feat_std steady ~0.005, no NaN, GPU 85%/9.3 GB.
+>   **ep50 gate pending** via a detached orchestrator (below). Filename: `ssl_mocov2_resnet50_4ch_256_ep50.pt`.
+> - **PRIOR RUNS PRESERVED on D: (per candidate request, nothing deleted):** `outputs/ssl/v1.0/`
+>   (collapse record, ep50-300 + gate_report), `v1.1/` (ep50 ckpt + gate_report + probe_features +
+>   train_state, copied from C: this session), `v1.2/` (ep50 ckpt + gate_report + logs). v2.0
+>   deliverables copy to `outputs/ssl/v2.0/` at the ep50 gate.
+> - **★ PROCESS RULE for THIS machine (native Windows):** harness-tracked background jobs (Bash/PS
+>   `run_in_background`) **get KILLED on long waits**; a detached **`Start-Process`** survives the
+>   harness (like the trainer). Long orchestration (wait-for-ep50 → stop trainer → gate → copy → DONE)
+>   must run as a detached `Start-Process powershell -File …ps1` writing a `GATE_DONE.txt` marker.
+>   GPU can't do training+probe together (14+3.5 > 16 GB) → the orchestrator STOPS the trainer at ep50
+>   before gating; `train_state` is atomic per-epoch so `--resume` to ep300 stays possible.
+> - **v2.0 run command** (from `D:/dissertation-project/experiments`):
+>   ```bash
+>   PY="C:/mamba/envs/dr-classifier/python.exe"
+>   "$PY" -u scripts/run_ssl_pretrain.py \
+>     --config configs/default.yaml --config configs/ssl_pretrain.yaml \
+>     --config configs/_win_local.yaml --config configs/ssl_moco_v2_0.yaml \
+>     --backbone resnet50 --method mocov2 --device cuda        # add --resume after any kill
+>   # gate: same 4 configs + run_ssl_probe.py --backbone resnet50 --method mocov2 \
+>   #       --ckpt C:/ssl_out/v2.0/ssl_mocov2_resnet50_4ch_256_ep50.pt
+>   ```
+> - **NEXT if MoCo-v2 ALSO fails the gate:** escalate to the maintainer for the INV-SSL-6 amendment
+>   (Barlow Twins / VICReg), or try the documented **ImageNet→continual-SSL fallback** (`--pretrained-init`,
+>   starts at κ=0.32). Do NOT keep tuning BYOL augmentation — that lever is exhausted.
+
 - **Goal:** produce an in-domain **fundus self-supervised (SSL) initialization** for the
   **pipeline arm** of Experiment 1 (Configs **B** and **D**), then validate it with a
   **linear-probe acceptance gate**. Baseline arm (A/C) stays **ImageNet**. This realizes
@@ -28,14 +84,76 @@
   `outputs/ssl/v1.0/ssl_byol_resnet50_4ch_256_ep300.pt` + `manifest.json` written;
   `train_state_resnet50.pt` cleared on clean completion. Reached 300 across several
   `--resume` restarts (last: died mid-ep280 → resumed ep280 → ran to 300).
-- **▶ NEXT (run on the faster PC): the linear-probe gate** `run_ssl_probe.py --backbone resnet50`.
-  The probe was **rewritten this session** to (a) read the 256² Stage 0–4 **cache** (was live
-  preproc 3× over 53,576 imgs → hours; now minutes) and (b) checkpoint extracted features to a
-  **resumable on-disk cache** so it can be stopped/resumed. See §3 step 3 + §6.
-- **⚠ WATCH — likely BYOL collapse:** by epoch 278 `feat_std` fell to **~0.001–0.003** (was
-  ~0.0065 at ep 25), loss near-zero (~0.0005–0.18). Stable/not crashing, but this is the
-  collapse signature. The §3.3 linear-probe gate is the real test of whether the features are
-  usable; run it before spending days on EfficientNet-B3.
+- **❌ LINEAR-PROBE GATE RUN & FAILED (2026-07-07, faster PC / RTX 5070 Ti).** Full 53,576-row
+  gate on ResNet-50: **κ(SSL)=0.0025, κ(random)=0.0000, κ(imagenet)=0.3025** (ROC-AUC: ssl
+  0.514 ≈ random 0.500 vs imagenet 0.715). Both criteria fail (`beats_random=false`,
+  `competitive_with_imagenet=false`). `meta.gate_passed` **NOT** flipped → **Exp-1 Configs B/D
+  stay blocked**, and **EfficientNet-B3 SSL must NOT be started** (it was gated on this pass).
+  Report: `outputs/ssl/v1.0/gate_report.json`. The probe machinery is proven sound — ImageNet
+  scores normally (κ=0.30), so a broken probe is ruled out; **the checkpoint is the problem.**
+- **⚠ CONFIRMED — BYOL representational collapse (v1.0).** The §3.6 WATCH came true: ep300 features
+  are functionally random (probe AUC 0.514). `not_collapsed=true` in the report is a
+  false-negative from a lenient feat_std threshold — functionally it IS collapsed.
+- **🔎 ROOT CAUSE (2026-07-07):** two compounding bugs, both in the small-batch regime:
+  1. **LR ~36× too high.** `SSLTrainer` (src/ssl/trainer.py:192,202) reads `optimizer.base_lr`
+     **verbatim, with NO batch-size scaling**. v1.0 used `base_lr=0.45` at **batch 16**; the
+     standard BYOL/LARS rule is `lr = 0.2 × batch/256 = 0.0125` at batch 16.
+  2. **Batch 16 too small** for BYOL — the projector/predictor use `BatchNorm1d`
+     (src/ssl/heads.py:41), whose stats are far too noisy at batch 16 (a classic collapse driver).
+- **▶ RESOLUTION — v1.1 retrain LAUNCHED (2026-07-07, RTX 5070 Ti), decision: "retrain large batch".**
+  From-scratch BYOL at **batch 96** (13.9 GB VRAM, AMP) + **base_lr 0.075** (= 0.2×96/256), 300 ep,
+  written to a **NEW `outputs/ssl/v1.1/`** dir (v1.0 collapsed ckpt + gate_report preserved as the
+  record). Config: new `configs/ssl_retrain_v1_1.yaml`. **Healthy start:** loss 3.99→3.47 over ep0,
+  feat_std steady ~0.0057 (NOT decaying). **ETA ~28 h** (~5.6 min/ep, ~160 img/s, GPU-bound at 99%).
+  Resumable via `--resume` (rolling `train_state_resnet50.pt` in v1.1 dir, per-epoch). **Plan:** gate
+  the intermediate ep50 (~4.7 h) / ep100 (~9.3 h) checkpoints early to confirm the fix before ep300;
+  only start EfficientNet-B3 after ResNet-50 v1.1 passes the §3.3 gate. Command: §5 (v1.1 variant below).
+  - **⚠ CRASH + RECOVERY (2026-07-07 18:36):** the per-epoch `torch.save` of the 413 MB
+    `train_state` **crashed writing to the external drive D:** (`RuntimeError: [enforce fail at
+    inline_container.cc] unexpected pos …` — a truncated write ~150 MB in; D: had 395 GB free, so
+    NOT disk-full → external-USB write flakiness). Atomic-save saved us: the prior **ep6** state was
+    intact + verified-loadable. **FIX:** redirected `checkpoint.out_dir` → **`C:/ssl_out`** (fast
+    internal disk) in `ssl_retrain_v1_1.yaml`; copied the good ep6 state to C:; relaunched with
+    `--resume` (restored ep6). **Verified the epoch save now succeeds on C:** (18:47:40, clean).
+    → **All v1.1 artifacts now live on `C:/ssl_out/v1.1/` (NOT D:)**; copy the final deliverable
+    ckpt to `D:/…/outputs/ssl/v1.1/` at the end for durability/travel.
+  - **LIVE STATUS (last checked 2026-07-07 ~20:26):** ALIVE, paused once by candidate then resumed to
+    **ep18/300** (writing to C:), VRAM 14.3 GB, GPU-bound. **loss ~0.47** (warmup done, LR at peak 0.075),
+    **feat_std ~0.0075** — healthy (~4× above the collapsed 0.0018; not trending to 0). Pace ~6 min/ep →
+    **ep50 ≈ +3 h, ep300 ≈ +28 h.** Real test = the ep50 probe gate.
+  - **★ DISK RULE for THIS machine (native Windows):** the external drive **D: is NOT safe for the
+    hot checkpoint loop** — a 413 MB file written every epoch crashed torch.save mid-write. Write
+    all training/probe outputs to **internal C:**, copy only final deliverables to D:. (Mirrors the
+    WSL "native ext4 scratch vs E: durable" rule in §4½, but here the flaky zone is D: itself.)
+- **❓ WHY RETRAIN ResNet-50 AGAIN (not move to EfficientNet-B3)?** Because ResNet-50 **v1.0 FAILED the
+  gate** — training it to ep300 on 53k imgs "completed" but produced *useless* (collapsed) features
+  (κ≈random). The governance order is **ResNet-50 must PASS the gate BEFORE EfficientNet-B3 starts**
+  (§3 step 2) — the ResNet gate is the cheap canary: if BYOL is broken, EfficientNet would collapse the
+  same way and waste more GPU-days. Also **Config B (ResNet+pipeline) itself requires a working ResNet
+  SSL init**, so it stays blocked regardless of EfficientNet. v1.1 is a **redo of a failed run with the
+  bug fixed**, not redundant work.
+- **▶ EfficientNet-B3 v1.1 — PREPARED for a PARALLEL run on the RTX 3060 / WSL box (2026-07-07).**
+  Candidate decided to run EfficientNet-B3 SSL **in parallel** (not strictly after ResNet passes the
+  gate). Justified: the ResNet v1.1 fix is **already showing healthy anti-collapse** (feat_std rising
+  through ep18), so the "cheap canary" has effectively given its positive signal — applying the SAME
+  fix to EfficientNet now is low-risk. **Same two-pronged fix**, EfficientNet-tuned:
+  - Config: **`configs/ssl_retrain_eff_v1_1.yaml`** — batch **32**, `base_lr` **0.025** (=0.2×32/256),
+    v1.1, `out_dir=/home/yesmu/ssl_out`. **AMP stays OFF** (fp16 overflow); fp32 is VRAM-heavy —
+    MEASURED on the 5070 Ti: EfficientNet-B3 fp32 @256² is **batch 64 → 15.9 GB**, so batch 32 (~8.5 GB)
+    fits the 3060's 12 GB. Path smoke-tested here: runs, `feature_dim=1536`, healthy start (loss 3.98,
+    feat_std 0.016).
+  - **Handoff doc (on D:):** `EFFICIENTNET_B3_SSL_HANDOFF.md` (repo root) — pre-flight, launch/resume
+    commands (WSL), disk rule (write to `/home/yesmu/ssl_out`, copy final to `/mnt/e/…/outputs/ssl/v1.1`),
+    healthy-vs-collapse signatures, and early ep50/100 gating.
+  - Both backbones still must pass their probe gate before their checkpoints unblock Exp-1 (B/D).
+- **▶ ENV NOTE — the "faster PC" is native Windows, NO WSL, drive = D:.** TASK.md's WSL/`/mnt/e`/
+  conda commands do NOT apply here. This session rebuilt the env from scratch: Miniforge GUI
+  installer fails (exit 2, non-interactive) → used **micromamba** to create the `dr-classifier`
+  conda env (py3.11) at `C:/mamba/envs/dr-classifier`; **torch 2.11.0+cu128** (Blackwell sm_120,
+  the 3060's torch 2.5.1 won't run this GPU); `timm` also required (missing from requirements.txt).
+  Cache extracted from the E:/D: tarball to `C:/ssl_data/ssl_cache_256`. Machine paths live in a
+  NEW `configs/_win_local.yaml` (native Windows) — the committed `_wsl_local.yaml` (RTX 3060/WSL)
+  was left untouched so the drive round-trips. Run command: see §5 (Windows variant).
 - **Stage 0–4 cache COMPLETE & VERIFIED (2026-06-27):** 53,576 PNGs == 53,576
   `cache_meta.csv` data rows (1:1, no dups, 0 errors) at `/home/yesmu/ssl_cache_256`
   (WSL-native ext4). The resumed run processed the final 2,371 (incl. 223 orphan PNGs)
@@ -293,6 +411,31 @@ python -u scripts/run_ssl_probe.py \
 Config keys live in `configs/default.yaml` (`ssl:` block, authoritative) + overlays
 `configs/ssl_pretrain.yaml` (epochs/method) + `configs/_wsl_local.yaml` (machine paths;
 uncommitted).
+
+### 5-bis. Commands — NATIVE WINDOWS / RTX 5070 Ti (the "faster PC", NO WSL)
+
+Env is **micromamba**, not the failed Miniforge installer. Env python:
+`C:/mamba/envs/dr-classifier/python.exe` (torch 2.11.0+cu128, Blackwell). Machine paths +
+cache live in `configs/_win_local.yaml` (native, uncommitted); the v1.1 retrain science
+(batch/lr/version) lives in `configs/ssl_retrain_v1_1.yaml`. Run from `D:/dissertation-project/experiments`:
+
+```bash
+PY="C:/mamba/envs/dr-classifier/python.exe"
+# SSL retrain v1.1 (fixes the batch-16 collapse) — writes outputs/ssl/v1.1/
+"$PY" -u scripts/run_ssl_pretrain.py \
+  --config configs/default.yaml --config configs/ssl_pretrain.yaml \
+  --config configs/_win_local.yaml --config configs/ssl_retrain_v1_1.yaml \
+  --backbone resnet50 --device cuda            # add --resume after any kill/reboot
+
+# Linear-probe gate on a v1.1 checkpoint (uses the C:/ssl_data cache via _win_local)
+"$PY" -u scripts/run_ssl_probe.py \
+  --config configs/default.yaml --config configs/ssl_pretrain.yaml \
+  --config configs/_win_local.yaml --config configs/ssl_retrain_v1_1.yaml \
+  --backbone resnet50 --device cuda
+#   (to gate an intermediate ep50/ep100 ckpt instead of the derived ep300 name, add
+#    --ckpt outputs/ssl/v1.1/ssl_byol_resnet50_4ch_256_ep100.pt)
+```
+
 
 ---
 

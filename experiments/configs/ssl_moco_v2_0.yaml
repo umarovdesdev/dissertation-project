@@ -1,0 +1,45 @@
+# SSL run v2.0 — METHOD CHANGE: BYOL -> MoCo-v2 (INV-SSL-6 allowed family).
+#
+# WHY: three BYOL runs failed the linear-probe gate with kappa_ssl~0 (v1.0 ep300
+# AUC 0.514; v1.1 ep50 0.508; v1.2 ep50 0.524) despite healthy feat_std and 0 dead
+# dims. Root cause: BYOL has NO negatives, so the objective is dominated by the
+# largest un-augmented variation (global illumination / camera / vignetting / FOV)
+# and the sparse DR lesion signal (a fraction of a percent of pixels) contributes
+# negligibly -> features are rich but orthogonal to DR grade. Domain-tuning the
+# augmentation (v1.2) barely moved AUC (+0.016), confirming the method — not the
+# augmentation — is the dominant lever.
+#
+# FIX: MoCo-v2 adds an 8192-entry negative queue (InfoNCE). Every image embedding
+# is explicitly pushed to be DISTINGUISHABLE from thousands of others, so the
+# representation is forced to encode discriminative content and cannot collapse
+# onto global nuisance factors. Stable at small batch (negatives come from the
+# queue, not the batch) — methods.py names it "a good fallback if BYOL collapses".
+# INV-SSL-6 compliant (BYOL / MoCo-v2 / SimSiam / DINO allowed); NO new code, only
+# this config + --method mocov2. NEW from-scratch run in a NEW v2.0 dir; v1.x
+# records preserved. Keeps the v1.2 domain-tuned augmentation so the ONLY change
+# vs the last BYOL run is the method (clean attribution). Gate ep50 early as before.
+ssl:
+  method: mocov2
+  batch_size: 96              # MoCo-v2 is small-batch-stable (queue supplies negatives); 96 fits the 5070 Ti
+  optimizer:
+    name: sgd                 # MoCo-v2 canonical optimizer (was lars for BYOL)
+    base_lr: 0.01125          # MoCo-v2 rule: 0.03 * batch/256 = 0.03 * 96/256
+    weight_decay: 1.0e-4      # MoCo-v2 uses wd 1e-4 (BYOL used 1e-6)
+    # warmup_epochs (10) + schedule (cosine) inherited from default.yaml
+  checkpoint:
+    version: "v2.0"
+    out_dir: "C:/ssl_out"     # fast internal disk (D: USB crashed torch.save mid-write); copy final to D: at the end
+  mocov2:
+    queue_size: 8192
+    moco_dim: 128
+    temperature: 0.2
+    ema: 0.999
+  augment:                    # inherit the v1.2 domain-tuned block so method is the ONLY changed variable
+    global_crop_scale:   [0.5, 1.0]
+    color_jitter:        [0.2, 0.2, 0.1, 0.02]
+    color_jitter_prob:   0.8
+    grayscale_prob:      0.0
+    blur_prob_view1:     0.5
+    blur_prob_view2:     0.1
+    solarize_prob_view2: 0.0
+    hflip_prob:          0.5
