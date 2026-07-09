@@ -560,7 +560,8 @@
       "Bash(cat /c/ssl_out/*)",
       "Bash(tail *)",
       "PowerShell(try { $d = Get-Content \"D:/dissertation-project/.claude/settings.local.json\" -Raw | ConvertFrom-Json; Write-Output \\(\"valid JSON; allow rules: \" + $d.permissions.allow.Count\\) } catch { Write-Output \"INVALID JSON: $_\" })",
-      "Bash(echo \"=== commit exit: $? ===\")"
+      "Bash(echo \"=== commit exit: $? ===\")",
+      "Bash(break)"
     ]
   }
 }

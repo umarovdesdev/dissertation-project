@@ -12,6 +12,53 @@
 
 ## ⓪ TL;DR — what we are doing and the one thing in flight
 
+> ### ■■ RESULTS 2026-07-09 — SSL METHOD SWEEP COMPLETE: all 4 gates FAILED, in-family SSL exhausted
+>
+> **Bottom line: from-scratch in-domain CNN-SSL within the INV-SSL-6 family (BYOL / MoCo-v2 / DINO)
+> does NOT clear the linear-probe gate on this fundus corpus (256², 53k). No run is in flight; GPU idle.**
+> This is now a robust negative result (4 failed gates across 3 method families, flat/declining
+> trajectories), not a tuning accident. Candidate decision (2026-07-09): record and pause here.
+>
+> **Linear-probe gate (kappa quadratic), corrected re-gate — the numbers of record:**
+>
+> | Method | Epoch | kappa(SSL) | kappa(random) | kappa(ImageNet) | passed |
+> |--------|-------|-----------|--------------|----------------|--------|
+> | BYOL v1.1 / v1.2 | ep50 | **0.000** | 0.00 | 0.32 | ❌ |
+> | MoCo-v2 (v2.0) | ep50 | **0.112** | 0.00 | 0.320 | ❌ |
+> | MoCo-v2 (v2.0) | ep100 | **0.109** | 0.00 | 0.303 | ❌ |
+> | DINO (v3.0) | ep50 | 0.075 | 0.00 | 0.320 | ❌ |
+> | DINO (v3.0) | ep100 | 0.061 | 0.00 | 0.303 | ❌ |
+>
+> Acceptance needs kappa(SSL) ≥ kappa(ImageNet) − 0.03 (≈0.29) AND ≥ random+0.05. All fail the
+> ImageNet-competitiveness arm badly (best SSL 0.11 vs ImageNet 0.30). Source: `C:/ssl_out/COMPARISON.txt`,
+> per-run `gate_report_ep{50,100}.json` + `regate_ep{50,100}.log` under `outputs/ssl/v2.0/` and `v3.0/` (copied to D:).
+>
+> **Interpretation (four findings):**
+> 1. **Method change WORKED, partially.** MoCo/DINO beat random for the first time (kappa 0.06–0.11 vs
+>    BYOL's exact 0.00) — the no-negatives diagnosis was right; the negative queue / centering recovered
+>    *some* DR signal. But it is only ~1/3 of ImageNet.
+> 2. **Undertraining is RULED OUT.** ep50→ep100 is flat/declining (MoCo 0.112→0.109; DINO 0.075→0.061).
+>    More epochs do not help — this kills the "gate ep50 too early" alternative.
+> 3. **MoCo-v2 is the best in-family method** (kappa ≈0.11); DINO is worse (≈0.06–0.075) *despite* the
+>    highest training feat_std (0.013) — another confirmation that training-time feat_std is a misleading
+>    proxy and only the probe kappa is trustworthy.
+> 4. **The corrected gate machinery is proven** (ImageNet scores 0.30–0.32 every run; the earlier
+>    "gates crashed in 4s" was a bug — `run_ssl_probe.py` has NO `--method` flag; the orchestrator wrongly
+>    passed it. Fixed in the re-gate; probe reads the backbone from the checkpoint, method is irrelevant).
+>
+> **RECOMMENDED NEXT PATH (not started — awaiting candidate/maintainer):** stop tuning in-family methods.
+> Highest-probability unblock for Configs B/D = **ImageNet→continual-SSL** (`--pretrained-init`, MoCo-v2):
+> start from ImageNet (kappa 0.32, already passes) and SSL-adapt on fundus — SSL only has to *not destroy*
+> a competitive start. Documented fallback (§5). Alternatives to escalate to the maintainer: an INV-SSL-6
+> amendment for Barlow Twins / VICReg (redundancy-reduction, out-of-family today), and/or revisiting the
+> frozen-linear-probe acceptance criterion, which may be too harsh for from-scratch in-domain SSL on a
+> 53k corpus (Fable-5 review, `FABLE5_REVIEW.md`; note the exact-0.000 BYOL kappa partly reflected probe
+> majority-collapse under 73% class-0 imbalance — a class-balanced probe control was never run).
+>
+> **Artifacts preserved (nothing deleted):** `outputs/ssl/v1.0` (BYOL collapse), `v1.1`/`v1.2` (BYOL fail),
+> `v2.0` (MoCo-v2 ep50/ep100 + gates), `v3.0` (DINO ep50/ep100 + gates). DINO stopped at ep100 (reached);
+> `train_state` on C: is `--resume`-able. Orchestrator scripts live in `C:/ssl_out/*.ps1` (machine-local).
+
 > ### ▶▶ SESSION 2026-07-08 (native Windows / RTX 5070 Ti / drive D:) — METHOD PIVOT BYOL → MoCo-v2
 >
 > **The BYOL approach is abandoned after 3 failed probe gates; MoCo-v2 (v2.0) is now the run in flight.**
