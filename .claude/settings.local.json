@@ -561,7 +561,11 @@
       "Bash(tail *)",
       "PowerShell(try { $d = Get-Content \"D:/dissertation-project/.claude/settings.local.json\" -Raw | ConvertFrom-Json; Write-Output \\(\"valid JSON; allow rules: \" + $d.permissions.allow.Count\\) } catch { Write-Output \"INVALID JSON: $_\" })",
       "Bash(echo \"=== commit exit: $? ===\")",
-      "Bash(break)"
+      "Bash(break)",
+      "Bash(\"C:/mamba/envs/dr-classifier/python.exe\" -c \"import torch,timm; print\\('torch',torch.__version__,'cuda',torch.cuda.is_available\\(\\), torch.cuda.get_device_name\\(0\\) if torch.cuda.is_available\\(\\) else 'NO_GPU'\\)\")",
+      "PowerShell(Write-Output \"PS_OK\"; $g = & \"C:/mamba/envs/dr-classifier/python.exe\" -c \"import torch;print\\(torch.cuda.mem_get_info\\(\\)[0]/1e9\\)\"; Write-Output \"free_VRAM_GB=$g\")",
+      "Read(//d/datasets/EyePACS/**)",
+      "Read(//d/datasets/EyePACS/train/**)"
     ]
   }
 }
