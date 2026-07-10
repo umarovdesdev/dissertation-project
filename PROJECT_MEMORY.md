@@ -24,6 +24,7 @@ Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `
 
 ## Experiments / Config-D
 - [Config-D pretraining axis](PROJECT_MEMORY/config-d-pretraining.md) — v6.0.0 drops RETFound for ophthalmology SSL; shipped demo Config-D = retired ImageNet artifact (divergence)
+- [Continual-SSL init decision](PROJECT_MEMORY/continual-ssl-init-decision.md) — 2026-07-10: integrated arm B/D = ImageNet→continual-SSL ep50 for both backbones; from-scratch SSL failed; ResNet continual +0.25 over ImageNet but **EffNet continual ≈ ImageNet (no benefit — thesis caveat)**; probe noise fixed (deterministic)
 - [Config-D Kaggle source](PROJECT_MEMORY/config-d-kaggle-source.md) — trains on `dreamer07/eyepacs`; adapter `is_file()` fix; Run#1 EyePACS failed (12h), Run#2 APTOS ok (interim ckpt f1=0.82)
 - [Colab Config-D runner](PROJECT_MEMORY/colab-config-d-runner.md) — `experiments/colab/` two-mode; Kaggle=APTOS test, Colab=real EyePACS; persistence on Kaggle Datasets
 - [V5 cache / throughput](PROJECT_MEMORY/v5-cache-throughput.md) — GPU-starved by per-image CPU preprocessing; fix = precompute+cache Stages 0–4 (IMPLEMENTED feat/v5-cache-colab)

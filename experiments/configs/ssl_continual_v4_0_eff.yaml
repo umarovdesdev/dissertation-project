@@ -1,0 +1,13 @@
+# EffNet-B3 overlay for continual-SSL v4.0 — load AFTER configs/ssl_continual_v4_0.yaml.
+# Config D counterpart of the ResNet-50 continual run. A ResNet checkpoint CANNOT init
+# EfficientNet-B3 (different architecture), so Config D needs its OWN continual run —
+# same recipe (MoCo-v2, ImageNet start via --pretrained-init, 50 epochs), EffNet-sized:
+#   * batch 32 — EffNet-B3 fp32 @256 4ch is VRAM-heavy (batch 64 ~= 15.9 GB); 32 fits.
+#   * base_lr scaled to the batch: 0.003 * 32/256 = 0.000375 (10x-lower continual rule).
+#   * AMP stays OFF for EfficientNet (ssl.mixed_precision.efficientnet_b3=false in
+#     default.yaml — fp16 overflow), so this run is fp32 and slower than the ResNet arm.
+# Same v4.0 checkpoint dir; filename ssl_mocov2_efficientnet_b3_4ch_256_ep50.pt.
+ssl:
+  batch_size: 32
+  optimizer:
+    base_lr: 0.000375

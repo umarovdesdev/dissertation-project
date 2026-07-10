@@ -138,8 +138,26 @@ def _train_linear_head(
     epochs: int,
     lr: float,
     device: torch.device,
+    n_seeds: int = 5,
+    weight_decay: float = 1.0e-4,
+    min_steps: int = 200,
 ) -> np.ndarray:
-    """Train a linear head on cached frozen features; return test probabilities.
+    """Train a low-variance linear probe on cached frozen features.
+
+    The naive probe (single random head, full-batch Adam, few steps, raw features)
+    is high-variance: on the SAME frozen features the reported κ varied by ~±0.1 for
+    EfficientNet (the head init/optimization, not the backbone, moved the score). This
+    made continual-vs-ImageNet differences smaller than the measurement noise. Three
+    fixes make the probe well-conditioned and (given fixed features) deterministic:
+
+    1. **Feature standardization** — z-score with train-set mean/std (applied to test
+       with the SAME stats, no leakage). A linear head over CE is convex; standardizing
+       removes the ill-conditioning that made the optimum init-sensitive.
+    2. **Guaranteed convergence** — at least ``min_steps`` full-batch steps with a small
+       ``weight_decay`` (full-batch on cached features is ~1 ms/step, so this is cheap).
+    3. **Seed averaging** — average the test probabilities over ``n_seeds`` head inits,
+       cutting residual variance by ~√n_seeds. Seeds are fixed, so the result is
+       reproducible.
 
     Args:
         train_feats: Probe-train features ``(Ntr, d)``.
@@ -147,30 +165,43 @@ def _train_linear_head(
         test_feats: Probe-test features ``(Nte, d)``.
         feature_dim: Feature dimension ``d``.
         num_classes: Number of DR grades (5).
-        epochs: Linear-head training epochs.
+        epochs: Requested head steps (a floor of ``min_steps`` is enforced).
         lr: Learning rate.
         device: Compute device.
+        n_seeds: Number of head inits to average over.
+        weight_decay: L2 regularization on the head.
+        min_steps: Minimum optimization steps (ensures convergence for small ``epochs``).
 
     Returns:
-        Test-set class probabilities ``(Nte, num_classes)`` as a NumPy array.
+        Seed-averaged test-set class probabilities ``(Nte, num_classes)`` as NumPy.
     """
-    head = nn.Linear(feature_dim, num_classes).to(device)
-    optimizer = torch.optim.Adam(head.parameters(), lr=lr)
-    criterion = nn.CrossEntropyLoss()
-
-    x_tr = train_feats.to(device)
+    x_tr_raw = train_feats.to(device)
+    x_te_raw = test_feats.to(device)
+    mean = x_tr_raw.mean(dim=0, keepdim=True)
+    std = x_tr_raw.std(dim=0, keepdim=True).clamp_min(1e-6)
+    x_tr = (x_tr_raw - mean) / std
+    x_te = (x_te_raw - mean) / std
     y_tr = train_labels.long().to(device)
-    head.train()
-    for _ in range(epochs):
-        optimizer.zero_grad()
-        loss = criterion(head(x_tr), y_tr)
-        loss.backward()
-        optimizer.step()
+    criterion = nn.CrossEntropyLoss()
+    steps = max(int(epochs), int(min_steps))
 
-    head.eval()
-    with torch.no_grad():
-        probs = F.softmax(head(test_feats.to(device)), dim=1)
-    return probs.cpu().numpy()
+    prob_sum: torch.Tensor | None = None
+    for s in range(max(1, int(n_seeds))):
+        torch.manual_seed(1000 + s)
+        head = nn.Linear(feature_dim, num_classes).to(device)
+        optimizer = torch.optim.Adam(head.parameters(), lr=lr, weight_decay=weight_decay)
+        head.train()
+        for _ in range(steps):
+            optimizer.zero_grad()
+            loss = criterion(head(x_tr), y_tr)
+            loss.backward()
+            optimizer.step()
+        head.eval()
+        with torch.no_grad():
+            p = F.softmax(head(x_te), dim=1)
+        prob_sum = p if prob_sum is None else prob_sum + p
+
+    return (prob_sum / max(1, int(n_seeds))).cpu().numpy()
 
 
 @torch.no_grad()

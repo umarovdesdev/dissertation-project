@@ -1,0 +1,25 @@
+# Exp-1 overlay — point the pipeline arm (Config B/D) at the SIP checkpoints for the
+# DOWNSTREAM leg of the head-to-head. Parallel to configs/exp1_continual_v4_0.yaml.
+# Load LAST in the exp1 chain; baseline arm (A/C = ImageNet) untouched.
+#
+#   python run_experiment.py exp1 \
+#     --config configs/default.yaml --config configs/_win_local.yaml \
+#     --config configs/exp1_sip.yaml --configs B,D
+#
+# To compare downstream, run Exp-1 TWICE — once with exp1_continual_v4_0.yaml, once
+# with this — and diff the B/D metrics. Do the expensive downstream leg only for the
+# arm that WON the cheap probe-gate leg (brief §8), unless compute allows both.
+#
+# NOTE — placeholder epoch: the ckpt paths name ep40, but the ACTUAL epoch that
+# enters Exp-1 is whichever one wins the gate on the shared holdout. Edit after gating.
+# B/D stay BLOCKED until the SIP checkpoint exists with meta.gate_passed=true
+# (load_ssl_backbone require_gate_passed=True fail-fasts) — safe to keep early.
+#
+# init.source stays "ssl" on purpose: the existing _build_model_with_init ssl branch
+# calls load_ssl_backbone + checks gate_passed, and the SIP checkpoint writes the same
+# manifest format — so no new init source is needed in code.
+experiments:
+  exp1:
+    configurations:
+      B: {preprocessing: full, model: resnet50,        in_channels: 4, init: {source: ssl, ckpt: "outputs/sip/v1.0/ssl_sip_resnet50_4ch_256_ep40.pt"}}
+      D: {preprocessing: full, model: efficientnet_b3, in_channels: 4, init: {source: ssl, ckpt: "outputs/sip/v1.0/ssl_sip_efficientnet_b3_4ch_256_ep40.pt"}}

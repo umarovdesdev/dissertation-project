@@ -1,0 +1,21 @@
+# Exp-1 overlay — point the pipeline arm (Config B/D) at the v4.0 continual-SSL
+# checkpoints instead of the collapsed v1.0 BYOL ones. OVERLAY, not an edit to the
+# authoritative default.yaml: load it LAST in the exp1 config chain so its B/D
+# entries deep-merge over the defaults. Baseline arm (A/C = ImageNet) is untouched.
+#
+#   python run_experiment.py exp1 \
+#     --config configs/default.yaml --config configs/_win_local.yaml \
+#     --config configs/exp1_continual_v4_0.yaml --configs B,D
+#
+# NOTE 1 — placeholder epoch. The ckpt paths below name ep50, but the ACTUAL epoch
+# that enters Exp-1 is whichever one PASSES the linear-probe gate (ep10/20/30/40/50).
+# After gating, edit the two ckpt filenames here to the passing epoch.
+# NOTE 2 — B/D stay BLOCKED until v4.0 is trained AND gate_passed=true is written to
+# the checkpoint meta: load_ssl_backbone(require_gate_passed=True) fail-fasts by
+# design, so this overlay is safe to keep before the run finishes (same guard the
+# defaults already have — this is not a regression).
+experiments:
+  exp1:
+    configurations:
+      B: {preprocessing: full, model: resnet50,        in_channels: 4, init: {source: ssl, ckpt: "outputs/ssl/v4.0/ssl_mocov2_resnet50_4ch_256_ep50.pt"}}
+      D: {preprocessing: full, model: efficientnet_b3, in_channels: 4, init: {source: ssl, ckpt: "outputs/ssl/v4.0/ssl_mocov2_efficientnet_b3_4ch_256_ep50.pt"}}

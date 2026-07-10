@@ -1,0 +1,92 @@
+# SIP run sip/v1.0 — SUPERVISED in-domain pretraining on the 53k labeled EyePACS-test.
+#
+# This is the SECOND arm of a head-to-head against continual-SSL (configs/
+# ssl_continual_v4_0.yaml). Both arms are judged by the SAME gate on the SAME
+# patient-level holdout so the winner is chosen on equal footing — see
+# experiments/docs/supervised_indomain_pretraining_brief.md for the comparison
+# protocol and the NEW-CODE spec this config drives.
+#
+# ============================ GOVERNANCE GATE ===============================
+# UNLIKE continual-SSL, this arm is NOT a sanctioned fallback. It feeds DR labels
+# into the pretraining objective, which SB-2.4 currently FORBIDS ("testLabels15.csv
+# grades are used only by the linear-probe gate, never by the SSL objective").
+# Running SIP requires a maintainer amendment to SB-2.4 + CFC-2.8 + SC-H (proposal
+# drafted in outputs/sip/v1.0/GOVERNANCE_AMENDMENT_PROPOSAL.md). Do NOT launch
+# before that amendment is signed. The label-free continual-SSL arm needs no such
+# amendment and can run in parallel meanwhile.
+# ============================================================================
+#
+# WHY THIS ARM: from-scratch label-free SSL failed the gate on this 53k corpus
+# (best 0.11 vs ImageNet 0.30) because an instance-discrimination objective is
+# dominated by global nuisance and the sparse DR signal contributes negligibly.
+# SIP removes exactly that failure mode: it optimizes the DR labels DIRECTLY, so the
+# features are DR-discriminative by construction and should clear the frozen-probe
+# gate comfortably. Start from ImageNet (not scratch) so the run keeps ImageNet's
+# general primitives and only adapts them toward the lesion signal.
+#
+# NO LEAKAGE: the 53k EyePACS-"test" corpus is disjoint from the Exp-1 35k CV corpus
+# by image AND patient identity (INV-SSL-1/2), so supervised-pretrain-then-transfer
+# is legitimate — analogous to ImageNet being a separate labeled corpus. The SIP
+# holdout (below) is carved patient-level from the 53k so the gate never sees a
+# patient SIP trained on.
+#
+# ---- LAUNCH (after amendment; native Windows / from experiments/) --------------
+#   PY="C:/mamba/envs/dr-classifier/python.exe"
+#   "$PY" -u scripts/run_sip_pretrain.py \       # NEW script (see brief §5)
+#     --config configs/default.yaml --config configs/_win_local.yaml \
+#     --config configs/sip_pretrain.yaml \
+#     --backbone resnet50 --device cuda          # then --backbone efficientnet_b3; --resume after any kill
+#
+# The `sip:` block below is the schema the new script consumes. Reuses the existing
+# 256 Stage-0-4 cache (ssl.cache_dir from _win_local) and the existing probe gate.
+sip:
+  init:             imagenet     # start supervised pretraining from ImageNet weights (NOT from scratch)
+  image_size:       256          # matches the Stage-0-4 cache; downstream Exp-1 fine-tunes at 512
+  in_channels:      4            # RGB + FOV mask (same 4-ch contract as the pipeline arm)
+  cache_dir:        null         # inherit ssl.cache_dir from _win_local — reuse the SAME 256 cache
+  num_classes:      5
+  epochs:           40           # supervised converges fast from ImageNet; early-stop on the holdout
+  batch_size:       96           # resnet50 @256 4ch on the 5070 Ti; efficientnet drops per VRAM
+  num_workers:      4
+  seed:             42
+  deterministic:    true
+  grad_clip:        1.0
+
+  optimizer:
+    name:           adamw
+    lr:             3.0e-4
+    weight_decay:   1.0e-4
+    warmup_epochs:  2
+    schedule:       cosine
+
+  loss:                          # same objective family as Exp-1 for consistency
+    type:           focal
+    gamma:          2.0
+    class_weights:  inverse_frequency   # 53k is ~73% grade-0; weight by inverse frequency
+
+  # SHARED comparison split — carved patient-level from the 53k. The SAME holdout
+  # gates BOTH this SIP run AND continual-SSL v4.0 (brief §4). SIP trains only on
+  # the pretrain slice; the gate tests only on the holdout slice. seed fixes it so
+  # both arms see identical membership.
+  split:
+    scheme:         patient_level
+    holdout_frac:   0.15
+    seed:           42
+    labels_csv:     "testLabels15.csv"
+
+  early_stopping:
+    monitor:        holdout_weighted_f1
+    mode:           max
+    patience:       6
+
+  checkpoint:
+    out_dir:        "C:/ssl_out"   # fast internal disk; copy final to D:/…/outputs/sip/v1.0 at the end
+    version:        "v1.0"         # namespace: outputs/sip/v1.0 (NOT the ssl/ track) — keeps the run families separate
+    save_every:     5              # ep5/10/…/40 so the gate can pick the best-generalizing epoch
+    keep_last:      10
+
+  backbones:        [resnet50, efficientnet_b3]
+
+  mixed_precision:
+    resnet50:       true
+    efficientnet_b3: false         # fp16 overflow — must stay disabled (CLAUDE.md)

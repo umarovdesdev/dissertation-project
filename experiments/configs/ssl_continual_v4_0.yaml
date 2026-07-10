@@ -1,0 +1,102 @@
+# SSL run v4.0 — ImageNet -> continual-SSL FALLBACK (MoCo-v2), governance-sanctioned.
+#
+# ============================ READ THIS FIRST ================================
+# This config does NOT by itself enable continual mode. The ImageNet start is a
+# CLI FLAG, not a config key: run_ssl_pretrain.py reads it from --pretrained-init
+# (args.pretrained_init), never from YAML. Launch WITHOUT the flag and you get a
+# plain from-scratch MoCo-v2 run identical to v2.0 — a wasted GPU-day. The flag is
+# mandatory; the launch command below has it.
+# ============================================================================
+#
+# WHY THIS RUN: from-scratch in-domain CNN-SSL within the INV-SSL-6 family failed
+# the linear-probe gate across 3 method families (BYOL kappa~0.00; MoCo-v2 0.11;
+# DINO 0.06-0.075) vs ImageNet kappa~0.30 — a robust negative result, not a tuning
+# accident. Root cause: an instance-discrimination objective on 53k near-identical
+# fundus images is dominated by global nuisance (illumination/camera/FOV); the
+# sparse DR lesion signal (<1% of pixels) contributes negligibly, so from-scratch
+# features are rich but orthogonal to DR grade.
+#
+# THE FALLBACK (INVARIANTS/CFC-2.8, documented, "must be explicitly flagged if
+# used"): start the trunk from ImageNet — which ALREADY passes the gate (kappa 0.30
+# frozen) because its general primitives encode DR-relevant texture/edges — and run
+# the SAME MoCo-v2 objective only to ADAPT those weights to fundus statistics. SSL
+# no longer has to DISCOVER DR structure from scratch; it only has to NOT DESTROY a
+# competitive start. Provenance is auto-recorded: the manifest writes
+# init_source=imagenet_continual (run_ssl_pretrain.py:194) — that IS the required
+# governance flag. The activation is also logged in outputs/ssl/v4.0/FALLBACK_ACTIVATION.md.
+#
+# METHOD = MoCo-v2 (best in-family: kappa 0.11 from-scratch, beats BYOL/DINO).
+# OBJECTIVE STAYS LABEL-FREE, so SB-2.4 is untouched (testLabels15.csv grades stay
+# only in the gate) and the frozen-probe gate remains valid AS-IS (no held-out
+# redesign needed — unlike the supervised-pretraining alternative).
+#
+# ---- DESIGN DELTAS vs the from-scratch MoCo run (v2.0): ADAPT, don't re-learn ----
+#  * base_lr 10x LOWER (0.001125 = 0.003*96/256 vs v2.0's 0.01125 = 0.03*96/256).
+#    High LR on good weights = catastrophic forgetting; we fine-tune, not train.
+#  * epochs 50 (not 300). Adaptation is fast; over-training here is a RISK, not a
+#    benefit — it drifts the good ImageNet features toward the nuisance attractor.
+#  * warmup_epochs 3 (not 10). The projector head + queue are fresh (random); a
+#    short warmup keeps their large early gradients from corrupting the good trunk,
+#    but a long warmup on already-good weights is wasteful.
+#  * save_every 10 -> deliverable ckpts at ep10/20/30/40/50 for EARLY gating.
+#
+# ---- GATING RULE (inverted vs from-scratch — critical) -------------------------
+# The ImageNet arm passes trivially, so the ONLY failure mode is DEGRADATION below
+# ~0.29. Gate early (ep10/25/50) and watch the TRAJECTORY:
+#   * kappa holds >= 0.29 (ideally rises above 0.32)  -> adaptation working, keep going.
+#   * kappa MONOTONICALLY DECLINES from ~0.32         -> catastrophic forgetting, STOP.
+# Here "more epochs" is the danger, not the cure (mirror-image of from-scratch).
+#
+# NEW v4.0 dir; v1.x/v2.0/v3.0 records preserved. Keeps the v2.0 domain-tuned
+# augment so METHOD/START are the only changed variables. NO NEW CODE — this config
+# + the existing --pretrained-init flag.
+#
+# ---- HEAD-TO-HEAD NOTE ---------------------------------------------------------
+# When comparing this arm against SIP (supervised in-domain pretraining), BOTH must
+# be gated on the SAME patient-level holdout, not this run's default Usage=Private
+# probe slice. See experiments/docs/supervised_indomain_pretraining_brief.md §4/§8.
+# For a standalone fallback run (not the comparison), the default gate is fine.
+#
+# ---- LAUNCH (native Windows / from D:/dissertation-project/experiments) ---------
+#   PY="C:/mamba/envs/dr-classifier/python.exe"
+#   "$PY" -u scripts/run_ssl_pretrain.py \
+#     --config configs/default.yaml --config configs/ssl_pretrain.yaml \
+#     --config configs/_win_local.yaml --config configs/ssl_continual_v4_0.yaml \
+#     --backbone resnet50 --method mocov2 --pretrained-init --device cuda
+#     #                                    ^^^^^^^^^^^^^^^^^ MANDATORY. add --resume after any kill.
+#   # gate an intermediate ckpt early:
+#   #   run_ssl_probe.py <same 4 configs> --backbone resnet50 --method mocov2 \
+#   #     --ckpt C:/ssl_out/v4.0/ssl_mocov2_resnet50_4ch_256_ep10.pt
+ssl:
+  method: mocov2
+  epochs: 50                    # short: adaptation, not from-scratch training; gate early
+  batch_size: 96                # MoCo-v2 small-batch-stable (queue supplies negatives); 96 fits the 5070 Ti — drop on OOM
+
+  optimizer:
+    name: sgd                   # MoCo-v2 canonical optimizer
+    base_lr: 0.001125           # 10x LOWER than from-scratch: 0.003 * batch/256 = 0.003 * 96/256 (anti-forgetting)
+    weight_decay: 1.0e-4        # MoCo-v2 standard
+    warmup_epochs: 3            # short — only to settle the fresh projector/queue, not to re-learn the trunk
+    schedule: cosine            # inherited default, restated for visibility
+
+  mocov2:
+    queue_size: 8192
+    moco_dim: 128
+    temperature: 0.2
+    ema: 0.999
+
+  checkpoint:
+    version: "v4.0"
+    out_dir: "C:/ssl_out"       # fast internal disk (D: USB crashed torch.save mid-write); copy final to D: at the end
+    save_every: 10              # ep10/20/30/40/50 deliverables so the early gate has checkpoints
+    keep_last: 6                # retain all 5 milestones + final (default keep_last=2 would prune the early ones)
+
+  augment:                      # inherit the v2.0 domain-tuned block so START + METHOD are the only changed variables
+    global_crop_scale:   [0.5, 1.0]
+    color_jitter:        [0.2, 0.2, 0.1, 0.02]
+    color_jitter_prob:   0.8
+    grayscale_prob:      0.0
+    blur_prob_view1:     0.5
+    blur_prob_view2:     0.1
+    solarize_prob_view2: 0.0
+    hflip_prob:          0.5

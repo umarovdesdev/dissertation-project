@@ -12,6 +12,48 @@
 
 ## ⓪ TL;DR — what we are doing and the one thing in flight
 
+> ### ✅✅ RESOLUTION 2026-07-10 — SSL solved via ImageNet→continual-SSL; Config B/D initialized; Config D run in flight
+>
+> **Bottom line: the SSL blocker is RESOLVED.** After from-scratch in-domain SSL failed (below),
+> pivoted to the governance-sanctioned **ImageNet→continual-SSL** fallback (MoCo-v2, `--pretrained-init`,
+> 50 ep, `run v4.0`). Chosen for **BOTH** backbones; both ep50 checkpoints pass the linear-probe gate
+> and unblock Exp-1 Configs **B** and **D**. Checkpoints (gate_passed=True) at
+> `experiments/outputs/ssl/v4.0/ssl_mocov2_{resnet50,efficientnet_b3}_4ch_256_ep50.pt`.
+>
+> **Head-to-head on the seed-42 patient-level holdout (robust deterministic probe — the numbers of record):**
+>
+> | Backbone (Config) | continual κ | ImageNet κ | Δ | verdict |
+> |-------------------|-------------|-----------|-----|---------|
+> | ResNet-50 (B)     | **0.605**   | 0.357     | **+0.248** | continual = large real in-domain win |
+> | EfficientNet-B3 (D) | **0.431** | 0.435     | **−0.004** | continual ≈ ImageNet, **no benefit** |
+>
+> **⚠ Thesis caveat (do NOT overclaim):** continual helps ResNet-50 enormously but gives EfficientNet-B3
+> **no in-domain benefit** (deterministic, not noise). Config D's init is effectively ImageNet-equivalent;
+> using it is a symmetry choice. Any integrated-arm effect on D is from preprocessing, not the init.
+>
+> **Probe noise FIXED.** The linear-probe gate was high-variance (~±0.1 κ for EffNet — same frozen features
+> scored ImageNet κ 0.338 vs 0.445 across runs). Fixed `src/ssl/probe.py::_train_linear_head` (feature
+> standardization + seed-averaging + guaranteed convergence → **deterministic**). All κ of record are re-gated.
+>
+> **SIP (supervised in-domain pretraining) built + governance-amended, but NOT chosen.** Implemented
+> `scripts/run_sip_pretrain.py` (supervised on the 53k DR grades, patient-level holdout, reuses the SSL
+> checkpoint/probe infra) as a stronger alternative; SIP-ResNet scored 0.658 (old noisy probe). Landed the
+> **v6.3.0 governance amendment** (INVARIANTS SB-2.4 relaxed + CFC-2.8 extended; CONTRIBUTIONS SC-H
+> generalized to "in-domain init, self-supervised OR supervised, gate-selected"; VERSION_SYNC). Candidate
+> chose **continual for both** for symmetry; SIP stays a sanctioned option. Spec:
+> `experiments/docs/supervised_indomain_pretraining_brief.md`.
+>
+> **▶ IN FLIGHT — Config D full run, autonomous.** No 512² Exp-1 cache existed (only the SSL 256² cache),
+> so a detached orchestrator (`C:/ssl_out/orchestrate_expD.ps1`) runs the whole chain unattended:
+> **build 512² Stage 0–4 cache (35k train) → smoke Config D → full 5-fold Config D** (EfficientNet-B3, fp32,
+> continual init, dataset-specific norm stats). Multi-day (cache ~hours + EffNet fp32 @512² ~1–2 days).
+> Progress `C:/ssl_out/orchestrate_expD.log`; done marker `C:/ssl_out/EXPD_DONE.txt`; metrics
+> `experiments/outputs/exp1/metrics.csv`. **NEXT after D:** Config **C** (ImageNet baseline, same backbone —
+> the H-1 pair for D), then **A/B**. CFC-2.8 confound stands (H-1 cannot isolate preprocessing).
+> Wiring overlays: `configs/exp1_continual_v4_0.yaml` (B/D → continual), `configs/exp1_sip.yaml` (SIP variant);
+> machine-merged run configs `configs/_run_exp1D*.yaml` are uncommitted (machine paths). Decision recorded in
+> `PROJECT_MEMORY/continual-ssl-init-decision.md`.
+
 > ### ■■ RESULTS 2026-07-09 — SSL METHOD SWEEP COMPLETE: all 4 gates FAILED, in-family SSL exhausted
 >
 > **Bottom line: from-scratch in-domain CNN-SSL within the INV-SSL-6 family (BYOL / MoCo-v2 / DINO)

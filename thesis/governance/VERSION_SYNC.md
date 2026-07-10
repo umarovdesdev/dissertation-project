@@ -1,6 +1,10 @@
 # VERSION SYNCHRONIZATION REGISTER
 
-**Version:** 6.2.0 | **Date:** 2026-06-26
+**Version:** 6.3.0 | **Date:** 2026-07-09
+
+## v6.3.0 Amendment Scope
+
+**Supervised in-domain pretraining (SIP) added as a gate-selected integrated-arm initialization.** From-scratch label-free CNN-SSL (BYOL / MoCo-v2 / DINO) **failed** the linear-probe acceptance gate on the EyePACS-test corpus — best quadratic-κ ≈0.11 vs ImageNet ≈0.30, flat/declining ep50→ep100, a robust negative result (`experiments/outputs/ssl/COMPARISON.txt`). In response, **SIP** is admitted alongside fundus-SSL and the ImageNet→continual-SSL fallback: the same CNN backbone is supervised on the 53,576-image EyePACS-test corpus **using its DR grades** (started from ImageNet, adapted), then transferred to Experiment 1, with the final choice among the three inits made by the existing linear-probe acceptance gate on a **patient-level holdout**. This **(1) relaxes SB-2.4** to permit supervised use of the EyePACS-test grades for a distinct in-domain *pretraining* stage — the corpus stays disjoint from the Experiment-1 35,126 CV set by image + patient identity (INV-SSL-1/2) and is still not folded into Experiment-1 training; **(2) extends CFC-2.8** to list SIP as a gate-selected init while retaining its core confound caveat (the integrated arm still differs from baseline along both preprocessing and initialization); **(3) generalizes SC-H** from "self-supervised" to "in-domain initialization (self-supervised OR supervised), gate-selected," recording the SSL negative result as evidence. The label-free SSL objective is unchanged; SIP is a separate objective. **Adds an allowed initialization + relaxes one operational restriction; reverses no hypothesis, scope boundary, or forbidden-claim → MINOR bump** per VERSIONING_POLICY §4. Governance files updated: INVARIANTS (header, SB-2.4, CFC-2.8), CONTRIBUTIONS (SC-H), VERSION_SYNC. **Pending downstream sync** (does not gate this bump): HYPOTHESIS Premise-4/Conclusion wording, RESEARCH_ARCHITECTURE §4.2bis/§9.1, glossary EN/KZ. Implementation: `experiments/scripts/run_sip_pretrain.py`, spec `experiments/docs/supervised_indomain_pretraining_brief.md`, proposal `experiments/outputs/sip/v1.0/GOVERNANCE_AMENDMENT_PROPOSAL.md`.
 
 ## v6.2.0 Amendment Scope
 
@@ -34,12 +38,12 @@ Pretraining source amendment: integrated arm of Experiment 1 uses RETFound; base
 
 | File | Version | Synced |
 |------|---------|--------|
-| governance/INVARIANTS.md | 6.2.0 | ✅ — v6.2.0: SB-2.4 (fundus-SSL corpus disjointness / no pretraining leakage) added; DGL-6 extended with corpus (EyePACS-test 53,576), BYOL-primary, from-scratch, linear-probe gate — completed 2026-06-26 |
+| governance/INVARIANTS.md | 6.3.0 | ✅ — v6.3.0: SB-2.4 relaxed + CFC-2.8 extended to admit supervised in-domain pretraining (SIP) as a gate-selected integrated-arm init (SSL negative result); header summary added — completed 2026-07-09. v6.2.0: SB-2.4 added; DGL-6 extended (EyePACS-test 53,576, BYOL-primary, from-scratch, linear-probe gate) |
 | governance/HYPOTHESIS.md | 6.2.0 | ✅ — v6.2.0: Premise 4 + Conclusion corrected RETFound→ophthalmology-SSL (v6.0.0 sync miss); SSL operational specifics recorded — completed 2026-06-26 |
 | governance/RESEARCH_ARCHITECTURE.md | 6.2.0 | ✅ — v6.2.0: §4.2bis extended (corpus, BYOL-primary, from-scratch 4-channel, linear-probe gate); §9.1 pretraining-leakage bullet — completed 2026-06-26 |
 | governance/VERSION_SYNC.md | 6.2.0 | ✅ |
 | governance/ARGUMENT_MAP.md | 6.0.0 | ✅ — unaffected by v6.2.0 (no pretraining-source node in this file; binding-ref unchanged) |
-| governance/CONTRIBUTIONS.md | 6.2.0 | ✅ — v6.2.0: SC-H refined with locked specifics (EyePACS-test corpus, BYOL-primary from-scratch, linear-probe gate); CFC-2.8 boundary unchanged — completed 2026-06-26 |
+| governance/CONTRIBUTIONS.md | 6.3.0 | ✅ — v6.3.0: SC-H generalized to "in-domain initialization (self-supervised OR supervised), gate-selected" — SIP admitted, SSL negative result recorded — completed 2026-07-09. v6.2.0: SC-H refined with locked SSL specifics; CFC-2.8 boundary unchanged |
 | governance/CENTRAL_THESIS.md | 6.0.0 | ✅ — unaffected by v6.2.0 (no pretraining reference in body; binding-ref unchanged) |
 | literature/external/gulshan-2016.md | v5.3 sync ✅ | ✅ — v5.3: §15 Paradigmatic Role block + §16 Paradigmatic citation-ready statements + §18 Paradigmatic Synthesis — completed 2026-05-28 |
 | literature/external/pratt-2016.md | v5.3 sync ✅ | ✅ — v5.3: P1 position-in-paradigm-space line added to §15 |
