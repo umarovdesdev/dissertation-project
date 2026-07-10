@@ -14,7 +14,7 @@ Run both; choose by §8.
 
 ## 2. Governance (BLOCKER — maintainer)
 SIP violates SB-2.4 as written (labels are pretraining-only for the gate). Required
-amendment (proposal: outputs/sip/v1.0/GOVERNANCE_AMENDMENT_PROPOSAL.md):
+amendment (proposal: thesis/governance/records/GOVERNANCE_AMENDMENT_PROPOSAL.md):
 - **SB-2.4** — permit supervised use of the 53k labels for a distinct in-domain
   PRETRAINING stage; keep the "must not be folded into the Exp-1 35k training set"
   clause intact (pretrain-then-transfer is not folding).
@@ -72,7 +72,7 @@ Level 2 (expensive): run Exp-1 B/D (35k, 5-fold CV) with the Level-1 winner's
 
 ## 9. Files & namespaces
 - outputs/sip/v1.0/  — SIP checkpoints, gate reports, split id-lists, amendment proposal.
-- outputs/ssl/v4.0/  — continual-SSL checkpoints + FALLBACK_ACTIVATION.md.
+- outputs/ssl/v4.0/  — continual-SSL checkpoints (fallback record: thesis/governance/records/FALLBACK_ACTIVATION.md).
 - Keep the two run families in separate dirs; never overwrite the v1.0-v3.0 SSL records.
 
 ## 10. Open decisions (for the candidate / maintainer)

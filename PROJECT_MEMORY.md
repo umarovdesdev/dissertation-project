@@ -25,6 +25,8 @@ Format: one file per fact in `PROJECT_MEMORY/`, with YAML frontmatter (`name`, `
 ## Experiments / Config-D
 - [Config-D pretraining axis](PROJECT_MEMORY/config-d-pretraining.md) — v6.0.0 drops RETFound for ophthalmology SSL; shipped demo Config-D = retired ImageNet artifact (divergence)
 - [Continual-SSL init decision](PROJECT_MEMORY/continual-ssl-init-decision.md) — 2026-07-10: integrated arm B/D = ImageNet→continual-SSL ep50 for both backbones; from-scratch SSL failed; ResNet continual +0.25 over ImageNet but **EffNet continual ≈ ImageNet (no benefit — thesis caveat)**; probe noise fixed (deterministic)
+- [Linear-probe noise fix](PROJECT_MEMORY/linear-probe-noise-fix.md) — the SSL gate was ~±0.1 κ noisy (EffNet); fixed `src/ssl/probe.py` to deterministic; earlier gate κ (SSL sweep, SIP-ResNet 0.658) are noisy estimates; SIP-ResNet needs re-gate
+- [Exp-1 run mechanics + 512² cache](PROJECT_MEMORY/exp1-run-mechanics-512-cache.md) — running Exp-1 needs a 512² Stage 0-4 cache (SSL 256² not reusable) + a single merged config (run_experiment.py ≠ SSL multi-config chain); PYTHONIOENCODING/CUDA_VISIBLE_DEVICES/detached-orchestrator gotchas
 - [Config-D Kaggle source](PROJECT_MEMORY/config-d-kaggle-source.md) — trains on `dreamer07/eyepacs`; adapter `is_file()` fix; Run#1 EyePACS failed (12h), Run#2 APTOS ok (interim ckpt f1=0.82)
 - [Colab Config-D runner](PROJECT_MEMORY/colab-config-d-runner.md) — `experiments/colab/` two-mode; Kaggle=APTOS test, Colab=real EyePACS; persistence on Kaggle Datasets
 - [V5 cache / throughput](PROJECT_MEMORY/v5-cache-throughput.md) — GPU-starved by per-image CPU preprocessing; fix = precompute+cache Stages 0–4 (IMPLEMENTED feat/v5-cache-colab)

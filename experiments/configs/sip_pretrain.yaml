@@ -11,7 +11,7 @@
 # into the pretraining objective, which SB-2.4 currently FORBIDS ("testLabels15.csv
 # grades are used only by the linear-probe gate, never by the SSL objective").
 # Running SIP requires a maintainer amendment to SB-2.4 + CFC-2.8 + SC-H (proposal
-# drafted in outputs/sip/v1.0/GOVERNANCE_AMENDMENT_PROPOSAL.md). Do NOT launch
+# drafted in thesis/governance/records/GOVERNANCE_AMENDMENT_PROPOSAL.md). Do NOT launch
 # before that amendment is signed. The label-free continual-SSL arm needs no such
 # amendment and can run in parallel meanwhile.
 # ============================================================================

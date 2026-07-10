@@ -23,7 +23,7 @@
 # no longer has to DISCOVER DR structure from scratch; it only has to NOT DESTROY a
 # competitive start. Provenance is auto-recorded: the manifest writes
 # init_source=imagenet_continual (run_ssl_pretrain.py:194) — that IS the required
-# governance flag. The activation is also logged in outputs/ssl/v4.0/FALLBACK_ACTIVATION.md.
+# governance flag. The activation is also logged in thesis/governance/records/FALLBACK_ACTIVATION.md.
 #
 # METHOD = MoCo-v2 (best in-family: kappa 0.11 from-scratch, beats BYOL/DINO).
 # OBJECTIVE STAYS LABEL-FREE, so SB-2.4 is untouched (testLabels15.csv grades stay
